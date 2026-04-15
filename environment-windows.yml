@@ -1,0 +1,15 @@
+# gr-lora_sdr Windows 简化环境配置
+# 使用方式：conda env create -f environment-windows.yml
+# 说明：本文件仅包含核心依赖，安装后会自动解析并安装子依赖。
+
+name: gr-lora
+channels:
+  - tapparelj
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - gnuradio-lora_sdr
+  - gnuradio
+  - numpy
+  - pip
