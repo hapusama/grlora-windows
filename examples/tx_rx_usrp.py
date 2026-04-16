@@ -7,7 +7,7 @@
 # GNU Radio Python Flow Graph
 # Title: Tx Rx Usrp
 # Author: Tapparel Joachim@EPFL,TCL
-# GNU Radio version: v3.11.0.0git-604-gd7f88722
+# GNU Radio version: 3.10.12.0
 
 from gnuradio import blocks
 import pmt
@@ -22,6 +22,7 @@ from gnuradio import eng_notation
 from gnuradio import uhd
 import time
 import gnuradio.lora_sdr as lora_sdr
+import threading
 
 
 
@@ -30,6 +31,7 @@ class tx_rx_usrp(gr.top_block):
 
     def __init__(self):
         gr.top_block.__init__(self, "Tx Rx Usrp", catch_exceptions=True)
+        self.flowgraph_started = threading.Event()
 
         ##################################################
         # Variables
@@ -144,7 +146,6 @@ class tx_rx_usrp(gr.top_block):
         self.lora_sdr_gray_demap_0.set_sf(self.sf)
         self.lora_sdr_hamming_enc_0.set_sf(self.sf)
         self.lora_sdr_interleaver_0.set_sf(self.sf)
-        self.lora_sdr_modulate_0.set_sf(self.sf)
 
     def get_samp_rate_tx(self):
         return self.samp_rate_tx
@@ -235,6 +236,7 @@ def main(top_block_cls=tx_rx_usrp, options=None):
     signal.signal(signal.SIGTERM, sig_handler)
 
     tb.start()
+    tb.flowgraph_started.set()
 
     try:
         input('Press Enter to quit: ')

@@ -3,3 +3,5 @@ build*/
 *.pyo
 .vscode/
 */__pycache__/*
+
+data/USRP_IQ/*.bin

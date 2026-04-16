@@ -7,7 +7,7 @@
 # GNU Radio Python Flow Graph
 # Title: Tx Rx Functionality Check
 # Author: Tapparel Joachim@EPFL,TCL
-# GNU Radio version: v3.11.0.0git-604-gd7f88722
+# GNU Radio version: 3.10.12.0
 
 from gnuradio import blocks
 import pmt
@@ -21,6 +21,7 @@ from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 import gnuradio.lora_sdr as lora_sdr
+import threading
 
 
 
@@ -29,6 +30,7 @@ class tx_rx_functionality_check(gr.top_block):
 
     def __init__(self):
         gr.top_block.__init__(self, "Tx Rx Functionality Check", catch_exceptions=True)
+        self.flowgraph_started = threading.Event()
 
         ##################################################
         # Variables
@@ -136,7 +138,6 @@ class tx_rx_functionality_check(gr.top_block):
         self.lora_sdr_gray_demap_0.set_sf(self.sf)
         self.lora_sdr_hamming_enc_0.set_sf(self.sf)
         self.lora_sdr_interleaver_0.set_sf(self.sf)
-        self.lora_sdr_modulate_0.set_sf(self.sf)
 
     def get_samp_rate(self):
         return self.samp_rate
@@ -218,6 +219,7 @@ def main(top_block_cls=tx_rx_functionality_check, options=None):
     signal.signal(signal.SIGTERM, sig_handler)
 
     tb.start()
+    tb.flowgraph_started.set()
 
     try:
         input('Press Enter to quit: ')
