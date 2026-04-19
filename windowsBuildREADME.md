@@ -1,0 +1,238 @@
+# gr-lora_sdr Windows 编译与 CRC 双模式使用指南
+
+> 本指南专门针对本项目（`d:\Desktop\proj\gr-lora_sdr`）在 **Windows 11 + conda + VS 2022** 环境下的编译、安装和调试。
+
+---
+
+## 一、环境准备（只需首次配置）
+
+### 1.1 安装 Visual Studio 2022
+
+- 下载并安装 **Visual Studio Community 2022**（或 Build Tools）
+- 安装时必须勾选：**"使用 C++ 的桌面开发"** 工作负载
+- 记录 `vcvarsall.bat` 路径，例如：
+  ```
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat
+  ```
+
+### 1.2 创建 conda 环境并安装依赖
+
+```powershell
+conda create -n gr-lora python=3.10
+conda activate gr-lora
+conda install -c conda-forge gnuradio-core boost-cpp volk cmake pybind11
+```
+
+> ⚠️ **关键**：`pybind11` 版本必须与 `gnuradio-core` 的 Python 绑定 ABI 兼容。如果后续出现 `ImportError: generic_type: type "..." referenced unknown base type "gr::block"`，说明 pybind11 版本不匹配，需要升级/降级后重新编译。
+
+---
+
+## 二、编译与安装（每次修改源码后执行）
+
+### 2.1 使用一键编译脚本（推荐）
+
+本项目已提供 `build_grlora.bat`，路径：
+```
+d:\Desktop\proj\gr-lora_sdr\build_grlora.bat
+```
+
+直接双击运行，或在 **x64 Native Tools Command Prompt for VS 2022** 中执行：
+
+```powershell
+cd d:\Desktop\proj\gr-lora_sdr
+.\build_grlora.bat
+```
+
+脚本会自动完成以下步骤：
+1. 调用 `vcvarsall.bat x64` 设置 MSVC 环境
+2. 删除旧的 `build` 目录，创建新的
+3. 运行 CMake 配置（使用 NMake Makefiles 生成器）
+4. 编译（`nmake`）
+5. 安装到 conda 环境的 `Library` 目录
+
+### 2.2 手动分步编译（如需排查问题）
+
+```powershell
+# 1. 打开 VS 2022 x64 命令行工具，或手动调用 vcvarsall
+call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+
+# 2. 进入项目目录
+cd /d d:\Desktop\proj\gr-lora_sdr
+
+# 3. 清理并创建 build 目录
+rmdir /s /q build
+mkdir build
+cd build
+
+# 4. 设置 CMake 前缀路径
+set CMAKE_PREFIX_PATH=D:\mysoft2\miniconda3\envs\gr-lora\Library
+
+# 5. 配置
+cmake .. -G "NMake Makefiles" ^
+    -DCMAKE_INSTALL_PREFIX=D:\mysoft2\miniconda3\envs\gr-lora\Library ^
+    -DPYTHON_EXECUTABLE=D:\mysoft2\miniconda3\envs\gr-lora\python.exe ^
+    -DGR_PYTHON_DIR=D:\mysoft2\miniconda3\envs\gr-lora\Lib\site-packages
+
+# 6. 编译
+nmake
+
+# 7. 安装
+nmake install
+```
+
+---
+
+## 三、验证编译是否成功
+
+### 3.1 检查 Python 导入
+
+```powershell
+conda activate gr-lora
+python -c "import gnuradio.lora_sdr as lora; print('Import OK'); print('Crc_mode:', lora.Crc_mode.GRLORA, lora.Crc_mode.SX1276)"
+```
+
+如果输出 `Import OK` 并且显示了 `Crc_mode.GRLORA` 和 `Crc_mode.SX1276`，说明编译和安装都成功了。
+
+### 3.2 检查模块路径（确认不是旧版本）
+
+```powershell
+python -c "import gnuradio.lora_sdr; import os; print(os.path.dirname(gnuradio.lora_sdr.__file__))"
+```
+
+应输出类似：
+```
+D:\mysoft2\miniconda3\envs\gr-lora\lib\site-packages\gnuradio\lora_sdr
+```
+
+---
+
+## 四、常见问题与排查
+
+### 4.1 `ImportError: generic_type: type "add_crc" referenced unknown base type "gr::block"`
+
+**原因**：`gnuradio-core` 的 Python 绑定和 `lora_sdr_python.pyd` 的 **pybind11 internals 版本不匹配**。
+
+**诊断**：检查两个二进制文件中的 pybind11 内部版本号：
+```python
+import re
+with open(r'D:\mysoft2\miniconda3\envs\gr-lora\Lib\site-packages\gnuradio\gr\gr_python.cp310-win_amd64.pyd','rb') as f:
+    print('gr_python:', re.findall(rb'__pybind11_internals_v\d+', f.read()))
+with open(r'D:\mysoft2\miniconda3\envs\gr-lora\Lib\site-packages\gnuradio\lora_sdr\lora_sdr_python.cp310-win_amd64.pyd','rb') as f:
+    print('lora_sdr_python:', re.findall(rb'__pybind11_internals_v\d+', f.read()))
+```
+
+两者必须显示 **相同** 的版本（如都是 `v5`）。
+
+**修复**：
+```powershell
+conda activate gr-lora
+conda install -c conda-forge pybind11=2.13.6   # 安装与 gnuradio-core 匹配的版本
+rmdir /s /q d:\Desktop\proj\gr-lora_sdr\build   # 清理旧构建
+# 然后重新运行 build_grlora.bat
+```
+
+### 4.2 `Python bindings out of sync` 错误
+
+**原因**：修改了 C++ 头文件（如 `crc_verif.h`），但 `crc_verif_python.cc` 中的 `BINDTOOL_HEADER_FILE_HASH` 与新的头文件哈希不匹配。
+
+**修复**：计算新头文件的 MD5 哈希，更新到 `crc_verif_python.cc` 中的 `BINDTOOL_HEADER_FILE_HASH(...)` 宏。
+
+---
+
+## 五、CRC 双模式功能说明
+
+本项目对 `crc_verif` 块进行了扩展，支持两种 CRC 校验算法：
+
+| 模式 | 枚举值 | 适用场景 | 算法说明 |
+|------|--------|---------|---------|
+| **GRLORA**（默认） | `lora_sdr.Crc_mode.GRLORA` | gr-lora_sdr 软件发射机 ↔ 软件接收机 | 对 `payload_len - 2` 字节计算 CRC-16，再与最后 2 字节 XOR |
+| **SX1276** | `lora_sdr.Crc_mode.SX1276` | SX1276/RFM95/SX1262 硬件发射机 → 软件接收机 | 标准 CRC-16-CCITT，对**全部 payload** 字节计算 |
+
+### 5.1 在 Python 脚本中使用
+
+```python
+import gnuradio.lora_sdr as lora_sdr
+
+# 方式 1：显式传入枚举值（推荐，清晰明了）
+crc = lora_sdr.crc_verif(1, False, lora_sdr.Crc_mode.SX1276)
+
+# 方式 2：使用兼容的静态方法（旧代码风格）
+crc = lora_sdr.crc_verif(1, False, lora_sdr.crc_verif.SX1276())
+```
+
+### 5.2 在 lora_file_RX.py 中使用
+
+```powershell
+# 接收 SX1276 硬件发射的帧（标准 CRC-16）
+python gr-lora_sdr\examples\lora_file_RX.py `
+  -f "gr-lora_sdr\data\USRP_IQ\1_1_6_12_2_16.bin" `
+  --sf 12 --bw 125000 --samp-rate 500000 --cr 2 `
+  --center-freq 487.7e6 --sync-word 0x12 `
+  --has-crc --crc-mode 1
+
+# 接收 gr-lora_sdr 软件发射的帧（自定义 CRC）
+python gr-lora_sdr\examples\lora_file_RX.py `
+  -f "gr-lora_sdr\data\USRP_IQ\xxx.bin" `
+  --sf 12 --bw 125000 --samp-rate 500000 --cr 2 `
+  --has-crc --crc-mode 0
+```
+
+> `--crc-mode 0` 可省略，因为默认就是 GRLORA 模式。
+
+---
+
+## 六、调试技巧
+
+### 6.1 确认 CRC 模式实际生效
+
+`crc_verif_impl.cc` 中已加入调试输出，运行时会在终端打印：
+```
+[crc_verif] CRC mode: SX1276, payload_len=33
+```
+或
+```
+[crc_verif] CRC mode: GRLORA, payload_len=33
+```
+
+看到这一行，即可 100% 确认当前使用的是哪种 CRC 算法。
+
+### 6.2 对比两种模式的校验结果
+
+同一个文件跑两次：
+```powershell
+# 第一次：SX1276 模式
+python ... --crc-mode 1
+
+# 第二次：GRLORA 模式
+python ... --crc-mode 0
+```
+
+- 如果 **模式 1 显示 CRC valid，模式 0 显示 CRC invalid** → 发射端是标准 SX1276 CRC，新功能工作正常。
+- 如果 **两者都 invalid** → 除了 CRC 算法外，SF/CR/SyncWord/采样率等参数可能还有不匹配。
+
+---
+
+## 七、文件修改清单（本项目的改动）
+
+以下文件已被修改以支持 CRC 双模式：
+
+| 文件 | 改动内容 |
+|------|---------|
+| `include/gnuradio/lora_sdr/crc_verif.h` | 新增 `Crc_mode` 枚举（`GRLORA`, `SX1276`）和 `make()` 的第三个参数 |
+| `lib/crc_verif_impl.h` | 新增 `m_crc_mode` 成员和 `crc16_sx1276()` 声明 |
+| `lib/crc_verif_impl.cc` | 新增 `crc16_sx1276()` 实现，运行时根据 `m_crc_mode` 分支 |
+| `python/lora_sdr/bindings/crc_verif_python.cc` | pybind11 绑定：`py::enum_<Crc_mode>` + `.def_static` 兼容层 |
+| `python/lora_sdr/lora_sdr_lora_rx.py` | hier block 增加 `crc_mode` 参数 |
+| `examples/lora_file_RX.py` | 新增 `--crc-mode` CLI 参数，int→enum 转换 |
+| `grc/lora_sdr_crc_verif.block.yml` | GRC 块定义增加 CRC 模式下拉框 |
+| `build_grlora.bat` | Windows 一键编译脚本 |
+
+---
+
+## 八、快速参考：一条命令重新编译
+
+```powershell
+cd d:\Desktop\proj\gr-lora_sdr && .\build_grlora.bat
+```
+
+编译完成后，直接运行 `lora_file_RX.py` 即可使用最新的 CRC 功能。

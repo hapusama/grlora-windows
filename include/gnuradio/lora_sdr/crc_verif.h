@@ -51,7 +51,12 @@ namespace gr {
        * class. lora_sdr::crc_verif::make is the public interface for
        * creating new instances.
        */
-      static sptr make(int print_rx_msg, bool output_crc_check);
+      enum Crc_mode {
+        GRLORA, ///< gr-lora_sdr custom CRC (backward compatible)
+        SX1276  ///< Standard SX1276/RFM95 hardware CRC-16
+      };
+
+      static sptr make(int print_rx_msg, bool output_crc_check, Crc_mode crc_mode = GRLORA);
     };
 
   } // namespace lora_sdr

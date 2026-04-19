@@ -15,20 +15,21 @@ namespace gr
     {
 
         crc_verif::sptr
-        crc_verif::make(int print_rx_msg, bool output_crc_check)
+        crc_verif::make(int print_rx_msg, bool output_crc_check, crc_verif::Crc_mode crc_mode)
         {
-            return gnuradio::get_initial_sptr(new crc_verif_impl(print_rx_msg, output_crc_check));
+            return gnuradio::get_initial_sptr(new crc_verif_impl(print_rx_msg, output_crc_check, crc_mode));
         }
 
         /*
          * The private constructor
          */
-        crc_verif_impl::crc_verif_impl(int print_rx_msg, bool output_crc_check)
+        crc_verif_impl::crc_verif_impl(int print_rx_msg, bool output_crc_check, crc_verif::Crc_mode crc_mode)
             : gr::block("crc_verif",
                         gr::io_signature::make(1, 1, sizeof(uint8_t)),
                         gr::io_signature::make2(0, 2, sizeof(uint8_t), sizeof(uint8_t))),
                         print_rx_msg(print_rx_msg),
-                  output_crc_check(output_crc_check)
+                  output_crc_check(output_crc_check),
+                  m_crc_mode(crc_mode)
         {
             message_port_register_out(pmt::mp("msg"));
             set_tag_propagation_policy(TPP_DONT);
@@ -64,6 +65,24 @@ namespace gr
                     {
                         crc = (crc << 1);
                     }
+                    newByte <<= 1;
+                }
+            }
+            return crc;
+        }
+
+        unsigned int crc_verif_impl::crc16_sx1276(uint8_t *data, uint32_t len)
+        {
+            uint16_t crc = 0x0000;
+            for (unsigned int i = 0; i < len; i++)
+            {
+                uint8_t newByte = data[i];
+                for (unsigned char j = 0; j < 8; j++)
+                {
+                    if (((crc & 0x8000) >> 8) ^ (newByte & 0x80))
+                        crc = (crc << 1) ^ 0x1021;
+                    else
+                        crc = (crc << 1);
                     newByte <<= 1;
                 }
             }
@@ -116,11 +135,19 @@ namespace gr
                 }
                 else
                 {
-                    // calculate CRC on the N-2 firsts data bytes
-                    m_crc = crc16(&in_buff[0], m_payload_len - 2);
+                    std::cout << "[crc_verif] CRC mode: " << (m_crc_mode == crc_verif::SX1276 ? "SX1276" : "GRLORA")
+                              << ", payload_len=" << (int)m_payload_len << std::endl;
+                    if (m_crc_mode == crc_verif::SX1276) {
+                        // Standard SX1276 CRC-16: compute over the entire payload, compare with trailing 2 bytes
+                        m_crc = crc16_sx1276(&in_buff[0], m_payload_len);
+                    } else {
+                        // gr-lora_sdr custom CRC (backward compatible)
+                        // calculate CRC on the N-2 firsts data bytes
+                        m_crc = crc16(&in_buff[0], m_payload_len - 2);
 
-                    // XOR the obtained CRC with the last 2 data bytes
-                    m_crc = m_crc ^ in_buff[m_payload_len - 1] ^ (in_buff[m_payload_len - 2] << 8);
+                        // XOR the obtained CRC with the last 2 data bytes
+                        m_crc = m_crc ^ in_buff[m_payload_len - 1] ^ (in_buff[m_payload_len - 2] << 8);
+                    }
 #ifdef GRLORA_DEBUG
                     for (int i = 0; i < (int)m_payload_len + 2; i++)
                         std::cout << std::hex << (int)in_buff[i] << std::dec << std::endl;

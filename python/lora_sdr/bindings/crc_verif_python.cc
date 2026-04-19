@@ -16,7 +16,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0) */
 /* BINDTOOL_USE_PYGCCXML(0) */
 /* BINDTOOL_HEADER_FILE(crc_verif.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(0c1080da98c3ced88d2f4a26b7d592da) */
+/* BINDTOOL_HEADER_FILE_HASH(dffa24c8dd1885b332c84b1d3eeffddb) */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -33,11 +33,20 @@ void bind_crc_verif(py::module &m) {
 
   using crc_verif = ::gr::lora_sdr::crc_verif;
 
+  py::enum_<crc_verif::Crc_mode>(m, "Crc_mode")
+      .value("GRLORA", crc_verif::GRLORA)
+      .value("SX1276", crc_verif::SX1276)
+      .export_values();
+
   py::class_<crc_verif, gr::block, gr::basic_block, std::shared_ptr<crc_verif>>(
       m, "crc_verif", D(crc_verif))
 
       .def(py::init(&crc_verif::make), py::arg("print_rx_msg"),
-           py::arg("output_crc_check"), D(crc_verif, make))
+           py::arg("output_crc_check"), py::arg("crc_mode") = crc_verif::GRLORA,
+           D(crc_verif, make))
+
+      .def_static("GRLORA", []() { return crc_verif::GRLORA; })
+      .def_static("SX1276", []() { return crc_verif::SX1276; })
 
       ;
 }

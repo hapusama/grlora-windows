@@ -137,9 +137,14 @@ class lora_file_RX(gr.top_block):
         self.lora_sdr_dewhitening_0 = lora_sdr.dewhitening()
 
         # CRC 校验：验证数据完整性并在终端打印最终载荷
+        # CRC 校验：验证数据完整性并在终端打印最终载荷
+        # crc_mode: 0=gr-lora_sdr custom (默认), 1=SX1276/RFM95 standard CRC-16
+        # CRC 校验：验证数据完整性并在终端打印最终载荷
+        crc_mode = lora_sdr.Crc_mode.SX1276 if args.crc_mode == 1 else lora_sdr.Crc_mode.GRLORA
         self.lora_sdr_crc_verif_0 = lora_sdr.crc_verif(
             1,        # print_payload，非 0 表示打印收到的数据包内容
-            False     # output_crc
+            False,    # output_crc
+            crc_mode  # CRC 算法模式
         )
 
         ##################################################
@@ -340,6 +345,14 @@ def main():
         type=int,
         default=16,
         help="前导码长度（默认 16）"
+    )
+    parser.add_argument(
+        "--crc-mode",
+        type=int,
+        choices=[0, 1],
+        default=0,
+        help="CRC 算法模式 (0=gr-lora_sdr custom, 1=SX1276/RFM95 standard CRC-16)。"
+             "当使用 SX1276/RFM95 等硬件模块发射时，应设为 1。默认 0。"
     )
 
     args = parser.parse_args()

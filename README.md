@@ -41,7 +41,7 @@ In the GNU Radio implementation of the LoRa Tx and Rx chains the user can choose
 	- Implicit and explicit header mode
 	- Payload length: 1-255 bytes
 	- Sync word selection (network ID)
-	- Verification of payload CRC
+	- Verification of payload CRC (with **dual-mode support**: original gr-lora_sdr custom CRC and standard SX1276/RFM95 CRC-16)
 	- Verification of explicit header checksum
 	- Low datarate optimisation mode 
 	- Utilisation of soft-decision decoding for improved performances
@@ -61,19 +61,39 @@ J, Tapparel and A. Burg, "Design and Implementation of LoRa Physical Layer in GN
 If you find this implementation useful for your project, please consider citing the aforementioned paper.
 
 ## Prerequisites
+
+### Common (Linux/macOS/Windows)
 - Gnuradio 3.10
 - python 3
 - cmake
 - libvolk
 - boost
 - UHD
+- pybind11
+
+### Linux / macOS
 - gcc > 9.3.0
 - gxx
-- pybind11
+
+### Windows (Build from Source)
+> ⚠️ Building GNU Radio OOT modules on Windows is more involved than on Linux due to pybind11 ABI compatibility requirements.
+
+- **Visual Studio 2022** (Community, Professional, or Build Tools) with "Desktop development with C++" workload
+- **conda** environment with `gnuradio-core` and matching dependencies
+- **Critical**: The `pybind11` version in your conda environment must be **ABI-compatible** with the version used to build `gnuradio-core` from conda-forge. You can verify this by checking the `__pybind11_internals_vX__` string inside `gnuradio-runtime.dll` and your compiled `.pyd`. If versions mismatch, you will see `ImportError: generic_type: type "..." referenced unknown base type "gr::block"`.
+- A typical working conda env on Windows:
+  ```powershell
+  conda create -n gr-lora python=3.10
+  conda activate gr-lora
+  conda install -c conda-forge gnuradio-core boost-cpp volk cmake pybind11
+  ```
 
 ## Installation
 The out of tree module gr-lora_sdr can be installed from source or directly as a conda package.
 ### From source
+
+#### Linux / macOS
+
 - Clone this repository
 	```sh
 	git clone https://github.com/tapparelj/gr-lora_sdr.git
@@ -130,6 +150,40 @@ The out of tree module gr-lora_sdr can be installed from source or directly as a
 	python3 examples/tx_rx_functionality_check.py 
 	```
 
+#### Windows (Build from Source with MSVC)
+
+> ⚠️ On Windows, the most common failure is a **pybind11 ABI mismatch** between `gnuradio-core` (from conda-forge) and your freshly compiled OOT module. Always verify that the `pybind11` package in your conda env matches the internals version used by `gnuradio-core`.
+
+1. **Prepare conda environment**
+   ```powershell
+   conda create -n gr-lora python=3.10
+   conda activate gr-lora
+   conda install -c conda-forge gnuradio-core boost-cpp volk cmake pybind11
+   ```
+
+2. **Open "x64 Native Tools Command Prompt for VS 2022"** (or run `vcvarsall.bat x64`)
+
+3. **Configure & Build**
+   ```powershell
+   cd gr-lora_sdr
+   mkdir build
+   cd build
+   $env:CMAKE_PREFIX_PATH = "${env:CONDA_PREFIX}\Library"
+   cmake .. -G "NMake Makefiles" `
+       -DCMAKE_INSTALL_PREFIX="${env:CONDA_PREFIX}\Library" `
+       -DPYTHON_EXECUTABLE="${env:CONDA_PREFIX}\python.exe" `
+       -DGR_PYTHON_DIR="${env:CONDA_PREFIX}\Lib\site-packages"
+   nmake
+   nmake install
+   ```
+
+4. **Quick verification**
+   ```powershell
+   python -c "import gnuradio.lora_sdr as lora; print('Import OK')"
+   ```
+
+A convenience batch script `build_grlora.bat` is also provided in the repository root for repeatable builds.
+
 #### Usage
 - An example of a LoRa transmitter and receiver can be found in gr-lora_sdr/examples/ (both python and grc).
 - The .grc files can be opened with gnuradio-companion to set the different transmission parameters.
@@ -183,7 +237,28 @@ Thanks to Ryan Volz this OOT module can also directly be installed as a Conda pa
 		```
 		[grc]
 		local_blocks_path=path_to_the_downloaded_folder/gr-lora_sdr/grc
+- **Windows only — `ImportError: generic_type: type "..." referenced unknown base type "gr::block"`**:
+	- This is a **pybind11 ABI incompatibility** between `gnuradio-core` and your compiled `lora_sdr_python.pyd`.
+	- Check the pybind11 internals version inside the binaries:
+		```python
+		import re
+		with open(r'%CONDA_PREFIX%\Lib\site-packages\gnuradio\gr\gr_python.cp310-win_amd64.pyd','rb') as f:
+		    print(re.findall(rb'__pybind11_internals_v\d+', f.read()))
+		with open(r'%CONDA_PREFIX%\Lib\site-packages\gnuradio\lora_sdr\lora_sdr_python.cp310-win_amd64.pyd','rb') as f:
+		    print(re.findall(rb'__pybind11_internals_v\d+', f.read()))
+		```
+	- Both must show the **same** version (e.g. both `v4` or both `v5`).
+	- **Fix**: Upgrade (or downgrade) the `pybind11` conda package to match the version used by `gnuradio-core`, then clean and rebuild:
+		```powershell
+		conda install -c conda-forge pybind11=2.13.6   # or the matching version
+		rmdir /s /q build
+		# rebuild ...
+		```
 ## Changelog
+- **Add dual-mode CRC verification** (`crc_verif` block)
+  - Original `GRLORA` mode (default, backward-compatible): computes CRC over `payload_len - 2` bytes and XORs with the last 2 bytes.
+  - New `SX1276` mode: standard CRC-16-CCITT over the **entire** payload, matching hardware transceivers such as SX1276, SX1262, and RFM95.
+  - Accessible in Python/GRC via `crc_mode` parameter (`Crc_mode.GRLORA` / `Crc_mode.SX1276`).
 - Add option to ignore sync words checks and print the received values
 - Add optional print of received payload as hex values
 - Added tagged stream input support (for frame definition of frame length)

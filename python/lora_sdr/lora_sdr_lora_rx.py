@@ -16,7 +16,7 @@ import signal
 from . import lora_sdr_python as lora_sdr
 
 class lora_sdr_lora_rx(gr.hier_block2):
-    def __init__(self, center_freq=868100000, bw=125000, cr=1, has_crc=True, impl_head=False, pay_len=255, samp_rate=250000, sf=7,sync_word=[0x12], soft_decoding=False, ldro_mode=2, print_rx=[True,True]):
+    def __init__(self, center_freq=868100000, bw=125000, cr=1, has_crc=True, impl_head=False, pay_len=255, samp_rate=250000, sf=7,sync_word=[0x12], soft_decoding=False, ldro_mode=2, print_rx=[True,True], crc_mode=lora_sdr.crc_verif.GRLORA):
         gr.hier_block2.__init__(
             self, "lora_sdr_lora_rx",
                 gr.io_signature(1, 1, gr.sizeof_gr_complex*1),
@@ -52,7 +52,7 @@ class lora_sdr_lora_rx(gr.hier_block2):
         self.lora_sdr_fft_demod_0 = lora_sdr.fft_demod( soft_decoding, True)
         self.lora_sdr_dewhitening_0 = lora_sdr.dewhitening()
         self.lora_sdr_deinterleaver_0 = lora_sdr.deinterleaver(soft_decoding)
-        self.lora_sdr_crc_verif_0 = lora_sdr.crc_verif( self.print_payload, False)
+        self.lora_sdr_crc_verif_0 = lora_sdr.crc_verif( self.print_payload, False, crc_mode)
 
 
         ##################################################
