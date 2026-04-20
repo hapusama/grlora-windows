@@ -530,8 +530,8 @@ def main():
     parser.add_argument(
         "--sync-word",
         type=lambda x: int(x, 0),
-        default=0x12,
-        help="同步字（默认 0x12，支持十进制或 0x 十六进制写法）"
+        default=0x34,
+        help="同步字（默认 0x34，支持十进制或 0x 十六进制写法）"
     )
     parser.add_argument(
         "--ldro-mode",
@@ -568,7 +568,7 @@ def main():
     parser.add_argument(
         "--preamble-plot-max",
         type=int,
-        default=3,
+        default=0,
         help="最多保存多少帧前导码图；0 表示不限制"
     )
     parser.add_argument(
