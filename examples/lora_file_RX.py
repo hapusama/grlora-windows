@@ -9,6 +9,21 @@
 # Description: 基于 gr-lora_sdr 的离线 IQ 文件接收机，用于解析 USRP 采集的 LoRa 基带数据
 # Author: Tapparel Joachim@EPFL,TCL (modified for file source)
 #
+# 运行前请确保已安装 gr-lora_sdr，并使用 USRP 采集了 LoRa 信号的基带 IQ 数据文件（.fc32 或 .cfile 格式）。
+# python examples\lora_file_RX.py `
+#   -f data\USRP_IQ\1_1_6_10_2_16.bin `
+#   --sf 11 `
+#   --bw 125000 `
+#   --samp-rate 500000 `
+#   --cr 1 `
+#   --center-freq 487.7e6 `
+#   --sync-word 0x34 `
+#   --preamble-len 16 `
+#   --ldro-mode 2 `
+#   --crc-mode 1 `
+#   --plot-preamble `
+#   --preamble-plot-max 0
+
 
 from gnuradio import gr
 from gnuradio import blocks
@@ -16,11 +31,182 @@ from gnuradio.filter import firdes
 from gnuradio.fft import window
 import sys
 import signal
+from pathlib import Path
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 import gnuradio.lora_sdr as lora_sdr
 import numpy as np
+import pmt
+
+
+class preamble_spectrogram_sink(gr.basic_block):
+    """
+    接收 frame_sync 输出的对齐前导码 IQ，并保存为频谱图。
+    """
+
+    def __init__(self, output_dir, max_plots=3, dpi=150):
+        gr.basic_block.__init__(
+            self,
+            name="preamble_spectrogram_sink",
+            in_sig=None,
+            out_sig=None
+        )
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.max_plots = max_plots
+        self.dpi = dpi
+        self.plot_count = 0
+        self.message_port_register_in(pmt.intern("preamble"))
+        self.set_msg_handler(pmt.intern("preamble"), self.handle_preamble)
+
+    def _dict_value(self, msg, key, default=None):
+        value = pmt.dict_ref(msg, pmt.intern(key), pmt.PMT_NIL)
+        if pmt.is_null(value):
+            return default
+        return pmt.to_python(value)
+
+    def _pmt_iq_to_numpy(self, iq_pmt):
+        if pmt.is_c32vector(iq_pmt):
+            return np.asarray(pmt.c32vector_elements(iq_pmt), dtype=np.complex64)
+        if pmt.is_blob(iq_pmt):
+            raw = bytes(pmt.blob_data(iq_pmt))
+        elif pmt.is_u8vector(iq_pmt):
+            raw = bytes(pmt.u8vector_elements(iq_pmt))
+        else:
+            raise TypeError(f"Unsupported preamble_iq PMT type: {pmt.write_string(iq_pmt)}")
+        return np.frombuffer(raw, dtype=np.complex64)
+
+    def handle_preamble(self, msg):
+        if self.max_plots > 0 and self.plot_count >= self.max_plots:
+            return
+        if not pmt.is_dict(msg):
+            print("[preamble_plot] ignored non-dict preamble message")
+            return
+
+        iq_pmt = pmt.dict_ref(msg, pmt.intern("preamble_iq"), pmt.PMT_NIL)
+        if pmt.is_null(iq_pmt):
+            print("[preamble_plot] preamble_iq missing")
+            return
+
+        try:
+            iq = self._pmt_iq_to_numpy(iq_pmt)
+            meta = {
+                "frame_count": self._dict_value(msg, "frame_count", self.plot_count + 1),
+                "sf": int(self._dict_value(msg, "sf", 7)),
+                "bw": float(self._dict_value(msg, "bw", 125000)),
+                "sample_rate": float(self._dict_value(msg, "sample_rate", self._dict_value(msg, "bw", 125000))),
+                "samples_per_symbol": int(self._dict_value(msg, "samples_per_symbol", 1 << int(self._dict_value(msg, "sf", 7)))),
+                "n_symbols": int(self._dict_value(msg, "n_symbols", 0)),
+                "snr_db": self._dict_value(msg, "snr_db", None),
+                "cfo": self._dict_value(msg, "cfo", None),
+                "sto": self._dict_value(msg, "sto", None),
+                "sfo": self._dict_value(msg, "sfo", None),
+            }
+            out_path = self.output_dir / f"preamble_frame_{int(meta['frame_count']):03d}.png"
+            self.plot_preamble(iq, meta, out_path)
+            self.plot_count += 1
+            print(f"[preamble_plot] saved {out_path}")
+        except Exception as exc:
+            print(f"[preamble_plot] failed: {exc}")
+
+    def plot_preamble(self, iq, meta, out_path):
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        fs = float(meta["sample_rate"])
+        bw = float(meta["bw"])
+        samples_per_symbol = max(1, int(meta["samples_per_symbol"]))
+        if iq.size < 32:
+            raise ValueError("preamble IQ is too short to plot")
+
+        nperseg = min(512, max(64, samples_per_symbol // 8))
+        nperseg = min(nperseg, iq.size)
+        noverlap = int(nperseg * 0.88)
+        if noverlap >= nperseg:
+            noverlap = nperseg - 1
+        hop = max(1, nperseg - noverlap)
+        nfft = max(1024, nperseg * 2)
+        starts = np.arange(0, iq.size - nperseg + 1, hop)
+        if starts.size == 0:
+            starts = np.array([0])
+            nperseg = iq.size
+            nfft = max(1024, nperseg * 2)
+
+        window = np.hanning(nperseg).astype(np.float32)
+        frames = np.empty((starts.size, nperseg), dtype=np.complex64)
+        for row, start in enumerate(starts):
+            frames[row, :] = iq[start:start + nperseg] * window
+
+        spec = np.abs(np.fft.fft(frames, n=nfft, axis=1)).T
+        freqs = np.fft.fftfreq(nfft, d=1.0 / fs)
+        times = (starts + nperseg / 2) / fs
+
+        freqs = np.fft.fftshift(freqs)
+        spec = np.fft.fftshift(spec, axes=0)
+        spec = np.maximum(spec, 1e-15)
+        spec_db = 20 * np.log10(spec / np.max(spec)) - 55.0
+        spec_db = np.clip(spec_db, -170.0, -55.0)
+
+        time_ms = times * 1e3
+        freq_khz = freqs / 1e3
+
+        plt.rcParams.update({
+            "font.size": 13,
+            "axes.titlesize": 18,
+            "axes.labelsize": 14,
+            "xtick.labelsize": 13,
+            "ytick.labelsize": 13,
+        })
+
+        fig, ax = plt.subplots(figsize=(18.0, 5.6), dpi=self.dpi)
+        mesh = ax.pcolormesh(
+            time_ms,
+            freq_khz,
+            spec_db,
+            shading="auto",
+            cmap="viridis",
+            vmin=-170,
+            vmax=-55
+        )
+
+        symbol_ms = samples_per_symbol / fs * 1e3
+        n_symbols = meta["n_symbols"] or int(np.ceil(iq.size / samples_per_symbol))
+        for idx in range(1, n_symbols):
+            ax.axvline(idx * symbol_ms, color="white", linestyle="--", linewidth=0.6, alpha=0.18)
+
+        ax.set_title("Preamble Symbol Spectrogram")
+        ax.set_xlabel("Time (ms)")
+        ax.set_ylabel("Frequency (kHz)")
+        ax.set_ylim(-bw / 2e3, bw / 2e3)
+        ax.set_xlim(0, iq.size / fs * 1e3)
+
+        cbar = fig.colorbar(mesh, ax=ax)
+        ticks = [-60, -80, -100, -120, -140, -160]
+        cbar.set_ticks(ticks)
+        cbar.set_ticklabels([f"{tick} dB" for tick in ticks])
+
+        subtitle = []
+        if meta["snr_db"] is not None:
+            subtitle.append(f"SNR {float(meta['snr_db']):.1f} dB")
+        if meta["cfo"] is not None:
+            subtitle.append(f"CFO {float(meta['cfo']):.2f} bins")
+        if subtitle:
+            ax.text(
+                0.995,
+                1.02,
+                " | ".join(subtitle),
+                transform=ax.transAxes,
+                ha="right",
+                va="bottom",
+                fontsize=11,
+                color="#333333"
+            )
+
+        fig.tight_layout()
+        fig.savefig(out_path, bbox_inches="tight")
+        plt.close(fig)
 
 
 class lora_file_RX(gr.top_block):
@@ -54,6 +240,7 @@ class lora_file_RX(gr.top_block):
         self.sync_word = args.sync_word        # 同步字，默认 0x12
         self.ldro_mode = args.ldro_mode        # 低数据率优化模式
         self.preamble_len = args.preamble_len    # 前导码长度
+        self.plot_preamble = args.plot_preamble
 
         ##################################################
         # 构建 GNU Radio 信号处理模块
@@ -147,6 +334,13 @@ class lora_file_RX(gr.top_block):
             crc_mode  # CRC 算法模式
         )
 
+        if self.plot_preamble:
+            self.preamble_spectrogram_sink_0 = preamble_spectrogram_sink(
+                args.preamble_plot_dir,
+                args.preamble_plot_max,
+                args.preamble_plot_dpi
+            )
+
         ##################################################
         # 连接信号流
         ##################################################
@@ -167,6 +361,11 @@ class lora_file_RX(gr.top_block):
             (self.lora_sdr_header_decoder_0, 'frame_info'),
             (self.lora_sdr_frame_sync_0, 'frame_info')
         )
+        if self.plot_preamble:
+            self.msg_connect(
+                (self.lora_sdr_frame_sync_0, 'preamble'),
+                (self.preamble_spectrogram_sink_0, 'preamble')
+            )
 
 
     def get_sf(self):
@@ -353,6 +552,30 @@ def main():
         default=0,
         help="CRC 算法模式 (0=gr-lora_sdr custom, 1=SX1276/RFM95 standard CRC-16)。"
              "当使用 SX1276/RFM95 等硬件模块发射时，应设为 1。默认 0。"
+    )
+    parser.add_argument(
+        "--plot-preamble",
+        action="store_true",
+        default=False,
+        help="保存 frame_sync 对齐并校正后的前导码频谱图"
+    )
+    parser.add_argument(
+        "--preamble-plot-dir",
+        type=str,
+        default=str(Path(__file__).resolve().parent / "preamble_plots"),
+        help="前导码频谱图输出目录"
+    )
+    parser.add_argument(
+        "--preamble-plot-max",
+        type=int,
+        default=3,
+        help="最多保存多少帧前导码图；0 表示不限制"
+    )
+    parser.add_argument(
+        "--preamble-plot-dpi",
+        type=int,
+        default=150,
+        help="前导码频谱图 DPI，默认 150"
     )
 
     args = parser.parse_args()

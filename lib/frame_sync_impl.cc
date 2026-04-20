@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <vector>
 #include <gnuradio/io_signature.h>
+#include <pmt/pmt.h>
 #include <volk/volk_alloc.hh>
 #include "frame_sync_impl.h"
 
@@ -92,6 +93,8 @@ namespace gr
             message_port_register_in(pmt::mp("noise_est"));
             set_msg_handler(pmt::mp("noise_est"), [this](pmt::pmt_t msg)
                             { this->noise_est_handler(msg); });
+
+            message_port_register_out(pmt::mp("preamble"));
 
 #ifdef GRLORA_DEBUG
             preamb_file.open("../../matlab/SFO/preamb.txt", std::ios::out | std::ios::trunc);
@@ -385,6 +388,36 @@ namespace gr
             int max_idx = std::distance(std::begin(fft_mag), std::max_element(std::begin(fft_mag), std::end(fft_mag)));
             float sig_en = fft_mag[max_idx];
             return 10 * log10(sig_en / (tot_en - sig_en));
+        }
+
+        void frame_sync_impl::publish_preamble(const std::vector<gr_complex> &samples,
+                                               int n_symbols,
+                                               float snr_est,
+                                               int netid1,
+                                               int netid2)
+        {
+            if (samples.empty() || n_symbols <= 0)
+            {
+                return;
+            }
+
+            pmt::pmt_t preamble_msg = pmt::make_dict();
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("preamble_iq"),
+                                         pmt::init_c32vector(samples.size(), samples));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("frame_count"), pmt::from_long(frame_cnt));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("sf"), pmt::from_long(m_sf));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("bw"), pmt::from_long(m_bw));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("sample_rate"), pmt::from_long(m_bw));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("samples_per_symbol"), pmt::from_long(m_number_of_bins));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("n_symbols"), pmt::from_long(n_symbols));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("snr_db"), pmt::mp((float)snr_est));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("cfo"), pmt::mp((float)(m_cfo_int + m_cfo_frac)));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("sto"), pmt::mp((float)(k_hat - m_cfo_int + m_sto_frac)));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("sfo"), pmt::mp((float)sfo_hat));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("netid1"), pmt::from_long(netid1));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("netid2"), pmt::from_long(netid2));
+
+            message_port_pub(pmt::mp("preamble"), preamble_msg);
         }
 
         void frame_sync_impl::noise_est_handler(pmt::pmt_t noise_est)
@@ -805,6 +838,11 @@ namespace gr
                         frame_info = pmt::dict_add(frame_info, pmt::intern("sf"), pmt::mp((long)m_sf));
 
                         add_item_tag(0, nitems_written(0), pmt::string_to_symbol("frame_info"), frame_info);
+                        publish_preamble(corr_preamb,
+                                         m_n_up_req + additional_upchirps,
+                                         snr_est,
+                                         netid1,
+                                         netid2);
 
                         m_received_head = false;
                         items_to_consume += m_samples_per_symbol / 4 + m_os_factor * m_cfo_int;

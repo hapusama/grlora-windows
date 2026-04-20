@@ -1,4 +1,4 @@
-# gr-lora_sdr Windows 编译与 CRC 双模式使用指南
+# gr-lora_sdr Windows 编译、CRC 双模式与前导码频谱图使用指南
 
 > 本指南专门针对本项目（`d:\Desktop\proj\gr-lora_sdr`）在 **Windows 11 + conda + VS 2022** 环境下的编译、安装和调试。
 
@@ -212,7 +212,101 @@ python ... --crc-mode 0
 
 ---
 
-## 七、文件修改清单（本项目的改动）
+## 七、对齐前导码频谱图功能
+
+`examples/lora_file_RX.py` 现在可以把 `frame_sync` 内部已经同步、校正后的前导码 IQ 数据画成频谱图，用于检查前导码对齐、采样率/SF 是否匹配，以及后续做信号分析。
+
+### 7.1 设计边界
+
+- C++ 层 `frame_sync_impl.cc` 负责在同步成功后导出可信的前导码 IQ 数据。
+- Python 层 `lora_file_RX.py` 负责接收 IQ 数据、画图、保存 PNG，未来也可以继续扩展为 `.npy/.npz` 导出或更复杂的分析。
+- C++ 不负责画图，避免把 matplotlib/numpy 这类分析逻辑塞进实时信号处理块。
+
+### 7.2 C++ 输出内容
+
+`frame_sync` 新增了一个 message output port：
+
+```text
+preamble
+```
+
+同步成功后会发送一个 PMT dict，主要字段如下：
+
+| 字段 | 含义 |
+|------|------|
+| `preamble_iq` | 对齐并校正后的前导码 IQ，PMT `c32vector`，Python 端可直接转为 `numpy.complex64` |
+| `frame_count` | 当前帧序号 |
+| `sf` | 扩频因子 |
+| `bw` | 带宽 |
+| `sample_rate` | 此处为校正后前导码的等效采样率，即 `bw` |
+| `samples_per_symbol` | 每个 LoRa symbol 的样本数，等于 `2^sf` |
+| `n_symbols` | 导出的前导码 symbol 数 |
+| `snr_db` | frame_sync 估计的前导码 SNR |
+| `cfo` | CFO 估计值，单位为 bins |
+| `sto` | STO 估计值 |
+| `sfo` | SFO 估计值 |
+| `netid1`, `netid2` | 解出的两个 sync word / network identifier symbol |
+
+这里使用 `pmt::init_c32vector(...)`，而不是 `pmt::make_blob(...)`。原因是 Windows 的 GNU Radio Python 绑定中 `pmt.blob_data()` 可能返回 `PyCapsule`，不方便直接转 `bytes`；`c32vector` 可以在 Python 中用 `pmt.c32vector_elements()` 稳定还原。
+
+### 7.3 Python 脚本参数
+
+`lora_file_RX.py` 新增以下参数：
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `--plot-preamble` | 关闭 | 开启前导码频谱图保存 |
+| `--preamble-plot-dir` | `examples/preamble_plots` | PNG 输出目录 |
+| `--preamble-plot-max` | `3` | 最多保存多少帧，`0` 表示不限制 |
+| `--preamble-plot-dpi` | `150` | 输出图片 DPI |
+
+默认只画前三帧，是为了避免长 IQ 文件生成大量 PNG。如果要画全部帧：
+
+```powershell
+--preamble-plot-max 0
+```
+
+### 7.4 使用示例
+
+```powershell
+python examples\lora_file_RX.py `
+  -f data\USRP_IQ\1_1_6_10_2_16.bin `
+  --sf 11 `
+  --bw 125000 `
+  --samp-rate 500000 `
+  --cr 1 `
+  --center-freq 487.7e6 `
+  --sync-word 0x34 `
+  --preamble-len 8 `
+  --ldro-mode 2 `
+  --crc-mode 1 `
+  --plot-preamble `
+  --preamble-plot-max 3
+```
+
+输出示例：
+
+```text
+[preamble_plot] saved D:\Desktop\proj\gr-lora_sdr\examples\preamble_plots\preamble_frame_001.png
+```
+
+### 7.5 绘图实现说明
+
+Python 端使用 `numpy + matplotlib` 生成频谱图，不依赖 `scipy`。图像风格包括：
+
+- 标题：`Preamble Symbol Spectrogram`
+- x 轴：`Time (ms)`
+- y 轴：`Frequency (kHz)`
+- 频率范围：`-bw/2` 到 `+bw/2`
+- 色图：`viridis`
+- 右侧 colorbar 显示 dB 刻度
+- 竖向虚线标出 LoRa symbol 边界
+
+注意：`--preamble-len` 应尽量与发射端真实前导码长度一致。STM32/SX1276 默认常见值是 8，如果发射端是 8，就建议使用 `--preamble-len 8`。
+
+---
+
+## 八、文件修改清单（本项目的改动）
 
 以下文件已被修改以支持 CRC 双模式：
 
@@ -227,9 +321,18 @@ python ... --crc-mode 0
 | `grc/lora_sdr_crc_verif.block.yml` | GRC 块定义增加 CRC 模式下拉框 |
 | `build_grlora.bat` | Windows 一键编译脚本 |
 
+以下文件已被修改以支持对齐前导码频谱图：
+
+| 文件 | 改动内容 |
+|------|---------|
+| `lib/frame_sync_impl.h` | 新增 `publish_preamble(...)` 声明 |
+| `lib/frame_sync_impl.cc` | 新增 `preamble` message output port；同步成功后把对齐/校正后的前导码 IQ 以 PMT `c32vector` 发给 Python |
+| `examples/lora_file_RX.py` | 新增 `preamble_spectrogram_sink`，接收 `frame_sync` 的 `preamble` 消息并保存频谱图 |
+| `examples/lora_file_RX.py` | 新增 `--plot-preamble`、`--preamble-plot-dir`、`--preamble-plot-max`、`--preamble-plot-dpi` 参数 |
+
 ---
 
-## 八、快速参考：一条命令重新编译
+## 九、快速参考：一条命令重新编译
 
 ```powershell
 cd d:\Desktop\proj\gr-lora_sdr && .\build_grlora.bat

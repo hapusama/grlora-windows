@@ -170,6 +170,15 @@ namespace gr
 
       float determine_snr(const gr_complex *samples);
 
+      /**
+          *  \brief  Publish the corrected and symbol-aligned preamble samples for plotting.
+          */
+      void publish_preamble(const std::vector<gr_complex> &samples,
+                            int n_symbols,
+                            float snr_est,
+                            int netid1,
+                            int netid2);
+
     public:
       frame_sync_impl(uint32_t center_freq, uint32_t bandwidth, uint8_t sf, bool impl_head, std::vector<uint16_t> sync_word, uint8_t os_factor, uint16_t preamb_len);
       ~frame_sync_impl();
