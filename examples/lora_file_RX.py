@@ -10,19 +10,7 @@
 # Author: Tapparel Joachim@EPFL,TCL (modified for file source)
 #
 # 运行前请确保已安装 gr-lora_sdr，并使用 USRP 采集了 LoRa 信号的基带 IQ 数据文件（.fc32 或 .cfile 格式）。
-# python examples\lora_file_RX.py `
-#   -f data\USRP_IQ\1_1_6_10_2_16.bin `
-#   --sf 11 `
-#   --bw 125000 `
-#   --samp-rate 500000 `
-#   --cr 1 `
-#   --center-freq 487.7e6 `
-#   --sync-word 0x34 `
-#   --preamble-len 16 `
-#   --ldro-mode 2 `
-#   --crc-mode 1 `
-#   --plot-preamble `
-#   --preamble-plot-max 0
+# python .\gr-lora_sdr\examples\lora_file_RX.py -f .\gr-lora_sdr\data\USRP_IQ\0_0_0_10_6_16.bin --sf 10 --bw 125000 --samp-rate 500000 --cr 1 --center-freq 487.7e6 --sync-word 0x34 --preamble-len 16 --ldro-mode 2 --crc-mode 1 --plot-preamble --preamble-plot-max 0
 
 
 from gnuradio import gr
@@ -112,7 +100,7 @@ class preamble_spectrogram_sink(gr.basic_block):
 
     def plot_preamble(self, iq, meta, out_path):
         import matplotlib
-        matplotlib.use("Agg")
+        matplotlib.use("Agg")   # 关闭弹窗
         import matplotlib.pyplot as plt
 
         fs = float(meta["sample_rate"])
@@ -121,7 +109,7 @@ class preamble_spectrogram_sink(gr.basic_block):
         if iq.size < 32:
             raise ValueError("preamble IQ is too short to plot")
 
-        nperseg = min(512, max(64, samples_per_symbol // 8))
+        nperseg = min(512, max(64, samples_per_symbol // 8))    # 每个短时FFT窗口的长度，通常取一个 symbol 的 1/8
         nperseg = min(nperseg, iq.size)
         noverlap = int(nperseg * 0.88)
         if noverlap >= nperseg:
@@ -285,6 +273,8 @@ class lora_file_RX(gr.top_block):
         #   int(samp_rate/bw) 为每个 chip 的采样点数，
         #   8 为默认前导码长度（preamble length）。
         # 帧同步：center_freq 在此块中仅用于 SFO 估计（sfo_hat = cfo * bw / center_freq），不做混频。
+        
+        # 这里非常值得注意 传给frame_sync的preamble_len并不等价于实际包的前导码长度，而是一个连续出现xx个upchirp才能触发同步的参数
         self.lora_sdr_frame_sync_0 = lora_sdr.frame_sync(
             int(self.center_freq),
             int(self.bw),
@@ -292,8 +282,9 @@ class lora_file_RX(gr.top_block):
             self.impl_head,
             [self.sync_word],
             int(self.samp_rate / self.bw),
-            self.preamble_len
+            int(self.preamble_len//2)
         )
+        
 
         # FFT 解调：将接收到的 chirp 信号解调为频域峰值（符号）
         self.lora_sdr_fft_demod_0 = lora_sdr.fft_demod(
