@@ -10,7 +10,7 @@
 # Author: Tapparel Joachim@EPFL,TCL (modified for file source)
 #
 # 运行前请确保已安装 gr-lora_sdr，并使用 USRP 采集了 LoRa 信号的基带 IQ 数据文件（.fc32 或 .cfile 格式）。
-# python .\gr-lora_sdr\examples\lora_file_RX.py -f .\gr-lora_sdr\data\USRP_IQ\0_0_0_10_6_16.bin --sf 10 --bw 125000 --samp-rate 500000 --cr 1 --center-freq 487.7e6 --sync-word 0x34 --preamble-len 16 --ldro-mode 2 --crc-mode 1 --plot-preamble --preamble-plot-max 0
+# python .\gr-lora_sdr\examples\lora_file_RX.py -f .\gr-lora_sdr\data\USRP_IQ\0_0_0_10_6_16.bin --sf 10 --bw 125000 --samp-rate 500000 --cr 1 --center-freq 487.7e6 --sync-word 0x34 --preamble-len 16 --ldro-mode 2 --crc-mode 0 --plot-preamble --preamble-plot-max 0
 
 
 from gnuradio import gr
@@ -26,25 +26,30 @@ from gnuradio import eng_notation
 import gnuradio.lora_sdr as lora_sdr
 import numpy as np
 import pmt
+import threading
 
 
-class preamble_spectrogram_sink(gr.basic_block):
+class phy_header_spectrogram_sink(gr.basic_block):
     """
-    接收 frame_sync 输出的对齐前导码 IQ，并保存为频谱图。
+    接收 frame_sync 输出的原始 IQ 索引范围，并保存 PHY header 频谱图。
     """
 
-    def __init__(self, output_dir, max_plots=3, dpi=150):
+    def __init__(self, input_file, output_dir, max_plots=3, dpi=150):
         gr.basic_block.__init__(
             self,
-            name="preamble_spectrogram_sink",
+            name="phy_header_spectrogram_sink",
             in_sig=None,
             out_sig=None
         )
+        self.input_file = Path(input_file)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.max_plots = max_plots
         self.dpi = dpi
         self.plot_count = 0
+        self.queued_count = 0
+        self.pending_plots = []
+        self.pending_lock = threading.Lock()
         self.message_port_register_in(pmt.intern("preamble"))
         self.set_msg_handler(pmt.intern("preamble"), self.handle_preamble)
 
@@ -62,53 +67,133 @@ class preamble_spectrogram_sink(gr.basic_block):
         elif pmt.is_u8vector(iq_pmt):
             raw = bytes(pmt.u8vector_elements(iq_pmt))
         else:
-            raise TypeError(f"Unsupported preamble_iq PMT type: {pmt.write_string(iq_pmt)}")
+            raise TypeError(f"Unsupported PHY header IQ PMT type: {pmt.write_string(iq_pmt)}")
         return np.frombuffer(raw, dtype=np.complex64)
 
     def handle_preamble(self, msg):
-        if self.max_plots > 0 and self.plot_count >= self.max_plots:
+        if self.max_plots > 0 and self.queued_count >= self.max_plots:
             return
         if not pmt.is_dict(msg):
-            print("[preamble_plot] ignored non-dict preamble message")
+            print("[phy_header_plot] ignored non-dict message")
             return
 
-        iq_pmt = pmt.dict_ref(msg, pmt.intern("preamble_iq"), pmt.PMT_NIL)
+        iq_pmt = pmt.dict_ref(msg, pmt.intern("phy_header_iq"), pmt.PMT_NIL)
         if pmt.is_null(iq_pmt):
-            print("[preamble_plot] preamble_iq missing")
+            iq_pmt = pmt.dict_ref(msg, pmt.intern("preamble_iq"), pmt.PMT_NIL)
+        start_sample = self._dict_value(msg, "start_sample", None)
+        end_sample = self._dict_value(msg, "end_sample", None)
+        if pmt.is_null(iq_pmt) and (start_sample is None or end_sample is None):
+            print("[phy_header_plot] phy_header_iq and sample range both missing")
             return
 
         try:
-            iq = self._pmt_iq_to_numpy(iq_pmt)
+            iq = None if pmt.is_null(iq_pmt) else self._pmt_iq_to_numpy(iq_pmt).copy()
+            sf = int(self._dict_value(msg, "sf", 7))
+            default_sps = 1 << sf
+            start_sample = None if start_sample is None else int(start_sample)
+            end_sample = None if end_sample is None else int(end_sample)
+            n_samples = int(self._dict_value(
+                msg,
+                "n_samples",
+                (end_sample - start_sample) if start_sample is not None and end_sample is not None else (iq.size if iq is not None else 0)
+            ))
             meta = {
-                "frame_count": self._dict_value(msg, "frame_count", self.plot_count + 1),
-                "sf": int(self._dict_value(msg, "sf", 7)),
+                "frame_count": self._dict_value(msg, "frame_count", self.queued_count + 1),
+                "sf": sf,
                 "bw": float(self._dict_value(msg, "bw", 125000)),
                 "sample_rate": float(self._dict_value(msg, "sample_rate", self._dict_value(msg, "bw", 125000))),
-                "samples_per_symbol": int(self._dict_value(msg, "samples_per_symbol", 1 << int(self._dict_value(msg, "sf", 7)))),
-                "n_symbols": int(self._dict_value(msg, "n_symbols", 0)),
+                "samples_per_symbol": int(self._dict_value(msg, "samples_per_symbol", default_sps)),
+                "n_symbols": float(self._dict_value(msg, "n_symbols", n_samples / default_sps)),
+                "start_sample": start_sample,
+                "end_sample": end_sample,
+                "n_samples": n_samples,
+                "preamble_len": self._dict_value(msg, "preamble_len", None),
+                "sync_word_symbols": self._dict_value(msg, "sync_word_symbols", None),
+                "sfd_symbols": self._dict_value(msg, "sfd_symbols", None),
+                "netid1": int(self._dict_value(msg, "netid1", -1)),
+                "netid2": int(self._dict_value(msg, "netid2", -1)),
                 "snr_db": self._dict_value(msg, "snr_db", None),
                 "cfo": self._dict_value(msg, "cfo", None),
                 "sto": self._dict_value(msg, "sto", None),
                 "sfo": self._dict_value(msg, "sfo", None),
+                "header_valid": bool(self._dict_value(msg, "header_valid", False)),
+                "source": self._dict_value(msg, "source", ""),
             }
-            out_path = self.output_dir / f"preamble_frame_{int(meta['frame_count']):03d}.png"
-            self.plot_preamble(iq, meta, out_path)
-            self.plot_count += 1
-            print(f"[preamble_plot] saved {out_path}")
+            with self.pending_lock:
+                self.pending_plots.append((iq, meta))
+                self.queued_count += 1
+            print(
+                f"[phy_header_plot] queued frame {int(meta['frame_count'])} "
+                f"(samples {meta['start_sample']}:{meta['end_sample']}, {meta['n_symbols']:.2f} symbols)"
+            )
         except Exception as exc:
-            print(f"[preamble_plot] failed: {exc}")
+            print(f"[phy_header_plot] failed: {exc}")
+
+    def save_all(self):
+        with self.pending_lock:
+            pending = list(self.pending_plots)
+            self.pending_plots.clear()
+
+        for iq, meta in pending:
+            try:
+                if iq is None:
+                    src = np.memmap(self.input_file, dtype=np.complex64, mode="r")
+                    start = int(meta["start_sample"])
+                    end = int(meta["end_sample"])
+                    start = max(0, min(start, src.size))
+                    end = max(start, min(end, src.size))
+                    iq = np.asarray(src[start:end], dtype=np.complex64).copy()
+                    meta = dict(meta)
+                    meta["start_sample"] = start
+                    meta["end_sample"] = end
+                    meta["n_samples"] = iq.size
+                    meta["n_symbols"] = iq.size / max(1, int(meta["samples_per_symbol"]))
+                out_path = self.output_dir / f"phy_header_frame_{int(meta['frame_count']):03d}.png"
+                print(
+                    f"[phy_header_plot] saving frame {int(meta['frame_count'])} "
+                    f"({meta.get('n_symbols', 0):.2f} symbols, {iq.size} samples)",
+                    flush=True
+                )
+                self.plot_preamble(iq, meta, out_path)
+                self.plot_count += 1
+                print(f"[phy_header_plot] saved {out_path}")
+            except Exception as exc:
+                print(f"[phy_header_plot] failed to save frame {meta.get('frame_count', '?')}: {exc}")
+
+    def _viridis_rgb(self, values):
+        values = np.clip(values, 0.0, 1.0)
+        stops = np.array([
+            [0.267, 0.005, 0.329],
+            [0.283, 0.141, 0.458],
+            [0.254, 0.265, 0.530],
+            [0.207, 0.372, 0.553],
+            [0.164, 0.471, 0.558],
+            [0.128, 0.567, 0.551],
+            [0.135, 0.659, 0.518],
+            [0.267, 0.749, 0.441],
+            [0.478, 0.821, 0.318],
+            [0.741, 0.873, 0.150],
+            [0.993, 0.906, 0.144],
+        ], dtype=np.float32)
+        pos = values * (len(stops) - 1)
+        idx = np.floor(pos).astype(np.int32)
+        idx = np.clip(idx, 0, len(stops) - 2)
+        frac = (pos - idx)[..., None]
+        rgb = stops[idx] * (1.0 - frac) + stops[idx + 1] * frac
+        return np.clip(rgb * 255.0, 0, 255).astype(np.uint8)
 
     def plot_preamble(self, iq, meta, out_path):
-        import matplotlib
-        matplotlib.use("Agg")   # 关闭弹窗
-        import matplotlib.pyplot as plt
-
-        fs = float(meta["sample_rate"])
         bw = float(meta["bw"])
+        fs = float(meta.get("sample_rate", bw))
         samples_per_symbol = max(1, int(meta["samples_per_symbol"]))
         if iq.size < 32:
-            raise ValueError("preamble IQ is too short to plot")
-
+            raise ValueError("PHY header IQ is too short to plot")
+        iq = np.nan_to_num(iq, nan=0.0, posinf=0.0, neginf=0.0).astype(np.complex64, copy=False)
+        os_factor = max(1, int(round(fs / bw)))
+        if os_factor > 1:
+            iq = iq[os_factor // 2::os_factor]
+            samples_per_symbol = max(1, samples_per_symbol // os_factor)
+            fs = bw
         nperseg = min(512, max(64, samples_per_symbol // 8))    # 每个短时FFT窗口的长度，通常取一个 symbol 的 1/8
         nperseg = min(nperseg, iq.size)
         noverlap = int(nperseg * 0.88)
@@ -128,6 +213,7 @@ class preamble_spectrogram_sink(gr.basic_block):
             frames[row, :] = iq[start:start + nperseg] * window
 
         spec = np.abs(np.fft.fft(frames, n=nfft, axis=1)).T
+        spec = np.nan_to_num(spec, nan=0.0, posinf=0.0, neginf=0.0)
         freqs = np.fft.fftfreq(nfft, d=1.0 / fs)
         times = (starts + nperseg / 2) / fs
 
@@ -135,45 +221,49 @@ class preamble_spectrogram_sink(gr.basic_block):
         spec = np.fft.fftshift(spec, axes=0)
         spec = np.maximum(spec, 1e-15)
         spec_db = 20 * np.log10(spec / np.max(spec)) - 55.0
+        spec_db = np.nan_to_num(spec_db, nan=-170.0, posinf=-55.0, neginf=-170.0)
         spec_db = np.clip(spec_db, -170.0, -55.0)
 
         time_ms = times * 1e3
         freq_khz = freqs / 1e3
+        del time_ms, freq_khz
 
-        plt.rcParams.update({
-            "font.size": 13,
-            "axes.titlesize": 18,
-            "axes.labelsize": 14,
-            "xtick.labelsize": 13,
-            "ytick.labelsize": 13,
-        })
+        from PIL import Image, ImageDraw, ImageFont
 
-        fig, ax = plt.subplots(figsize=(18.0, 5.6), dpi=self.dpi)
-        mesh = ax.pcolormesh(
-            time_ms,
-            freq_khz,
-            spec_db,
-            shading="auto",
-            cmap="viridis",
-            vmin=-170,
-            vmax=-55
-        )
+        norm = (spec_db - (-170.0)) / 115.0
+        rgb = self._viridis_rgb(norm)
+        rgb = np.flipud(rgb)
+
+        plot_w = max(900, int(12.0 * self.dpi))
+        plot_h = max(300, int(3.2 * self.dpi))
+        left = 88
+        right = 112
+        top = 62
+        bottom = 64
+        img_w = plot_w + left + right
+        img_h = plot_h + top + bottom
+
+        image = Image.new("RGB", (img_w, img_h), "white")
+        draw = ImageDraw.Draw(image)
+        font = ImageFont.load_default()
+        spec_img = Image.fromarray(rgb, mode="RGB").resize((plot_w, plot_h), Image.Resampling.BILINEAR)
+        image.paste(spec_img, (left, top))
 
         symbol_ms = samples_per_symbol / fs * 1e3
-        n_symbols = meta["n_symbols"] or int(np.ceil(iq.size / samples_per_symbol))
-        for idx in range(1, n_symbols):
-            ax.axvline(idx * symbol_ms, color="white", linestyle="--", linewidth=0.6, alpha=0.18)
+        n_symbols = float(meta["n_symbols"] or (iq.size / samples_per_symbol))
+        symbol_edges_ms = np.arange(1, int(np.floor(n_symbols)) + 1, dtype=np.float32) * symbol_ms
+        symbol_edges_ms = symbol_edges_ms[symbol_edges_ms < iq.size / fs * 1e3]
+        if symbol_edges_ms.size <= 256:
+            total_ms = iq.size / fs * 1e3
+            for edge_ms in symbol_edges_ms:
+                x = left + int(round(edge_ms / total_ms * plot_w))
+                draw.line([(x, top), (x, top + plot_h)], fill=(255, 255, 255), width=1)
 
-        ax.set_title("Preamble Symbol Spectrogram")
-        ax.set_xlabel("Time (ms)")
-        ax.set_ylabel("Frequency (kHz)")
-        ax.set_ylim(-bw / 2e3, bw / 2e3)
-        ax.set_xlim(0, iq.size / fs * 1e3)
+        axis_color = (20, 20, 20)
+        draw.rectangle([left, top, left + plot_w, top + plot_h], outline=axis_color, width=1)
 
-        cbar = fig.colorbar(mesh, ax=ax)
-        ticks = [-60, -80, -100, -120, -140, -160]
-        cbar.set_ticks(ticks)
-        cbar.set_ticklabels([f"{tick} dB" for tick in ticks])
+        title = "LoRa Preamble + Sync + SFD Spectrogram"
+        draw.text((left, 18), title, fill=axis_color, font=font)
 
         subtitle = []
         if meta["snr_db"] is not None:
@@ -181,20 +271,43 @@ class preamble_spectrogram_sink(gr.basic_block):
         if meta["cfo"] is not None:
             subtitle.append(f"CFO {float(meta['cfo']):.2f} bins")
         if subtitle:
-            ax.text(
-                0.995,
-                1.02,
-                " | ".join(subtitle),
-                transform=ax.transAxes,
-                ha="right",
-                va="bottom",
-                fontsize=11,
-                color="#333333"
-            )
+            text = " | ".join(subtitle)
+            bbox = draw.textbbox((0, 0), text, font=font)
+            draw.text((left + plot_w - (bbox[2] - bbox[0]), 20), text, fill=(50, 50, 50), font=font)
 
-        fig.tight_layout()
-        fig.savefig(out_path, bbox_inches="tight")
-        plt.close(fig)
+        total_ms = iq.size / fs * 1e3
+        xticks = np.linspace(0, total_ms, 6)
+        for tick in xticks:
+            x = left + int(round(tick / total_ms * plot_w))
+            draw.line([(x, top + plot_h), (x, top + plot_h + 5)], fill=axis_color)
+            label = f"{tick:.1f}"
+            bbox = draw.textbbox((0, 0), label, font=font)
+            draw.text((x - (bbox[2] - bbox[0]) / 2, top + plot_h + 8), label, fill=axis_color, font=font)
+
+        yticks = np.linspace(-bw / 2e3, bw / 2e3, 5)
+        for tick in yticks:
+            y = top + plot_h - int(round((tick + bw / 2e3) / (bw / 1e3) * plot_h))
+            draw.line([(left - 5, y), (left, y)], fill=axis_color)
+            label = f"{tick:.0f}"
+            bbox = draw.textbbox((0, 0), label, font=font)
+            draw.text((left - 10 - (bbox[2] - bbox[0]), y - 5), label, fill=axis_color, font=font)
+
+        draw.text((left + plot_w / 2 - 35, img_h - 30), "Time (ms)", fill=axis_color, font=font)
+        draw.text((8, top + plot_h / 2 - 8), "Frequency (kHz)", fill=axis_color, font=font)
+
+        cbar_x = left + plot_w + 32
+        cbar_w = 22
+        cbar_values = np.linspace(1.0, 0.0, plot_h, dtype=np.float32).reshape(plot_h, 1)
+        cbar_rgb = self._viridis_rgb(cbar_values)
+        cbar_img = Image.fromarray(cbar_rgb, mode="RGB").resize((cbar_w, plot_h), Image.Resampling.BILINEAR)
+        image.paste(cbar_img, (cbar_x, top))
+        draw.rectangle([cbar_x, top, cbar_x + cbar_w, top + plot_h], outline=axis_color, width=1)
+        for tick in [-60, -80, -100, -120, -140, -160]:
+            y = top + int(round(((-55.0 - tick) / 115.0) * plot_h))
+            draw.line([(cbar_x + cbar_w, y), (cbar_x + cbar_w + 5, y)], fill=axis_color)
+            draw.text((cbar_x + cbar_w + 9, y - 5), f"{tick} dB", fill=axis_color, font=font)
+
+        image.save(out_path)
 
 
 class lora_file_RX(gr.top_block):
@@ -227,7 +340,7 @@ class lora_file_RX(gr.top_block):
         self.center_freq = args.center_freq    # 中心频率 (Hz)，仅用于帧同步内部的 SFO 估计
         self.sync_word = args.sync_word        # 同步字，默认 0x12
         self.ldro_mode = args.ldro_mode        # 低数据率优化模式
-        self.preamble_len = args.preamble_len    # 前导码长度
+        self.preamble_len = args.preamble_len    # 同步触发阈值；绘图导出 preamble_len + sync word + SFD
         self.plot_preamble = args.plot_preamble
 
         ##################################################
@@ -271,10 +384,11 @@ class lora_file_RX(gr.top_block):
         # --------------------------------------------------
         # 帧同步：检测前导码、补偿频偏、输出符号块
         #   int(samp_rate/bw) 为每个 chip 的采样点数，
-        #   8 为默认前导码长度（preamble length）。
+        #   preamble_len 也决定绘图时向前回切的 preamble upchirp 数。
         # 帧同步：center_freq 在此块中仅用于 SFO 估计（sfo_hat = cfo * bw / center_freq），不做混频。
         
-        # 这里非常值得注意 传给frame_sync的preamble_len并不等价于实际包的前导码长度，而是一个连续出现xx个upchirp才能触发同步的参数
+        # 这里非常值得注意：传给 frame_sync 的 preamble_len 是连续出现多少个 upchirp 才触发同步的参数；
+        # 本脚本的前导码图也按这个值导出 preamble_len + 2 sync + 2.25 SFD。
         self.lora_sdr_frame_sync_0 = lora_sdr.frame_sync(
             int(self.center_freq),
             int(self.bw),
@@ -282,7 +396,7 @@ class lora_file_RX(gr.top_block):
             self.impl_head,
             [self.sync_word],
             int(self.samp_rate / self.bw),
-            int(self.preamble_len//2)
+            int(self.preamble_len)
         )
         
 
@@ -316,7 +430,7 @@ class lora_file_RX(gr.top_block):
 
         # CRC 校验：验证数据完整性并在终端打印最终载荷
         # CRC 校验：验证数据完整性并在终端打印最终载荷
-        # crc_mode: 0=gr-lora_sdr custom (默认), 1=SX1276/RFM95 standard CRC-16
+        # crc_mode: 0=GRLORA/默认 LoRa PHY 对照, 1=全 payload CRC-16 对照模式
         # CRC 校验：验证数据完整性并在终端打印最终载荷
         crc_mode = lora_sdr.Crc_mode.SX1276 if args.crc_mode == 1 else lora_sdr.Crc_mode.GRLORA
         self.lora_sdr_crc_verif_0 = lora_sdr.crc_verif(
@@ -326,7 +440,8 @@ class lora_file_RX(gr.top_block):
         )
 
         if self.plot_preamble:
-            self.preamble_spectrogram_sink_0 = preamble_spectrogram_sink(
+            self.preamble_spectrogram_sink_0 = phy_header_spectrogram_sink(
+                args.input_file,
                 args.preamble_plot_dir,
                 args.preamble_plot_max,
                 args.preamble_plot_dpi
@@ -357,6 +472,10 @@ class lora_file_RX(gr.top_block):
                 (self.lora_sdr_frame_sync_0, 'preamble'),
                 (self.preamble_spectrogram_sink_0, 'preamble')
             )
+
+    def save_preamble_plots(self):
+        if self.plot_preamble:
+            self.preamble_spectrogram_sink_0.save_all()
 
 
     def get_sf(self):
@@ -534,21 +653,23 @@ def main():
         "--preamble-len",
         type=int,
         default=16,
-        help="前导码长度（默认 16）"
+        help="同步触发阈值参考值（默认 16）。前导码图会导出该值对应的 upchirp 数，再加 2 个 sync word symbol 和 2.25 个 SFD symbol。"
     )
     parser.add_argument(
         "--crc-mode",
         type=int,
         choices=[0, 1],
         default=0,
-        help="CRC 算法模式 (0=gr-lora_sdr custom, 1=SX1276/RFM95 standard CRC-16)。"
-             "当使用 SX1276/RFM95 等硬件模块发射时，应设为 1。默认 0。"
+        help="CRC 算法模式 (0=GRLORA/默认 LoRa PHY 对照, 1=全 payload CRC-16 对照模式)。"
+             "LoraSTMacL1/SX1276 LoRa PHY 包优先使用 0。默认 0。"
     )
     parser.add_argument(
         "--plot-preamble",
+        "--plot-phy-header",
+        dest="plot_preamble",
         action="store_true",
         default=False,
-        help="保存 frame_sync 对齐并校正后的前导码频谱图"
+        help="保存 frame_sync 精细对齐后的 LoRa preamble + sync word + SFD 频谱图"
     )
     parser.add_argument(
         "--preamble-plot-dir",
@@ -577,6 +698,7 @@ def main():
     def sig_handler(sig=None, frame=None):
         tb.stop()
         tb.wait()
+        tb.save_preamble_plots()
         sys.exit(0)
 
     signal.signal(signal.SIGINT, sig_handler)
@@ -584,6 +706,7 @@ def main():
 
     tb.start()
     tb.wait()   # 等待文件读取完成（或用户按下 Ctrl+C）
+    tb.save_preamble_plots()
 
 
 if __name__ == '__main__':

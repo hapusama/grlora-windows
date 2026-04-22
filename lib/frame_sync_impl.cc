@@ -41,7 +41,6 @@ namespace gr
             }
 
             m_preamb_len = preamble_len;
-            net_ids.resize(2, 0);
 
             m_n_up_req = preamble_len - 3;
             up_symb_to_use = m_n_up_req - 1;
@@ -67,11 +66,19 @@ namespace gr
             preamble_upchirps.resize(m_preamb_len * m_number_of_bins);
             preamble_raw_up.resize((m_preamb_len + 3) * m_samples_per_symbol);
             CFO_frac_correc.resize(m_number_of_bins);
-            CFO_SFO_frac_correc.resize(m_number_of_bins);
             symb_corr.resize(m_number_of_bins);
             in_down.resize(m_number_of_bins);
             preamble_raw.resize(m_preamb_len * m_number_of_bins);
             net_id_samp.resize(m_samples_per_symbol * 2.5); // we should be able to move up to one quarter of symbol in each direction
+            m_additional_symbol_samp_abs = 0;
+            m_phy_header_start_sample = 0;
+            m_phy_header_end_sample = 0;
+            m_phy_header_ready = false;
+            m_phy_header_validated = false;
+            m_phy_header_published = false;
+            m_phy_header_snr_est = 0.0f;
+            m_phy_header_netid1 = -1;
+            m_phy_header_netid2 = -1;
 
             build_ref_chirps(&m_upchirp[0], &m_downchirp[0], m_sf);
 
@@ -124,76 +131,6 @@ namespace gr
             ninput_items_required[0] = (m_os_factor * (m_number_of_bins + 2));
         }
 
-        float frame_sync_impl::estimate_CFO_frac(gr_complex *samples)
-        {
-            int k0;
-            float cfo_frac;
-            double Y_1, Y0, Y1, u, v, ka, wa, k_residual;
-            std::vector<gr_complex> CFO_frac_correc_aug(up_symb_to_use * m_number_of_bins); ///< CFO frac correction vector
-            std::vector<gr_complex> dechirped(up_symb_to_use * m_number_of_bins);
-            kiss_fft_cpx *cx_in_cfo = new kiss_fft_cpx[2 * up_symb_to_use * m_number_of_bins];
-            kiss_fft_cpx *cx_out_cfo = new kiss_fft_cpx[2 * up_symb_to_use * m_number_of_bins];
-
-            std::vector<float> fft_mag_sq(2 * up_symb_to_use * m_number_of_bins);
-            kiss_fft_cfg cfg_cfo = kiss_fft_alloc(2 * up_symb_to_use * m_number_of_bins, 0, 0, 0);
-            // create longer downchirp
-            std::vector<gr_complex> downchirp_aug(up_symb_to_use * m_number_of_bins);
-            for (int i = 0; i < up_symb_to_use; i++)
-            {
-                memcpy(&downchirp_aug[i * m_number_of_bins], &m_downchirp[0], m_number_of_bins * sizeof(gr_complex));
-            }
-
-            // Dechirping
-            volk_32fc_x2_multiply_32fc(&dechirped[0], samples, &downchirp_aug[0], up_symb_to_use * m_number_of_bins);
-            // prepare FFT
-            for (uint32_t i = 0; i < 2 * up_symb_to_use * m_number_of_bins; i++)
-            {
-                if (i < up_symb_to_use * m_number_of_bins)
-                {
-                    cx_in_cfo[i].r = dechirped[i].real();
-                    cx_in_cfo[i].i = dechirped[i].imag();
-                }
-                else
-                { // add padding
-                    cx_in_cfo[i].r = 0;
-                    cx_in_cfo[i].i = 0;
-                }
-            }
-            // do the FFT
-            kiss_fft(cfg_cfo, cx_in_cfo, cx_out_cfo);
-            // Get magnitude
-            for (uint32_t i = 0u; i < 2 * up_symb_to_use * m_number_of_bins; i++)
-            {
-                fft_mag_sq[i] = cx_out_cfo[i].r * cx_out_cfo[i].r + cx_out_cfo[i].i * cx_out_cfo[i].i;
-            }
-            free(cfg_cfo);
-            delete[] cx_in_cfo;
-            delete[] cx_out_cfo;
-            // get argmax here
-            k0 = std::distance(std::begin(fft_mag_sq), std::max_element(std::begin(fft_mag_sq), std::end(fft_mag_sq)));
-
-            // get three spectral lines
-            Y_1 = fft_mag_sq[mod(k0 - 1, 2 * up_symb_to_use * m_number_of_bins)];
-            Y0 = fft_mag_sq[k0];
-            Y1 = fft_mag_sq[mod(k0 + 1, 2 * up_symb_to_use * m_number_of_bins)];
-            // set constant coeff
-            u = 64 * m_number_of_bins / 406.5506497; // from Cui yang (15)
-            v = u * 2.4674;
-            // RCTSL
-            wa = (Y1 - Y_1) / (u * (Y1 + Y_1) + v * Y0);
-            ka = wa * m_number_of_bins / M_PI;
-            k_residual = fmod((k0 + ka) / 2 / up_symb_to_use, 1);
-            cfo_frac = k_residual - (k_residual > 0.5 ? 1 : 0);
-            // Correct CFO frac in preamble
-            for (uint32_t n = 0; n < up_symb_to_use * m_number_of_bins; n++)
-            {
-                CFO_frac_correc_aug[n] = gr_expj(-2 * M_PI * (cfo_frac) / m_number_of_bins * n);
-            }
-
-            volk_32fc_x2_multiply_32fc(&preamble_upchirps[0], samples, &CFO_frac_correc_aug[0], up_symb_to_use * m_number_of_bins);
-
-            return cfo_frac;
-        }
         float frame_sync_impl::estimate_CFO_frac_Bernier(gr_complex *samples)
         {
             std::vector<int> k0(up_symb_to_use);
@@ -350,14 +287,6 @@ namespace gr
             return sig_en ? (std::distance(std::begin(fft_mag), std::max_element(std::begin(fft_mag), std::end(fft_mag)))) : -1;
         }
 
-        float frame_sync_impl::determine_energy(const gr_complex *samples, int length = 1)
-        {
-            volk::vector<float> magsq_chirp(m_number_of_bins * length);
-            float energy_chirp = 0;
-            volk_32fc_magnitude_squared_32f(&magsq_chirp[0], samples, m_number_of_bins * length);
-            volk_32f_accumulator_s32f(&energy_chirp, &magsq_chirp[0], m_number_of_bins * length);
-            return energy_chirp / m_number_of_bins / length;
-        }
         float frame_sync_impl::determine_snr(const gr_complex *samples)
         {
             double tot_en = 0;
@@ -390,39 +319,55 @@ namespace gr
             return 10 * log10(sig_en / (tot_en - sig_en));
         }
 
-        void frame_sync_impl::publish_preamble(const std::vector<gr_complex> &samples,
-                                               int n_symbols,
-                                               float snr_est,
-                                               int netid1,
-                                               int netid2)
+        void frame_sync_impl::publish_phy_header(uint64_t start_sample,
+                                                 uint64_t end_sample)
         {
-            if (samples.empty() || n_symbols <= 0)
+            if (end_sample <= start_sample)
             {
                 return;
             }
 
+            const uint64_t n_samples = end_sample - start_sample;
+            const float n_symbols = (float)n_samples / (float)m_samples_per_symbol;
+
             pmt::pmt_t preamble_msg = pmt::make_dict();
-            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("preamble_iq"),
-                                         pmt::init_c32vector(samples.size(), samples));
             preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("frame_count"), pmt::from_long(frame_cnt));
             preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("sf"), pmt::from_long(m_sf));
             preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("bw"), pmt::from_long(m_bw));
-            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("sample_rate"), pmt::from_long(m_bw));
-            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("samples_per_symbol"), pmt::from_long(m_number_of_bins));
-            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("n_symbols"), pmt::from_long(n_symbols));
-            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("snr_db"), pmt::mp((float)snr_est));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("sample_rate"), pmt::from_long(m_bw * m_os_factor));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("samples_per_symbol"), pmt::from_long(m_samples_per_symbol));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("n_symbols"), pmt::mp(n_symbols));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("preamble_len"), pmt::from_long(m_preamb_len));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("sync_word_symbols"), pmt::mp(2.0f));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("sfd_symbols"), pmt::mp(2.25f));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("start_sample"), pmt::from_uint64(start_sample));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("end_sample"), pmt::from_uint64(end_sample));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("n_samples"), pmt::from_uint64(n_samples));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("header_valid"), pmt::from_bool(true));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("source"), pmt::intern("preamble_sync_sfd"));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("snr_db"), pmt::mp((float)m_phy_header_snr_est));
             preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("cfo"), pmt::mp((float)(m_cfo_int + m_cfo_frac)));
             preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("sto"), pmt::mp((float)(k_hat - m_cfo_int + m_sto_frac)));
             preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("sfo"), pmt::mp((float)sfo_hat));
-            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("netid1"), pmt::from_long(netid1));
-            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("netid2"), pmt::from_long(netid2));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("netid1"), pmt::from_long(m_phy_header_netid1));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("netid2"), pmt::from_long(m_phy_header_netid2));
 
             message_port_pub(pmt::mp("preamble"), preamble_msg);
         }
 
-        void frame_sync_impl::noise_est_handler(pmt::pmt_t noise_est)
+        void frame_sync_impl::try_publish_phy_header()
         {
-            m_noise_est = pmt::to_double(noise_est);
+            if (!m_phy_header_ready || !m_phy_header_validated || m_phy_header_published)
+            {
+                return;
+            }
+
+            publish_phy_header(m_phy_header_start_sample, m_phy_header_end_sample);
+            m_phy_header_published = true;
+        }
+
+        void frame_sync_impl::noise_est_handler(pmt::pmt_t)
+        {
         }
         void frame_sync_impl::frame_info_handler(pmt::pmt_t frame_info)
         {
@@ -441,6 +386,9 @@ namespace gr
                 k_hat = 0;
                 m_sto_frac = 0;
                 m_symb_numb = 0;
+                m_phy_header_ready = false;
+                m_phy_header_validated = false;
+                m_phy_header_published = false;
             }
             else
             {
@@ -457,6 +405,9 @@ namespace gr
 
                 frame_info = pmt::dict_add(frame_info, pmt::intern("ldro"), pmt::from_bool(m_ldro));
                 add_item_tag(0, nitems_written(0), pmt::string_to_symbol("frame_info"), frame_info);
+
+                m_phy_header_validated = true;
+                try_publish_phy_header();
             }
         }
 
@@ -470,8 +421,10 @@ namespace gr
             m_downchirp.resize(m_number_of_bins);
             preamble_upchirps.resize(m_preamb_len * m_number_of_bins);
             preamble_raw_up.resize((m_preamb_len + 3) * m_samples_per_symbol);
+            m_phy_header_ready = false;
+            m_phy_header_validated = false;
+            m_phy_header_published = false;
             CFO_frac_correc.resize(m_number_of_bins);
-            CFO_SFO_frac_correc.resize(m_number_of_bins);
             symb_corr.resize(m_number_of_bins);
             in_down.resize(m_number_of_bins);
             preamble_raw.resize(m_preamb_len * m_number_of_bins);
@@ -616,7 +569,6 @@ namespace gr
                     { // network identifier 1 correct or off by one
                         symbol_cnt = NET_ID2;
                         memcpy(&net_id_samp[0.25 * m_samples_per_symbol], &in[0], sizeof(gr_complex) * m_samples_per_symbol);
-                        net_ids[0] = bin_idx;
                     }
                     break;
                 }
@@ -625,7 +577,6 @@ namespace gr
 
                     symbol_cnt = DOWNCHIRP1;
                     memcpy(&net_id_samp[1.25 * m_samples_per_symbol], &in[0], sizeof(gr_complex) * (m_number_of_bins + 1) * m_os_factor);
-                    net_ids[1] = bin_idx;
 
                     break;
                 }
@@ -638,12 +589,14 @@ namespace gr
                 case DOWNCHIRP2:
                 {
                     down_val = get_symbol_val(&symb_corr[0], &m_upchirp[0]);
+                    m_additional_symbol_samp_abs = nitems_read(0);
                     memcpy(&additional_symbol_samp[0], &in[0], sizeof(gr_complex) * m_samples_per_symbol);
                     symbol_cnt = QUARTER_DOWN;
                     break;
                 }
                 case QUARTER_DOWN:
                 {
+                    int one_symbol_header_start_off = 0;
                     memcpy(&additional_symbol_samp[m_samples_per_symbol], &in[0], sizeof(gr_complex) * m_samples_per_symbol);
                     if ((uint32_t)down_val < m_number_of_bins / 2)
                     {
@@ -708,6 +661,8 @@ namespace gr
                     // //apply sfo correction
                     volk_32fc_x2_multiply_32fc(&corr_preamb[0], &corr_preamb[0], &sfo_corr_vect[0], (m_n_up_req + additional_upchirps) * m_number_of_bins);
 
+                    uint32_t detected_upchirps = m_n_up_req + additional_upchirps;
+
                     float snr_est = 0;
                     for (int i = 0; i < up_symb_to_use; i++)
                     {
@@ -716,7 +671,7 @@ namespace gr
                     snr_est /= up_symb_to_use;
 
                     // update sto_frac to its value at the beginning of the net id
-                    m_sto_frac += sfo_hat * m_preamb_len;
+                    m_sto_frac += sfo_hat * detected_upchirps;
                     // ensure that m_sto_frac is in [-0.5,0.5]
                     if (abs(m_sto_frac) > 0.5)
                     {
@@ -768,6 +723,7 @@ namespace gr
                                     // the first symbol was mistaken for the end of the downchirp. we should correct and output it.
 
                                     int start_off = (int)m_os_factor / 2 - my_roundf(m_sto_frac * m_os_factor) + m_os_factor * (0.25 * m_number_of_bins + m_cfo_int);
+                                    one_symbol_header_start_off = start_off;
                                     for (int i = start_off; i < 1.25 * m_samples_per_symbol; i += m_os_factor)
                                     {
 
@@ -838,11 +794,36 @@ namespace gr
                         frame_info = pmt::dict_add(frame_info, pmt::intern("sf"), pmt::mp((long)m_sf));
 
                         add_item_tag(0, nitems_written(0), pmt::string_to_symbol("frame_info"), frame_info);
-                        publish_preamble(corr_preamb,
-                                         m_n_up_req + additional_upchirps,
-                                         snr_est,
-                                         netid1,
-                                         netid2);
+                        m_phy_header_snr_est = snr_est;
+                        m_phy_header_netid1 = netid1;
+                        m_phy_header_netid2 = netid2;
+                        m_phy_header_start_sample = 0;
+                        m_phy_header_end_sample = 0;
+                        m_phy_header_ready = false;
+                        m_phy_header_validated = false;
+                        m_phy_header_published = false;
+
+                        const int64_t first_payload_symbol_start =
+                            one_symbol_off
+                                ? (int64_t)m_additional_symbol_samp_abs +
+                                      (int64_t)one_symbol_header_start_off -
+                                      (int64_t)m_os_factor / 2
+                                : (int64_t)nitems_read(0) +
+                                      (int64_t)items_to_consume +
+                                      (int64_t)m_samples_per_symbol / 4 +
+                                      (int64_t)m_os_factor * m_cfo_int -
+                                      (int64_t)my_roundf(m_sto_frac * m_os_factor);
+
+                        const uint64_t phy_header_samples =
+                            ((uint64_t)m_preamb_len + 4u) * (uint64_t)m_samples_per_symbol +
+                            (uint64_t)m_samples_per_symbol / 4u;
+                        const uint64_t header_end =
+                            (uint64_t)std::max<int64_t>(0, first_payload_symbol_start);
+
+                        m_phy_header_end_sample = header_end;
+                        m_phy_header_start_sample =
+                            header_end > phy_header_samples ? header_end - phy_header_samples : 0;
+                        m_phy_header_ready = m_phy_header_end_sample > m_phy_header_start_sample;
 
                         m_received_head = false;
                         items_to_consume += m_samples_per_symbol / 4 + m_os_factor * m_cfo_int;
@@ -882,12 +863,13 @@ namespace gr
             }
             case SFO_COMPENSATION:
             {
-                // transmit only useful symbols (at least 8 symbol for PHY header)
+                // transmit LoRa header/payload data symbols after the preamble, sync word, and SFD
 
                 if (symbol_cnt < 8 || ((uint32_t)symbol_cnt < m_symb_numb && m_received_head))
                 {
                     // output downsampled signal (with no STO but with CFO)
                     memcpy(&out[0], &in_down[0], m_number_of_bins * sizeof(gr_complex));
+
                     items_to_consume = m_samples_per_symbol;
 
                     //   update sfo evolution

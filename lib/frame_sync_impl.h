@@ -41,7 +41,6 @@ namespace gr
       uint8_t m_state;                    ///< Current state of the synchronization
       uint32_t m_center_freq;             ///< RF center frequency
       uint32_t m_bw;                      ///< Bandwidth
-      uint32_t m_samp_rate;               ///< Sampling rate
       uint8_t m_sf;                       ///< Spreading factor
       uint8_t m_cr;                       ///< Coding rate
       uint32_t m_pay_len;                 ///< payload length
@@ -58,7 +57,6 @@ namespace gr
       uint32_t m_samples_per_symbol; ///< Number of samples received per lora symbols
       uint32_t m_symb_numb;          ///<number of payload lora symbols
       bool m_received_head;          ///< indicate that the header has be decoded and received by this block
-      double m_noise_est;            ///< estimate of the noise
 
       std::vector<gr_complex> in_down;     ///< downsampled input
       std::vector<gr_complex> m_downchirp; ///< Reference downchirp
@@ -82,24 +80,29 @@ namespace gr
       std::vector<gr_complex> additional_symbol_samp;  ///< save the value of the last 1.25 downchirp as it might contain the first payload symbol
       std::vector<gr_complex> preamble_raw;      ///<vector containing the preamble upchirps without any synchronization
       std::vector<gr_complex> preamble_raw_up;  ///<vector containing the upsampled preamble upchirps without any synchronization
-      std::vector<gr_complex> downchirp_raw;    ///< vector containing the preamble downchirps without any synchronization
       std::vector<gr_complex> preamble_upchirps; ///<vector containing the preamble upchirps
       std::vector<gr_complex> net_id_samp;       ///< vector of the oversampled network identifier samples
-      std::vector<int> net_ids;                  ///< values of the network identifiers received
+      uint64_t m_additional_symbol_samp_abs;     ///< absolute input sample index for additional_symbol_samp[0]
+      uint64_t m_phy_header_start_sample;        ///< aligned absolute input sample index for preamble + sync word + SFD start
+      uint64_t m_phy_header_end_sample;          ///< aligned absolute input sample index for preamble + sync word + SFD end
+      bool m_phy_header_ready;                   ///< true once the aligned preamble + sync word + SFD range has been recorded
+      bool m_phy_header_validated;               ///< true after the header decoder reports a valid header checksum
+      bool m_phy_header_published;               ///< true after publishing the PHY header range
+      float m_phy_header_snr_est;                ///< SNR estimate to attach to the PHY header message
+      int m_phy_header_netid1;                   ///< decoded first network id for the PHY header message
+      int m_phy_header_netid2;                   ///< decoded second network id for the PHY header message
 
       int up_symb_to_use;              ///< number of upchirp symbols to use for CFO and STO frac estimation
       int k_hat;                       ///< integer part of CFO+STO
       std::vector<int> preamb_up_vals; ///< value of the preamble upchirps
 
       float m_cfo_frac;                            ///< fractional part of CFO
-      float m_cfo_frac_bernier;                    ///< fractional part of CFO using Berniers algo
       int m_cfo_int;                               ///< integer part of CFO
       float m_sto_frac;                            ///< fractional part of CFO
       float sfo_hat;                               ///< estimated sampling frequency offset
       float sfo_cum;                               ///< cumulation of the sfo
       bool cfo_frac_sto_frac_est;                  ///< indicate that the estimation of CFO_frac and STO_frac has been performed
       std::vector<gr_complex> CFO_frac_correc;     ///< cfo frac correction vector
-      std::vector<gr_complex> CFO_SFO_frac_correc; ///< correction vector accounting for cfo and sfo
 
       std::vector<gr_complex> symb_corr; ///< symbol with CFO frac corrected
       int down_val;                      ///< value of the preamble downchirps
@@ -115,14 +118,7 @@ namespace gr
       int my_roundf(float number);
       
       /**
-          *  \brief  Estimate the value of fractional part of the CFO using RCTSL and correct the received preamble accordingly
-          *  \param  samples
-          *          The pointer to the preamble beginning.(We might want to avoid the
-          *          first symbol since it might be incomplete)
-          */
-      float estimate_CFO_frac(gr_complex *samples);
-      /**
-          *  \brief  (not used) Estimate the value of fractional part of the CFO using Berniers algorithm and correct the received preamble accordingly
+          *  \brief  Estimate the value of fractional part of the CFO using Berniers algorithm and correct the received preamble accordingly
           *  \param  samples
           *          The pointer to the preamble beginning.(We might want to avoid the
           *          first symbol since it might be incomplete)
@@ -145,16 +141,6 @@ namespace gr
       
 
       /**
-          *  \brief  Determine the energy of a symbol.
-          *
-          *  \param  samples
-          *          The complex symbol to analyse.
-          *          length
-          *          The number of LoRa symbols used for the estimation
-          */
-      float determine_energy(const gr_complex *samples, int length);
-
-      /**
          *   \brief  Handle the reception of the explicit header information, received from the header_decoder block 
          */
       void frame_info_handler(pmt::pmt_t frame_info);
@@ -171,13 +157,15 @@ namespace gr
       float determine_snr(const gr_complex *samples);
 
       /**
-          *  \brief  Publish the corrected and symbol-aligned preamble samples for plotting.
+          *  \brief  Publish the original-file sample range containing the PHY header symbols.
           */
-      void publish_preamble(const std::vector<gr_complex> &samples,
-                            int n_symbols,
-                            float snr_est,
-                            int netid1,
-                            int netid2);
+      void publish_phy_header(uint64_t start_sample,
+                              uint64_t end_sample);
+
+      /**
+          *  \brief  Publish the captured PHY header range once both sync capture and header validation are done.
+          */
+      void try_publish_phy_header();
 
     public:
       frame_sync_impl(uint32_t center_freq, uint32_t bandwidth, uint8_t sf, bool impl_head, std::vector<uint16_t> sync_word, uint8_t os_factor, uint16_t preamb_len);
