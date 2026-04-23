@@ -813,7 +813,8 @@ namespace gr
                                       (int64_t)m_samples_per_symbol / 4 +
                                       (int64_t)m_os_factor * m_cfo_int -
                                       (int64_t)my_roundf(m_sto_frac * m_os_factor);
-
+                        // the preamble symbols + the quarter downchirp symbol (where we start estimating the STO) + the additional samples 
+                        // due to CFOint (we are already correcting CFOfrac and STOfrac in the preamble upchirps, so we don't need to consider them here)
                         const uint64_t phy_header_samples =
                             ((uint64_t)m_preamb_len + 4u) * (uint64_t)m_samples_per_symbol +
                             (uint64_t)m_samples_per_symbol / 4u;

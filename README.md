@@ -31,7 +31,7 @@ conda install -c conda-forge gnuradio-core boost-cpp volk cmake pybind11
 
 ### 2.1 使用一键编译脚本（推荐）
 
-本项目已提供 `build_grlora.bat`，路径：
+本项目已提供 `build_grlora.bat`，路径：(注意，目前是把绑定的conda写死成gr-lora，但是实际使用gnuradio的时候是radioconda环境，所以如果要在gnuradio中使用这个模块，需要把这个路径改成radioconda的路径)
 ```
 d:\Desktop\proj\gr-lora_sdr\build_grlora.bat
 ```
