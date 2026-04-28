@@ -4,4 +4,8 @@ build*/
 .vscode/
 */__pycache__/*
 
-data/USRP_IQ/*.bin
+# Raw IQ captures and temporary analysis artifacts.
+data/USRP_IQ/**/*.bin
+data/USRP_IQ/**/*.log
+examples/_file_source_staging/
+examples/_full_debug.log

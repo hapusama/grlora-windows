@@ -518,7 +518,24 @@ namespace gr
                     symbol_cnt = 0;
                     cfo_frac_sto_frac_est = false;
                     k_hat = most_frequent(&preamb_up_vals[0], preamb_up_vals.size());
-                    memcpy(&net_id_samp[0], &in[int(0.75 * m_samples_per_symbol - k_hat * m_os_factor)], sizeof(gr_complex) * 0.25 * m_samples_per_symbol);
+
+                    const int quarter_symbol_samp = (int)(m_samples_per_symbol / 4);
+                    const int net_id_start_idx =
+                        (int)(3 * m_samples_per_symbol / 4) - k_hat * (int)m_os_factor;
+                    if (k_hat < 0 || (uint32_t)k_hat >= m_number_of_bins ||
+                        net_id_start_idx < 0 ||
+                        net_id_start_idx + quarter_symbol_samp > ninput_items[0])
+                    {
+                        m_state = DETECT;
+                        symbol_cnt = 1;
+                        items_to_consume = m_samples_per_symbol;
+                        items_to_output = 0;
+                        k_hat = 0;
+                        m_sto_frac = 0;
+                        break;
+                    }
+
+                    memcpy(&net_id_samp[0], &in[net_id_start_idx], sizeof(gr_complex) * quarter_symbol_samp);
 
                     // perform the coarse synchronization
                     items_to_consume = m_os_factor * ((int)(m_number_of_bins - k_hat));
