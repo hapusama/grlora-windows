@@ -160,7 +160,8 @@ namespace gr
           *  \brief  Publish the original-file sample range containing the PHY header symbols.
           */
       void publish_phy_header(uint64_t start_sample,
-                              uint64_t end_sample);
+                              uint64_t end_sample,
+                              pmt::pmt_t frame_info);
 
       /**
           *  \brief  Publish the captured PHY header range once both sync capture and header validation are done.

@@ -32,6 +32,7 @@ namespace gr
                   m_crc_mode(crc_mode)
         {
             message_port_register_out(pmt::mp("msg"));
+            message_port_register_out(pmt::mp("payload_metadata"));
             set_tag_propagation_policy(TPP_DONT);
             
         }
@@ -201,6 +202,11 @@ namespace gr
                             std::cout << RED << "CRC invalid" << RESET << std::endl
                                       << std::endl;
                     }
+                    pmt::pmt_t payload_metadata = pmt::is_dict(current_tag.value) ? current_tag.value : pmt::make_dict();
+                    payload_metadata = pmt::dict_add(payload_metadata, pmt::intern("payload"), pmt::mp(message_str));
+                    payload_metadata = pmt::dict_add(payload_metadata, pmt::intern("decoded_payload_len"), pmt::from_long(m_payload_len));
+                    payload_metadata = pmt::dict_add(payload_metadata, pmt::intern("crc_valid"), pmt::from_bool(crc_valid == 1));
+                    message_port_pub(pmt::intern("payload_metadata"), payload_metadata);
                     message_port_pub(pmt::intern("msg"), pmt::mp(message_str));
                     in_buff.erase(in_buff.begin(), in_buff.begin()+m_payload_len + 2);
                     if(output_crc_check){
@@ -239,6 +245,11 @@ namespace gr
                     }
                     std::cout << std::endl;
                 }
+                pmt::pmt_t payload_metadata = pmt::is_dict(current_tag.value) ? current_tag.value : pmt::make_dict();
+                payload_metadata = pmt::dict_add(payload_metadata, pmt::intern("payload"), pmt::mp(message_str));
+                payload_metadata = pmt::dict_add(payload_metadata, pmt::intern("decoded_payload_len"), pmt::from_long(m_payload_len));
+                payload_metadata = pmt::dict_add(payload_metadata, pmt::intern("crc_valid"), pmt::from_bool(true));
+                message_port_pub(pmt::intern("payload_metadata"), payload_metadata);
                 message_port_pub(pmt::intern("msg"), pmt::mp(message_str));
                 
                 return m_payload_len;

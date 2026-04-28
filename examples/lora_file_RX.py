@@ -10,7 +10,7 @@
 # Author: Tapparel Joachim@EPFL,TCL (modified for file source)
 #
 # 运行前请确保已安装 gr-lora_sdr，并使用 USRP 采集了 LoRa 信号的基带 IQ 数据文件（.fc32 或 .cfile 格式）。
-# python .\gr-lora_sdr\examples\lora_file_RX.py -f .\gr-lora_sdr\data\USRP_IQ\1_1_6_10_2_16.bin --sf 11 --bw 125000 --samp-rate 500000 --cr 1 --center-freq 487.7e6 --sync-word 0x34 --preamble-len 16 --ldro-mode 2 --crc-mode 0 --plot-preamble --preamble-plot-max 0 
+# python .\gr-lora_sdr\examples\lora_file_RX.py -f .\gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_8.bin --sf 10 --bw 125000 --samp-rate 500000 --cr 1 --center-freq 487.7e6 --sync-word 0x34 --preamble-len 8 --ldro-mode 2 --crc-mode 0 --plot-preamble --preamble-plot-max 0 
 
 from gnuradio import gr
 from gnuradio import blocks

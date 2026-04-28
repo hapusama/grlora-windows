@@ -34,6 +34,7 @@ namespace gr
             m_ldro_mode = ldro_mode;
 
             pay_cnt = 0;
+            m_frame_context = pmt::make_dict();
 
             set_tag_propagation_policy(TPP_DONT);
             message_port_register_out(pmt::mp("frame_info"));
@@ -53,10 +54,10 @@ namespace gr
             ninput_items_required[0] = noutput_items;
         }
 
-        void header_decoder_impl::publish_frame_info(int cr, int pay_len, int crc, uint8_t ldro_mode, int err)
+        void header_decoder_impl::publish_frame_info(int cr, int pay_len, int crc, uint8_t ldro_mode, int err, pmt::pmt_t frame_context)
         {
 
-            pmt::pmt_t header_content = pmt::make_dict();
+            pmt::pmt_t header_content = pmt::is_dict(frame_context) ? frame_context : pmt::make_dict();
 
             header_content = pmt::dict_add(header_content, pmt::intern("cr"), pmt::from_long(cr));
             header_content = pmt::dict_add(header_content, pmt::intern("pay_len"), pmt::from_long(pay_len));
@@ -102,6 +103,7 @@ namespace gr
                     if (is_header)
                     {
                         pay_cnt = 0;
+                        m_frame_context = tags[0].value;
                     }
                 }
             }
@@ -113,7 +115,7 @@ namespace gr
             {
                 if (m_impl_header)
                 { //implicit header, all parameters should have been provided
-                    publish_frame_info(m_cr, m_payload_len, m_has_crc, m_ldro_mode, 0);
+                    publish_frame_info(m_cr, m_payload_len, m_has_crc, m_ldro_mode, 0, m_frame_context);
 
                     for (int i = 0; i < nitem_to_process; i++)
                     {
@@ -169,7 +171,7 @@ namespace gr
 #endif
                         noutput_items = nitem_to_process - header_len;
                     }
-                    publish_frame_info(m_cr, m_payload_len, m_has_crc, m_ldro_mode, head_err);
+                    publish_frame_info(m_cr, m_payload_len, m_has_crc, m_ldro_mode, head_err, m_frame_context);
                     // print("pub header info");
                     for (int i = header_len, j = 0; i < nitem_to_process; i++, j++)
                     {

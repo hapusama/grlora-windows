@@ -111,7 +111,7 @@ class preamble_metadata_sink(gr.basic_block):
 
     frame_sync 负责在 IQ 中检测包同步位置。这里收集的是每个包的
     preamble/sync/SFD 对齐样本范围，以及 frame_sync 估计的 SNR/CFO/STO/SFO。
-    注意：frame_sync 自带的 frame_count 只是内部检测计数，不作为最终输出字段。
+    frame_count 会沿着 header/payload 元数据一起传播，用于避免按 list index 错配。
     """
 
     def __init__(self):
@@ -161,6 +161,16 @@ class preamble_metadata_sink(gr.basic_block):
             "netid1": int(self._dict_value(msg, "netid1", -1)),
             "netid2": int(self._dict_value(msg, "netid2", -1)),
         }
+        for source_key, output_key in (
+            ("cr", "cr"),
+            ("pay_len", "pay_len"),
+            ("crc", "crc"),
+            ("ldro_mode", "ldro_mode"),
+            ("err", "header_err"),
+        ):
+            value = self._dict_value(msg, source_key, None)
+            if value is not None:
+                frame[output_key] = int(value)
         with self._lock:
             self.frames.append(frame)
 
@@ -195,18 +205,30 @@ class header_metadata_sink(gr.basic_block):
             return
 
         header = {
+            "frame_count": int(self._dict_value(msg, "frame_count", -1)),
             "cr": int(self._dict_value(msg, "cr", -1)),
             "pay_len": int(self._dict_value(msg, "pay_len", -1)),
             "crc": int(self._dict_value(msg, "crc", 0)),
             "ldro_mode": int(self._dict_value(msg, "ldro_mode", 2)),
             "header_err": int(self._dict_value(msg, "err", 1)),
         }
+        for key in ("start_sample", "end_sample"):
+            value = self._dict_value(msg, key, None)
+            if value is not None:
+                header[key] = int(value)
         with self._lock:
             self.headers.append(header)
 
 
 def payload_msg_to_bytes(msg):
     """Convert crc_verif payload PMT into raw bytes."""
+    if isinstance(msg, bytes):
+        return msg
+    if isinstance(msg, bytearray):
+        return bytes(msg)
+    if isinstance(msg, str):
+        return msg.encode("latin-1", errors="ignore")
+
     if hasattr(pmt, "is_u8vector") and pmt.is_u8vector(msg):
         return bytes(pmt.u8vector_elements(msg))
     if hasattr(pmt, "is_blob") and pmt.is_blob(msg):
@@ -255,7 +277,7 @@ def int_or_default(value, default=-1):
 
 
 class payload_metadata_sink(gr.basic_block):
-    """Collect decoded payload packet numbers in detection order."""
+    """Collect decoded payload packet numbers and frame metadata."""
 
     def __init__(self):
         gr.basic_block.__init__(
@@ -269,18 +291,38 @@ class payload_metadata_sink(gr.basic_block):
         self.message_port_register_in(pmt.intern("payload"))
         self.set_msg_handler(pmt.intern("payload"), self.handle_payload)
 
+    def _dict_value(self, msg, key, default=None):
+        value = pmt.dict_ref(msg, pmt.intern(key), pmt.PMT_NIL)
+        if pmt.is_null(value):
+            return default
+        return pmt.to_python(value)
+
     def handle_payload(self, msg):
-        payload = payload_msg_to_bytes(msg)
+        metadata = {}
+        if pmt.is_dict(msg):
+            payload = payload_msg_to_bytes(self._dict_value(msg, "payload", b""))
+            for key in ("frame_count", "start_sample", "end_sample"):
+                value = self._dict_value(msg, key, None)
+                if value is not None:
+                    metadata[key] = int(value)
+            crc_valid = self._dict_value(msg, "crc_valid", None)
+            if crc_valid is not None:
+                metadata["crc_valid"] = bool(crc_valid)
+            decoded_payload_len = self._dict_value(msg, "decoded_payload_len", len(payload))
+        else:
+            payload = payload_msg_to_bytes(msg)
+            decoded_payload_len = len(payload)
         packet_number = extract_payload_packet_number(payload)
 
         with self._lock:
-            self.payloads.append(
+            metadata.update(
                 {
                     "header_packet_counter": packet_number,
                     "payload_packet_number": packet_number,
-                    "decoded_payload_len": len(payload),
+                    "decoded_payload_len": int(decoded_payload_len),
                 }
             )
+            self.payloads.append(metadata)
 
 
 # ---------- GNU Radio 接收链 ----------
@@ -385,7 +427,7 @@ class lora_file_preamble_fft_rx(gr.top_block):
             self.connect((self.dewhitening, 0), (self.crc_verif, 0))
             self.connect((self.crc_verif, 0), (self.payload_bytes_null_sink, 0))
             self.connect((self.crc_verif, 1), (self.crc_valid_sink, 0))
-            self.msg_connect((self.crc_verif, "msg"), (self.payload_sink, "payload"))
+            self.msg_connect((self.crc_verif, "payload_metadata"), (self.payload_sink, "payload"))
         else:
             self.connect((self.header_decoder, 0), (self.payload_null_sink, 0))
 
@@ -820,9 +862,54 @@ def resolve_capture_args(base_args, input_file, lab_metadata=None, prepare_sourc
     return args
 
 
-def merge_frame_and_header_metadata(frames, headers, payloads, capture_args):
+def frame_metadata_key(item):
+    """Return the stable packet key carried by frame/header/payload metadata."""
+    for key in ("frame_count", "start_sample"):
+        value = item.get(key, None)
+        if value in (None, ""):
+            continue
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError):
+            continue
+        if key == "frame_count" and parsed < 0:
+            continue
+        return key, parsed
+    return None
+
+
+def default_header_metadata(capture_args):
+    return {
+        "cr": int(capture_args.cr),
+        "pay_len": int(capture_args.pay_len),
+        "crc": int(capture_args.has_crc),
+        "ldro_mode": int(capture_args.ldro_mode),
+        "header_err": -1,
+    }
+
+
+def default_payload_metadata():
+    return {
+        "header_packet_counter": "",
+        "payload_packet_number": "",
+        "decoded_payload_len": 0,
+    }
+
+
+def finalize_packet_metadata(item, capture_args, packet_index):
     metadata = capture_args.capture_metadata
+    item.update(metadata)
+    item["input_file"] = str(capture_args.input_file)
+    item["file_name"] = Path(capture_args.input_file).name
+    item["file_stem"] = Path(capture_args.input_file).stem
+    item["packet_index_in_file"] = packet_index
+    item["global_packet_id"] = ""
+    return item
+
+
+def merge_frame_and_header_metadata_by_index(frames, headers, payloads, capture_args):
     require_valid_payload = bool(getattr(capture_args, "require_valid_payload", False))
+    valid_headers = [header for header in headers if int(header.get("header_err", 1)) == 0]
     merged = []
     for index, frame in enumerate(frames):
         payload = payloads[index] if index < len(payloads) else None
@@ -830,35 +917,76 @@ def merge_frame_and_header_metadata(frames, headers, payloads, capture_args):
             continue
 
         item = dict(frame)
-        if index < len(headers):
-            item.update(headers[index])
+        if index < len(valid_headers):
+            item.update(valid_headers[index])
         else:
-            item.update(
-                {
-                    "cr": int(capture_args.cr),
-                    "pay_len": int(capture_args.pay_len),
-                    "crc": int(capture_args.has_crc),
-                    "ldro_mode": int(capture_args.ldro_mode),
-                    "header_err": -1,
-                }
-            )
+            item.update(default_header_metadata(capture_args))
         if payload:
             item.update(payload)
         else:
-            item.update(
-                {
-                    "header_packet_counter": "",
-                    "payload_packet_number": "",
-                    "decoded_payload_len": 0,
-                }
-            )
-        item.update(metadata)
-        item["input_file"] = str(capture_args.input_file)
-        item["file_name"] = Path(capture_args.input_file).name
-        item["file_stem"] = Path(capture_args.input_file).stem
-        item["packet_index_in_file"] = index
-        item["global_packet_id"] = ""
-        merged.append(item)
+            item.update(default_payload_metadata())
+        merged.append(finalize_packet_metadata(item, capture_args, index))
+    return merged
+
+
+def merge_frame_and_header_metadata(frames, headers, payloads, capture_args):
+    require_valid_payload = bool(getattr(capture_args, "require_valid_payload", False))
+    frame_keys = [frame_metadata_key(frame) for frame in frames]
+    header_keys = [frame_metadata_key(header) for header in headers]
+    payload_keys = [frame_metadata_key(payload) for payload in payloads]
+    has_frame_ids = all(key is not None for key in frame_keys)
+    has_header_ids = any(key is not None for key in header_keys)
+    has_payload_ids = (not payloads) or any(key is not None for key in payload_keys)
+
+    if not (has_frame_ids and has_header_ids and has_payload_ids):
+        print(
+            f"[preamble_fft] metadata IDs incomplete for {Path(capture_args.input_file).name}; "
+            "falling back to detection-order merge"
+        )
+        return merge_frame_and_header_metadata_by_index(frames, headers, payloads, capture_args)
+
+    headers_by_key = {}
+    for header, key in zip(headers, header_keys):
+        if key is not None:
+            headers_by_key[key] = header
+
+    payloads_by_key = {}
+    for payload, key in zip(payloads, payload_keys):
+        if key is not None:
+            payloads_by_key[key] = payload
+
+    merged = []
+    frame_key_set = set(frame_keys)
+    for index, (frame, key) in enumerate(zip(frames, frame_keys)):
+        header = headers_by_key.get(key)
+        payload = payloads_by_key.get(key)
+        if require_valid_payload and not (payload and payload.get("crc_valid", False)):
+            continue
+
+        item = dict(frame)
+        if header is not None:
+            item.update(header)
+        else:
+            item.update(default_header_metadata(capture_args))
+        if payload is not None:
+            item.update(payload)
+        else:
+            item.update(default_payload_metadata())
+        merged.append(finalize_packet_metadata(item, capture_args, index))
+
+    unmatched_valid_header_keys = {
+        key
+        for header, key in zip(headers, header_keys)
+        if key is not None and int(header.get("header_err", 1)) == 0 and key not in frame_key_set
+    }
+    unmatched_payload_keys = {
+        key for key in payload_keys if key is not None and key not in frame_key_set
+    }
+    if unmatched_valid_header_keys or unmatched_payload_keys:
+        print(
+            f"[preamble_fft] unmatched metadata for {Path(capture_args.input_file).name}: "
+            f"{len(unmatched_valid_header_keys)} header(s), {len(unmatched_payload_keys)} payload(s)"
+        )
     return merged
 
 
@@ -890,14 +1018,15 @@ def run_detector_once(capture_args, current_tb=None):
             if current_tb is not None:
                 current_tb[0] = None
 
-            frames = sorted(tb.metadata_sink.frames, key=lambda item: (item["start_sample"], item["frame_count"]))
+            frames = list(tb.metadata_sink.frames)
             headers = list(tb.header_sink.headers)
             payloads = []
             if getattr(capture_args, "require_valid_payload", False):
                 crc_valid_flags = [bool(item) for item in tb.crc_valid_sink.data()]
                 for index, payload in enumerate(tb.payload_sink.payloads):
                     item = dict(payload)
-                    item["crc_valid"] = crc_valid_flags[index] if index < len(crc_valid_flags) else False
+                    if "crc_valid" not in item:
+                        item["crc_valid"] = crc_valid_flags[index] if index < len(crc_valid_flags) else False
                     payloads.append(item)
         return frames, headers, payloads
     finally:

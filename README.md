@@ -316,6 +316,7 @@ header checksum 通过后会发送 PMT dict，主要字段如下：
 | `sto` | STO 估计值 |
 | `sfo` | SFO 估计值 |
 | `netid1`, `netid2` | 解出的两个 sync word / network identifier symbol |
+| `cr`, `pay_len`, `crc`, `ldro_mode`, `err` | header_decoder 回传的 PHY header 元数据，用于脚本侧和 header/payload 消息按同一 frame 对齐 |
 
 消息不携带拼接后的绘图 IQ。Python 端直接从输入 `.bin` 文件按索引读取连续原始 IQ，不再做 dechirp + FFT 二次细化。
 
@@ -333,6 +334,8 @@ header checksum 通过后会发送 PMT dict，主要字段如下：
 ```powershell
 --preamble-plot-max 0
 ```
+
+注意：`--preamble-len` 不只是绘图时切出多少个 preamble symbol，它也会原样传给 C++ `frame_sync` 作为检测阈值，并在内部形成 `m_n_up_req = preamble_len - 3`。低信噪比或前导码质量较差的 IQ 文件可能在标称值下检测不到，需要适当降低该值做排查。例如 `0_0_0_10_6_16.bin` 用 `--preamble-len 16` 没有有效输出，但用 `--preamble-len 12` 可以正常解出 1 个 CRC-valid 包。
 
 ### 6.4 输出示例
 
@@ -395,7 +398,17 @@ python examples\lora_file_preamble_fft.py `
 
 因此，末尾残包、payload 解码失败或 CRC invalid 不会导致 `decoded payload count != detected packet count` 这类 warning，也不会影响 RSSI / SNR / preamble FFT 特征导出。
 
-### 7.4 需要 `FCnt` 时
+### 7.4 frame/header/payload 元数据合并
+
+脚本不再按 list index 直接合并 `frame_sync`、`header_decoder` 和 `crc_verif` 三路消息。C++ 链路现在会把同一个包的 `frame_count` 以及 `start_sample:end_sample` 沿着 tag/message 传递：
+
+```text
+frame_sync -> header_decoder -> crc_verif
+```
+
+Python 端优先按 `frame_count` 合并 frame/header/payload；如果遇到旧版已安装模块没有这些 ID，会打印 warning 并退回 detection-order merge。这样可以避免 frame 排序、无效 header、payload 只对 CRC-valid 包产生消息时造成错配。
+
+### 7.5 需要 `FCnt` 时
 
 如果确实需要 LoRaWAN `FCnt`，可以启用：
 
@@ -411,7 +424,7 @@ python examples\lora_file_preamble_fft.py `
 
 启用后，脚本会重新接回 `header_decoder -> dewhitening -> crc_verif`，只保留 CRC-valid payload 对应的数据包，并尝试从 `PHYPayload` / `FHDR` 中解析 `FCnt`。末尾残包、CRC invalid 包或 payload 不完整包会被整包舍弃。`--crc-mode` 和 `--print-payload` 仅在该模式下有意义。
 
-### 7.5 批处理隔离模式
+### 7.6 批处理隔离模式
 
 长批量任务中，如果担心单个 native 崩溃拖垮整个 lab，可以启用子进程隔离：
 
@@ -534,6 +547,11 @@ exit=3221225477
 | 文件 | 改动内容 |
 |------|----------|
 | `examples/lora_file_preamble_fft.py` | 扩展为离线批处理特征导出脚本，支持 lab 分组、packet 级 CSV / NPZ 输出、payload 可选解析、Windows 路径兼容和 worker 隔离 |
+| `examples/lora_file_preamble_fft.py` | frame/header/payload 元数据优先按 `frame_count` 合并，并保留旧版 detection-order fallback |
+| `lib/frame_sync_impl.cc` / `lib/frame_sync_impl.h` | `frame_info` tag 增加 `frame_count` 和原始 IQ 样本范围，供后续 header/payload 元数据对齐 |
+| `lib/header_decoder_impl.cc` / `lib/header_decoder_impl.h` | 发布 `frame_info` 时保留上游 frame 元数据，避免 Python 侧只能按消息顺序合并 |
+| `lib/crc_verif_impl.cc` | 保留原 `msg` payload 输出，并新增 `payload_metadata` message port，输出 payload、CRC 结果和 frame ID |
+| `grc/lora_sdr_crc_verif.block.yml` | GRC 块定义增加可选 `payload_metadata` 消息口 |
 | `lib/frame_sync_impl.cc` | 修复 `DETECT -> SYNC` 阶段边界检查，避免 SF12 等场景下负索引导致 native 崩溃 |
 
 ---
@@ -547,6 +565,8 @@ exit=3221225477
 - 输出收敛为 packet 级特征：平均 RSSI、平均 SNR、SX1276 风格 SNR register 值、前导码主峰 `-3 dB` 宽度、以及主峰对齐后的局部平均幅度谱。旧版 per-frame 明细 CSV 不再生成，并会清理 `rssi_samples_5ms.csv`、`preamble_symbol_features.csv`、`position_summary.csv` 等过期输出，避免误读旧文件。
 - 默认运行模式不再解析 payload。流图在 `header_decoder` 后直接接 `null_sink`，只依赖 `frame_sync` 的对齐范围和 `header_decoder` 的 PHY header 信息计算信号特征。因此末尾残包、payload 解码失败或 CRC invalid 不会再导致 `decoded payload count != detected packet count` 这类 warning，也不会影响 RSSI/SNR/preamble FFT 特征导出。
 - 如确实需要 LoRaWAN `FCnt`，新增可选开关 `--require-valid-payload`（别名 `--with-fcnt`）。启用后脚本会重新接回 `header_decoder -> dewhitening -> crc_verif`，只保留 CRC-valid payload 对应的数据包并尝试从 PHYPayload/FHDR 中解析 `FCnt`；末尾残包、CRC invalid 包或 payload 不完整包会被整包舍弃。`--crc-mode` 和 `--print-payload` 仅在该模式下有意义。
+- 修复 `lora_file_preamble_fft.py` 的 frame/header/payload 按 index 合并风险：`frame_sync` 现在把 `frame_count` 和 `start_sample:end_sample` 写入 `frame_info` tag，`header_decoder` 会保留这些字段，`crc_verif` 额外发布 `payload_metadata` 消息；Python 端优先按 `frame_count` 合并三路元数据，避免无效 header、排序或 CRC-valid payload 过滤造成错配。
+- `lora_file_RX.py` 的前导码检测阈值未改变，仍由 `--preamble-len` 原样传入 `frame_sync`。已验证 `0_0_0_10_14_8.bin --preamble-len 8` 可正常解码和画图；`0_0_0_10_6_16.bin` 在 `--preamble-len 16` 下无有效输出，但降低到 `--preamble-len 12` 可解出 1 个 CRC-valid 包。
 - 修复 `lora_file_preamble_fft.py` 在遇到非数字位置字段时写 NPZ 失败的问题。例如 `1_0_yidong_12_14_16.bin` 的 `position_id` 不能转成整数，现在 NPZ 中数字版 `position_id` 写为 `-1`，同时新增 `position_labels` 保留原始字符串 `yidong`。
 - 为 Windows 路径兼容性增加 ASCII hardlink staging：GNU Radio C++ `file_source` 读取包含中文字符的路径时可能失败，脚本现在会为输入文件创建 ASCII-only 临时硬链接供 `file_source` 使用，Python 侧仍从真实路径读取 IQ 和元数据。
 - 新增 `--isolated-workers` 批处理隔离模式和隐藏的 `--detect-only-json` worker 模式。批量处理时可让每个 `.bin` 在子进程中单独检测，避免单个 native 崩溃拖垮整个 lab 批处理；worker 失败时可通过 `--worker-log-lines` 打印尾部日志。

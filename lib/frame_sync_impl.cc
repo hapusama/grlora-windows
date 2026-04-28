@@ -320,7 +320,8 @@ namespace gr
         }
 
         void frame_sync_impl::publish_phy_header(uint64_t start_sample,
-                                                 uint64_t end_sample)
+                                                 uint64_t end_sample,
+                                                 pmt::pmt_t frame_info)
         {
             if (end_sample <= start_sample)
             {
@@ -329,9 +330,11 @@ namespace gr
 
             const uint64_t n_samples = end_sample - start_sample;
             const float n_symbols = (float)n_samples / (float)m_samples_per_symbol;
+            const long metadata_frame_count = pmt::to_long(
+                pmt::dict_ref(frame_info, pmt::intern("frame_count"), pmt::from_long(frame_cnt)));
 
-            pmt::pmt_t preamble_msg = pmt::make_dict();
-            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("frame_count"), pmt::from_long(frame_cnt));
+            pmt::pmt_t preamble_msg = pmt::dict_delete(frame_info, pmt::intern("is_header"));
+            preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("frame_count"), pmt::from_long(metadata_frame_count));
             preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("sf"), pmt::from_long(m_sf));
             preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("bw"), pmt::from_long(m_bw));
             preamble_msg = pmt::dict_add(preamble_msg, pmt::intern("sample_rate"), pmt::from_long(m_bw * m_os_factor));
@@ -362,7 +365,7 @@ namespace gr
                 return;
             }
 
-            publish_phy_header(m_phy_header_start_sample, m_phy_header_end_sample);
+            publish_phy_header(m_phy_header_start_sample, m_phy_header_end_sample, pmt::make_dict());
             m_phy_header_published = true;
         }
 
@@ -399,15 +402,28 @@ namespace gr
 
                 m_symb_numb = 8 + ceil((double)(2 * m_pay_len - m_sf + 2 + !m_impl_head * 5 + m_has_crc * 4) / (m_sf - 2 * m_ldro)) * (4 + m_cr);
                 m_received_head = true;
+                const uint64_t header_start_sample = pmt::to_uint64(
+                    pmt::dict_ref(frame_info, pmt::intern("start_sample"), pmt::from_uint64(m_phy_header_start_sample)));
+                const uint64_t header_end_sample = pmt::to_uint64(
+                    pmt::dict_ref(frame_info, pmt::intern("end_sample"), pmt::from_uint64(m_phy_header_end_sample)));
+
                 frame_info = pmt::dict_add(frame_info, pmt::intern("is_header"), pmt::from_bool(false));
                 frame_info = pmt::dict_add(frame_info, pmt::intern("symb_numb"), pmt::from_long(m_symb_numb));
-                frame_info = pmt::dict_delete(frame_info, pmt::intern("ldro_mode"));
+                pmt::pmt_t downstream_frame_info = pmt::dict_delete(frame_info, pmt::intern("ldro_mode"));
 
-                frame_info = pmt::dict_add(frame_info, pmt::intern("ldro"), pmt::from_bool(m_ldro));
-                add_item_tag(0, nitems_written(0), pmt::string_to_symbol("frame_info"), frame_info);
+                downstream_frame_info = pmt::dict_add(downstream_frame_info, pmt::intern("ldro"), pmt::from_bool(m_ldro));
+                add_item_tag(0, nitems_written(0), pmt::string_to_symbol("frame_info"), downstream_frame_info);
 
                 m_phy_header_validated = true;
-                try_publish_phy_header();
+                if (header_end_sample > header_start_sample)
+                {
+                    publish_phy_header(header_start_sample, header_end_sample, frame_info);
+                    m_phy_header_published = true;
+                }
+                else
+                {
+                    try_publish_phy_header();
+                }
             }
         }
 
@@ -809,8 +825,6 @@ namespace gr
                         frame_info = pmt::dict_add(frame_info, pmt::intern("cfo_int"), pmt::mp((long)m_cfo_int));
                         frame_info = pmt::dict_add(frame_info, pmt::intern("cfo_frac"), pmt::mp((float)m_cfo_frac));
                         frame_info = pmt::dict_add(frame_info, pmt::intern("sf"), pmt::mp((long)m_sf));
-
-                        add_item_tag(0, nitems_written(0), pmt::string_to_symbol("frame_info"), frame_info);
                         m_phy_header_snr_est = snr_est;
                         m_phy_header_netid1 = netid1;
                         m_phy_header_netid2 = netid2;
@@ -842,6 +856,11 @@ namespace gr
                         m_phy_header_start_sample =
                             header_end > phy_header_samples ? header_end - phy_header_samples : 0;
                         m_phy_header_ready = m_phy_header_end_sample > m_phy_header_start_sample;
+
+                        frame_info = pmt::dict_add(frame_info, pmt::intern("frame_count"), pmt::from_long(frame_cnt));
+                        frame_info = pmt::dict_add(frame_info, pmt::intern("start_sample"), pmt::from_uint64(m_phy_header_start_sample));
+                        frame_info = pmt::dict_add(frame_info, pmt::intern("end_sample"), pmt::from_uint64(m_phy_header_end_sample));
+                        add_item_tag(0, nitems_written(0), pmt::string_to_symbol("frame_info"), frame_info);
 
                         m_received_head = false;
                         items_to_consume += m_samples_per_symbol / 4 + m_os_factor * m_cfo_int;
