@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0
 #
-# Offline LoRa packet RSSI/SNR and preamble FFT feature exporter for fc32/cfile IQ captures.
+# Offline LoRa packet IQ power and preamble FFT feature exporter for fc32/cfile IQ captures.
 # conda run --no-capture-output -n gr-lora python gr-lora_sdr/examples/lora_file_preamble_fft.py --all-bin --input-dir gr-lora_sdr/data/USRP_IQ --samp-rate 500000 --center-freq 487.7e6 --sync-word 0x34 --crc-mode 0 --no-throttle --no-print-header --print-payload none
 # In --all-bin mode, SF/TP/preamble length are parsed from each file name:
 # experiment_corridor_position_sf_tp_preamble.bin
@@ -35,15 +35,11 @@ from gnuradio.eng_arg import eng_float
 import gnuradio.lora_sdr as lora_sdr
 
 
-RSSI_OFFSET_LF = -164.0
-RSSI_OFFSET_HF = -157.0
-RF_MID_BAND_THRESH = 525000000.0
-SX1276_SNR_STEP_DB = 0.25
-SX1276_SNR_REG_MIN = -128
-SX1276_SNR_REG_MAX = 127
 EPS_POWER = 1e-30
 WINDOWS_ACCESS_VIOLATION = 0xC0000005
 
+
+# ---------- 文件/输入源工具 ----------
 
 @contextmanager
 def suppress_native_output(enabled=True):
@@ -107,6 +103,8 @@ def cleanup_file_source_path(capture_args):
     except OSError:
         pass
 
+
+# ---------- GNU Radio 消息接收器 ----------
 
 class preamble_metadata_sink(gr.basic_block):
     """Collect frame_sync preamble messages.
@@ -232,6 +230,8 @@ def payload_msg_to_bytes(msg):
     return b""
 
 
+# ---------- Payload 辅助函数 ----------
+
 def extract_payload_packet_number(payload):
     if len(payload) >= 8 and (payload[0] & 0xE0) in (0x40, 0x60, 0x80, 0xA0):
         # Branch4 LoRaWAN-like PHYPayload: MHDR|DevAddr|FCtrl|FCnt|...
@@ -283,12 +283,16 @@ class payload_metadata_sink(gr.basic_block):
             )
 
 
+# ---------- GNU Radio 接收链 ----------
+
 class lora_file_preamble_fft_rx(gr.top_block):
     """Run the same file RX chain far enough to obtain frame_sync preamble ranges."""
 
     def __init__(self, args):
         gr.top_block.__init__(self, "LoRa File Preamble FFT", catch_exceptions=True)
 
+        # 把已经解析好的采集参数保存到 top_block 中，保证 GNU Radio 流图启动后
+        # 不再依赖外部临时状态。
         self.input_file = args.input_file
         self.file_source_path = args.file_source_path
         self.sf = args.sf
@@ -307,6 +311,8 @@ class lora_file_preamble_fft_rx(gr.top_block):
         os_factor = int(round(float(self.samp_rate) / float(self.bw)))
         min_buf = int(np.ceil(os_factor * ((1 << self.sf) + 2)))
 
+        # 从 file_source_path 读取 IQ。Windows 下如果真实路径含中文，这里可能是
+        # 一个 ASCII-only 的临时硬链接。
         self.file_source = blocks.file_source(
             gr.sizeof_gr_complex,
             self.file_source_path,
@@ -316,6 +322,8 @@ class lora_file_preamble_fft_rx(gr.top_block):
         )
         self.file_source.set_min_output_buffer(min_buf)
 
+        # 标准 gr-lora_sdr 接收链，一直接到 PHY header decoder。默认特征导出
+        # 更关心包的时间位置和 header 元数据，不一定需要解出 payload。
         self.frame_sync = lora_sdr.frame_sync(
             int(self.center_freq),
             int(self.bw),
@@ -341,6 +349,8 @@ class lora_file_preamble_fft_rx(gr.top_block):
         self.metadata_sink = preamble_metadata_sink()
         self.header_sink = header_metadata_sink()
         if self.require_valid_payload:
+            # 可选路径：继续解 payload 并做 CRC 校验，只保留 CRC-valid 的包。
+            # 主要用于需要 LoRaWAN FCnt / payload 包号的场景。
             self.dewhitening = lora_sdr.dewhitening()
             crc_mode = lora_sdr.Crc_mode.SX1276 if args.crc_mode == 1 else lora_sdr.Crc_mode.GRLORA
             self.crc_verif = lora_sdr.crc_verif(
@@ -354,6 +364,7 @@ class lora_file_preamble_fft_rx(gr.top_block):
         else:
             self.payload_null_sink = blocks.null_sink(gr.sizeof_char)
 
+        # throttle 适合调试实时播放节奏；批量导出通常使用 --no-throttle 提速。
         if args.throttle:
             self.throttle = blocks.throttle(gr.sizeof_gr_complex, self.samp_rate, True)
             self.throttle.set_min_output_buffer(min_buf)
@@ -368,6 +379,8 @@ class lora_file_preamble_fft_rx(gr.top_block):
         self.connect((self.deinterleaver, 0), (self.hamming_dec, 0))
         self.connect((self.hamming_dec, 0), (self.header_decoder, 0))
         if self.require_valid_payload:
+            # payload-valid 模式保留下游解码链路，让 crc_verif 能输出 payload
+            # 消息和 CRC valid 标志。
             self.connect((self.header_decoder, 0), (self.dewhitening, 0))
             self.connect((self.dewhitening, 0), (self.crc_verif, 0))
             self.connect((self.crc_verif, 0), (self.payload_bytes_null_sink, 0))
@@ -375,10 +388,15 @@ class lora_file_preamble_fft_rx(gr.top_block):
             self.msg_connect((self.crc_verif, "msg"), (self.payload_sink, "payload"))
         else:
             self.connect((self.header_decoder, 0), (self.payload_null_sink, 0))
+
+        # header_decoder 会通知 frame_sync 哪些 PHY header 有效；只有 header
+        # 通过后，frame_sync 才发布对齐后的 preamble/sync/SFD 样本范围。
         self.msg_connect((self.header_decoder, "frame_info"), (self.frame_sync, "frame_info"))
         self.msg_connect((self.header_decoder, "frame_info"), (self.header_sink, "frame_info"))
         self.msg_connect((self.frame_sync, "preamble"), (self.metadata_sink, "preamble"))
 
+
+# ---------- 信号分析函数 ----------
 
 def build_upchirp(sf, symbol_id=0):
     n_bins = 1 << sf
@@ -425,25 +443,6 @@ def mean_power_db(samples):
         return float("nan")
     power = float(np.mean(np.abs(samples) ** 2))
     return db10(max(power, EPS_POWER))
-
-
-def sx1276_rssi_offset(center_freq):
-    return RSSI_OFFSET_HF if float(center_freq) > RF_MID_BAND_THRESH else RSSI_OFFSET_LF
-
-
-def sx1276_snr_reg_value(snr_db):
-    """Convert an SNR estimate to the SX1276 RegPktSnrValue quarter-dB format."""
-    if not np.isfinite(float(snr_db)):
-        return None
-    reg = int(round(float(snr_db) / SX1276_SNR_STEP_DB))
-    return int(np.clip(reg, SX1276_SNR_REG_MIN, SX1276_SNR_REG_MAX))
-
-
-def sx1276_style_snr_db(snr_db):
-    reg = sx1276_snr_reg_value(snr_db)
-    if reg is None:
-        return float("nan")
-    return float(reg) * SX1276_SNR_STEP_DB
 
 
 def resolve_ldro(sf, bw, ldro_mode):
@@ -548,30 +547,21 @@ def circular_peak_width_bins(magnitude, peak_bin, threshold_db=-3.0):
     return max(0.0, float(right_cross - left_cross))
 
 
-def symbol_snr_db_from_magnitude(magnitude, peak_bin):
+def symbol_peak_to_residual_db_from_magnitude(magnitude, peak_bin):
+    """Return dechirp FFT peak energy divided by residual-bin energy in dB."""
     energy = np.asarray(magnitude, dtype=np.float64) ** 2
     total_energy = float(np.sum(energy))
     if total_energy <= 0.0:
         return float("nan")
     peak_energy = float(energy[int(peak_bin)])
-    noise_energy = total_energy - peak_energy
-    return db10(peak_energy / max(noise_energy, EPS_POWER))
+    residual_energy = total_energy - peak_energy
+    return db10(peak_energy / max(residual_energy, EPS_POWER))
 
 
-def symbol_plan(part, preamble_len):
-    """Return the symbols analyzed around the preamble/header boundary."""
+def symbol_plan(preamble_len):
+    """Return the preamble upchirp symbols analyzed for each packet."""
     preamble_len = max(0, int(preamble_len))
-    plan = [("preamble_upchirp", "up") for _ in range(preamble_len)]
-    if part == "phy-header":
-        plan.extend(
-            [
-                ("sync_word_0", "up"),
-                ("sync_word_1", "up"),
-                ("sfd_downchirp_0", "down"),
-                ("sfd_downchirp_1", "down"),
-            ]
-        )
-    return plan
+    return [("preamble_upchirp", "up") for _ in range(preamble_len)]
 
 
 def analyze_frame(iq, frame, args):
@@ -588,16 +578,15 @@ def analyze_frame(iq, frame, args):
         downsample_phase = os_factor // 2
     downsample_phase = int(np.clip(downsample_phase, 0, os_factor - 1))
 
-    cfo = float(frame["cfo"]) if np.isfinite(float(frame["cfo"])) else 0.0
     upchirp = build_upchirp(sf, 0)
     downchirp = np.conj(upchirp)
     fft_n = args.nfft if args.nfft else n_bins
-    plan = symbol_plan(args.part, int(frame["preamble_len"]))
+    plan = symbol_plan(int(frame["preamble_len"]))
 
     magnitudes = np.zeros((len(plan), fft_n), dtype=np.float32)
     peak_bins = np.zeros(len(plan), dtype=np.int32)
     peak_width_bins = np.zeros(len(plan), dtype=np.float32)
-    symbol_snr_db = np.zeros(len(plan), dtype=np.float32)
+    symbol_peak_to_residual_db = np.zeros(len(plan), dtype=np.float32)
     is_preamble = np.zeros(len(plan), dtype=bool)
 
     frame_start = int(frame["start_sample"])
@@ -616,10 +605,6 @@ def analyze_frame(iq, frame, args):
             samples = samples[:n_bins]
 
         samples = np.nan_to_num(samples, nan=0.0, posinf=0.0, neginf=0.0).astype(np.complex64, copy=False)
-        if args.cfo_correct:
-            n = np.arange(n_bins, dtype=np.float32)
-            samples = samples * np.exp(-2.0j * np.pi * cfo * n / n_bins).astype(np.complex64)
-
         ref = downchirp if chirp_kind == "up" else upchirp
         spectrum = np.fft.fft(samples * ref, n=fft_n)
         mag = np.abs(spectrum).astype(np.float32)
@@ -631,14 +616,16 @@ def analyze_frame(iq, frame, args):
         peak_width_bins[symbol_index] = float(
             circular_peak_width_bins(mag, peak_bins[symbol_index], args.peak_width_db)
         )
-        symbol_snr_db[symbol_index] = float(symbol_snr_db_from_magnitude(mag, peak_bins[symbol_index]))
+        symbol_peak_to_residual_db[symbol_index] = float(
+            symbol_peak_to_residual_db_from_magnitude(mag, peak_bins[symbol_index])
+        )
         magnitudes[symbol_index, :] = normalize_magnitude(mag, args.normalize)
 
     return {
         "magnitudes": magnitudes,
         "peak_bins": peak_bins,
         "peak_width_bins": peak_width_bins,
-        "symbol_snr_db": symbol_snr_db,
+        "symbol_peak_to_residual_db": symbol_peak_to_residual_db,
         "is_preamble": is_preamble,
     }
 
@@ -654,6 +641,8 @@ def fmt_float(value):
         return ""
     return f"{value:.9g}"
 
+
+# ---------- 元数据和任务发现 ----------
 
 def write_dict_csv(path, rows, fieldnames):
     with path.open("w", newline="", encoding="utf-8") as f:
@@ -886,6 +875,8 @@ def json_safe(value):
     return value
 
 
+# ---------- 检测执行 ----------
+
 def run_detector_once(capture_args, current_tb=None):
     """Run GNU Radio detector for one IQ file and return copied metadata lists."""
     tb = None
@@ -966,8 +957,6 @@ def child_detector_command(capture_args, json_path):
     if capture_args.impl_head:
         cmd.append("--impl-head")
     cmd.append("--throttle" if capture_args.throttle else "--no-throttle")
-    if capture_args.cfo_correct:
-        cmd.append("--cfo-correct")
     if getattr(capture_args, "require_valid_payload", False):
         cmd.append("--require-valid-payload")
     if capture_args.downsample_phase is not None:
@@ -1035,6 +1024,8 @@ def run_detector_isolated(capture_args):
     return [], [], []
 
 
+# ---------- 特征汇总和输出 ----------
+
 def peak_spectrum_offsets(args):
     half_width = max(0, int(args.peak_spectrum_half_width))
     return np.arange(-half_width, half_width + 1, dtype=np.int32)
@@ -1067,24 +1058,22 @@ def average_preamble_peak_features(analysis, args):
 
 
 def compute_packet_average_metrics(analysis, ranges, iq, args):
-    """计算每包保留的 RSSI/SNR 和前导码主峰局部频谱特征。"""
+    """计算每包保留的 IQ 功率、前导码主峰集中度和局部频谱特征。"""
     packet_iq = np.asarray(iq[ranges["packet_start_sample"]:ranges["packet_end_sample"]], dtype=np.complex64)
     mask = analysis["is_preamble"]
-    symbol_snrs = analysis["symbol_snr_db"][mask]
+    peak_to_residual_values = analysis["symbol_peak_to_residual_db"][mask]
     peak_features = average_preamble_peak_features(analysis, args)
 
-    # 平均 RSSI：先计算整个包 IQ 的平均功率，再套用 SX1276 LF/HF offset 风格转换。
+    # 平均 IQ 功率：这里是 USRP 复数样本功率的 dB 值，不是经过射频链路标定后的 dBm。
     packet_power_db = mean_power_db(packet_iq)
-    packet_rssi = sx1276_rssi_offset(args.center_freq) + packet_power_db if np.isfinite(packet_power_db) else float("nan")
 
-    # 平均 SNR：先对前导码 dechirp FFT SNR 取平均，再按 SX1276 RegPktSnrValue 的 0.25 dB 口径量化。
-    packet_snr_raw = float(np.nanmean(symbol_snrs)) if symbol_snrs.size else float("nan")
-    packet_snr_reg = sx1276_snr_reg_value(packet_snr_raw)
-    packet_snr = sx1276_style_snr_db(packet_snr_raw)
+    # 前导码主峰集中度：dechirp FFT 主峰能量 / 其余 bin 残余能量，不等价于传统信道 SNR。
+    preamble_peak_to_residual_db = (
+        float(np.nanmean(peak_to_residual_values)) if peak_to_residual_values.size else float("nan")
+    )
     return {
-        "packet_avg_rssi_dbm": packet_rssi,
-        "packet_avg_snr_db": packet_snr,
-        "packet_avg_snr_reg_value": packet_snr_reg if packet_snr_reg is not None else "",
+        "packet_avg_power_db": packet_power_db,
+        "preamble_peak_to_residual_db": preamble_peak_to_residual_db,
         **peak_features,
     }
 
@@ -1102,9 +1091,8 @@ def build_packet_row(frame, metrics, args):
         "filename_tx_power_dbm": frame.get("filename_tx_power_dbm", ""),
         "filename_preamble_len": frame.get("filename_preamble_len", ""),
         "header_packet_counter": frame.get("header_packet_counter", frame.get("payload_packet_number", "")),
-        "packet_avg_rssi_dbm": fmt_float(metrics["packet_avg_rssi_dbm"]),
-        "packet_avg_snr_db": fmt_float(metrics["packet_avg_snr_db"]),
-        "packet_avg_snr_reg_value": metrics["packet_avg_snr_reg_value"],
+        "packet_avg_power_db": fmt_float(metrics["packet_avg_power_db"]),
+        "preamble_peak_to_residual_db": fmt_float(metrics["preamble_peak_to_residual_db"]),
         "preamble_peak_width_3db_bins_avg": fmt_float(metrics["preamble_peak_width_bins_avg"]),
     }
     for offset, value in zip(peak_spectrum_offsets(args), metrics["preamble_peak_spectrum"]):
@@ -1123,9 +1111,8 @@ def save_results(args, capture_results):
 
     packet_rows = []
     npz_frames = []
-    packet_avg_rssi_dbm = []
-    packet_avg_snr_db = []
-    packet_avg_snr_reg_value = []
+    packet_avg_power_db = []
+    preamble_peak_to_residual_db = []
     preamble_peak_spectrum = []
     preamble_peak_width_bins_avg = []
 
@@ -1138,23 +1125,20 @@ def save_results(args, capture_results):
             metrics = compute_packet_average_metrics(analysis, ranges, iq, capture_args)
             npz_frames.append(frame)
             packet_rows.append(build_packet_row(frame, metrics, capture_args))
-            packet_avg_rssi_dbm.append(metrics["packet_avg_rssi_dbm"])
-            packet_avg_snr_db.append(metrics["packet_avg_snr_db"])
-            packet_avg_snr_reg_value.append(
-                int(metrics["packet_avg_snr_reg_value"]) if metrics["packet_avg_snr_reg_value"] != "" else -9999
-            )
+            packet_avg_power_db.append(metrics["packet_avg_power_db"])
+            preamble_peak_to_residual_db.append(metrics["preamble_peak_to_residual_db"])
             preamble_peak_spectrum.append(metrics["preamble_peak_spectrum"])
             preamble_peak_width_bins_avg.append(metrics["preamble_peak_width_bins_avg"])
 
     packet_path = output_dir / "packet_features.csv"
 
-    # packet_features.csv：Excel 友好版，一行代表一个数据包，只保留平均 RSSI/SNR、
-    # FHDR 包计数、文件名元数据和主峰附近平均幅度谱。
+    # packet_features.csv：Excel 友好版，一行代表一个数据包，只保留平均 IQ 功率、
+    # 前导码主峰集中度、FHDR 包计数、文件名元数据和主峰附近平均幅度谱。
     packet_fields = [
         "file_name", "lab_name",
         "experiment_id", "corridor_id", "position_id", "tx_power_dbm",
         "filename_sf", "filename_tx_power_dbm", "filename_preamble_len", "header_packet_counter",
-        "packet_avg_rssi_dbm", "packet_avg_snr_db", "packet_avg_snr_reg_value",
+        "packet_avg_power_db", "preamble_peak_to_residual_db",
         "preamble_peak_width_3db_bins_avg",
     ]
     packet_fields.extend(f"preamble_peak_mag_bin_{int(offset):+d}" for offset in peak_spectrum_offsets(args))
@@ -1204,14 +1188,12 @@ def save_results(args, capture_results):
             ],
             dtype=np.int32,
         ),
-        packet_avg_rssi_dbm=np.asarray(packet_avg_rssi_dbm, dtype=np.float32),
-        packet_avg_snr_db=np.asarray(packet_avg_snr_db, dtype=np.float32),
-        packet_avg_snr_reg_value=np.asarray(packet_avg_snr_reg_value, dtype=np.int16),
+        packet_avg_power_db=np.asarray(packet_avg_power_db, dtype=np.float32),
+        preamble_peak_to_residual_db=np.asarray(preamble_peak_to_residual_db, dtype=np.float32),
         preamble_peak_width_3db_bins_avg=np.asarray(preamble_peak_width_bins_avg, dtype=np.float32),
         preamble_peak_spectrum_offsets=peak_spectrum_offsets(args),
         preamble_peak_spectrum=np.asarray(preamble_peak_spectrum, dtype=np.float32),
         normalization=args.normalize,
-        part=args.part,
         peak_width_db=args.peak_width_db,
         peak_spectrum_half_width=int(args.peak_spectrum_half_width),
     )
@@ -1222,9 +1204,11 @@ def save_results(args, capture_results):
     }
 
 
+# ---------- 命令行和主流程 ----------
+
 def build_arg_parser():
     parser = ArgumentParser(
-        description="Export LoRa packet RSSI/SNR and preamble dechirp FFT features from fc32/cfile IQ captures."
+        description="Export LoRa packet IQ power and preamble dechirp FFT features from fc32/cfile IQ captures."
     )
     parser.add_argument("-f", "--input-file", type=str, default=None, help="Input fc32/cfile IQ file.")
     parser.add_argument(
@@ -1255,7 +1239,7 @@ def build_arg_parser():
     parser.add_argument("--impl-head", action="store_true", default=False, help="Use implicit header mode.")
     parser.add_argument("--soft-decoding", action="store_true", default=True, help="Use soft decoding.")
     parser.add_argument("--hard-decoding", action="store_false", dest="soft_decoding", help="Use hard decoding.")
-    parser.add_argument("--center-freq", type=eng_float, default=487.7e6, help="RF center frequency used by frame_sync SFO estimation and SX1276-style RSSI offset.")
+    parser.add_argument("--center-freq", type=eng_float, default=487.7e6, help="RF center frequency used by frame_sync SFO estimation.")
     parser.add_argument("--sync-word", type=lambda x: int(x, 0), default=0x34, help="LoRa sync word, decimal or 0x hex.")
     parser.add_argument("--ldro-mode", type=int, default=2, help="LDRO mode: 0 disabled, 1 enabled, 2 auto.")
     parser.add_argument(
@@ -1312,12 +1296,6 @@ def build_arg_parser():
         help="Output directory for single-file mode, or fallback output directory when --all-bin has no lab subdirectories.",
     )
     parser.add_argument(
-        "--part",
-        choices=["preamble", "phy-header"],
-        default="preamble",
-        help="Analyze only preamble upchirps, or preamble + sync word + two full SFD downchirps.",
-    )
-    parser.add_argument(
         "--normalize",
         choices=["max", "sum", "l2", "none"],
         default="max",
@@ -1334,12 +1312,6 @@ def build_arg_parser():
         type=int,
         default=None,
         help="Oversampled symbol decimation phase. Default is os_factor//2, matching frame_sync.",
-    )
-    parser.add_argument(
-        "--cfo-correct",
-        action="store_true",
-        default=False,
-        help="Apply frame_sync CFO estimate before FFT.",
     )
     parser.add_argument(
         "--peak-width-db",
@@ -1389,10 +1361,23 @@ def build_arg_parser():
 
 
 def main():
-    # 解析命令行参数，决定处理单个文件，还是按 USRP_IQ 下的 lab 文件夹批量处理。
+    """命令行入口。
+
+    主流程分为六步：
+    1. 解析参数，判断是单文件、批处理，还是隐藏 worker 模式。
+    2. 把输入文件整理成一个或多个 job；一个 lab 文件夹对应一个 job。
+    3. 为 Ctrl+C/终止信号安装清理函数，避免 GNU Radio top_block 悬挂。
+    4. 对每个 IQ 文件运行 detector，拿到 preamble 范围、PHY header 和可选 payload 信息。
+    5. 合并每包元数据，然后重新读取 IQ 计算功率/前导码 FFT 特征。
+    6. 每个 job 写出 packet_features.csv 和 preamble_features.npz。
+    """
+
+    # Step 1: 解析命令行参数。
     parser = build_arg_parser()
     args = parser.parse_args()
 
+    # 隐藏 worker 模式：父进程在 --isolated-workers 下会启动子进程。
+    # 子进程只检测一个文件，把 frame/header/payload 元数据写成 JSON 后退出。
     if args.detect_only_json:
         if not args.input_file:
             parser.error("--detect-only-json requires -f/--input-file")
@@ -1400,6 +1385,9 @@ def main():
         write_detector_json(capture_args, args.detect_only_json)
         return 0
 
+    # Step 2: 组织待处理任务。
+    # --all-bin: 扫描 input_dir 下的 lab 子目录，每个 lab 单独输出。
+    # 单文件模式: 只创建一个 job，输出到 --output-dir。
     if args.all_bin:
         jobs = discover_lab_jobs(args)
         if not jobs:
@@ -1416,10 +1404,12 @@ def main():
             }
         ]
 
-    # 用列表保存当前 GNU Radio top_block，便于 Ctrl+C 时安全停止。
+    # Step 3: 保存当前正在运行的 GNU Radio top_block。
+    # 这里用单元素列表，是为了让内部 sig_handler 可以修改外层引用。
     current_tb = [None]
 
     def sig_handler(sig=None, frame=None):
+        # 收到 Ctrl+C / SIGTERM 时，先停止当前流图，再用 130 退出。
         if current_tb[0] is not None:
             current_tb[0].stop()
             current_tb[0].wait()
@@ -1431,6 +1421,7 @@ def main():
     total_packets = 0
     successful_jobs = 0
     for job in jobs:
+        # Step 4a: 初始化当前 job。
         # 每个 lab 文件夹作为一个独立任务：单独读取其中所有 bin，输出也写回该 lab 文件夹。
         job_args = copy.copy(args)
         job_args.output_dir = str(job["output_dir"])
@@ -1446,6 +1437,7 @@ def main():
 
         capture_results = []
         for input_file in job["input_files"]:
+            # Step 4b: 为单个 IQ 文件准备实际参数。
             # 根据文件名补全实验编号、位置编号、SF、发射功率、前导码长度等信息。
             # 如果 lab 的补充.txt 写明了修正参数，会在 resolve_capture_args 里覆盖文件名参数。
             # 子进程隔离模式下，父进程只调度，不提前创建 GNU Radio file_source 的 hardlink。
@@ -1461,13 +1453,16 @@ def main():
                 f"(sf={capture_args.sf}, preamble_len={capture_args.preamble_len})"
             )
 
-            # 跑 gr-lora_sdr 接收链，收集每个数据包的前导码范围和 PHY header 信息。
+            # Step 4c: 运行 detector。
+            # 普通模式在当前进程跑；隔离模式为每个文件启动一个子进程，
+            # 防止单个 native 崩溃影响整个批处理。
             if use_isolated_worker:
                 frames, headers, payloads = run_detector_isolated(capture_args)
             else:
                 frames, headers, payloads = run_detector_once(capture_args, current_tb)
 
-            # 合并包范围和 header；本脚本不再解 payload，包号字段保持为空。
+            # Step 4d: 合并 frame_sync/header_decoder/payload 三路元数据。
+            # 默认不要求 payload CRC valid；如果开启 --require-valid-payload，只保留 CRC 通过的包。
             if not frames:
                 print(f"[preamble_fft] no valid preamble ranges for {input_file}")
                 continue
@@ -1484,16 +1479,18 @@ def main():
             capture_results.append((capture_args, merged_frames))
             print(f"[preamble_fft] collected {len(merged_frames)} packet(s) from {input_file.name}")
 
+        # 当前 job 没有任何有效包时跳过输出，继续处理下一个 job。
         if not capture_results:
             print(f"[preamble_fft] no valid packets for job {job['label']}")
             continue
 
-        # 基于该 lab 内收集到的包位置重新读取 IQ，写出该 lab 自己的 CSV 和 NPZ。
+        # Step 5/6: 重新读取 IQ，计算每包特征，并写出当前 job 的 CSV/NPZ。
         outputs = save_results(job_args, capture_results)
         total_packets += outputs["packet_count"]
         successful_jobs += 1
         print(f"[preamble_fft] wrote {outputs['packet_count']} packet(s) -> {outputs['packet']}, {outputs['npz']}")
 
+    # 所有 job 都处理完后，根据是否成功写出任何包返回退出码。
     if successful_jobs == 0:
         print("[preamble_fft] no valid packets were published by frame_sync/header_decoder")
         return 1
