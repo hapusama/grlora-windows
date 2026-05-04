@@ -514,6 +514,35 @@ exit=3221225477
 0xC0000005
 ```
 
+这里的负数不是数据包在 IQ 文件中的绝对样本索引为负，而是 GNU Radio 当前传给 `frame_sync` 的输入窗口 `in[]` 的相对下标为负。`in[0]` 只代表本次 `general_work()` 可读缓冲区的起点，不代表整个 IQ 文件起点。
+
+流程上，`DETECT` 阶段先连续检测 preamble upchirp。检测成功后，代码取这些 upchirp 的 dechirp FFT 主峰 bin，得到 `k_hat`，用它估计当前窗口和真实 LoRa symbol 边界之间的整数偏移。随后进入 `SYNC`，需要截取 sync word / network ID 附近的过采样样本到 `net_id_samp`，用于后续 CFO / STO / SFO 修正和 sync word 校验。
+
+相关量的含义：
+
+- `N = 2^SF = m_number_of_bins`，是一个 LoRa symbol 的基础 bin / chip 数；SF12 时 `N = 4096`。
+- `m_os_factor` 是过采样倍数。
+- `m_samples_per_symbol = N * m_os_factor`，是一个 symbol 在原始 IQ 中的采样点数。
+- `k_hat` 是 preamble upchirp dechirp 后 FFT 主峰所在的 bin。由于 LoRa dechirp 会把 symbol 内时间偏移映射成 FFT bin 偏移，所以这里把 `k_hat` 当作 symbol 内的循环整数时间偏移使用。
+
+旧代码在检测到 preamble 后，要从 `netid1` 起点之前 `0.25 symbol` 开始保存一段 `net_id_samp`。如果从当前 `in[0]` 到 `netid1` 起点还剩约 `(N - k_hat) * m_os_factor` 个 IQ sample，那么提前 `0.25 symbol` 后，拷贝起点就是：
+
+```text
+(N - k_hat) * m_os_factor - 0.25 * N * m_os_factor
+= (0.75 * N - k_hat) * m_os_factor
+= 0.75 * m_samples_per_symbol - k_hat * m_os_factor
+```
+
+因此 `0.75` 来自 `1.0 symbol - 0.25 symbol`：本来要走到下一个 symbol 起点，但为了保留 sync word 前面的四分之一个 symbol 余量，需要提前截取。
+
+问题在于 `k_hat` 是环形 FFT bin。SF12 时 `0.75 * N = 3072`，如果 `k_hat > 3072`，线性计算得到的 `net_id_samp` 拷贝起点就会小于 0。例如 `k_hat = 4090` 在环形意义上可能只是接近 `-6 bin` 的小负偏移，但旧代码直接按 `4090` 参与线性下标计算，会得到：
+
+```text
+3072 - 4090 = -1018 bin
+```
+
+再乘以 `m_os_factor` 后就会访问类似 `in[-4072]` 的位置，读到当前输入缓冲区之前的内存，Windows 下容易直接触发 `0xC0000005`。
+
 当前代码已在拷贝窗口前检查 `k_hat` 和边界。非法检测会直接回到 `DETECT`，避免越界访问。
 
 ---
@@ -554,9 +583,68 @@ exit=3221225477
 | `grc/lora_sdr_crc_verif.block.yml` | GRC 块定义增加可选 `payload_metadata` 消息口 |
 | `lib/frame_sync_impl.cc` | 修复 `DETECT -> SYNC` 阶段边界检查，避免 SF12 等场景下负索引导致 native 崩溃 |
 
+### 9.4 弱包解码加噪测试数据
+
+| 文件 | 改动内容 |
+|------|----------|
+| `weakPacket_decoding/scripts/make_noisy_iq.py` | 离线 IQ 加噪脚本，读取 raw `complex64` / GNU Radio `gr_complex` 文件，按相对噪声功率步进写出 AWGN 版本并记录 gr-lora_sdr 实测 SNR |
+| `.gitignore` | 忽略 `weakPacket_decoding/data/` 和 `weakPacket_decoding/_file_source_staging/` 下的本地实验文件，避免误提交大体积 IQ sweep 和临时 hardlink |
+
+脚本会从 `data/USRP_IQ` 的文件名自动读取 `SF` 和 `Preamble` 数量。文件名格式按 `文件名描述.txt` 约定为：
+
+```text
+实验编号_走廊编号_位置编号_SF_TP_Preamble数量.bin
+```
+
+现在不再按“目标 SNR”反推噪声功率。默认用整段 IQ 平均功率作为加噪强度标尺（`--power-mode total`），按 `--noise-start-db/--noise-stop-db/--noise-step-db` 逐步增加复高斯白噪声；每写出一个 `.bin` 后都会再跑一次 gr-lora_sdr，记录 `frame_sync` 的 preamble SNR 实测值。
+
+因此该脚本应在安装了 gr-lora_sdr 的环境中运行：
+
+```powershell
+conda activate gr-lora
+python weakPacket_decoding\scripts\make_noisy_iq.py `
+  --noise-start-db -30 `
+  --noise-stop-db 0 `
+  --noise-step-db 5 `
+  --overwrite
+```
+
+也可以直接给出需要测试的加噪功率点。这里的 dB 是“相对参考功率的加噪功率”，不是目标 SNR：
+
+```powershell
+python weakPacket_decoding\scripts\make_noisy_iq.py `
+  --noise-power-db -35 -30 -25 -20 -15 -10 -5 0 `
+  --overwrite
+```
+
+如果希望用完整 packet 窗口作为加噪强度标尺，可以指定 `--power-mode packet`。该模式会先调用 gr-lora_sdr 接收链，利用 `frame_sync` 发布的 `preamble` message 获取 `preamble + sync word + SFD` 对齐样本范围，再结合 `header_decoder` 回传的 `pay_len`、`cr`、`crc` 和 `ldro_mode` 推导完整 packet 样本范围。
+
+输出默认位于：
+
+```text
+weakPacket_decoding\data\noisy_iq\0_0_0_10_14_8\
+```
+
+每个 `.bin` 保持原始 `complex64` IQ 格式，并配套同名 `.json` 记录加噪功率、随机种子、文件名解析出的 `SF/Preamble`、生成参数以及 gr-lora_sdr 实测 SNR。目录下还会生成 `<input>_noise_sweep_summary.json` 和 `<input>_noise_sweep_summary.csv`，便于直接查看每一步的检测包数和 SNR 中位数。
+
+注意：gr-lora_sdr `snr_db` 是 `frame_sync` 对前导码 dechirp FFT 主峰能量与残余 bin 能量的估计。强噪声下如果 header 已经解不出来，对应步的检测包数可能为 0，summary 里的 SNR 会留空。
+
 ---
 
 ## 10. 更新日志
+
+### 2026-05-04
+
+- `weakPacket_decoding/scripts/make_noisy_iq.py` 会从 IQ 文件名自动解析 `SF` 和 `Preamble` 数量；命令行 `--sf`、`--preamble-len` 仍可手动覆盖。
+- 加噪方式从“目标 SNR sweep”改为“相对噪声功率步进”：使用 `--noise-power-db` 或 `--noise-start-db/--noise-stop-db/--noise-step-db` 控制每一步加入的 AWGN 功率，默认参考功率为整段 IQ 平均功率（`--power-mode total`）。
+- 每写出一个加噪 `.bin` 后都会自动运行 gr-lora_sdr 检测链，并把 `frame_sync` 的 preamble SNR 实测统计写入同名 JSON，同时生成 sweep summary JSON/CSV。
+- 已用 `0_0_0_10_14_8.bin --sample-limit 800000 --noise-power-db -30` 做 smoke test：文件名解析得到 `SF=10`、`Preamble=8`，原始输入检测到 7 个 header-valid 包，截断加噪输出检测到 1 个包且写出 summary。
+
+### 2026-05-03
+
+- 新增 `weakPacket_decoding/scripts/make_noisy_iq.py`，用于把 `data/USRP_IQ/0_0_0_10_14_8.bin` 手动加入复高斯白噪声，生成 20/15/10/5/0/-5 dB 等不同目标 SNR 下的测试 IQ。
+- 初版脚本使用 `--power-mode active`：先按块估计低分位底噪，再用高于底噪阈值的活跃块作为包功率参考，适配固定间隔发包的 USRP 连续采样文件。
+- 已生成本地测试集到 `weakPacket_decoding/data/noisy_iq/0_0_0_10_14_8/`，每个 `.bin` 对应一个标准 JSON metadata 文件；该目录已在根 `.gitignore` 中忽略。
 
 ### 2026-04-28
 

@@ -2,3 +2,5 @@
 实验编号-走廊编号-位置编号-SF-TP-Preamble数量。
 每一个单独的bin文件都是发射端以固定时间间隔发射lora数据包，然后接收端用usrp接收产生的IQ数据；
 注意，该USRP采集的信号来源是lora信号，且stm32中的代码来源于lorastmacl1
+这个数据夹下所有采样数据的参数：--samp-rate 500000 --center-freq 487.7e6 --sync-word 0x34 --crc-mode 0，
+这个crc-mode 0的含义请参考gr-lora_sdr项目文件夹下的readme.md
