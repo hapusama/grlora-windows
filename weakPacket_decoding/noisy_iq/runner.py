@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import math
 from pathlib import Path
 from typing import Any
@@ -17,6 +17,8 @@ import numpy as np
 from .capture import (
     build_noise_power_db_values,
     check_output_collisions,
+    decoded_payload_hexes_from_packets,
+    normalize_payload_hexes,
     planned_output_paths,
     resolve_capture_parameters,
     validate_capture_args,
@@ -36,6 +38,7 @@ class NoisyIqSweep:
     """
 
     args: argparse.Namespace
+    groundtruth_info: dict[str, Any] = field(default_factory=dict)
 
     def run(self) -> int:
         input_path = Path(self.args.input).resolve()
@@ -54,6 +57,7 @@ class NoisyIqSweep:
         with IqCapture.open(input_path) as capture:
             process_samples = capture.processed_sample_count(self.args.sample_limit)
             measurement_service = GrloraMeasurementService(self.args)
+            clean_groundtruth_measurement = self._prepare_groundtruth(measurement_service, input_path)
             # signal_power 是后续每个噪声步的缩放基准，不直接代表最终文件 SNR。
             power_info = ReferencePowerEstimator(self.args, measurement_service).estimate(capture.samples)
             noise_reference_power = float(power_info["signal_power"])
@@ -79,6 +83,7 @@ class NoisyIqSweep:
                     measurement_service,
                     input_path,
                     power_info,
+                    clean_groundtruth_measurement,
                 )
 
             for index, (noise_power_db, out_path, meta_path) in enumerate(outputs, start=1):
@@ -112,6 +117,7 @@ class NoisyIqSweep:
                         "noise_reference_power": float(noise_reference_power),
                         "noise_reference_power_db": db10(float(noise_reference_power)),
                         "noise_reference_mode": self.args.power_mode,
+                        "groundtruth": self.groundtruth_info,
                     },
                 )
                 print(f"Summary JSON: {summary_json}")
@@ -123,6 +129,89 @@ class NoisyIqSweep:
         if self.args.output_dir is not None:
             return Path(self.args.output_dir).resolve()
         return (DEFAULT_OUTPUT_ROOT / input_path.stem).resolve()
+
+    def _prepare_groundtruth(
+        self,
+        measurement_service: GrloraMeasurementService,
+        input_path: Path,
+    ) -> dict[str, Any] | None:
+        if self.args.no_expected_payload_check:
+            self.args.expected_payload_source = "disabled"
+            self.groundtruth_info = {
+                "mode": "disabled",
+                "source_file": str(input_path),
+                "expected_payload_hex": [],
+            }
+            return None
+
+        if self.args.expected_payload_hex is not None:
+            payload_hexes = normalize_payload_hexes(list(self.args.expected_payload_hex))
+            self.args.expected_payload_hex = payload_hexes
+            self.args.expected_payload_source = "cli"
+            self.groundtruth_info = {
+                "mode": "cli",
+                "source_file": str(input_path),
+                "expected_packet_count": int(len(payload_hexes)),
+                "expected_payload_hex": payload_hexes,
+            }
+            return None
+
+        if self.args.dry_run:
+            self.args.expected_payload_source = "dry_run_not_decoded"
+            self.groundtruth_info = {
+                "mode": "dry_run_not_decoded",
+                "source_file": str(input_path),
+                "expected_payload_hex": [],
+            }
+            return None
+
+        print("[GROUNDTRUTH] decoding clean input without added noise...")
+        packets = measurement_service.detect(input_path)
+        decoded_packets = [
+            packet
+            for packet in packets
+            if packet.get("decoded_payload_available") or packet.get("decoded_payload_hex")
+        ]
+        payload_hexes = decoded_payload_hexes_from_packets(decoded_packets)
+        detected_count = len(packets)
+        decoded_count = len(decoded_packets)
+        if not payload_hexes:
+            raise RuntimeError(
+                "Clean input did not produce any decoded payloads, so no groundtruth can be derived. "
+                "Check --sf/--samp-rate/--bw/--sync-word/--preamble-len, or pass --expected-payload-hex."
+            )
+        if decoded_count != detected_count:
+            raise RuntimeError(
+                "Clean input groundtruth is incomplete: "
+                f"detected {detected_count} packet(s) but decoded {decoded_count} payload(s). "
+                "Fix the clean decode settings first, or pass --expected-payload-hex explicitly."
+            )
+
+        crc_valid_count = sum(1 for packet in decoded_packets if bool(packet.get("crc_valid", False)))
+        self.args.expected_payload_hex = payload_hexes
+        self.args.expected_payload_source = "clean_decode"
+        self.groundtruth_info = {
+            "mode": "clean_decode",
+            "source_file": str(input_path),
+            "detected_packets": int(detected_count),
+            "decoded_payload_packets": int(decoded_count),
+            "crc_valid_packets": int(crc_valid_count),
+            "crc_invalid_packets": int(max(0, decoded_count - crc_valid_count)),
+            "expected_packet_count": int(len(payload_hexes)),
+            "expected_payload_hex": payload_hexes,
+        }
+
+        clean_measurement = measurement_service.measurement_from_packets(input_path, packets)
+        payload_check = clean_measurement.get("payload_check", {}) or {}
+        if not payload_check.get("all_expected_payloads_correct", False):
+            raise RuntimeError("Clean decoded payloads could not be verified against the derived groundtruth.")
+
+        print(
+            "[GROUNDTRUTH] clean decode accepted: "
+            f"detected={detected_count}, payloads={decoded_count}, "
+            f"crc_valid={crc_valid_count}/{decoded_count}"
+        )
+        return clean_measurement
 
     def _print_header(
         self,
@@ -150,6 +239,12 @@ class NoisyIqSweep:
             f"mode={self.args.power_mode}, power={noise_reference_power:.6e} "
             f"({db10(noise_reference_power):.2f} dB)"
         )
+        if self.groundtruth_info:
+            print(
+                "Groundtruth: "
+                f"mode={self.groundtruth_info.get('mode', '')}, "
+                f"expected_packets={self.groundtruth_info.get('expected_packet_count', 0)}"
+            )
         if self.args.power_mode == "packet":
             grlora_snr = power_info.get("grlora_snr_db_summary", {})
             print(
@@ -173,12 +268,16 @@ class NoisyIqSweep:
         measurement_service: GrloraMeasurementService,
         input_path: Path,
         power_info: dict[str, Any],
+        precomputed_measurement: dict[str, Any] | None = None,
     ) -> None:
-        clean_measurement = (
-            measurement_service.clean_measurement_from_packet_power(input_path, power_info)
-            if self.args.power_mode == "packet"
-            else measurement_service.measure_snr(input_path)
-        )
+        if precomputed_measurement is not None:
+            clean_measurement = precomputed_measurement
+        else:
+            clean_measurement = (
+                measurement_service.clean_measurement_from_packet_power(input_path, power_info)
+                if self.args.power_mode == "packet"
+                else measurement_service.measure_snr(input_path)
+            )
         clean_summary = clean_measurement["grlora_snr_db_summary"]
         reporter.append(
             kind="clean",
@@ -307,6 +406,7 @@ class NoisyIqSweep:
             "sample_limit": self.args.sample_limit,
             "processed_samples": int(process_samples),
             "capture_metadata": capture_metadata,
+            "groundtruth": self.groundtruth_info,
             "args": {
                 "power_mode": self.args.power_mode,
                 "sf": self.args.sf,
@@ -322,6 +422,7 @@ class NoisyIqSweep:
                 "ldro_mode": self.args.ldro_mode,
                 "crc_mode": self.args.crc_mode,
                 "expected_payload_hex": self.args.expected_payload_hex,
+                "expected_payload_source": getattr(self.args, "expected_payload_source", ""),
                 "no_expected_payload_check": self.args.no_expected_payload_check,
                 "noise_percentile": self.args.noise_percentile,
                 "active_threshold_db": self.args.active_threshold_db,

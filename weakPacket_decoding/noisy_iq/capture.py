@@ -13,7 +13,6 @@ from pathlib import Path
 import re
 from typing import Any
 
-from .constants import DEFAULT_EXPECTED_PAYLOAD_HEXES
 from .utils import db_to_label, parse_payload_hex
 
 
@@ -174,13 +173,28 @@ def validate_capture_args(args: argparse.Namespace) -> None:
         raise ValueError("--sample-limit must be positive when provided.")
 
 
+def normalize_payload_hexes(payload_hexes: list[str] | tuple[str, ...]) -> list[str]:
+    """Return canonical lower-case payload hex strings."""
+    return [parse_payload_hex(value).hex() for value in payload_hexes]
+
+
+def decoded_payload_hexes_from_packets(decoded_packets: list[dict[str, Any]]) -> list[str]:
+    """Extract canonical payload hex strings from decoded packet metadata."""
+    payload_hexes = []
+    for packet in decoded_packets:
+        if not (packet.get("decoded_payload_available") or packet.get("decoded_payload_hex")):
+            continue
+        payload_hexes.append(parse_payload_hex(str(packet.get("decoded_payload_hex", ""))).hex())
+    return payload_hexes
+
+
 def expected_payloads_from_args(args: argparse.Namespace) -> list[bytes]:
     """Return payload groundtruth used to judge whether decoded packets are correct."""
     if getattr(args, "no_expected_payload_check", False):
         return []
-    payload_hexes = args.expected_payload_hex
+    payload_hexes = getattr(args, "expected_payload_hex", None)
     if payload_hexes is None:
-        payload_hexes = DEFAULT_EXPECTED_PAYLOAD_HEXES
+        return []
     return [parse_payload_hex(value) for value in payload_hexes]
 
 

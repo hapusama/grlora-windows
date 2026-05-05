@@ -8,7 +8,8 @@ independently. This file stays as a thin script entry point.
 中文说明：这个文件只保留命令行入口，真正的加噪、测量、写 metadata
 等逻辑都拆到了旁边的 ``noisy_iq`` 包里，后续调试时可以按模块看。
 """
-# python .\gr-lora_sdr\weakPacket_decoding\scripts\make_noisy_iq.py --samp-rate 500000 --bw 125000 --sync-word 0x34 --noise-power-db 10 15 25 30 --overwrite
+# python .\gr-lora_sdr\weakPacket_decoding\scripts\make_noisy_iq.py -i .\gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_8.bin --samp-rate 500000 --bw 125000 --sync-word 0x34 --noise-power-db 10 15 25 30 --overwrite
+
 from __future__ import annotations
 
 from pathlib import Path

@@ -42,6 +42,9 @@ class GrloraMeasurementService:
         verify_args = argparse.Namespace(**vars(self.args))
         verify_args.input = path
         packets = GrloraPacketDetector(verify_args).detect(path.resolve())
+        return self.measurement_from_packets(path, packets)
+
+    def measurement_from_packets(self, path: Path, packets: list[dict[str, Any]]) -> dict[str, Any]:
         # frame_sync 给出的 snr_db 是 gr-lora_sdr 内部估计值，这里只做有限值统计。
         snr_values = [float(packet.get("grlora_snr_db", float("nan"))) for packet in packets]
         decoded_packets = [

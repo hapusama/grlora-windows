@@ -129,12 +129,15 @@ def parse_args() -> argparse.Namespace:
         type=str,
         nargs="+",
         default=None,
-        help="Expected clean decoded payloads as hex strings. Default: hard-coded groundtruth for 0_0_0_10_14_8.bin.",
+        help=(
+            "Override expected clean decoded payloads as hex strings. "
+            "Default: auto-decode the clean input first and use those payloads as groundtruth."
+        ),
     )
     parser.add_argument(
         "--no-expected-payload-check",
         action="store_true",
-        help="Disable groundtruth payload comparison and only measure detection/SNR.",
+        help="Disable clean groundtruth decoding and only measure detection/SNR.",
     )
     parser.add_argument(
         "--print-header",

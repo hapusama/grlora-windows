@@ -587,7 +587,9 @@ exit=3221225477
 
 | 文件 | 改动内容 |
 |------|----------|
-| `weakPacket_decoding/scripts/make_noisy_iq.py` | 离线 IQ 加噪脚本，读取 raw `complex64` / GNU Radio `gr_complex` 文件，按相对噪声功率步进写出 AWGN 版本并记录 gr-lora_sdr 实测 SNR |
+| `weakPacket_decoding/scripts/make_noisy_iq.py` | 离线 IQ 加噪命令行入口；实际实现已拆到 `weakPacket_decoding/noisy_iq/` 包 |
+| `weakPacket_decoding/scripts/make_failure_limit_iq.py` | 自动搜索并保存“解码失败边界”和“检测失败边界”的 noisy IQ 二进制文件 |
+| `weakPacket_decoding/noisy_iq/` | 加噪、功率估计、gr-lora_sdr 检测、JSON/CSV 汇总等可复用模块 |
 | `.gitignore` | 忽略 `weakPacket_decoding/data/` 和 `weakPacket_decoding/_file_source_staging/` 下的本地实验文件，避免误提交大体积 IQ sweep 和临时 hardlink |
 
 脚本会从 `data/USRP_IQ` 的文件名自动读取 `SF` 和 `Preamble` 数量。文件名格式按 `文件名描述.txt` 约定为：
@@ -598,11 +600,29 @@ exit=3221225477
 
 现在不再按“目标 SNR”反推噪声功率。默认用整段 IQ 平均功率作为加噪强度标尺（`--power-mode total`），按 `--noise-start-db/--noise-stop-db/--noise-step-db` 逐步增加复高斯白噪声；每写出一个 `.bin` 后都会再跑一次 gr-lora_sdr，记录 `frame_sync` 的 preamble SNR 实测值。
 
+Groundtruth 不再写死在 `constants.py` 里。默认情况下，`make_noisy_iq.py` 会先对输入的 clean `.bin` 不加噪声跑一次同一条 gr-lora_sdr 解码链，把 clean 解出的每个 payload hex 作为本次 sweep 的 expected payload 列表。也就是说，当前假设是：传入的 clean 文件本身检测数量正确、payload 解码正确；如果 clean 文件没有解出 payload，或者 clean 检测包数和解码 payload 数不一致，脚本会直接停止，避免后续用错误 groundtruth 做统计。
+
+如需手动指定 groundtruth，仍可使用 `--expected-payload-hex <hex...>` 覆盖自动 clean 解码结果；如果只想测检测数量和 SNR，不想做 payload 正误统计，可使用 `--no-expected-payload-check` 关闭 groundtruth 检查。
+
+`make_noisy_iq.py` 现在只是薄入口，核心逻辑按职责拆到了 `weakPacket_decoding/noisy_iq/`：
+
+| 模块 | 职责 |
+|------|------|
+| `cli.py` | 保持原命令行参数兼容，只负责解析 CLI |
+| `runner.py` | `NoisyIqSweep` 总流程：clean 解码生成 groundtruth、读 IQ、估计参考功率、逐步加噪、测量、写汇总 |
+| `iq_file.py` | `IqCapture`、raw `complex64` memmap、分块功率估计和 AWGN 写文件 |
+| `detector.py` | `GrloraPacketDetector`，封装最短 gr-lora_sdr 接收链和 metadata sink |
+| `power.py` | `ReferencePowerEstimator` 和 `GrloraMeasurementService`，负责参考功率和 SNR/payload 统计 |
+| `capture.py` | 从文件名/命令行解析 `SF`、`Preamble`，规范化 clean/CLI payload，并做 expected payload 比对 |
+| `reporting.py` | 同名 metadata JSON、sweep summary JSON/CSV 写出 |
+| `constants.py` / `utils.py` | 默认路径、dB/JSON/CSV 等通用工具；payload groundtruth 默认运行时生成 |
+
 因此该脚本应在安装了 gr-lora_sdr 的环境中运行：
 
 ```powershell
 conda activate gr-lora
 python weakPacket_decoding\scripts\make_noisy_iq.py `
+  -i data\USRP_IQ\0_0_0_10_14_8.bin `
   --noise-start-db -30 `
   --noise-stop-db 0 `
   --noise-step-db 5 `
@@ -613,8 +633,27 @@ python weakPacket_decoding\scripts\make_noisy_iq.py `
 
 ```powershell
 python weakPacket_decoding\scripts\make_noisy_iq.py `
+  -i data\USRP_IQ\0_0_0_10_14_8.bin `
   --noise-power-db -35 -30 -25 -20 -15 -10 -5 0 `
   --overwrite
+```
+
+如果只想生成几个接近失败边界的噪声点，也可以显式给出更强的相对加噪功率。例如当前 `0_0_0_10_14_8.bin` 在 `--samp-rate 500000` 下，`25 dB` 附近会开始掉包，`30 dB` 附近只剩少量误检/误解码：
+
+```powershell
+python weakPacket_decoding\scripts\make_noisy_iq.py `
+  -i data\USRP_IQ\0_0_0_10_14_8.bin `
+  --samp-rate 500000 `
+  --bw 125000 `
+  --sync-word 0x34 `
+  --noise-power-db 10 15 25 30 `
+  --overwrite
+```
+
+同一命令的一行版：
+
+```powershell
+python weakPacket_decoding\scripts\make_noisy_iq.py -i data\USRP_IQ\0_0_0_10_14_8.bin --samp-rate 500000 --bw 125000 --sync-word 0x34 --noise-power-db 10 15 25 30 --overwrite
 ```
 
 如果希望用完整 packet 窗口作为加噪强度标尺，可以指定 `--power-mode packet`。该模式会先调用 gr-lora_sdr 接收链，利用 `frame_sync` 发布的 `preamble` message 获取 `preamble + sync word + SFD` 对齐样本范围，再结合 `header_decoder` 回传的 `pay_len`、`cr`、`crc` 和 `ldro_mode` 推导完整 packet 样本范围。
@@ -625,13 +664,49 @@ python weakPacket_decoding\scripts\make_noisy_iq.py `
 weakPacket_decoding\data\noisy_iq\0_0_0_10_14_8\
 ```
 
-每个 `.bin` 保持原始 `complex64` IQ 格式，并配套同名 `.json` 记录加噪功率、随机种子、文件名解析出的 `SF/Preamble`、生成参数以及 gr-lora_sdr 实测 SNR。目录下还会生成 `<input>_noise_sweep_summary.json` 和 `<input>_noise_sweep_summary.csv`，便于直接查看每一步的检测包数和 SNR 中位数。
+每个 `.bin` 保持原始 `complex64` IQ 格式，并配套同名 `.json` 记录加噪功率、随机种子、文件名解析出的 `SF/Preamble`、运行时 groundtruth、生成参数以及 gr-lora_sdr 实测 SNR。目录下还会生成 `<input>_noise_sweep_summary.json` 和 `<input>_noise_sweep_summary.csv`，便于直接查看每一步的检测包数、解码 payload 数、正确 payload 数、漏检数和 SNR 中位数。
 
 注意：gr-lora_sdr `snr_db` 是 `frame_sync` 对前导码 dechirp FFT 主峰能量与残余 bin 能量的估计。强噪声下如果 header 已经解不出来，对应步的检测包数可能为 0，summary 里的 SNR 会留空。
+
+如果需要自动生成“刚好解码失败”和“刚好检测失败”的两类边界样本，可以使用 `make_failure_limit_iq.py`。该脚本会先粗扫噪声强度，再二分细化边界，并分别输出：
+
+- `<input>_decode_failure_limit.bin`：还能检测到一些包，但无法完整恢复所有 expected payload。
+- `<input>_detect_failure_limit.bin`：已经完全检测不到包。
+
+示例：
+
+```powershell
+python weakPacket_decoding\scripts\make_failure_limit_iq.py `
+  --samp-rate 500000 `
+  --bw 125000 `
+  --sync-word 0x34 `
+  --coarse-start-db 20 `
+  --coarse-stop-db 60 `
+  --coarse-step-db 10 `
+  --refine-iterations 6 `
+  --overwrite
+```
+
+默认输出位于：
+
+```text
+weakPacket_decoding\data\noisy_iq\<input-stem>\failure_limits\
+```
+
+同目录会写出 `.json`，记录所选噪声点、检测/解码包数、gr-lora_sdr SNR 统计和完整搜索历史。注意：多包 capture 中，“解码失败”可能表现为只检测到部分包且这些包本身 payload 正确；脚本把这种情况归为未能完整恢复整组 expected payload。
 
 ---
 
 ## 10. 更新日志
+
+### 2026-05-05
+
+- 将 `weakPacket_decoding/scripts/make_noisy_iq.py` 从 1600+ 行单文件实现拆为薄命令行入口，核心实现迁移到 `weakPacket_decoding/noisy_iq/` 包，便于单独调试 IQ 读写、功率估计、GNU Radio 检测和报告输出。
+- 新增 `IqCapture`、`NoisyIqSweep`、`GrloraPacketDetector`、`ReferencePowerEstimator`、`GrloraMeasurementService`、`SweepReporter` 等对象，替代原脚本中混在一起的流程函数。
+- `IqCapture` 支持 context manager / `close()`，修复 Windows 下 `numpy.memmap` 占用 `.bin` 文件句柄导致临时目录无法删除的问题。
+- 新增 `weakPacket_decoding/scripts/make_failure_limit_iq.py`，复用 `noisy_iq` 模块自动搜索并保存 `decode_failure_limit.bin` 和 `detect_failure_limit.bin` 两类边界 noisy IQ。
+- `make_noisy_iq.py` 默认不再使用 `constants.py` 中的固定 payload 列表；脚本启动时会先对 clean 输入不加噪声解码一次，将 clean payload 列表写成本次 sweep 的 groundtruth，并在 JSON / summary 中记录检测、解码和 payload 正误统计。
+- 已在 `gr-lora` conda 环境中验证默认 `0_0_0_10_14_8.bin --samp-rate 500000 --bw 125000 --sync-word 0x34` 可正常检测 clean 输入 7/7 包；`make_failure_limit_iq.py` 可将解码失败边界和检测失败边界分别保存到独立 `.bin` / `.json` 文件。
 
 ### 2026-05-04
 
