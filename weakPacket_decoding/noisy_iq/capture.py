@@ -198,6 +198,32 @@ def expected_payloads_from_args(args: argparse.Namespace) -> list[bytes]:
     return [parse_payload_hex(value) for value in payload_hexes]
 
 
+def payload_error_counts(decoded_payload: bytes, expected_payload: bytes) -> dict[str, int]:
+    """Return byte/bit error counts between two payload byte strings."""
+    common_len = min(len(decoded_payload), len(expected_payload))
+    byte_errors = sum(
+        1
+        for decoded_byte, expected_byte in zip(
+            decoded_payload[:common_len], expected_payload[:common_len]
+        )
+        if decoded_byte != expected_byte
+    )
+    bit_errors = sum(
+        (int(decoded_byte) ^ int(expected_byte)).bit_count()
+        for decoded_byte, expected_byte in zip(
+            decoded_payload[:common_len], expected_payload[:common_len]
+        )
+    )
+    length_delta = abs(len(decoded_payload) - len(expected_payload))
+    return {
+        "byte_errors": int(byte_errors + length_delta),
+        "bit_errors": int(bit_errors + 8 * length_delta),
+        "compared_bytes": int(max(len(decoded_payload), len(expected_payload))),
+        "compared_bits": int(8 * max(len(decoded_payload), len(expected_payload))),
+        "length_delta_bytes": int(length_delta),
+    }
+
+
 def compare_payloads(
     decoded_packets: list[dict[str, Any]],
     expected_payloads: list[bytes],
@@ -216,7 +242,7 @@ def compare_payloads(
 
     unmatched_expected = list(range(len(expected_payloads)))
     matches = []
-    wrong_decoded_indexes = []
+    exact_matched_decoded_indexes: set[int] = set()
     # 这里按“每个期望 payload 最多匹配一次”处理，避免重复解出同一个包时虚高正确率。
     for decoded_index, (_, payload) in enumerate(decoded):
         match_pos = None
@@ -225,9 +251,9 @@ def compare_payloads(
                 match_pos = expected_index
                 break
         if match_pos is None:
-            wrong_decoded_indexes.append(decoded_index)
             continue
         unmatched_expected.remove(match_pos)
+        exact_matched_decoded_indexes.add(decoded_index)
         matches.append(
             {
                 "decoded_index": int(decoded_index),
@@ -236,10 +262,65 @@ def compare_payloads(
             }
         )
 
+    byte_error_count = 0
+    bit_error_count = 0
+    compared_byte_count = 0
+    compared_bit_count = 0
+    compared_payload_packets = 0
+    wrong_decoded_indexes = []
+    wrong_pairs = []
+    nearest_unmatched_expected = list(unmatched_expected)
+
+    for match in matches:
+        _, payload = decoded[int(match["decoded_index"])]
+        expected_payload = expected_payloads[int(match["expected_index"])]
+        counts = payload_error_counts(payload, expected_payload)
+        byte_error_count += counts["byte_errors"]
+        bit_error_count += counts["bit_errors"]
+        compared_byte_count += counts["compared_bytes"]
+        compared_bit_count += counts["compared_bits"]
+        compared_payload_packets += 1
+
+    for decoded_index, (_, payload) in enumerate(decoded):
+        if decoded_index in exact_matched_decoded_indexes:
+            continue
+        wrong_decoded_indexes.append(decoded_index)
+        candidate_indexes = nearest_unmatched_expected or list(range(len(expected_payloads)))
+        if not candidate_indexes:
+            continue
+        nearest_expected = min(
+            candidate_indexes,
+            key=lambda expected_index: (
+                payload_error_counts(payload, expected_payloads[expected_index])["bit_errors"],
+                expected_index,
+            ),
+        )
+        if nearest_expected in nearest_unmatched_expected:
+            nearest_unmatched_expected.remove(nearest_expected)
+        counts = payload_error_counts(payload, expected_payloads[nearest_expected])
+        byte_error_count += counts["byte_errors"]
+        bit_error_count += counts["bit_errors"]
+        compared_byte_count += counts["compared_bytes"]
+        compared_bit_count += counts["compared_bits"]
+        compared_payload_packets += 1
+        wrong_pairs.append(
+            {
+                "decoded_index": int(decoded_index),
+                "nearest_expected_index": int(nearest_expected),
+                "byte_errors": int(counts["byte_errors"]),
+                "bit_errors": int(counts["bit_errors"]),
+                "compared_bytes": int(counts["compared_bytes"]),
+                "compared_bits": int(counts["compared_bits"]),
+                "length_delta_bytes": int(counts["length_delta_bytes"]),
+                "payload_hex": payload.hex(),
+            }
+        )
+
     crc_valid_count = sum(1 for packet in decoded_packets if bool(packet.get("crc_valid", False)))
     correct_count = len(matches)
     wrong_count = len(wrong_decoded_indexes)
     missed_correct = max(0, len(expected_payloads) - correct_count)
+    ber = bit_error_count / compared_bit_count if compared_bit_count > 0 else float("nan")
 
     return {
         "expected_packet_count": int(len(expected_payloads)),
@@ -249,10 +330,17 @@ def compare_payloads(
         "correct_payload_packets": int(correct_count),
         "wrong_payload_packets": int(wrong_count),
         "missed_correct_payload_packets": int(missed_correct),
+        "compared_payload_packets": int(compared_payload_packets),
+        "compared_byte_count": int(compared_byte_count),
+        "compared_bit_count": int(compared_bit_count),
+        "byte_error_count": int(byte_error_count),
+        "bit_error_count": int(bit_error_count),
+        "ber": float(ber),
         "all_expected_payloads_correct": bool(
             len(expected_payloads) > 0 and correct_count == len(expected_payloads) and wrong_count == 0
         ),
         "matches": matches,
+        "wrong_pairs": wrong_pairs,
         "unmatched_expected_indexes": [int(index) for index in unmatched_expected],
         "wrong_decoded_indexes": [int(index) for index in wrong_decoded_indexes],
     }

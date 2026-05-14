@@ -203,7 +203,11 @@ namespace gr
                                       << std::endl;
                     }
                     pmt::pmt_t payload_metadata = pmt::is_dict(current_tag.value) ? current_tag.value : pmt::make_dict();
+                    pmt::pmt_t payload_bytes = m_payload_len > 0
+                                                   ? pmt::init_u8vector(m_payload_len, &in_buff[0])
+                                                   : pmt::make_u8vector(0, 0);
                     payload_metadata = pmt::dict_add(payload_metadata, pmt::intern("payload"), pmt::mp(message_str));
+                    payload_metadata = pmt::dict_add(payload_metadata, pmt::intern("payload_bytes"), payload_bytes);
                     payload_metadata = pmt::dict_add(payload_metadata, pmt::intern("decoded_payload_len"), pmt::from_long(m_payload_len));
                     payload_metadata = pmt::dict_add(payload_metadata, pmt::intern("crc_valid"), pmt::from_bool(crc_valid == 1));
                     message_port_pub(pmt::intern("payload_metadata"), payload_metadata);
@@ -246,7 +250,11 @@ namespace gr
                     std::cout << std::endl;
                 }
                 pmt::pmt_t payload_metadata = pmt::is_dict(current_tag.value) ? current_tag.value : pmt::make_dict();
+                pmt::pmt_t payload_bytes = m_payload_len > 0
+                                               ? pmt::init_u8vector(m_payload_len, &in_buff[0])
+                                               : pmt::make_u8vector(0, 0);
                 payload_metadata = pmt::dict_add(payload_metadata, pmt::intern("payload"), pmt::mp(message_str));
+                payload_metadata = pmt::dict_add(payload_metadata, pmt::intern("payload_bytes"), payload_bytes);
                 payload_metadata = pmt::dict_add(payload_metadata, pmt::intern("decoded_payload_len"), pmt::from_long(m_payload_len));
                 payload_metadata = pmt::dict_add(payload_metadata, pmt::intern("crc_valid"), pmt::from_bool(true));
                 message_port_pub(pmt::intern("payload_metadata"), payload_metadata);

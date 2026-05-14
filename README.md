@@ -12,7 +12,7 @@
 - [4. 安装验证](#4-安装验证)
 - [5. CRC 校验说明](#5-crc-校验说明)
 - [6. PHY Header 频谱图](#6-phy-header-频谱图)
-- [7. 前导码特征批处理](#7-前导码特征批处理)
+- [7. 前导码特征批处理与前导码 FFT 绘图](#7-前导码特征批处理与前导码-fft-绘图)
 - [8. 常见问题与排查](#8-常见问题与排查)
 - [9. 本地改动清单](#9-本地改动清单)
 - [10. 更新日志](#10-更新日志)
@@ -363,42 +363,89 @@ PHY header 图按 `--preamble-len + 2 + 2.25` 个 symbol 从原始 IQ 中连续�
 
 ---
 
-## 7. 前导码特征批处理
+## 7. 前导码特征批处理与前导码 FFT 绘图
 
-`examples/lora_file_preamble_fft.py` 用于从离线 IQ 文件中批量导出 packet 级信号特征，尤其适合处理 `data\USRP_IQ` 下按 lab 分组的采集数据。
+`examples/lora_file_preamble_fft.py` 用于从离线 IQ 文件中批量导出 packet 级信号特征，也可以为每个检测到的数据包输出前导码 dechirp FFT 图。它只读取 `data\USRP_IQ` 下的原始 IQ `.bin`，不依赖 `fingerprint_localization/data`。
 
-### 7.1 批处理入口
+入口脚本现在只是薄入口，具体实现拆到 `examples/preamble_fft_tools/`，避免单个超大脚本难以维护：
+
+| 模块 | 作用 |
+|------|------|
+| `cli.py` | 命令行参数和主流程 |
+| `flowgraph.py` | GNU Radio 接收链，只用于获取同步与 header 元数据 |
+| `sinks.py` | `frame_sync` / `header_decoder` / `crc_verif` 的 PMT 消息收集器 |
+| `detector.py` | 单文件检测、worker 子进程隔离和 JSON worker 模式 |
+| `jobs.py` | lab/file 发现、位置过滤、文件名元数据解析和 frame/header/payload 合并 |
+| `signal_analysis.py` | chirp/dechirp、FFT、packet 特征计算 |
+| `plots.py` | 前导码 raw dechirp FFT PNG 绘图 |
+| `outputs.py` | `packet_features.csv` 和 `preamble_features.npz` 输出 |
+| `utils.py` / `constants.py` | 通用工具和常量 |
+
+### 7.1 导出 packet 级频谱特征
+
+以下命令处理 `lab1_sf11_TP2` 中 location 8-13 的 6 个 `.bin` 文件，并写出 `packet_features.csv` 与 `preamble_features.npz`：
 
 ```powershell
-python examples\lora_file_preamble_fft.py `
-  --all-bin `
-  --input-dir data\USRP_IQ
+conda run --no-capture-output -n gr-lora python examples/lora_file_preamble_fft.py --all-bin --input-dir data/USRP_IQ/lab1_sf11_TP2 --sf 11 --preamble-len 16 --samp-rate 500000 --center-freq 487.7e6 --sync-word 0x34 --crc-mode 0 --no-throttle --no-print-header --print-payload none --position-ids 8,9,10,11,12,13
 ```
 
-脚本会按 lab 子文件夹分组处理，每个 lab 单独写回：
+输出文件写在当前 lab 目录下：
 
-- `packet_features.csv`
-- `preamble_features.npz`
+- `packet_features.csv`：Excel 友好的一包一行特征表。
+- `preamble_features.npz`：Python 分析用压缩数组，保留位置、文件名、包序号和局部前导码 FFT 特征。
 
-### 7.2 输出特征
+当前输出收敛为 packet 级特征，包括平均 IQ 功率、前导码主峰集中度、主峰 `-3 dB` 宽度，以及主峰附近的局部平均幅度谱。旧版 per-frame 明细 CSV 不再生成。脚本会清理 `rssi_samples_5ms.csv`、`preamble_symbol_features.csv`、`position_summary.csv` 等过期输出，避免误读旧文件。
 
-当前输出收敛为 packet 级特征：
+### 7.2 只绘制每包前导码 raw dechirp FFT
 
-- 平均 RSSI
-- 平均 SNR
-- SX1276 风格 SNR register 值
-- 前导码主峰 `-3 dB` 宽度
-- 主峰对齐后的局部平均幅度谱
+以下命令只画图，不覆盖 `packet_features.csv` / `preamble_features.npz`：
 
-旧版 per-frame 明细 CSV 不再生成。脚本会清理 `rssi_samples_5ms.csv`、`preamble_symbol_features.csv`、`position_summary.csv` 等过期输出，避免误读旧文件。
+```powershell
+conda run --no-capture-output -n gr-lora python examples/lora_file_preamble_fft.py --all-bin --input-dir data/USRP_IQ/lab1_sf11_TP2 --sf 11 --preamble-len 16 --samp-rate 500000 --center-freq 487.7e6 --sync-word 0x34 --crc-mode 0 --no-throttle --no-print-header --print-payload none --position-ids 8,9,10,11,12,13 --plot-only --plot-dechirp-fft --plot-output-dir data/USRP_IQ/lab1_sf11_TP2/preamble_fft_plots --plot-db-floor -60 --plot-zoom-bins 8
+```
 
-### 7.3 默认不解析 payload
+绘图输出结构：
+
+```text
+data/USRP_IQ/lab1_sf11_TP2/preamble_fft_plots/
+├── locationid08/
+│   ├── lab01_sf11_tp02_preamble16_locationid08_packet001.png
+│   └── ...
+├── locationid09/
+├── ...
+├── location_08_preamble_dechirp_fft.png
+├── ...
+└── location_mean_comparison.png
+```
+
+图像口径：
+
+- 每个 packet 图来自该包的 `preamble_len` 个 upchirp，逐个 dechirp + FFT 后在线性幅度上平均。
+- 绘图使用 raw FFT bin，不再把每个 symbol 的主峰搬到 bin 0，因此可以观察主峰 bin 抖动。
+- 横轴为 `Raw FFT bin offset`；纵轴为线性主峰归一化幅度 `Peak-normalized magnitude`，每条 packet 曲线以自身主峰为 `1`。`--plot-db-floor` 仅为兼容旧命令保留，当前归一化图不使用它。
+- 主曲线和主峰参考线使用蓝色。
+- 每张 packet 图左上角记录该包平均谱的线性绝对主峰幅度 `abs peak magnitude` 和 raw peak bin。
+- `--plot-zoom-bins 8` 表示附带主峰附近 `±8 bins` 的 zoom 面板。
+
+### 7.3 文件名解析与位置过滤
+
+文件名按 `data/USRP_IQ/文件名描述.txt` 约定解析：
+
+```text
+实验编号_走廊编号_位置编号_SF_TP_Preamble.bin
+```
+
+例如 `1_0_8_11_2_16.bin` 表示 experiment 1、corridor 0、location 8、SF11、TP2、16 个 preamble upchirp。`--position-ids 8,9,10` 可限制只处理指定位置；PowerShell 下逗号参数有时会被拆开，脚本也兼容 `--position-ids 8 9 10`。
+
+如果 lab 目录有 `补充.txt`，脚本会读取其中的说明和参数覆盖信息。例如 `lab1_sf11_TP2/补充.txt` 说明实际 SF 为 11，因此建议命令行显式指定 `--sf 11 --preamble-len 16`。
+
+### 7.4 默认不解析 payload
 
 默认模式下，流图在 `header_decoder` 后直接连接 `null_sink`，只依赖 `frame_sync` 的对齐范围和 `header_decoder` 的 PHY header 信息计算信号特征。
 
 因此，末尾残包、payload 解码失败或 CRC invalid 不会导致 `decoded payload count != detected packet count` 这类 warning，也不会影响 RSSI / SNR / preamble FFT 特征导出。
 
-### 7.4 frame/header/payload 元数据合并
+### 7.5 frame/header/payload 元数据合并
 
 脚本不再按 list index 直接合并 `frame_sync`、`header_decoder` 和 `crc_verif` 三路消息。C++ 链路现在会把同一个包的 `frame_count` 以及 `start_sample:end_sample` 沿着 tag/message 传递：
 
@@ -408,7 +455,7 @@ frame_sync -> header_decoder -> crc_verif
 
 Python 端优先按 `frame_count` 合并 frame/header/payload；如果遇到旧版已安装模块没有这些 ID，会打印 warning 并退回 detection-order merge。这样可以避免 frame 排序、无效 header、payload 只对 CRC-valid 包产生消息时造成错配。
 
-### 7.5 需要 `FCnt` 时
+### 7.6 需要 `FCnt` 时
 
 如果确实需要 LoRaWAN `FCnt`，可以启用：
 
@@ -424,7 +471,7 @@ Python 端优先按 `frame_count` 合并 frame/header/payload；如果遇到旧�
 
 启用后，脚本会重新接回 `header_decoder -> dewhitening -> crc_verif`，只保留 CRC-valid payload 对应的数据包，并尝试从 `PHYPayload` / `FHDR` 中解析 `FCnt`。末尾残包、CRC invalid 包或 payload 不完整包会被整包舍弃。`--crc-mode` 和 `--print-payload` 仅在该模式下有意义。
 
-### 7.6 批处理隔离模式
+### 7.7 批处理隔离模式
 
 长批量任务中，如果担心单个 native 崩溃拖垮整个 lab，可以启用子进程隔离：
 
@@ -575,12 +622,14 @@ exit=3221225477
 
 | 文件 | 改动内容 |
 |------|----------|
-| `examples/lora_file_preamble_fft.py` | 扩展为离线批处理特征导出脚本，支持 lab 分组、packet 级 CSV / NPZ 输出、payload 可选解析、Windows 路径兼容和 worker 隔离 |
-| `examples/lora_file_preamble_fft.py` | frame/header/payload 元数据优先按 `frame_count` 合并，并保留旧版 detection-order fallback |
+| `examples/lora_file_preamble_fft.py` | 现在是薄入口；实现拆到 `examples/preamble_fft_tools/`，按 CLI、flowgraph、sinks、detector、jobs、signal_analysis、plots、outputs、utils 分模块维护 |
+| `examples/lora_file_preamble_fft.py` | 支持 lab 分组、packet 级 CSV / NPZ 输出、payload 可选解析、Windows 路径兼容、worker 隔离和按 location 过滤 |
+| `examples/preamble_fft_tools/plots.py` | 新增每包前导码 raw dechirp FFT 绘图：不做 per-symbol 主峰对齐，纵轴为线性主峰归一化幅度，并在图上标注绝对主峰幅度 |
+| `examples/preamble_fft_tools/jobs.py` | frame/header/payload 元数据优先按 `frame_count` 合并，并保留旧版 detection-order fallback |
 | `lib/frame_sync_impl.cc` / `lib/frame_sync_impl.h` | `frame_info` tag 增加 `frame_count` 和原始 IQ 样本范围，供后续 header/payload 元数据对齐 |
 | `lib/header_decoder_impl.cc` / `lib/header_decoder_impl.h` | 发布 `frame_info` 时保留上游 frame 元数据，避免 Python 侧只能按消息顺序合并 |
-| `lib/crc_verif_impl.cc` | 保留原 `msg` payload 输出，并新增 `payload_metadata` message port，输出 payload、CRC 结果和 frame ID |
-| `grc/lora_sdr_crc_verif.block.yml` | GRC 块定义增加可选 `payload_metadata` 消息口 |
+| `lib/crc_verif_impl.cc` | 保留原 `msg` payload 输出，并新增 `payload_metadata` message port，输出 payload、`payload_bytes` 二进制 u8vector、CRC 结果和 frame ID |
+| `grc/lora_sdr_crc_verif.block.yml` | GRC 块定义增加可选 `payload_metadata` 消息口，说明二进制 `payload_bytes` 字段 |
 | `lib/frame_sync_impl.cc` | 修复 `DETECT -> SYNC` 阶段边界检查，避免 SF12 等场景下负索引导致 native 崩溃 |
 
 ### 9.4 弱包解码加噪测试数据
@@ -723,9 +772,10 @@ weakPacket_decoding\data\noisy_iq\<input-stem>\failure_limits\
 
 ### 2026-04-28
 
-- `examples/lora_file_preamble_fft.py` 从单帧前导码 FFT 导出脚本扩展为离线批处理特征导出脚本：支持 `--all-bin --input-dir ...` 按 USRP_IQ 下的 lab 子文件夹分组处理，每个 lab 单独写回 `packet_features.csv` 和 `preamble_features.npz`。
+- `examples/lora_file_preamble_fft.py` 已重构为薄入口，核心代码拆到 `examples/preamble_fft_tools/`；继续支持 `--all-bin --input-dir ...` 按 USRP_IQ 下的 lab 子文件夹分组处理，并写回 `packet_features.csv` 和 `preamble_features.npz`。
 - `lora_file_preamble_fft.py` 会从文件名解析实验编号、走廊编号、位置编号、SF、发射功率和前导码长度；如果 lab 目录存在 `补充.txt`，会读取其中的说明和参数覆盖信息，并把 lab 元数据写入输出结果。
 - 输出收敛为 packet 级特征：平均 RSSI、平均 SNR、SX1276 风格 SNR register 值、前导码主峰 `-3 dB` 宽度、以及主峰对齐后的局部平均幅度谱。旧版 per-frame 明细 CSV 不再生成，并会清理 `rssi_samples_5ms.csv`、`preamble_symbol_features.csv`、`position_summary.csv` 等过期输出，避免误读旧文件。
+- 新增 `--plot-dechirp-fft --plot-only` 绘图路径，可按 `locationidXX/` 为每个 packet 保存 raw dechirp FFT PNG；图像不做 per-symbol 主峰对齐，纵轴为线性主峰归一化幅度，图内记录绝对主峰幅度。
 - 默认运行模式不再解析 payload。流图在 `header_decoder` 后直接接 `null_sink`，只依赖 `frame_sync` 的对齐范围和 `header_decoder` 的 PHY header 信息计算信号特征。因此末尾残包、payload 解码失败或 CRC invalid 不会再导致 `decoded payload count != detected packet count` 这类 warning，也不会影响 RSSI/SNR/preamble FFT 特征导出。
 - 如确实需要 LoRaWAN `FCnt`，新增可选开关 `--require-valid-payload`（别名 `--with-fcnt`）。启用后脚本会重新接回 `header_decoder -> dewhitening -> crc_verif`，只保留 CRC-valid payload 对应的数据包并尝试从 PHYPayload/FHDR 中解析 `FCnt`；末尾残包、CRC invalid 包或 payload 不完整包会被整包舍弃。`--crc-mode` 和 `--print-payload` 仅在该模式下有意义。
 - 修复 `lora_file_preamble_fft.py` 的 frame/header/payload 按 index 合并风险：`frame_sync` 现在把 `frame_count` 和 `start_sample:end_sample` 写入 `frame_info` tag，`header_decoder` 会保留这些字段，`crc_verif` 额外发布 `payload_metadata` 消息；Python 端优先按 `frame_count` 合并三路元数据，避免无效 header、排序或 CRC-valid payload 过滤造成错配。

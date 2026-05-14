@@ -314,21 +314,35 @@ class GrloraPacketDetector:
                     return bytes(payload)
                 if isinstance(payload, str):
                     return payload.encode("latin-1", errors="replace")
+                if isinstance(payload, np.ndarray):
+                    return payload.astype(np.uint8, copy=False).tobytes()
                 if isinstance(payload, (list, tuple)):
                     return bytes(int(item) & 0xFF for item in payload)
                 return str(payload).encode("utf-8", errors="replace")
 
+            def _payload_pmt_to_bytes(self, payload_pmt) -> bytes:
+                if pmt.is_null(payload_pmt):
+                    return b""
+                if hasattr(pmt, "is_u8vector") and pmt.is_u8vector(payload_pmt):
+                    return bytes(pmt.u8vector_elements(payload_pmt))
+                if hasattr(pmt, "is_blob") and pmt.is_blob(payload_pmt):
+                    return bytes(pmt.blob_data(payload_pmt))
+                return self._payload_to_bytes(pmt.to_python(payload_pmt))
+
             def handle_payload_metadata(self, msg):
                 if not pmt.is_dict(msg):
                     return
+                payload_bytes_pmt = pmt.dict_ref(msg, pmt.intern("payload_bytes"), pmt.PMT_NIL)
                 payload_pmt = pmt.dict_ref(msg, pmt.intern("payload"), pmt.PMT_NIL)
                 payload_decode_error = ""
                 try:
-                    payload_value = None if pmt.is_null(payload_pmt) else pmt.to_python(payload_pmt)
+                    if not pmt.is_null(payload_bytes_pmt):
+                        payload_bytes = self._payload_pmt_to_bytes(payload_bytes_pmt)
+                    else:
+                        payload_bytes = self._payload_pmt_to_bytes(payload_pmt)
                 except Exception as exc:
-                    payload_value = None
+                    payload_bytes = b""
                     payload_decode_error = f"{type(exc).__name__}: {exc}"
-                payload_bytes = self._payload_to_bytes(payload_value)
                 payload = {
                     "frame_count": int(self._dict_value(msg, "frame_count", -1)),
                     "decoded_payload_len": int(self._dict_value(msg, "decoded_payload_len", len(payload_bytes))),

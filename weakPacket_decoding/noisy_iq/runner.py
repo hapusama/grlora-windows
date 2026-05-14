@@ -299,6 +299,7 @@ class NoisyIqSweep:
             f"{clean_payload.get('expected_packet_count', 0)}, "
             f"wrong={clean_payload.get('wrong_payload_packets', 0)}, "
             f"miss_detect={clean_payload.get('missed_detection_packets', 0)}, "
+            f"ber={float(clean_payload.get('ber', float('nan'))):.3g}, "
             f"grlora_snr_median={clean_summary['median']:.2f} dB"
         )
 
@@ -373,6 +374,7 @@ class NoisyIqSweep:
             f"{payload_check.get('expected_packet_count', 0)}, "
             f"wrong={payload_check.get('wrong_payload_packets', 0)}, "
             f"miss_detect={payload_check.get('missed_detection_packets', 0)}, "
+            f"ber={float(payload_check.get('ber', float('nan'))):.3g}, "
             f"grlora_snr_median={summary['median']:.2f} dB"
         )
         write_metadata(meta_path, metadata)

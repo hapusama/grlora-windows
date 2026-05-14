@@ -57,7 +57,7 @@ documentation: |-
         in: stream of payload bytes
       Output:
         (optional) msg: Received payload
-        (optional) payload_metadata: Received payload plus frame metadata for packet-level alignment.
+        (optional) payload_metadata: Received payload plus frame metadata for packet-level alignment. Includes payload_bytes as a binary u8vector.
         (optional) payload_char: Received payload as a stream of char, with tagged with payload length and CRC verification result.
         (optional) crc_check: stream indicating the result of the CRC verification. Enabled by the corresponding parameter.
 
