@@ -5,7 +5,9 @@
 #include <gnuradio/io_signature.h>
 
 #include <boost/math/special_functions/bessel.hpp>  // to compute LLR
+#include <cmath>
 #include <limits>
+#include <numeric>
 
 #include "fft_demod_impl.h"
 extern "C" {
@@ -30,11 +32,17 @@ namespace gr {
                         m_soft_decoding(soft_decoding), max_log_approx(max_log_approx), 
                         m_new_frame(true) {
             set_sf(MIN_SF);//accept any new sf
+            m_cr = 0;
             m_symb_cnt = 0;
+            m_frame_count = -1;
+            m_current_cfo_int = 0;
+            m_current_cfo_frac = 0.0f;
             // m_samples_per_symbol = (uint32_t)(1u << m_sf);
             m_ldro = false;
+            is_header = true;
 
             set_tag_propagation_policy(TPP_DONT);
+            message_port_register_out(pmt::mp("peak_candidates"));
 #ifdef GRLORA_MEASUREMENTS
             int num = 0;  // check next file name to use
             while (1) {
@@ -95,6 +103,7 @@ namespace gr {
             // Get magnitude squared
             float *m_fft_mag_sq = new float[m_samples_per_symbol];  // /!\ dynamic memory allocation
             for (uint32_t i = 0u; i < m_samples_per_symbol; i++) {
+                m_fft[i] = gr_complex(cx_out[i].r, cx_out[i].i);
                 m_fft_mag_sq[i] = cx_out[i].r * cx_out[i].r + cx_out[i].i * cx_out[i].i;
                 rec_en += m_fft_mag_sq[i];
             }
@@ -112,6 +121,7 @@ namespace gr {
 
             // Return argmax
             uint16_t idx = std::max_element(m_fft_mag_sq, m_fft_mag_sq + m_samples_per_symbol) - m_fft_mag_sq;
+            publish_peak_candidates(m_fft_mag_sq, idx);
             // std::cout << " hard-dec idx " << idx /*<< " m_fft_mag_sq " << m_fft_mag_sq[0] */<< std::endl;
 
 #ifdef GRLORA_MEASUREMENTS
@@ -126,6 +136,73 @@ namespace gr {
             delete[] m_fft_mag_sq;
 
             return idx;
+        }
+
+        void fft_demod_impl::publish_peak_candidates(const float *fft_mag_sq, uint16_t hard_bin) {
+            // 这里固定发布 Top-16 候选，避免把完整 FFT 频谱塞进消息导致文件过大。
+            // 对弱包 peak 搜索而言，Top-16 通常已经覆盖后续重排序需要的候选集合。
+            const uint32_t top_k = std::min<uint32_t>(16u, m_samples_per_symbol);
+            std::vector<uint32_t> order(m_samples_per_symbol);
+            std::iota(order.begin(), order.end(), 0u);
+            std::partial_sort(
+                order.begin(),
+                order.begin() + top_k,
+                order.end(),
+                [fft_mag_sq](uint32_t lhs, uint32_t rhs) {
+                    return fft_mag_sq[lhs] > fft_mag_sq[rhs];
+                });
+
+            std::vector<uint16_t> candidate_bins(top_k);
+            std::vector<uint16_t> candidate_symbols(top_k);
+            std::vector<gr_complex> candidate_values(top_k);
+            std::vector<float> candidate_powers(top_k);
+            std::vector<float> candidate_phases(top_k);
+
+            const uint32_t demap_divisor = (is_header || m_ldro) ? 4u : 1u;
+            for (uint32_t i = 0; i < top_k; i++) {
+                const uint32_t bin = order[i];
+                candidate_bins[i] = static_cast<uint16_t>(bin);
+                candidate_symbols[i] = static_cast<uint16_t>(
+                    mod(static_cast<long>(bin) - 1, static_cast<long>(m_samples_per_symbol)) / demap_divisor);
+                candidate_values[i] = m_fft[bin];
+                candidate_powers[i] = fft_mag_sq[bin];
+                candidate_phases[i] = std::arg(m_fft[bin]);
+            }
+
+            double total_power = 0.0;
+            for (uint32_t i = 0; i < m_samples_per_symbol; i++) {
+                total_power += fft_mag_sq[i];
+            }
+            const float best_power = candidate_powers.empty() ? 0.0f : candidate_powers[0];
+            const float second_power = candidate_powers.size() > 1 ? candidate_powers[1] : 0.0f;
+            const double confidence_db = 10.0 * std::log10((best_power + 1e-30) / (second_power + 1e-30));
+            const double noise_power_est =
+                (total_power - best_power) / std::max<uint32_t>(1u, m_samples_per_symbol - 1u);
+            const uint16_t hard_symbol = static_cast<uint16_t>(
+                mod(static_cast<long>(hard_bin) - 1, static_cast<long>(m_samples_per_symbol)) / demap_divisor);
+
+            pmt::pmt_t msg = pmt::make_dict();
+            msg = pmt::dict_add(msg, pmt::intern("frame_count"), pmt::from_long(m_frame_count));
+            msg = pmt::dict_add(msg, pmt::intern("symbol_index"), pmt::from_long(m_symb_cnt));
+            msg = pmt::dict_add(msg, pmt::intern("is_header"), pmt::from_bool(is_header));
+            msg = pmt::dict_add(msg, pmt::intern("sf"), pmt::from_long(m_sf));
+            msg = pmt::dict_add(msg, pmt::intern("cr"), pmt::from_long(m_cr));
+            msg = pmt::dict_add(msg, pmt::intern("ldro"), pmt::from_bool(m_ldro));
+            msg = pmt::dict_add(msg, pmt::intern("samples_per_symbol"), pmt::from_long(m_samples_per_symbol));
+            msg = pmt::dict_add(msg, pmt::intern("top_k"), pmt::from_long(top_k));
+            msg = pmt::dict_add(msg, pmt::intern("hard_bin"), pmt::from_long(hard_bin));
+            msg = pmt::dict_add(msg, pmt::intern("hard_symbol"), pmt::from_long(hard_symbol));
+            msg = pmt::dict_add(msg, pmt::intern("confidence_db"), pmt::mp(static_cast<float>(confidence_db)));
+            msg = pmt::dict_add(msg, pmt::intern("total_power"), pmt::mp(static_cast<float>(total_power)));
+            msg = pmt::dict_add(msg, pmt::intern("noise_power_est"), pmt::mp(static_cast<float>(noise_power_est)));
+            msg = pmt::dict_add(msg, pmt::intern("cfo_int"), pmt::from_long(m_current_cfo_int));
+            msg = pmt::dict_add(msg, pmt::intern("cfo_frac"), pmt::mp(m_current_cfo_frac));
+            msg = pmt::dict_add(msg, pmt::intern("candidate_bins"), pmt::init_u16vector(top_k, candidate_bins));
+            msg = pmt::dict_add(msg, pmt::intern("candidate_symbols"), pmt::init_u16vector(top_k, candidate_symbols));
+            msg = pmt::dict_add(msg, pmt::intern("candidate_values"), pmt::init_c32vector(top_k, candidate_values));
+            msg = pmt::dict_add(msg, pmt::intern("candidate_powers"), pmt::init_f32vector(top_k, candidate_powers));
+            msg = pmt::dict_add(msg, pmt::intern("candidate_phases"), pmt::init_f32vector(top_k, candidate_phases));
+            message_port_pub(pmt::intern("peak_candidates"), msg);
         }
 
         // Use in Soft-decoding
@@ -143,6 +220,7 @@ namespace gr {
             // compute SNR estimate at each received symbol as SNR remains constant during 1 simulation run
             // Estimate signal power
             int symbol_idx = std::max_element(m_fft_mag_sq, m_fft_mag_sq + m_samples_per_symbol) - m_fft_mag_sq;
+            publish_peak_candidates(m_fft_mag_sq, static_cast<uint16_t>(symbol_idx));
 
             // Estimate noise power
             double signal_energy = 0;
@@ -278,6 +356,10 @@ namespace gr {
                     int cfo_int = pmt::to_long(pmt::dict_ref(tags[0].value, pmt::string_to_symbol("cfo_int"), err));
                     float cfo_frac = pmt::to_float(pmt::dict_ref(tags[0].value, pmt::string_to_symbol("cfo_frac"), err));
                     int sf = pmt::to_double(pmt::dict_ref(tags[0].value, pmt::string_to_symbol("sf"), err));
+                    m_frame_count = pmt::to_long(pmt::dict_ref(tags[0].value, pmt::string_to_symbol("frame_count"), pmt::from_long(m_frame_count)));
+                    m_current_cfo_int = cfo_int;
+                    m_current_cfo_frac = cfo_frac;
+                    m_symb_cnt = 0;
                     if(sf != m_sf)
                         set_sf(sf);
                      //create downchirp taking CFO_int into account
@@ -292,6 +374,7 @@ namespace gr {
                 } 
                 else
                 {
+                    m_frame_count = pmt::to_long(pmt::dict_ref(tags[0].value, pmt::string_to_symbol("frame_count"), pmt::from_long(m_frame_count)));
                     m_cr = pmt::to_long(pmt::dict_ref(tags[0].value, pmt::string_to_symbol("cr"), err));
                     m_ldro = pmt::to_bool(pmt::dict_ref(tags[0].value,pmt::string_to_symbol("ldro"),err));
                     m_symb_numb = pmt::to_long(pmt::dict_ref(tags[0].value, pmt::string_to_symbol("symb_numb"), err));                

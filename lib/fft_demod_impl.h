@@ -14,6 +14,7 @@
 #include <gnuradio/io_signature.h>
 #include <gnuradio/lora_sdr/utilities.h>
 #include <gnuradio/lora_sdr/fft_demod.h>
+#include <pmt/pmt.h>
 
 namespace gr {
   namespace lora_sdr {
@@ -29,6 +30,9 @@ namespace gr {
       bool m_ldro; ///< use low datarate optimisation
       unsigned int m_symb_numb; ///< number of symbols in the frame
       unsigned int m_symb_cnt; ///< number of symbol already output in current frame
+      long m_frame_count;      ///< 当前帧编号，用于 peak 级 groundtruth 对齐
+      int m_current_cfo_int;   ///< 当前帧整数 CFO
+      float m_current_cfo_frac; ///< 当前帧小数 CFO
 
       double m_Ps_est = 0;   // Signal Power estimation updated at each rx symbol
       double m_Pn_est = 0;   // Signal Power estimation updated at each rx symbo
@@ -88,6 +92,11 @@ namespace gr {
        *  \brief  Compute the FFT and fill the class attributes
        */
       float* compute_fft_mag(const gr_complex *samples);
+
+      /**
+       *  \brief  发布当前符号的 Top-K 复数 FFT 候选，用于 peak 级 groundtruth。
+       */
+      void publish_peak_candidates(const float *fft_mag_sq, uint16_t hard_bin);
 
       /**
        *  \brief  Compute the Log-Likelihood Ratios of the SF nbr of bits
