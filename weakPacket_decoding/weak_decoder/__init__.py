@@ -1,20 +1,17 @@
-"""弱包 LoRa 检测与同步估计原型。"""
+"""弱包 LoRa 检测与帧同步原型。"""
 
-from .chirp import build_upchirp, dechirp_fft
-from .initial_state import (
-    InitialStateEstimate,
-    InitialStateSpectrum,
-    InitialStateSearchConfig,
-    InitialStateSeed,
-    compute_initial_state_spectrum,
-    estimate_initial_state,
-)
+from .chirp import build_upchirp, dechirp_fft, signed_fft_bin
 from .frame_locator import (
     FrameLocation,
     FrameLocatorConfig,
     SymbolPeak,
     locate_frame_from_event,
     sync_word_to_symbols,
+)
+from .grlora_frame_sync import (
+    FrameSyncPeak,
+    GrloraFrameSyncResult,
+    run_grlora_frame_sync_validation,
 )
 from .preamble_detector import (
     DetectionEvent,
@@ -26,21 +23,19 @@ from .preamble_detector import (
 
 __all__ = [
     "DetectionEvent",
-    "InitialStateEstimate",
-    "InitialStateSpectrum",
-    "InitialStateSearchConfig",
-    "InitialStateSeed",
     "FrameLocation",
     "FrameLocatorConfig",
+    "FrameSyncPeak",
+    "GrloraFrameSyncResult",
     "PreambleDetectorConfig",
     "SymbolPeak",
     "WindowPeak",
     "build_upchirp",
     "dechirp_fft",
     "detect_preamble_runs",
-    "compute_initial_state_spectrum",
-    "estimate_initial_state",
     "locate_frame_from_event",
+    "run_grlora_frame_sync_validation",
     "scan_preamble_windows",
+    "signed_fft_bin",
     "sync_word_to_symbols",
 ]

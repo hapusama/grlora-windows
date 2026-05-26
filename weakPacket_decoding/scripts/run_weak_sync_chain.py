@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""弱包同步链路入口：前导码检测、chirp 对齐、初始状态估计。"""
-
+"""弱包同步链路入口：前导码检测、SFD 帧定界、gr-lora_sdr 风格粗同步验证。"""
+# D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\run_weak_sync_chain.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_8.bin -o gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_8_sync_chain.csv --bw 125000 --samp-rate 500000 --sync-word 0x34 --win-chirps 2 --hop-chirps 1 --stft-dir gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_8_stft --framesync-peaks-csv gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_8_framesync_peaks.csv --framesync-spectrum-dir gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_8_framesync_spectrum
 from __future__ import annotations
 
 import argparse
@@ -16,26 +16,23 @@ WEAK_ROOT = Path(__file__).resolve().parents[1]
 if str(WEAK_ROOT) not in sys.path:
     sys.path.insert(0, str(WEAK_ROOT))
 
-from weak_decoder.chirp import build_upchirp  # noqa: E402
-from weak_decoder.initial_state import (  # noqa: E402
-    InitialStateEstimate,
-    InitialStateSpectrum,
-    InitialStateSearchConfig,
-    InitialStateSeed,
-    compute_initial_state_spectrum,
-    estimate_initial_state,
-    load_complex64_file,
-)
+from weak_decoder.chirp import build_upchirp, signed_fft_bin  # noqa: E402
 from weak_decoder.frame_locator import (  # noqa: E402
     FrameLocation,
     FrameLocatorConfig,
     locate_frame_from_event,
+)
+from weak_decoder.grlora_frame_sync import (  # noqa: E402
+    FrameSyncPeak,
+    GrloraFrameSyncResult,
+    run_grlora_frame_sync_validation,
 )
 from weak_decoder.preamble_detector import (  # noqa: E402
     DetectionEvent,
     PreambleDetectorConfig,
     WindowPeak,
     detect_preamble_runs,
+    load_complex64_file,
 )
 
 
@@ -48,14 +45,18 @@ def parse_int_auto(text: str) -> int:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "一体化弱包同步链：先做多 chirp 滑窗前导码检测，"
-            "再对每个检测事件独立做 chirp 起点对齐和初始状态估计。"
+            "一体化弱包帧同步链路：滑窗检测前导码，搜索 sync word + SFD 做帧定界，"
+            "再按 gr-lora_sdr 的 k_hat 粗同步方式验证前导码 peak 是否回到 bin0。"
         )
     )
     parser.add_argument("-i", "--input", type=Path, required=True, help="raw complex64 IQ 文件。")
-    parser.add_argument("-o", "--output", type=Path, required=True, help="链路结果 CSV。")
+    parser.add_argument("-o", "--output", type=Path, required=True, help="帧同步结果 CSV。")
     parser.add_argument("--events-csv", type=Path, default=None, help="可选：另存检测事件 CSV。")
     parser.add_argument("--windows-csv", type=Path, default=None, help="可选：另存逐滑窗 peak CSV。")
+    parser.add_argument("--framesync-peaks-csv", type=Path, default=None, help="可选：另存同步后逐符号 peak CSV。")
+    parser.add_argument("--framesync-spectrum-dir", type=Path, default=None, help="可选：保存同步后前导码平均 FFT 频谱图和 CSV。")
+    parser.add_argument("--framesync-spectrum-bin-span", type=int, default=96, help="前导码平均频谱图展示 bin0 附近正负多少个 bin。")
+    parser.add_argument("--framesync-spectrum-chirps", type=int, default=8, help="平均频谱使用多少个同步后的前导码 upchirp。")
     parser.add_argument("--sf", type=int, default=None, help="LoRa SF。默认从文件名第 4 段推断。")
     parser.add_argument("--bw", type=float, default=125000.0, help="LoRa 带宽 Hz，默认 125000。")
     parser.add_argument("--samp-rate", type=float, default=500000.0, help="IQ 采样率 Hz，默认 500000。")
@@ -70,7 +71,7 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="连续稳定窗口数。默认 preamble_len - win_chirps + 1。",
     )
-    parser.add_argument("--bin-tol", type=int, default=2, help="peak bin 循环距离容差，默认 2。")
+    parser.add_argument("--bin-tol", type=int, default=2, help="检测阶段 peak bin 循环距离容差，默认 2。")
     parser.add_argument("--sample-limit", type=int, default=None, help="只扫描前 N 个 sample。")
     parser.add_argument("--max-windows", type=int, default=None, help="最多扫描多少个滑窗。")
     parser.add_argument("--max-events", type=int, default=None, help="最多处理多少个检测事件。")
@@ -80,33 +81,18 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="检测事件去重间隔，单位 chirp；默认 preamble_len。",
     )
-    parser.add_argument("--align-search-chirps", type=float, default=1.0, help="chirp 起点对齐搜索半径，单位 chirp，默认 1。")
-    parser.add_argument("--align-step-samples", type=int, default=1, help="chirp 起点对齐步长，单位 sample，默认 1。")
-    parser.add_argument("--align-chirps", type=int, default=None, help="对齐评分使用的 upchirp 数，默认 min(4, preamble_len)。")
-    parser.add_argument("--frame-search-samples", type=int, default=None, help="SFD 定位搜索半径，单位 sample；默认 Ns/8。")
-    parser.add_argument("--frame-step-samples", type=int, default=1, help="SFD 定位搜索步长，单位 sample，默认 1。")
-    parser.add_argument("--frame-preamble-bin-tol", type=int, default=2, help="SFD 定位阶段前导码稳定 bin 容差，默认 2。")
-    parser.add_argument("--frame-sync-bin-tol", type=int, default=4, help="sync word 相对 bin 容差，默认 4。")
-    parser.add_argument("--frame-sfd-bin-tol", type=int, default=4, help="两个 SFD downchirp bin 稳定容差，默认 4。")
-    parser.add_argument("--frame-min-preamble-peaks", type=int, default=None, help="SFD 定位阶段最少稳定前导码符号数，默认 preamble_len-2。")
-    parser.add_argument("--frame-symbol-search-span", type=int, default=2, help="SFD 定位额外搜索前后多少个整 chirp，默认 2。")
-    parser.add_argument("--stft-dir", type=Path, default=None, help="可选：保存定位出的 preamble+sync+SFD STFT 验证图。")
-    parser.add_argument("--initial-state-plot-dir", type=Path, default=None, help="可选：保存初始状态估计补偿前后 FFT 能量分布图和 CSV。")
-    parser.add_argument("--initial-state-plot-bin-span", type=int, default=128, help="初始状态频谱图展示 bin0 附近正负多少个 bin，默认 128。")
-    parser.add_argument("--estimate-chirps", type=int, default=None, help="初始状态估计使用的 upchirp 数，默认 min(6, preamble_len)。")
-    parser.add_argument("--tau-min", type=float, default=None, help="tau0 搜索下界，单位 chip。")
-    parser.add_argument("--tau-max", type=float, default=None, help="tau0 搜索上界，单位 chip。")
-    parser.add_argument("--tau-step", type=float, default=8.0, help="tau0 粗搜索步长，默认 8。")
-    parser.add_argument("--beta-min", type=float, default=-64.0, help="beta 搜索下界，默认 -64。")
-    parser.add_argument("--beta-max", type=float, default=64.0, help="beta 搜索上界，默认 64。")
-    parser.add_argument("--beta-step", type=float, default=2.0, help="beta 粗搜索步长，默认 2。")
-    parser.add_argument("--fine-tau-radius", type=float, default=4.0, help="细搜索 tau0 半径，默认 4。")
-    parser.add_argument("--fine-tau-step", type=float, default=1.0, help="细搜索 tau0 步长，默认 1。")
-    parser.add_argument("--fine-beta-radius", type=float, default=2.0, help="细搜索 beta 半径，默认 2。")
-    parser.add_argument("--fine-beta-step", type=float, default=0.25, help="细搜索 beta 步长，默认 0.25。")
-    parser.add_argument("--zeta-span", type=float, default=0.0, help="SFO zeta 搜索半径，默认 0。")
-    parser.add_argument("--zeta-step", type=float, default=1e-6, help="SFO zeta 搜索步长，默认 1e-6。")
-    parser.add_argument("--frequency-chunk", type=int, default=128, help="粗搜索频偏分块大小。")
+    parser.add_argument("--align-search-chirps", type=float, default=1.0, help="chirp 起点粗对齐搜索半径，单位 chirp。")
+    parser.add_argument("--align-step-samples", type=int, default=1, help="chirp 起点粗对齐步长，单位 sample。")
+    parser.add_argument("--align-chirps", type=int, default=None, help="粗对齐评分使用的 upchirp 数，默认 min(4, preamble_len)。")
+    parser.add_argument("--frame-search-samples", type=int, default=None, help="SFD 定位搜索半径，默认 Ns/8。")
+    parser.add_argument("--frame-step-samples", type=int, default=1, help="SFD 定位搜索步长，默认 1 sample。")
+    parser.add_argument("--frame-preamble-bin-tol", type=int, default=2, help="帧定位阶段前导码稳定 bin 容差。")
+    parser.add_argument("--frame-sync-bin-tol", type=int, default=4, help="sync word 相对 bin 容差。")
+    parser.add_argument("--frame-sfd-bin-tol", type=int, default=4, help="两个 SFD downchirp bin 稳定容差。")
+    parser.add_argument("--frame-min-preamble-peaks", type=int, default=None, help="帧定位阶段最少稳定前导码符号数。")
+    parser.add_argument("--frame-symbol-search-span", type=int, default=2, help="SFD 定位额外搜索前后多少个整 chirp。")
+    parser.add_argument("--framesync-bin0-tol", type=int, default=0, help="gr-lora 粗同步后前导码落入 bin0 的容差。")
+    parser.add_argument("--stft-dir", type=Path, default=None, help="可选：保存 preamble+sync+SFD STFT 验证图。")
     return parser.parse_args()
 
 
@@ -144,25 +130,13 @@ def resolve_chirp_samples(sf: int, bw: float, samp_rate: float) -> tuple[int, in
     return int((1 << int(sf)) * os_factor), os_factor
 
 
-def detection_to_seed(event: DetectionEvent, event_index: int, start_sample: int) -> InitialStateSeed:
-    """把检测事件转换成初始状态估计种子。"""
-
-    return InitialStateSeed(
-        event_index=int(event_index),
-        start_sample=int(start_sample),
-        end_sample=int(event.end_sample),
-        reference_bin=int(event.reference_bin),
-        window_count=int(event.window_count),
-    )
-
-
 def select_spaced_events(
     events: list[DetectionEvent],
     chirp_samples: int,
     min_gap_chirps: float,
     max_events: int | None,
 ) -> list[DetectionEvent]:
-    """按起点间隔做轻量去重，避免同一段前导码被重复送进估计器。"""
+    """按起点间隔做轻量去重，避免同一段前导码被重复处理。"""
 
     selected: list[DetectionEvent] = []
     min_gap_samples = int(round(float(min_gap_chirps) * int(chirp_samples)))
@@ -185,7 +159,7 @@ def align_event_start(
     step_samples: int,
     align_chirps: int,
 ) -> dict[str, float | int]:
-    """在检测粗起点附近搜索更好的 chirp 边界。"""
+    """在检测粗起点附近搜索更好的 chirp 边界，给后续 SFD 搜索一个稳定中心。"""
 
     chirp_samples = config.chirp_samples
     downchirp = np.conjugate(
@@ -211,18 +185,18 @@ def align_event_start(
         second_power = float(np.partition(energy, -2)[-2]) if energy.size > 1 else 0.0
         confidence_db = 10.0 * math.log10((peak_power + 1e-30) / (second_power + 1e-30))
         peak_share = peak_power / total_power
-        score = peak_power
-        if best is None or score > float(best["align_score"]):
+        if best is None or peak_power > float(best["align_score"]):
             best = {
                 "aligned_start_sample": int(candidate_start),
                 "align_offset_samples": int(candidate_start - int(event.start_sample)),
                 "align_peak_bin": peak_bin,
+                "align_peak_signed_bin": signed_fft_bin(peak_bin, chirp_samples),
                 "align_peak_power": peak_power,
                 "align_second_power": second_power,
                 "align_total_power": total_power,
                 "align_confidence_db": float(confidence_db),
                 "align_peak_share": float(peak_share),
-                "align_score": float(score),
+                "align_score": float(peak_power),
             }
     if best is None:
         raise ValueError(f"event {event.event_index} has no valid alignment candidate.")
@@ -237,7 +211,7 @@ def write_windows_csv(path: Path, windows: list[WindowPeak], config: PreambleDet
         "start_sample",
         "end_sample",
         "peak_bin",
-        "peak_bin_div_os",
+        "peak_signed_bin",
         "peak_power",
         "second_power",
         "total_power",
@@ -256,7 +230,7 @@ def write_windows_csv(path: Path, windows: list[WindowPeak], config: PreambleDet
                     "start_sample": item.start_sample,
                     "end_sample": item.end_sample,
                     "peak_bin": item.peak_bin,
-                    "peak_bin_div_os": item.peak_bin / float(config.os_factor),
+                    "peak_signed_bin": signed_fft_bin(item.peak_bin, config.chirp_samples) if item.peak_bin >= 0 else "",
                     "peak_power": item.peak_power,
                     "second_power": item.second_power,
                     "total_power": item.total_power,
@@ -278,7 +252,7 @@ def write_events_csv(path: Path, events: list[DetectionEvent], config: PreambleD
         "last_window_index",
         "window_count",
         "reference_bin",
-        "reference_bin_div_os",
+        "reference_signed_bin",
         "bin_min",
         "bin_max",
         "mean_peak_power",
@@ -308,7 +282,7 @@ def write_events_csv(path: Path, events: list[DetectionEvent], config: PreambleD
                     "last_window_index": item.last_window_index,
                     "window_count": item.window_count,
                     "reference_bin": item.reference_bin,
-                    "reference_bin_div_os": item.reference_bin / float(config.os_factor),
+                    "reference_signed_bin": signed_fft_bin(item.reference_bin, config.chirp_samples),
                     "bin_min": item.bin_min,
                     "bin_max": item.bin_max,
                     "mean_peak_power": item.mean_peak_power,
@@ -327,11 +301,8 @@ def write_events_csv(path: Path, events: list[DetectionEvent], config: PreambleD
             )
 
 
-def write_chain_csv(
-    path: Path,
-    rows: list[dict[str, object]],
-) -> None:
-    """写出一体化链路结果。"""
+def write_chain_csv(path: Path, rows: list[dict[str, object]]) -> None:
+    """写出一体化帧同步链路结果。"""
 
     fields = [
         "packet_index",
@@ -340,10 +311,12 @@ def write_chain_csv(
         "detected_end_sample",
         "detected_window_count",
         "detected_reference_bin",
+        "detected_reference_signed_bin",
         "detected_mean_confidence_db",
         "aligned_start_sample",
         "align_offset_samples",
         "align_peak_bin",
+        "align_peak_signed_bin",
         "align_confidence_db",
         "align_peak_share",
         "frame_valid",
@@ -352,6 +325,7 @@ def write_chain_csv(
         "located_payload_start_sample",
         "locator_score",
         "preamble_ref_bin",
+        "preamble_ref_signed_bin",
         "preamble_stable_count",
         "sync1_bin",
         "sync2_bin",
@@ -364,22 +338,32 @@ def write_chain_csv(
         "sfd_bin_distance",
         "mean_preamble_confidence_db",
         "mean_sfd_confidence_db",
-        "tau0_chip",
-        "tau0_sample",
-        "beta_bin",
-        "cfo_hz",
-        "zeta",
-        "payload_sto_chip",
-        "payload_sto_sample",
-        "payload_start_sample",
-        "objective",
-        "noncoherent_power",
-        "coherent_gain_db",
-        "mean_abs_z0",
-        "coarse_tau0_chip",
-        "coarse_beta_bin",
-        "hit_tau_boundary",
-        "hit_beta_boundary",
+        "grlora_framesync_valid",
+        "grlora_coarse_offset_chips",
+        "grlora_coarse_offset_samples",
+        "grlora_synced_preamble_start_sample",
+        "grlora_synced_sfd_start_sample",
+        "grlora_synced_payload_start_sample",
+        "grlora_preamble_peak_mean_signed_bin",
+        "grlora_preamble_peak_max_abs_signed_bin",
+        "grlora_preamble_bin0_count",
+        "grlora_preamble_peak_count",
+        "grlora_sync1_peak_signed_bin",
+        "grlora_sync2_peak_signed_bin",
+        "grlora_sync1_expected_signed_bin",
+        "grlora_sync2_expected_signed_bin",
+        "grlora_sync1_distance",
+        "grlora_sync2_distance",
+        "grlora_sfd1_peak_signed_bin",
+        "grlora_sfd2_peak_signed_bin",
+        "grlora_sfd_mean_signed_bin",
+        "grlora_cfo_int_est",
+        "grlora_spectrum_chirps",
+        "grlora_spectrum_raw_peak_signed_bin",
+        "grlora_spectrum_peak_signed_bin",
+        "grlora_spectrum_peak_relative_db",
+        "grlora_spectrum_bin0_relative_db",
+        "grlora_spectrum_bin0_is_peak",
     ]
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
@@ -389,14 +373,57 @@ def write_chain_csv(
             writer.writerow({field: row.get(field, "") for field in fields})
 
 
-def estimate_to_row(
+def write_framesync_peaks_csv(path: Path, rows: list[tuple[int, int, FrameSyncPeak]]) -> None:
+    """写出 gr-lora 粗同步后每个验证符号的 peak。"""
+
+    fields = [
+        "packet_index",
+        "event_index",
+        "stage",
+        "symbol_index",
+        "start_sample",
+        "peak_bin",
+        "signed_peak_bin",
+        "expected_signed_bin",
+        "distance_to_expected",
+        "peak_power",
+        "second_power",
+        "confidence_db",
+        "peak_share",
+    ]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for packet_index, event_index, peak in rows:
+            writer.writerow(
+                {
+                    "packet_index": int(packet_index),
+                    "event_index": int(event_index),
+                    "stage": peak.stage,
+                    "symbol_index": peak.symbol_index,
+                    "start_sample": peak.start_sample,
+                    "peak_bin": peak.peak_bin,
+                    "signed_peak_bin": peak.signed_peak_bin,
+                    "expected_signed_bin": "" if peak.expected_signed_bin is None else peak.expected_signed_bin,
+                    "distance_to_expected": "" if peak.distance_to_expected is None else peak.distance_to_expected,
+                    "peak_power": peak.peak_power,
+                    "second_power": peak.second_power,
+                    "confidence_db": peak.confidence_db,
+                    "peak_share": peak.peak_share,
+                }
+            )
+
+
+def result_to_row(
     packet_index: int,
     event: DetectionEvent,
     alignment: dict[str, float | int],
     frame_location: FrameLocation,
-    estimate: InitialStateEstimate,
+    frame_sync: GrloraFrameSyncResult,
+    detector_config: PreambleDetectorConfig,
 ) -> dict[str, object]:
-    """合并检测、对齐、SFD 定位、初始状态估计四层结果。"""
+    """合并检测、帧定界、gr-lora 粗同步验证三层结果。"""
 
     return {
         "packet_index": int(packet_index),
@@ -405,10 +432,12 @@ def estimate_to_row(
         "detected_end_sample": int(event.end_sample),
         "detected_window_count": int(event.window_count),
         "detected_reference_bin": int(event.reference_bin),
+        "detected_reference_signed_bin": signed_fft_bin(event.reference_bin, detector_config.chirp_samples),
         "detected_mean_confidence_db": float(event.mean_confidence_db),
         "aligned_start_sample": alignment["aligned_start_sample"],
         "align_offset_samples": alignment["align_offset_samples"],
         "align_peak_bin": alignment["align_peak_bin"],
+        "align_peak_signed_bin": alignment["align_peak_signed_bin"],
         "align_confidence_db": alignment["align_confidence_db"],
         "align_peak_share": alignment["align_peak_share"],
         "frame_valid": int(frame_location.valid),
@@ -417,6 +446,7 @@ def estimate_to_row(
         "located_payload_start_sample": int(frame_location.payload_start_sample),
         "locator_score": float(frame_location.score),
         "preamble_ref_bin": int(frame_location.preamble_ref_bin),
+        "preamble_ref_signed_bin": signed_fft_bin(frame_location.preamble_ref_bin, detector_config.chirp_samples),
         "preamble_stable_count": int(frame_location.preamble_stable_count),
         "sync1_bin": int(frame_location.sync1_bin),
         "sync2_bin": int(frame_location.sync2_bin),
@@ -429,22 +459,26 @@ def estimate_to_row(
         "sfd_bin_distance": int(frame_location.sfd_bin_distance),
         "mean_preamble_confidence_db": float(frame_location.mean_preamble_confidence_db),
         "mean_sfd_confidence_db": float(frame_location.mean_sfd_confidence_db),
-        "tau0_chip": estimate.tau0_chip,
-        "tau0_sample": estimate.tau0_sample,
-        "beta_bin": estimate.beta_bin,
-        "cfo_hz": estimate.cfo_hz,
-        "zeta": estimate.zeta,
-        "payload_sto_chip": estimate.payload_sto_chip,
-        "payload_sto_sample": estimate.payload_sto_sample,
-        "payload_start_sample": estimate.payload_start_sample,
-        "objective": estimate.objective,
-        "noncoherent_power": estimate.noncoherent_power,
-        "coherent_gain_db": estimate.coherent_gain_db,
-        "mean_abs_z0": estimate.mean_abs_z0,
-        "coarse_tau0_chip": estimate.coarse_tau0_chip,
-        "coarse_beta_bin": estimate.coarse_beta_bin,
-        "hit_tau_boundary": int(estimate.hit_tau_boundary),
-        "hit_beta_boundary": int(estimate.hit_beta_boundary),
+        "grlora_framesync_valid": int(frame_sync.valid),
+        "grlora_coarse_offset_chips": frame_sync.coarse_offset_chips,
+        "grlora_coarse_offset_samples": frame_sync.coarse_offset_samples,
+        "grlora_synced_preamble_start_sample": frame_sync.synced_preamble_start_sample,
+        "grlora_synced_sfd_start_sample": frame_sync.synced_sfd_start_sample,
+        "grlora_synced_payload_start_sample": frame_sync.synced_payload_start_sample,
+        "grlora_preamble_peak_mean_signed_bin": frame_sync.preamble_peak_mean_signed_bin,
+        "grlora_preamble_peak_max_abs_signed_bin": frame_sync.preamble_peak_max_abs_signed_bin,
+        "grlora_preamble_bin0_count": frame_sync.preamble_bin0_count,
+        "grlora_preamble_peak_count": frame_sync.preamble_peak_count,
+        "grlora_sync1_peak_signed_bin": frame_sync.sync1_peak_signed_bin,
+        "grlora_sync2_peak_signed_bin": frame_sync.sync2_peak_signed_bin,
+        "grlora_sync1_expected_signed_bin": frame_sync.sync1_expected_signed_bin,
+        "grlora_sync2_expected_signed_bin": frame_sync.sync2_expected_signed_bin,
+        "grlora_sync1_distance": frame_sync.sync1_distance,
+        "grlora_sync2_distance": frame_sync.sync2_distance,
+        "grlora_sfd1_peak_signed_bin": frame_sync.sfd1_peak_signed_bin,
+        "grlora_sfd2_peak_signed_bin": frame_sync.sfd2_peak_signed_bin,
+        "grlora_sfd_mean_signed_bin": frame_sync.sfd_mean_signed_bin,
+        "grlora_cfo_int_est": frame_sync.cfo_int_est,
     }
 
 
@@ -455,7 +489,7 @@ def write_frame_stft_plot(
     preamble_len: float,
     output_path: Path,
 ) -> None:
-    """把定位出的 preamble+sync+SFD 区间画成 STFT 验证图。"""
+    """把物理帧定界出的 preamble+sync+SFD 区间画成 STFT 验证图。"""
 
     import matplotlib
 
@@ -528,7 +562,7 @@ def write_frame_stft_plot(
 
 
 def _power_to_relative_db(power: np.ndarray) -> np.ndarray:
-    """把功率谱转换成相对 dB，峰值归一到 0 dB。"""
+    """把功率谱归一化成相对 dB，最大值为 0 dB。"""
 
     values = np.asarray(power, dtype=np.float64)
     peak = float(np.max(values)) if values.size else 0.0
@@ -537,123 +571,141 @@ def _power_to_relative_db(power: np.ndarray) -> np.ndarray:
     return 10.0 * np.log10(np.maximum(values, 1e-300) / peak)
 
 
-def write_initial_state_spectrum_csv(
-    path: Path,
+def write_framesync_preamble_spectrum(
+    samples: np.ndarray,
+    frame_location: FrameLocation,
+    frame_sync: GrloraFrameSyncResult,
+    detector_config: PreambleDetectorConfig,
+    preamble_len: float,
     packet_index: int,
-    estimate: InitialStateEstimate,
-    spectrum: InitialStateSpectrum,
-) -> None:
-    """写出初始状态估计补偿前后的完整 FFT 能量分布。"""
-
-    fields = [
-        "packet_index",
-        "bin_index",
-        "signed_bin",
-        "raw_noncoherent_power",
-        "raw_noncoherent_db",
-        "raw_coherent_power",
-        "raw_coherent_db",
-        "aligned_noncoherent_power",
-        "aligned_noncoherent_db",
-        "aligned_coherent_power",
-        "aligned_coherent_db",
-        "tau0_chip",
-        "tau0_sample",
-        "beta_bin",
-        "cfo_hz",
-        "zeta",
-    ]
-    raw_non_db = _power_to_relative_db(spectrum.raw_noncoherent_power)
-    raw_coh_db = _power_to_relative_db(spectrum.raw_coherent_power)
-    aligned_non_db = _power_to_relative_db(spectrum.aligned_noncoherent_power)
-    aligned_coh_db = _power_to_relative_db(spectrum.aligned_coherent_power)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
-        writer.writeheader()
-        for idx in range(spectrum.bin_index.size):
-            writer.writerow(
-                {
-                    "packet_index": int(packet_index),
-                    "bin_index": int(spectrum.bin_index[idx]),
-                    "signed_bin": int(spectrum.signed_bin[idx]),
-                    "raw_noncoherent_power": float(spectrum.raw_noncoherent_power[idx]),
-                    "raw_noncoherent_db": float(raw_non_db[idx]),
-                    "raw_coherent_power": float(spectrum.raw_coherent_power[idx]),
-                    "raw_coherent_db": float(raw_coh_db[idx]),
-                    "aligned_noncoherent_power": float(spectrum.aligned_noncoherent_power[idx]),
-                    "aligned_noncoherent_db": float(aligned_non_db[idx]),
-                    "aligned_coherent_power": float(spectrum.aligned_coherent_power[idx]),
-                    "aligned_coherent_db": float(aligned_coh_db[idx]),
-                    "tau0_chip": float(estimate.tau0_chip),
-                    "tau0_sample": float(estimate.tau0_sample),
-                    "beta_bin": float(estimate.beta_bin),
-                    "cfo_hz": float(estimate.cfo_hz),
-                    "zeta": float(estimate.zeta),
-                }
-            )
-
-
-def write_initial_state_spectrum_plot(
-    path: Path,
-    packet_index: int,
-    estimate: InitialStateEstimate,
-    spectrum: InitialStateSpectrum,
+    output_png: Path,
+    output_csv: Path,
     bin_span: int,
-) -> None:
-    """画出补偿前后前导码 dechirp+FFT 能量分布对比。"""
+    chirp_count: int,
+) -> dict[str, object]:
+    """画出 gr-lora 粗同步前后前若干个前导码 dechirp+FFT 的平均功率谱。"""
 
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    order = np.argsort(spectrum.signed_bin)
-    signed_bins = spectrum.signed_bin[order]
-    raw_db = _power_to_relative_db(spectrum.raw_noncoherent_power)[order]
-    aligned_coh_db = _power_to_relative_db(spectrum.aligned_coherent_power)[order]
-    aligned_non_db = _power_to_relative_db(spectrum.aligned_noncoherent_power)[order]
+    fft_len = detector_config.chirp_samples
+    use_chirps = min(int(chirp_count), int(round(float(preamble_len))))
+    if use_chirps <= 0:
+        raise ValueError("framesync spectrum needs at least one preamble chirp.")
+
+    upchirp = build_upchirp(
+        detector_config.sf,
+        symbol_id=0,
+        os_factor=detector_config.os_factor,
+    )
+    down_ref = np.conjugate(upchirp).astype(np.complex64)
+    def average_power_from_start(start_sample: int) -> np.ndarray:
+        spectra = []
+        for chirp_index in range(use_chirps):
+            start = int(start_sample + chirp_index * fft_len)
+            stop = start + fft_len
+            if start < 0 or stop > samples.size:
+                raise ValueError(f"packet {packet_index} does not have enough preamble samples.")
+            segment = np.asarray(samples[start:stop], dtype=np.complex64)
+            spectra.append(np.fft.fft(segment * down_ref))
+        return np.mean(np.abs(np.asarray(spectra)) ** 2, axis=0, dtype=np.float64)
+
+    raw_power = average_power_from_start(int(frame_location.preamble_start_sample))
+    synced_power = average_power_from_start(int(frame_sync.synced_preamble_start_sample))
+    raw_rel_db = _power_to_relative_db(raw_power)
+    synced_rel_db = _power_to_relative_db(synced_power)
+    bin_index = np.arange(fft_len, dtype=np.int64)
+    signed_bins = np.asarray([signed_fft_bin(int(item), fft_len) for item in bin_index], dtype=np.int64)
+    order = np.argsort(signed_bins)
+    signed_sorted = signed_bins[order]
+    raw_db_sorted = raw_rel_db[order]
+    synced_db_sorted = synced_rel_db[order]
     span = max(1, int(bin_span))
-    mask = (signed_bins >= -span) & (signed_bins <= span)
+    mask = (signed_sorted >= -span) & (signed_sorted <= span)
 
-    raw_peak_signed = int(spectrum.signed_bin[spectrum.raw_peak_bin])
-    aligned_peak_signed = int(spectrum.signed_bin[spectrum.aligned_peak_bin])
+    raw_peak_bin = int(np.argmax(raw_power))
+    raw_peak_signed = signed_fft_bin(raw_peak_bin, fft_len)
+    synced_peak_bin = int(np.argmax(synced_power))
+    synced_peak_signed = signed_fft_bin(synced_peak_bin, fft_len)
+    synced_bin0_db = float(synced_rel_db[0])
 
-    fig, axes = plt.subplots(2, 1, figsize=(11, 6), dpi=160, sharex=True)
-    axes[0].plot(signed_bins[mask], raw_db[mask], color="#1f77b4", linewidth=1.1)
-    axes[0].axvline(0, color="black", linestyle="--", linewidth=0.8, alpha=0.7)
+    output_csv.parent.mkdir(parents=True, exist_ok=True)
+    with output_csv.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=[
+                "packet_index",
+                "chirps",
+                "bin_index",
+                "signed_bin",
+                "raw_avg_power",
+                "raw_relative_db",
+                "raw_peak_signed_bin",
+                "synced_avg_power",
+                "synced_relative_db",
+                "synced_peak_signed_bin",
+                "synced_bin0_relative_db",
+            ],
+        )
+        writer.writeheader()
+        for idx in range(fft_len):
+            writer.writerow(
+                {
+                    "packet_index": int(packet_index),
+                    "chirps": int(use_chirps),
+                    "bin_index": int(bin_index[idx]),
+                    "signed_bin": int(signed_bins[idx]),
+                    "raw_avg_power": float(raw_power[idx]),
+                    "raw_relative_db": float(raw_rel_db[idx]),
+                    "raw_peak_signed_bin": int(raw_peak_signed),
+                    "synced_avg_power": float(synced_power[idx]),
+                    "synced_relative_db": float(synced_rel_db[idx]),
+                    "synced_peak_signed_bin": int(synced_peak_signed),
+                    "synced_bin0_relative_db": synced_bin0_db,
+                }
+            )
+
+    fig, axes = plt.subplots(2, 1, figsize=(11, 6.4), dpi=160, sharex=True)
+    axes[0].plot(signed_sorted[mask], raw_db_sorted[mask], color="#1f77b4", linewidth=1.2)
+    axes[0].axvline(0, color="black", linestyle="--", linewidth=0.8, alpha=0.75)
     axes[0].axvline(raw_peak_signed, color="#d62728", linestyle=":", linewidth=0.9)
     axes[0].set_ylabel("Relative power (dB)")
     axes[0].set_title(
-        "Before initial-state compensation: "
-        f"noncoherent sum, peak bin {raw_peak_signed}"
+        "Before gr-lora coarse framesync: "
+        f"{use_chirps} preamble chirps avg, peak signed bin {raw_peak_signed}"
     )
     axes[0].grid(True, alpha=0.25)
 
-    axes[1].plot(signed_bins[mask], aligned_coh_db[mask], color="#2ca02c", linewidth=1.1, label="coherent")
-    axes[1].plot(signed_bins[mask], aligned_non_db[mask], color="#ff7f0e", linewidth=0.9, alpha=0.85, label="noncoherent")
-    axes[1].axvline(0, color="black", linestyle="--", linewidth=0.8, alpha=0.7)
-    axes[1].axvline(aligned_peak_signed, color="#d62728", linestyle=":", linewidth=0.9)
+    axes[1].plot(signed_sorted[mask], synced_db_sorted[mask], color="#2ca02c", linewidth=1.2)
+    axes[1].axvline(0, color="black", linestyle="--", linewidth=0.8, alpha=0.75)
+    axes[1].axvline(synced_peak_signed, color="#d62728", linestyle=":", linewidth=0.9)
+    axes[1].set_title(
+        "After gr-lora coarse framesync: "
+        f"{use_chirps} preamble chirps avg, peak signed bin {synced_peak_signed}"
+    )
     axes[1].set_xlabel("Signed FFT bin")
     axes[1].set_ylabel("Relative power (dB)")
-    axes[1].set_title(
-        "After best tau0/beta compensation: "
-        f"coherent peak bin {aligned_peak_signed}"
-    )
-    axes[1].legend(loc="lower right")
     axes[1].grid(True, alpha=0.25)
 
     fig.suptitle(
-        f"Packet {packet_index:03d} initial-state validation | "
-        f"tau0={estimate.tau0_chip:.3f} chip ({estimate.tau0_sample:.3f} sample), "
-        f"beta={estimate.beta_bin:.3f} bin, CFO={estimate.cfo_hz:.2f} Hz, "
-        f"zeta={estimate.zeta:.3g}, J={estimate.objective:.3g}",
-        fontsize=10,
+        f"Packet {packet_index:03d} preamble dechirp+FFT spectrum comparison",
+        fontsize=11,
     )
-    path.parent.mkdir(parents=True, exist_ok=True)
+    output_png.parent.mkdir(parents=True, exist_ok=True)
     fig.tight_layout()
-    fig.savefig(path)
+    fig.savefig(output_png)
     plt.close(fig)
+
+    return {
+        "grlora_spectrum_chirps": int(use_chirps),
+        "grlora_spectrum_raw_peak_signed_bin": int(raw_peak_signed),
+        "grlora_spectrum_peak_signed_bin": int(synced_peak_signed),
+        "grlora_spectrum_peak_relative_db": float(synced_rel_db[synced_peak_bin]),
+        "grlora_spectrum_bin0_relative_db": synced_bin0_db,
+        "grlora_spectrum_bin0_is_peak": int(synced_peak_signed == 0),
+    }
 
 
 def main() -> None:
@@ -682,11 +734,6 @@ def main() -> None:
         if args.frame_search_samples is not None
         else max(1, int(round(chirp_samples / 8)))
     )
-    estimate_chirps = (
-        int(args.estimate_chirps)
-        if args.estimate_chirps is not None
-        else max(1, min(6, int(round(preamble_len))))
-    )
     min_event_gap_chirps = float(args.min_event_gap_chirps) if args.min_event_gap_chirps is not None else float(preamble_len)
 
     detector_config = PreambleDetectorConfig(
@@ -711,27 +758,10 @@ def main() -> None:
         symbol_search_span=args.frame_symbol_search_span,
     )
     locator_config.validate()
-    search_config = InitialStateSearchConfig(
-        estimate_chirps=estimate_chirps,
-        preamble_len=preamble_len,
-        tau_min=args.tau_min,
-        tau_max=args.tau_max,
-        tau_step=args.tau_step,
-        beta_min=args.beta_min,
-        beta_max=args.beta_max,
-        beta_step=args.beta_step,
-        fine_tau_radius=args.fine_tau_radius,
-        fine_tau_step=args.fine_tau_step,
-        fine_beta_radius=args.fine_beta_radius,
-        fine_beta_step=args.fine_beta_step,
-        zeta_span=args.zeta_span,
-        zeta_step=args.zeta_step,
-        frequency_chunk=args.frequency_chunk,
-    )
-    search_config.validate()
 
     samples = load_complex64_file(args.input)
     rows: list[dict[str, object]] = []
+    framesync_peak_rows: list[tuple[int, int, FrameSyncPeak]] = []
     try:
         windows, events = detect_preamble_runs(
             samples,
@@ -762,35 +792,42 @@ def main() -> None:
                 locator_config,
                 coarse_start_sample=int(alignment["aligned_start_sample"]),
             )
-            seed = detection_to_seed(
-                event,
-                event_index=packet_index,
-                start_sample=int(frame_location.preamble_start_sample),
+            frame_sync = run_grlora_frame_sync_validation(
+                samples,
+                frame_location,
+                detector_config,
+                preamble_len,
+                args.sync_word,
+                bin0_tol=args.framesync_bin0_tol,
             )
-            estimate = estimate_initial_state(samples, seed, detector_config, search_config)
-            rows.append(estimate_to_row(packet_index, event, alignment, frame_location, estimate))
-            if args.initial_state_plot_dir is not None:
-                spectrum = compute_initial_state_spectrum(
+            row = result_to_row(
+                packet_index,
+                event,
+                alignment,
+                frame_location,
+                frame_sync,
+                detector_config,
+            )
+            if args.framesync_spectrum_dir is not None:
+                stem = f"packet_{packet_index:03d}_event_{event.event_index:03d}_framesync_preamble_spectrum"
+                spectrum_summary = write_framesync_preamble_spectrum(
                     samples,
-                    seed,
+                    frame_location,
+                    frame_sync,
                     detector_config,
-                    search_config,
-                    estimate,
-                )
-                stem = f"packet_{packet_index:03d}_event_{event.event_index:03d}_initial_state"
-                write_initial_state_spectrum_csv(
-                    args.initial_state_plot_dir / f"{stem}_spectrum.csv",
+                    preamble_len,
                     packet_index,
-                    estimate,
-                    spectrum,
+                    args.framesync_spectrum_dir / f"{stem}.png",
+                    args.framesync_spectrum_dir / f"{stem}.csv",
+                    args.framesync_spectrum_bin_span,
+                    args.framesync_spectrum_chirps,
                 )
-                write_initial_state_spectrum_plot(
-                    args.initial_state_plot_dir / f"{stem}_spectrum.png",
-                    packet_index,
-                    estimate,
-                    spectrum,
-                    args.initial_state_plot_bin_span,
-                )
+                row.update(spectrum_summary)
+            rows.append(row)
+            framesync_peak_rows.extend(
+                (packet_index, int(event.event_index), peak)
+                for peak in frame_sync.peaks
+            )
             if args.stft_dir is not None:
                 write_frame_stft_plot(
                     samples,
@@ -805,14 +842,28 @@ def main() -> None:
             write_events_csv(args.events_csv, events, detector_config)
         if args.windows_csv is not None:
             write_windows_csv(args.windows_csv, windows, detector_config)
+        if args.framesync_peaks_csv is not None:
+            write_framesync_peaks_csv(args.framesync_peaks_csv, framesync_peak_rows)
     finally:
         mmap_handle = getattr(samples, "_mmap", None)
         if mmap_handle is not None:
             mmap_handle.close()
 
+    valid_frames = sum(int(row["frame_valid"]) for row in rows)
+    valid_fsync = sum(int(row["grlora_framesync_valid"]) for row in rows)
+    max_abs_bins = [
+        int(row["grlora_preamble_peak_max_abs_signed_bin"])
+        for row in rows
+        if row.get("grlora_preamble_peak_max_abs_signed_bin") != ""
+    ]
+    max_abs_bin = max(max_abs_bins) if max_abs_bins else ""
+
     print(f"windows={len(windows)}")
     print(f"detections={len(events)}")
     print(f"selected_packets={len(rows)}")
+    print(f"frame_valid={valid_frames}/{len(rows)}")
+    print(f"grlora_framesync_valid={valid_fsync}/{len(rows)}")
+    print(f"grlora_preamble_max_abs_signed_bin={max_abs_bin}")
     print(f"sf={sf}")
     print(f"preamble_len={preamble_len:g}")
     print(f"chirp_samples={detector_config.chirp_samples}")
@@ -823,16 +874,17 @@ def main() -> None:
     print(f"frame_search_samples={frame_search_samples}")
     print(f"frame_symbol_search_span={args.frame_symbol_search_span}")
     print(f"sync_word=0x{int(args.sync_word):02x}")
-    print(f"estimate_chirps={estimate_chirps}")
     print(f"wrote={args.output}")
     if args.stft_dir is not None:
         print(f"wrote_stft_dir={args.stft_dir}")
-    if args.initial_state_plot_dir is not None:
-        print(f"wrote_initial_state_plot_dir={args.initial_state_plot_dir}")
     if args.events_csv is not None:
         print(f"wrote_events={args.events_csv}")
     if args.windows_csv is not None:
         print(f"wrote_windows={args.windows_csv}")
+    if args.framesync_peaks_csv is not None:
+        print(f"wrote_framesync_peaks={args.framesync_peaks_csv}")
+    if args.framesync_spectrum_dir is not None:
+        print(f"wrote_framesync_spectrum_dir={args.framesync_spectrum_dir}")
 
 
 if __name__ == "__main__":

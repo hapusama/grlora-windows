@@ -10,6 +10,14 @@ def positive_mod(value: int, modulus: int) -> int:
     return int((int(value) % int(modulus) + int(modulus)) % int(modulus))
 
 
+def signed_fft_bin(bin_index: int, fft_len: int) -> int:
+    """把循环 FFT bin 转成带符号 bin，便于观察峰值相对 bin0 的偏移。"""
+
+    value = positive_mod(int(bin_index), int(fft_len))
+    half = int(fft_len) // 2
+    return int(value - int(fft_len) if value > half else value)
+
+
 def build_upchirp(sf: int, symbol_id: int = 0, os_factor: int = 1) -> np.ndarray:
     """Build one gr-lora_sdr-compatible upchirp.
 
