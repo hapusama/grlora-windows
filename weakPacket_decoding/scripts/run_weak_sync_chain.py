@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """弱包同步链路入口：前导码检测、SFD 帧定界、gr-lora_sdr 风格粗同步验证。"""
-# D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\run_weak_sync_chain.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_8.bin -o gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_8_sync_chain.csv --bw 125000 --samp-rate 500000 --sync-word 0x34 --win-chirps 2 --hop-chirps 1 --stft-dir gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_8_stft --framesync-peaks-csv gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_8_framesync_peaks.csv --framesync-spectrum-dir gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_8_framesync_spectrum
+# D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\run_weak_sync_chain.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_8.bin -o gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_8_sync_chain.csv --bw 125000 --samp-rate 500000 --center-freq 487.7e6 --sync-word 0x34 --win-chirps 2 --hop-chirps 1 --framesync-peaks-csv gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_8_framesync_peaks.csv --framesync-spectrum-dir gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_8_framesync_spectrum --framesync-spectrum-bin-span 96 --framesync-spectrum-chirps 8
 from __future__ import annotations
 
 import argparse
@@ -60,6 +60,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sf", type=int, default=None, help="LoRa SF。默认从文件名第 4 段推断。")
     parser.add_argument("--bw", type=float, default=125000.0, help="LoRa 带宽 Hz，默认 125000。")
     parser.add_argument("--samp-rate", type=float, default=500000.0, help="IQ 采样率 Hz，默认 500000。")
+    parser.add_argument("--center-freq", type=float, default=487.7e6, help="RF 中心频率 Hz，用于由 CFO 推 SFO，默认 487.7e6。")
     parser.add_argument("--sync-word", type=parse_int_auto, default=0x34, help="LoRa sync word，默认 0x34。")
     parser.add_argument("--preamble-len", type=float, default=None, help="前导码 upchirp 数。默认从文件名最后一段推断。")
     parser.add_argument("--win-chirps", type=int, default=2, help="检测窗口内 chirp 数，默认 2。")
@@ -344,6 +345,8 @@ def write_chain_csv(path: Path, rows: list[dict[str, object]]) -> None:
         "grlora_synced_preamble_start_sample",
         "grlora_synced_sfd_start_sample",
         "grlora_synced_payload_start_sample",
+        "grlora_fine_preamble_start_sample",
+        "grlora_fine_payload_start_sample",
         "grlora_preamble_peak_mean_signed_bin",
         "grlora_preamble_peak_max_abs_signed_bin",
         "grlora_preamble_bin0_count",
@@ -357,7 +360,30 @@ def write_chain_csv(path: Path, rows: list[dict[str, object]]) -> None:
         "grlora_sfd1_peak_signed_bin",
         "grlora_sfd2_peak_signed_bin",
         "grlora_sfd_mean_signed_bin",
+        "grlora_up_symbols_used",
+        "grlora_cfo_frac_est",
+        "grlora_sto_frac_initial",
+        "grlora_sto_frac_refined",
+        "grlora_sto_frac_used",
+        "grlora_sto_sample_correction",
         "grlora_cfo_int_est",
+        "grlora_down_val_signed_bin",
+        "grlora_cfo_total_est",
+        "grlora_cfo_hz_est",
+        "grlora_sfo_hat",
+        "grlora_clk_off",
+        "grlora_fs_p",
+        "grlora_netid_sto_frac_est",
+        "grlora_payload_sto_frac_est",
+        "grlora_netid1_est",
+        "grlora_netid2_est",
+        "grlora_netid_offset",
+        "grlora_netid_valid",
+        "grlora_sfo_cum_initial",
+        "grlora_fine_preamble_peak_mean_signed_bin",
+        "grlora_fine_preamble_peak_max_abs_signed_bin",
+        "grlora_fine_preamble_bin0_count",
+        "grlora_fine_preamble_peak_count",
         "grlora_spectrum_chirps",
         "grlora_spectrum_raw_peak_signed_bin",
         "grlora_spectrum_peak_signed_bin",
@@ -465,6 +491,8 @@ def result_to_row(
         "grlora_synced_preamble_start_sample": frame_sync.synced_preamble_start_sample,
         "grlora_synced_sfd_start_sample": frame_sync.synced_sfd_start_sample,
         "grlora_synced_payload_start_sample": frame_sync.synced_payload_start_sample,
+        "grlora_fine_preamble_start_sample": frame_sync.fine_preamble_start_sample,
+        "grlora_fine_payload_start_sample": frame_sync.fine_payload_start_sample,
         "grlora_preamble_peak_mean_signed_bin": frame_sync.preamble_peak_mean_signed_bin,
         "grlora_preamble_peak_max_abs_signed_bin": frame_sync.preamble_peak_max_abs_signed_bin,
         "grlora_preamble_bin0_count": frame_sync.preamble_bin0_count,
@@ -478,7 +506,30 @@ def result_to_row(
         "grlora_sfd1_peak_signed_bin": frame_sync.sfd1_peak_signed_bin,
         "grlora_sfd2_peak_signed_bin": frame_sync.sfd2_peak_signed_bin,
         "grlora_sfd_mean_signed_bin": frame_sync.sfd_mean_signed_bin,
+        "grlora_up_symbols_used": frame_sync.up_symbols_used,
+        "grlora_cfo_frac_est": frame_sync.cfo_frac_est,
+        "grlora_sto_frac_initial": frame_sync.sto_frac_initial,
+        "grlora_sto_frac_refined": frame_sync.sto_frac_refined,
+        "grlora_sto_frac_used": frame_sync.sto_frac_used,
+        "grlora_sto_sample_correction": frame_sync.sto_sample_correction,
         "grlora_cfo_int_est": frame_sync.cfo_int_est,
+        "grlora_down_val_signed_bin": frame_sync.down_val_signed_bin,
+        "grlora_cfo_total_est": frame_sync.cfo_total_est,
+        "grlora_cfo_hz_est": frame_sync.cfo_hz_est,
+        "grlora_sfo_hat": frame_sync.sfo_hat,
+        "grlora_clk_off": frame_sync.clk_off,
+        "grlora_fs_p": frame_sync.fs_p,
+        "grlora_netid_sto_frac_est": frame_sync.netid_sto_frac_est,
+        "grlora_payload_sto_frac_est": frame_sync.payload_sto_frac_est,
+        "grlora_netid1_est": frame_sync.netid1_est,
+        "grlora_netid2_est": frame_sync.netid2_est,
+        "grlora_netid_offset": frame_sync.netid_offset,
+        "grlora_netid_valid": int(frame_sync.netid_valid),
+        "grlora_sfo_cum_initial": frame_sync.sfo_cum_initial,
+        "grlora_fine_preamble_peak_mean_signed_bin": frame_sync.fine_preamble_peak_mean_signed_bin,
+        "grlora_fine_preamble_peak_max_abs_signed_bin": frame_sync.fine_preamble_peak_max_abs_signed_bin,
+        "grlora_fine_preamble_bin0_count": frame_sync.fine_preamble_bin0_count,
+        "grlora_fine_preamble_peak_count": frame_sync.fine_preamble_peak_count,
     }
 
 
@@ -583,7 +634,7 @@ def write_framesync_preamble_spectrum(
     bin_span: int,
     chirp_count: int,
 ) -> dict[str, object]:
-    """画出 gr-lora 粗同步前后前若干个前导码 dechirp+FFT 的平均功率谱。"""
+    """画出 gr-lora 同步前后前若干个前导码 dechirp+FFT 的平均功率谱。"""
 
     import matplotlib
 
@@ -601,6 +652,7 @@ def write_framesync_preamble_spectrum(
         os_factor=detector_config.os_factor,
     )
     down_ref = np.conjugate(upchirp).astype(np.complex64)
+
     def average_power_from_start(start_sample: int) -> np.ndarray:
         spectra = []
         for chirp_index in range(use_chirps):
@@ -673,7 +725,7 @@ def write_framesync_preamble_spectrum(
     axes[0].axvline(raw_peak_signed, color="#d62728", linestyle=":", linewidth=0.9)
     axes[0].set_ylabel("Relative power (dB)")
     axes[0].set_title(
-        "Before gr-lora coarse framesync: "
+        "Before gr-lora framesync: "
         f"{use_chirps} preamble chirps avg, peak signed bin {raw_peak_signed}"
     )
     axes[0].grid(True, alpha=0.25)
@@ -682,7 +734,7 @@ def write_framesync_preamble_spectrum(
     axes[1].axvline(0, color="black", linestyle="--", linewidth=0.8, alpha=0.75)
     axes[1].axvline(synced_peak_signed, color="#d62728", linestyle=":", linewidth=0.9)
     axes[1].set_title(
-        "After gr-lora coarse framesync: "
+        "After gr-lora coarse timing sync: "
         f"{use_chirps} preamble chirps avg, peak signed bin {synced_peak_signed}"
     )
     axes[1].set_xlabel("Signed FFT bin")
@@ -799,6 +851,7 @@ def main() -> None:
                 preamble_len,
                 args.sync_word,
                 bin0_tol=args.framesync_bin0_tol,
+                center_freq=args.center_freq,
             )
             row = result_to_row(
                 packet_index,
@@ -857,6 +910,12 @@ def main() -> None:
         if row.get("grlora_preamble_peak_max_abs_signed_bin") != ""
     ]
     max_abs_bin = max(max_abs_bins) if max_abs_bins else ""
+    fine_max_abs_bins = [
+        int(row["grlora_fine_preamble_peak_max_abs_signed_bin"])
+        for row in rows
+        if row.get("grlora_fine_preamble_peak_max_abs_signed_bin") != ""
+    ]
+    fine_max_abs_bin = max(fine_max_abs_bins) if fine_max_abs_bins else ""
 
     print(f"windows={len(windows)}")
     print(f"detections={len(events)}")
@@ -864,8 +923,10 @@ def main() -> None:
     print(f"frame_valid={valid_frames}/{len(rows)}")
     print(f"grlora_framesync_valid={valid_fsync}/{len(rows)}")
     print(f"grlora_preamble_max_abs_signed_bin={max_abs_bin}")
+    print(f"grlora_fine_preamble_max_abs_signed_bin={fine_max_abs_bin}")
     print(f"sf={sf}")
     print(f"preamble_len={preamble_len:g}")
+    print(f"center_freq={args.center_freq:g}")
     print(f"chirp_samples={detector_config.chirp_samples}")
     print(f"win_chirps={detector_config.win_chirps}")
     print(f"hop_samples={detector_config.resolved_hop_samples}")

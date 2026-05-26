@@ -11,6 +11,7 @@ from .frame_locator import (
 from .grlora_frame_sync import (
     FrameSyncPeak,
     GrloraFrameSyncResult,
+    build_grlora_corrected_preamble_chirps,
     run_grlora_frame_sync_validation,
 )
 from .preamble_detector import (
@@ -31,6 +32,7 @@ __all__ = [
     "SymbolPeak",
     "WindowPeak",
     "build_upchirp",
+    "build_grlora_corrected_preamble_chirps",
     "dechirp_fft",
     "detect_preamble_runs",
     "locate_frame_from_event",

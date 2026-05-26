@@ -577,7 +577,7 @@ $$\mu_Q = \mu_0 + Q \cdot \hat{s}_{\text{SFO}}$$
 
 ## 9. 当前代码实现范围
 
-当前 `weakPacket_decoding` 里的实现先只做到 **帧定界 + gr-lora_sdr 风格粗同步验证**，暂时不进入 payload 解码。
+当前 `weakPacket_decoding` 里的实现做到 **帧定界 + gr-lora_sdr 风格同步参数估计**，暂时不进入 payload 解码。
 
 入口脚本为：
 
@@ -593,6 +593,14 @@ raw complex64 IQ
   -> chirp 起点粗对齐
   -> sync word + SFD 帧定界
   -> 按 preamble_ref_bin 做 gr-lora_sdr 式粗同步挪窗
+  -> chip-rate 抽样前导码
+  -> Bernier 相位差估计 CFO_frac
+  -> 2N FFT 估计 STO_frac
+  -> SFD downchirp 估计 CFO_int
+  -> 由 CFO_int + CFO_frac 推 SFO
+  -> SFO 相位补偿后重新估计 STO_frac
+  -> 用 STO/CFO/SFO 重新抽取并复检两个 sync word 符号
+  -> 根据 netid_offset、CFO_int、payload 处 STO_frac 计算 payload 起点
   -> 验证同步后前导码 dechirp+FFT peak 是否集中在 signed bin 0
 ```
 
@@ -602,7 +610,7 @@ raw complex64 IQ
 weak_decoder/grlora_frame_sync.py
 ```
 
-输出 CSV 里和 gr-lora 粗同步相关的关键字段包括：
+输出 CSV 里和 gr-lora 同步相关的关键字段包括：
 
 ```text
 grlora_coarse_offset_chips
@@ -610,6 +618,8 @@ grlora_coarse_offset_samples
 grlora_synced_preamble_start_sample
 grlora_synced_sfd_start_sample
 grlora_synced_payload_start_sample
+grlora_fine_preamble_start_sample
+grlora_fine_payload_start_sample
 grlora_preamble_peak_mean_signed_bin
 grlora_preamble_peak_max_abs_signed_bin
 grlora_preamble_bin0_count
@@ -617,8 +627,33 @@ grlora_preamble_peak_count
 grlora_sync1_peak_signed_bin
 grlora_sync2_peak_signed_bin
 grlora_sfd_mean_signed_bin
+grlora_up_symbols_used
+grlora_cfo_frac_est
+grlora_sto_frac_initial
+grlora_sto_frac_refined
+grlora_sto_frac_used
+grlora_sto_sample_correction
 grlora_cfo_int_est
+grlora_down_val_signed_bin
+grlora_cfo_total_est
+grlora_cfo_hz_est
+grlora_sfo_hat
+grlora_clk_off
+grlora_fs_p
+grlora_netid_sto_frac_est
+grlora_payload_sto_frac_est
+grlora_netid1_est
+grlora_netid2_est
+grlora_netid_offset
+grlora_netid_valid
+grlora_sfo_cum_initial
+grlora_fine_preamble_peak_mean_signed_bin
+grlora_fine_preamble_peak_max_abs_signed_bin
+grlora_fine_preamble_bin0_count
+grlora_fine_preamble_peak_count
 ```
 
-其中 `located_preamble_start_sample` 是 SFD 定界反推出的物理前导码起点；`grlora_synced_preamble_start_sample` 是仿照 gr-lora_sdr 用前导码 peak 挪窗之后的同步起点。两者属于不同坐标系，后续接 payload peak 搜索时需要明确选择哪一个。
+其中 `located_preamble_start_sample` 是 SFD 定界反推出的物理前导码起点；`grlora_synced_preamble_start_sample` 是仿照 gr-lora_sdr 用前导码 peak 挪窗之后的粗同步起点。`grlora_fine_payload_start_sample` 进一步加入整数 CFO 对应的等效采样偏移、`netid_offset` 和 payload 起点处的 STO_frac 采样修正，更接近 gr-lora_sdr 进入 payload 符号输出时使用的起点。
+
+注意：gr-lora_sdr 的 `frame_sync` 输出 payload 时主要消除 STO/SFO 造成的采样点偏差，但 CFO 会随 `cfo_int`、`cfo_frac` 一起传给后面的 `fft_demod`，由 CFO-aware downchirp 继续处理。因此，当前频谱图里的“after framesync”仍展示粗同步挪窗后的前导码 peak 是否回到 bin0；CFO/STO/SFO 的数值验证主要看 CSV 字段。
 
