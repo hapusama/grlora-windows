@@ -26,12 +26,12 @@ from weak_decoder.preamble_detector import PreambleDetectorConfig  # noqa: E402
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "读取 detect_weak_preamble.py 的 events.csv，"
-            "在每个粗前导码起点上做多 upchirp 相干叠加，估计 tau0 / beta / zeta。"
+            "读取 run_weak_sync_chain.py 的帧定界 CSV，"
+            "在 located_preamble_start_sample 上做多 upchirp 相干叠加，估计 tau0 / beta / zeta。"
         )
     )
     parser.add_argument("-i", "--input", type=Path, required=True, help="raw complex64 IQ 文件。")
-    parser.add_argument("-d", "--detections", type=Path, required=True, help="前导码检测 events.csv。")
+    parser.add_argument("-d", "--detections", type=Path, required=True, help="帧定界 CSV；兼容旧的前导码检测 events.csv。")
     parser.add_argument("-o", "--output", type=Path, required=True, help="初始状态估计 CSV。")
     parser.add_argument("--sf", type=int, required=True, help="LoRa spreading factor。")
     parser.add_argument("--bw", type=float, default=125000.0, help="LoRa 带宽 Hz，默认 125000。")
@@ -63,7 +63,7 @@ def _int(row: dict[str, str], key: str, default: int = 0) -> int:
 
 
 def load_detection_seeds(path: Path, max_events: int | None = None) -> list[InitialStateSeed]:
-    """从检测 events.csv 读取初始状态估计种子。"""
+    """从帧定界 CSV 读取初始状态估计种子；兼容旧检测 events.csv。"""
 
     seeds: list[InitialStateSeed] = []
     with path.open("r", encoding="utf-8", newline="") as handle:
@@ -71,11 +71,27 @@ def load_detection_seeds(path: Path, max_events: int | None = None) -> list[Init
         for row in reader:
             seeds.append(
                 InitialStateSeed(
-                    event_index=_int(row, "event_index", len(seeds)),
-                    start_sample=_int(row, "start_sample", 0),
-                    end_sample=_int(row, "end_sample", 0),
-                    reference_bin=_int(row, "reference_bin", 0),
-                    window_count=_int(row, "window_count", 0),
+                    event_index=_int(row, "packet_index", _int(row, "event_index", len(seeds))),
+                    start_sample=_int(
+                        row,
+                        "located_preamble_start_sample",
+                        _int(row, "start_sample", 0),
+                    ),
+                    end_sample=_int(
+                        row,
+                        "located_payload_start_sample",
+                        _int(row, "end_sample", 0),
+                    ),
+                    reference_bin=_int(
+                        row,
+                        "preamble_ref_bin",
+                        _int(row, "reference_bin", 0),
+                    ),
+                    window_count=_int(
+                        row,
+                        "preamble_stable_count",
+                        _int(row, "window_count", 0),
+                    ),
                 )
             )
             if max_events is not None and len(seeds) >= int(max_events):

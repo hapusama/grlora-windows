@@ -86,6 +86,22 @@ class InitialStateEstimate:
     hit_beta_boundary: bool
 
 
+@dataclass(frozen=True)
+class InitialStateSpectrum:
+    """初始状态估计前后的前导码 FFT 能量分布。"""
+
+    bin_index: np.ndarray
+    signed_bin: np.ndarray
+    raw_noncoherent_power: np.ndarray
+    raw_coherent_power: np.ndarray
+    aligned_noncoherent_power: np.ndarray
+    aligned_coherent_power: np.ndarray
+    raw_peak_bin: int
+    aligned_peak_bin: int
+    raw_bin0_power: float
+    aligned_bin0_power: float
+
+
 def signed_fft_bin(bin_index: int, fft_len: int) -> int:
     """把循环 FFT bin 转成带符号频偏 bin。"""
 
@@ -278,6 +294,51 @@ def _fine_search(
                         mean_abs_z0,
                     )
     return best
+
+
+def compute_initial_state_spectrum(
+    samples: np.ndarray,
+    seed: InitialStateSeed,
+    detector_config: PreambleDetectorConfig,
+    search_config: InitialStateSearchConfig,
+    estimate: InitialStateEstimate,
+) -> InitialStateSpectrum:
+    """计算补偿前后所有估计用 upchirp 的 dechirp+FFT 能量分布。"""
+
+    base = _extract_base_dechirped(samples, seed, detector_config, search_config)
+    raw_fft = np.fft.fft(base, axis=1)
+    raw_noncoherent = np.sum(np.abs(raw_fft) ** 2, axis=0, dtype=np.float64)
+    raw_coherent = np.abs(np.sum(raw_fft, axis=0)) ** 2
+
+    m_bins = detector_config.n_bins
+    fft_len = detector_config.chirp_samples
+    n = np.arange(fft_len, dtype=np.float64)
+    aligned_fft = np.empty_like(raw_fft, dtype=np.complex128)
+    for s_idx in range(base.shape[0]):
+        tau_s = float(estimate.tau0_chip) + float(s_idx) * (m_bins - 1.0) * float(estimate.zeta)
+        f_s = float(estimate.beta_bin) - tau_s
+        phi_s = float(s_idx) * float(estimate.beta_bin) + tau_s / 2.0 + tau_s * tau_s / (2.0 * m_bins)
+        freq_comp = np.exp(-2j * np.pi * f_s * n / fft_len)
+        phase_comp = np.exp(-2j * np.pi * phi_s)
+        aligned_fft[s_idx, :] = np.fft.fft(base[s_idx].astype(np.complex128) * freq_comp * phase_comp)
+
+    aligned_noncoherent = np.sum(np.abs(aligned_fft) ** 2, axis=0, dtype=np.float64)
+    aligned_coherent = np.abs(np.sum(aligned_fft, axis=0)) ** 2
+    bin_index = np.arange(fft_len, dtype=np.int64)
+    signed_bin = np.asarray([signed_fft_bin(int(item), fft_len) for item in bin_index], dtype=np.int64)
+
+    return InitialStateSpectrum(
+        bin_index=bin_index,
+        signed_bin=signed_bin,
+        raw_noncoherent_power=raw_noncoherent.astype(np.float64),
+        raw_coherent_power=raw_coherent.astype(np.float64),
+        aligned_noncoherent_power=aligned_noncoherent.astype(np.float64),
+        aligned_coherent_power=aligned_coherent.astype(np.float64),
+        raw_peak_bin=int(np.argmax(raw_noncoherent)),
+        aligned_peak_bin=int(np.argmax(aligned_coherent)),
+        raw_bin0_power=float(raw_noncoherent[0]),
+        aligned_bin0_power=float(aligned_coherent[0]),
+    )
 
 
 def estimate_initial_state(

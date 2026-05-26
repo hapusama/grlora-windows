@@ -19,8 +19,10 @@ if str(WEAK_ROOT) not in sys.path:
 from weak_decoder.chirp import build_upchirp  # noqa: E402
 from weak_decoder.initial_state import (  # noqa: E402
     InitialStateEstimate,
+    InitialStateSpectrum,
     InitialStateSearchConfig,
     InitialStateSeed,
+    compute_initial_state_spectrum,
     estimate_initial_state,
     load_complex64_file,
 )
@@ -89,6 +91,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--frame-min-preamble-peaks", type=int, default=None, help="SFD 定位阶段最少稳定前导码符号数，默认 preamble_len-2。")
     parser.add_argument("--frame-symbol-search-span", type=int, default=2, help="SFD 定位额外搜索前后多少个整 chirp，默认 2。")
     parser.add_argument("--stft-dir", type=Path, default=None, help="可选：保存定位出的 preamble+sync+SFD STFT 验证图。")
+    parser.add_argument("--initial-state-plot-dir", type=Path, default=None, help="可选：保存初始状态估计补偿前后 FFT 能量分布图和 CSV。")
+    parser.add_argument("--initial-state-plot-bin-span", type=int, default=128, help="初始状态频谱图展示 bin0 附近正负多少个 bin，默认 128。")
     parser.add_argument("--estimate-chirps", type=int, default=None, help="初始状态估计使用的 upchirp 数，默认 min(6, preamble_len)。")
     parser.add_argument("--tau-min", type=float, default=None, help="tau0 搜索下界，单位 chip。")
     parser.add_argument("--tau-max", type=float, default=None, help="tau0 搜索上界，单位 chip。")
@@ -523,6 +527,135 @@ def write_frame_stft_plot(
     plt.close(fig)
 
 
+def _power_to_relative_db(power: np.ndarray) -> np.ndarray:
+    """把功率谱转换成相对 dB，峰值归一到 0 dB。"""
+
+    values = np.asarray(power, dtype=np.float64)
+    peak = float(np.max(values)) if values.size else 0.0
+    if peak <= 0.0:
+        return np.full(values.shape, -300.0, dtype=np.float64)
+    return 10.0 * np.log10(np.maximum(values, 1e-300) / peak)
+
+
+def write_initial_state_spectrum_csv(
+    path: Path,
+    packet_index: int,
+    estimate: InitialStateEstimate,
+    spectrum: InitialStateSpectrum,
+) -> None:
+    """写出初始状态估计补偿前后的完整 FFT 能量分布。"""
+
+    fields = [
+        "packet_index",
+        "bin_index",
+        "signed_bin",
+        "raw_noncoherent_power",
+        "raw_noncoherent_db",
+        "raw_coherent_power",
+        "raw_coherent_db",
+        "aligned_noncoherent_power",
+        "aligned_noncoherent_db",
+        "aligned_coherent_power",
+        "aligned_coherent_db",
+        "tau0_chip",
+        "tau0_sample",
+        "beta_bin",
+        "cfo_hz",
+        "zeta",
+    ]
+    raw_non_db = _power_to_relative_db(spectrum.raw_noncoherent_power)
+    raw_coh_db = _power_to_relative_db(spectrum.raw_coherent_power)
+    aligned_non_db = _power_to_relative_db(spectrum.aligned_noncoherent_power)
+    aligned_coh_db = _power_to_relative_db(spectrum.aligned_coherent_power)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for idx in range(spectrum.bin_index.size):
+            writer.writerow(
+                {
+                    "packet_index": int(packet_index),
+                    "bin_index": int(spectrum.bin_index[idx]),
+                    "signed_bin": int(spectrum.signed_bin[idx]),
+                    "raw_noncoherent_power": float(spectrum.raw_noncoherent_power[idx]),
+                    "raw_noncoherent_db": float(raw_non_db[idx]),
+                    "raw_coherent_power": float(spectrum.raw_coherent_power[idx]),
+                    "raw_coherent_db": float(raw_coh_db[idx]),
+                    "aligned_noncoherent_power": float(spectrum.aligned_noncoherent_power[idx]),
+                    "aligned_noncoherent_db": float(aligned_non_db[idx]),
+                    "aligned_coherent_power": float(spectrum.aligned_coherent_power[idx]),
+                    "aligned_coherent_db": float(aligned_coh_db[idx]),
+                    "tau0_chip": float(estimate.tau0_chip),
+                    "tau0_sample": float(estimate.tau0_sample),
+                    "beta_bin": float(estimate.beta_bin),
+                    "cfo_hz": float(estimate.cfo_hz),
+                    "zeta": float(estimate.zeta),
+                }
+            )
+
+
+def write_initial_state_spectrum_plot(
+    path: Path,
+    packet_index: int,
+    estimate: InitialStateEstimate,
+    spectrum: InitialStateSpectrum,
+    bin_span: int,
+) -> None:
+    """画出补偿前后前导码 dechirp+FFT 能量分布对比。"""
+
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    order = np.argsort(spectrum.signed_bin)
+    signed_bins = spectrum.signed_bin[order]
+    raw_db = _power_to_relative_db(spectrum.raw_noncoherent_power)[order]
+    aligned_coh_db = _power_to_relative_db(spectrum.aligned_coherent_power)[order]
+    aligned_non_db = _power_to_relative_db(spectrum.aligned_noncoherent_power)[order]
+    span = max(1, int(bin_span))
+    mask = (signed_bins >= -span) & (signed_bins <= span)
+
+    raw_peak_signed = int(spectrum.signed_bin[spectrum.raw_peak_bin])
+    aligned_peak_signed = int(spectrum.signed_bin[spectrum.aligned_peak_bin])
+
+    fig, axes = plt.subplots(2, 1, figsize=(11, 6), dpi=160, sharex=True)
+    axes[0].plot(signed_bins[mask], raw_db[mask], color="#1f77b4", linewidth=1.1)
+    axes[0].axvline(0, color="black", linestyle="--", linewidth=0.8, alpha=0.7)
+    axes[0].axvline(raw_peak_signed, color="#d62728", linestyle=":", linewidth=0.9)
+    axes[0].set_ylabel("Relative power (dB)")
+    axes[0].set_title(
+        "Before initial-state compensation: "
+        f"noncoherent sum, peak bin {raw_peak_signed}"
+    )
+    axes[0].grid(True, alpha=0.25)
+
+    axes[1].plot(signed_bins[mask], aligned_coh_db[mask], color="#2ca02c", linewidth=1.1, label="coherent")
+    axes[1].plot(signed_bins[mask], aligned_non_db[mask], color="#ff7f0e", linewidth=0.9, alpha=0.85, label="noncoherent")
+    axes[1].axvline(0, color="black", linestyle="--", linewidth=0.8, alpha=0.7)
+    axes[1].axvline(aligned_peak_signed, color="#d62728", linestyle=":", linewidth=0.9)
+    axes[1].set_xlabel("Signed FFT bin")
+    axes[1].set_ylabel("Relative power (dB)")
+    axes[1].set_title(
+        "After best tau0/beta compensation: "
+        f"coherent peak bin {aligned_peak_signed}"
+    )
+    axes[1].legend(loc="lower right")
+    axes[1].grid(True, alpha=0.25)
+
+    fig.suptitle(
+        f"Packet {packet_index:03d} initial-state validation | "
+        f"tau0={estimate.tau0_chip:.3f} chip ({estimate.tau0_sample:.3f} sample), "
+        f"beta={estimate.beta_bin:.3f} bin, CFO={estimate.cfo_hz:.2f} Hz, "
+        f"zeta={estimate.zeta:.3g}, J={estimate.objective:.3g}",
+        fontsize=10,
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
+
+
 def main() -> None:
     args = parse_args()
     inferred_sf, inferred_preamble_len = infer_params_from_filename(args.input)
@@ -636,6 +769,28 @@ def main() -> None:
             )
             estimate = estimate_initial_state(samples, seed, detector_config, search_config)
             rows.append(estimate_to_row(packet_index, event, alignment, frame_location, estimate))
+            if args.initial_state_plot_dir is not None:
+                spectrum = compute_initial_state_spectrum(
+                    samples,
+                    seed,
+                    detector_config,
+                    search_config,
+                    estimate,
+                )
+                stem = f"packet_{packet_index:03d}_event_{event.event_index:03d}_initial_state"
+                write_initial_state_spectrum_csv(
+                    args.initial_state_plot_dir / f"{stem}_spectrum.csv",
+                    packet_index,
+                    estimate,
+                    spectrum,
+                )
+                write_initial_state_spectrum_plot(
+                    args.initial_state_plot_dir / f"{stem}_spectrum.png",
+                    packet_index,
+                    estimate,
+                    spectrum,
+                    args.initial_state_plot_bin_span,
+                )
             if args.stft_dir is not None:
                 write_frame_stft_plot(
                     samples,
@@ -672,6 +827,8 @@ def main() -> None:
     print(f"wrote={args.output}")
     if args.stft_dir is not None:
         print(f"wrote_stft_dir={args.stft_dir}")
+    if args.initial_state_plot_dir is not None:
+        print(f"wrote_initial_state_plot_dir={args.initial_state_plot_dir}")
     if args.events_csv is not None:
         print(f"wrote_events={args.events_csv}")
     if args.windows_csv is not None:

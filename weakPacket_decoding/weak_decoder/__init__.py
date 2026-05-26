@@ -3,8 +3,10 @@
 from .chirp import build_upchirp, dechirp_fft
 from .initial_state import (
     InitialStateEstimate,
+    InitialStateSpectrum,
     InitialStateSearchConfig,
     InitialStateSeed,
+    compute_initial_state_spectrum,
     estimate_initial_state,
 )
 from .frame_locator import (
@@ -25,6 +27,7 @@ from .preamble_detector import (
 __all__ = [
     "DetectionEvent",
     "InitialStateEstimate",
+    "InitialStateSpectrum",
     "InitialStateSearchConfig",
     "InitialStateSeed",
     "FrameLocation",
@@ -35,6 +38,7 @@ __all__ = [
     "build_upchirp",
     "dechirp_fft",
     "detect_preamble_runs",
+    "compute_initial_state_spectrum",
     "estimate_initial_state",
     "locate_frame_from_event",
     "scan_preamble_windows",

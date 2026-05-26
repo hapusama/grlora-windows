@@ -150,6 +150,13 @@ D:\mysoft2\miniconda3\envs\gr-lora\python.exe `
 --stft-dir gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_8_stft
 ```
 
+如需验证初始状态估计是否把前导码 FFT 峰拉回 bin0，可额外加：
+
+```powershell
+--estimate-chirps 8 `
+--initial-state-plot-dir gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_8_initial_state_validation
+```
+
 如需检查中间过程，可额外加：
 
 ```powershell
