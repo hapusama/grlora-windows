@@ -1,21 +1,42 @@
-"""Weak-packet LoRa demodulation prototypes.
-
-This package is intentionally independent from GNU Radio at import time.  It
-can reuse gr-lora_sdr packet metadata when available, then works on raw
-complex64 IQ windows with NumPy.
-"""
+"""弱包 LoRa 检测与同步估计原型。"""
 
 from .chirp import build_upchirp, dechirp_fft
-from .observations import PacketObservation, SymbolObservation, extract_packet_observation
-from .phase_model import PhaseRerankConfig, PhaseRerankResult, rerank_observation
+from .initial_state import (
+    InitialStateEstimate,
+    InitialStateSearchConfig,
+    InitialStateSeed,
+    estimate_initial_state,
+)
+from .frame_locator import (
+    FrameLocation,
+    FrameLocatorConfig,
+    SymbolPeak,
+    locate_frame_from_event,
+    sync_word_to_symbols,
+)
+from .preamble_detector import (
+    DetectionEvent,
+    PreambleDetectorConfig,
+    WindowPeak,
+    detect_preamble_runs,
+    scan_preamble_windows,
+)
 
 __all__ = [
-    "PacketObservation",
-    "PhaseRerankConfig",
-    "PhaseRerankResult",
-    "SymbolObservation",
+    "DetectionEvent",
+    "InitialStateEstimate",
+    "InitialStateSearchConfig",
+    "InitialStateSeed",
+    "FrameLocation",
+    "FrameLocatorConfig",
+    "PreambleDetectorConfig",
+    "SymbolPeak",
+    "WindowPeak",
     "build_upchirp",
     "dechirp_fft",
-    "extract_packet_observation",
-    "rerank_observation",
+    "detect_preamble_runs",
+    "estimate_initial_state",
+    "locate_frame_from_event",
+    "scan_preamble_windows",
+    "sync_word_to_symbols",
 ]
