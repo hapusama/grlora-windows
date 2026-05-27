@@ -278,6 +278,32 @@ header_valid == 1
 D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\plot_payload_peak_trends.py -i gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv -o gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_16_payload_peak_trends --analysis-output gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_16_payload_peak_trends\0_0_0_10_14_16_payload_peak_trends.csv --dpi 220
 ```
 
+### No-offset payload FFT feature 对照导出
+
+入口：
+
+```text
+scripts/export_payload_no_offset_features.py
+```
+
+该脚本只读取 `grlora_framesync_valid == 1` 的候选，不重新做弱检测、sync word / netID 检查，也不使用 CFO_int、CFO_frac、STO_frac、SFO 或 gr-lora_sdr corrected downchirp。它从原始 IQ 里按固定 raw symbol 长度切 payload symbol，用理想 oversampled downchirp 做 `dechirp + FFT`，导出 selected peak 的幅度、功率、相位、unwrap 相位、peak margin 和 peak energy ratio。
+
+默认 `--anchor located` 使用 `frame_locator` 的 `located_payload_start_sample` 作为 PHY header 第 0 个 symbol 起点，然后跳过 8 个 header symbol 到真正 payload。这个模式更接近“完全不做 offsets 补偿”的消融。如果只想保持 gr-lora fine header 起点、消融 FFT 内部补偿，可以改用 `--anchor fine`。
+
+示例：
+
+```powershell
+D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\export_payload_no_offset_features.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin -s gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\sync_chain\0_0_0_10_14_16_sync_chain.csv --sf 10 --bw 125000 --samp-rate 500000 --sync-word 0x34 --preamble-len 16 --peak-gt-csv gr-lora_sdr\weakPacket_decoding\data\peak_groundtruth\0_0_0_10_14_16_peak_gt_preamble8.csv
+```
+
+默认输出：
+
+```text
+data/payload_feature_no_offset/<basename>_payload_no_offset_features.csv
+data/payload_feature_no_offset/plots/packet_xxx_no_offset_peak_trends.png
+data/payload_feature_no_offset/plots/packet_xxx_raw_vs_corrected_peak_trends.png
+```
+
 ## gr-lora_sdr peak groundtruth 导出
 
 入口：
