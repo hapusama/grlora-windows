@@ -51,6 +51,25 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--print-header", action="store_true", default=False, help="打印 header_decoder 信息。")
     parser.add_argument("--max-log-approx", action="store_true", default=True, help="soft LLR 使用 max-log 近似，默认开启。")
     parser.add_argument("--no-max-log-approx", action="store_false", dest="max_log_approx", help="soft LLR 不使用 max-log 近似。")
+    parser.add_argument(
+        "--include-header",
+        action="store_true",
+        default=True,
+        help="写出 PHY header 符号。当前默认开启，保留该参数是为了兼容旧命令。",
+    )
+    parser.add_argument(
+        "--payload-only",
+        action="store_false",
+        dest="include_header",
+        help="只写 payload chirp label，不写 PHY header 符号。",
+    )
+    parser.add_argument(
+        "--min-label-confidence-db",
+        type=float,
+        default=6.0,
+        help="label_reliable 判定阈值，只打标不丢行，默认 6 dB。",
+    )
+    parser.add_argument("--summary-output", type=Path, default=None, help="可选：另存每个包的 label 摘要 CSV。")
     return parser.parse_args()
 
 
@@ -197,6 +216,7 @@ def export_peak_groundtruth(args: argparse.Namespace) -> dict[str, Any]:
         cleanup_file_source_path(staged_path)
 
     records.sort(key=lambda item: (item["frame_count"], item["symbol_index"]))
+    annotate_records(records, min_label_confidence_db=float(args.min_label_confidence_db))
     return {
         "input_file": str(Path(args.input).resolve()),
         "format": "gr-lora_sdr fft_demod peak_candidates",
@@ -206,23 +226,93 @@ def export_peak_groundtruth(args: argparse.Namespace) -> dict[str, Any]:
             if key != "output"
         },
         "record_count": len(records),
+        "payload_record_count": sum(1 for record in records if not bool(record["is_header"])),
         "records": records,
     }
 
 
-def write_peak_csv(path: Path, payload: dict[str, Any]) -> None:
-    """把嵌套的 Top-K peak 记录展开成便于表格查看的 CSV。"""
-    records = payload["records"]
+def annotate_records(records: list[dict[str, Any]], min_label_confidence_db: float = 6.0) -> None:
+    """给 gr-lora_sdr 原始 peak 消息补上 packet/payload 级 label 索引。"""
+
+    records.sort(key=lambda item: (item["frame_count"], item["symbol_index"]))
+    frame_counts = sorted({int(record["frame_count"]) for record in records})
+    packet_index_by_frame = {frame_count: index for index, frame_count in enumerate(frame_counts)}
+    total_by_frame = {frame_count: 0 for frame_count in frame_counts}
+    header_by_frame = {frame_count: 0 for frame_count in frame_counts}
+    payload_by_frame = {frame_count: 0 for frame_count in frame_counts}
+    for record in records:
+        frame_count = int(record["frame_count"])
+        total_by_frame[frame_count] += 1
+        if bool(record["is_header"]):
+            header_by_frame[frame_count] += 1
+        else:
+            payload_by_frame[frame_count] += 1
+
+    payload_seen = {frame_count: 0 for frame_count in frame_counts}
+    for record in records:
+        frame_count = int(record["frame_count"])
+        is_header = bool(record["is_header"])
+        payload_chirp_index = ""
+        if not is_header:
+            payload_chirp_index = payload_seen[frame_count]
+            payload_seen[frame_count] += 1
+
+        values = record.get("candidate_values", {})
+        real_values = values.get("real", [])
+        imag_values = values.get("imag", [])
+        powers = record.get("candidate_powers", [])
+        phases = record.get("candidate_phases", [])
+        confidence_db = float(record.get("confidence_db", float("nan")))
+        record["packet_index"] = int(packet_index_by_frame[frame_count])
+        record["frame_symbol_index"] = int(record["symbol_index"])
+        record["payload_chirp_index"] = payload_chirp_index
+        record["packet_total_symbols"] = int(total_by_frame[frame_count])
+        record["packet_header_symbols"] = int(header_by_frame[frame_count])
+        record["packet_payload_chirps"] = int(payload_by_frame[frame_count])
+        record["label_fft_bin"] = int(record["hard_bin"])
+        record["label_symbol"] = int(record["hard_symbol"])
+        record["label_real"] = real_values[0] if real_values else ""
+        record["label_imag"] = imag_values[0] if imag_values else ""
+        record["label_power"] = powers[0] if powers else ""
+        record["label_phase"] = phases[0] if phases else ""
+        record["label_confidence_db"] = confidence_db
+        record["label_reliable"] = int(confidence_db >= float(min_label_confidence_db))
+
+
+def _records_for_output(payload: dict[str, Any], include_header: bool) -> list[dict[str, Any]]:
+    records = list(payload["records"])
+    if include_header:
+        return records
+    return [record for record in records if not bool(record["is_header"])]
+
+
+def write_peak_csv(path: Path, payload: dict[str, Any], include_header: bool = False) -> dict[str, Any]:
+    """把嵌套的 Top-K peak 记录展开成便于训练/评估使用的 CSV。"""
+
+    records = _records_for_output(payload, include_header=include_header)
     max_top_k = max((int(record.get("top_k", 0)) for record in records), default=0)
     fixed_fields = [
         "input_file",
+        "packet_index",
         "frame_count",
-        "symbol_index",
+        "frame_symbol_index",
+        "payload_chirp_index",
+        "packet_total_symbols",
+        "packet_header_symbols",
+        "packet_payload_chirps",
         "is_header",
         "sf",
         "cr",
         "ldro",
         "samples_per_symbol",
+        "label_fft_bin",
+        "label_symbol",
+        "label_real",
+        "label_imag",
+        "label_power",
+        "label_phase",
+        "label_confidence_db",
+        "label_reliable",
         "top_k",
         "hard_bin",
         "hard_symbol",
@@ -253,13 +343,26 @@ def write_peak_csv(path: Path, payload: dict[str, Any]) -> None:
         for record in records:
             row = {
                 "input_file": payload["input_file"],
+                "packet_index": record["packet_index"],
                 "frame_count": record["frame_count"],
-                "symbol_index": record["symbol_index"],
+                "frame_symbol_index": record["frame_symbol_index"],
+                "payload_chirp_index": record["payload_chirp_index"],
+                "packet_total_symbols": record["packet_total_symbols"],
+                "packet_header_symbols": record["packet_header_symbols"],
+                "packet_payload_chirps": record["packet_payload_chirps"],
                 "is_header": int(bool(record["is_header"])),
                 "sf": record["sf"],
                 "cr": record["cr"],
                 "ldro": int(bool(record["ldro"])),
                 "samples_per_symbol": record["samples_per_symbol"],
+                "label_fft_bin": record["label_fft_bin"],
+                "label_symbol": record["label_symbol"],
+                "label_real": record["label_real"],
+                "label_imag": record["label_imag"],
+                "label_power": record["label_power"],
+                "label_phase": record["label_phase"],
+                "label_confidence_db": record["label_confidence_db"],
+                "label_reliable": record["label_reliable"],
                 "top_k": record["top_k"],
                 "hard_bin": record["hard_bin"],
                 "hard_symbol": record["hard_symbol"],
@@ -286,14 +389,77 @@ def write_peak_csv(path: Path, payload: dict[str, Any]) -> None:
                 row[f"top{rank}_phase"] = phases[index] if index < len(phases) else ""
             writer.writerow(row)
     os.replace(tmp_path, path)
+    return {
+        "wrote_rows": len(records),
+        "include_header": bool(include_header),
+        "max_top_k": int(max_top_k),
+    }
+
+
+def write_summary_csv(path: Path, payload: dict[str, Any]) -> None:
+    """写出每个 gr-lora_sdr 解码帧对应的 payload label 摘要。"""
+
+    records = list(payload["records"])
+    frame_counts = sorted({int(record["frame_count"]) for record in records})
+    fields = [
+        "input_file",
+        "packet_index",
+        "frame_count",
+        "total_symbols",
+        "header_symbols",
+        "payload_chirps",
+        "first_payload_frame_symbol_index",
+        "last_payload_frame_symbol_index",
+        "min_payload_confidence_db",
+        "mean_payload_confidence_db",
+        "all_payload_labels_reliable",
+        "cfo_int",
+        "cfo_frac",
+    ]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_name(path.name + ".tmp")
+    with tmp_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for packet_index, frame_count in enumerate(frame_counts):
+            packet_records = [record for record in records if int(record["frame_count"]) == frame_count]
+            payload_records = [record for record in packet_records if not bool(record["is_header"])]
+            confidences = [float(record["label_confidence_db"]) for record in payload_records]
+            first_payload = payload_records[0]["frame_symbol_index"] if payload_records else ""
+            last_payload = payload_records[-1]["frame_symbol_index"] if payload_records else ""
+            writer.writerow(
+                {
+                    "input_file": payload["input_file"],
+                    "packet_index": packet_index,
+                    "frame_count": frame_count,
+                    "total_symbols": len(packet_records),
+                    "header_symbols": sum(1 for record in packet_records if bool(record["is_header"])),
+                    "payload_chirps": len(payload_records),
+                    "first_payload_frame_symbol_index": first_payload,
+                    "last_payload_frame_symbol_index": last_payload,
+                    "min_payload_confidence_db": min(confidences) if confidences else "",
+                    "mean_payload_confidence_db": (sum(confidences) / len(confidences)) if confidences else "",
+                    "all_payload_labels_reliable": int(all(int(record["label_reliable"]) for record in payload_records)) if payload_records else 0,
+                    "cfo_int": packet_records[0]["cfo_int"] if packet_records else "",
+                    "cfo_frac": packet_records[0]["cfo_frac"] if packet_records else "",
+                }
+            )
+    os.replace(tmp_path, path)
 
 
 def main() -> None:
     args = parse_args()
     payload = export_peak_groundtruth(args)
-    write_peak_csv(args.output, payload)
-    print(f"records={payload['record_count']}")
+    stats = write_peak_csv(args.output, payload, include_header=bool(args.include_header))
+    if args.summary_output is not None:
+        write_summary_csv(args.summary_output, payload)
+    print(f"raw_records={payload['record_count']}")
+    print(f"payload_records={payload['payload_record_count']}")
+    print(f"wrote_rows={stats['wrote_rows']}")
+    print(f"include_header={int(stats['include_header'])}")
     print(f"wrote={args.output}")
+    if args.summary_output is not None:
+        print(f"wrote_summary={args.summary_output}")
 
 
 if __name__ == "__main__":

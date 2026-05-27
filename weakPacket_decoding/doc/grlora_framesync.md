@@ -638,10 +638,12 @@ grlora_down_val_signed_bin
 grlora_cfo_total_est
 grlora_cfo_hz_est
 grlora_sfo_hat
+grlora_sfo_samples_per_symbol
 grlora_clk_off
 grlora_fs_p
 grlora_netid_sto_frac_est
 grlora_payload_sto_frac_est
+grlora_payload_sto_sample_correction
 grlora_netid1_est
 grlora_netid2_est
 grlora_netid_offset
@@ -654,6 +656,8 @@ grlora_fine_preamble_peak_count
 ```
 
 其中 `located_preamble_start_sample` 是 SFD 定界反推出的物理前导码起点；`grlora_synced_preamble_start_sample` 是仿照 gr-lora_sdr 用前导码 peak 挪窗之后的粗同步起点。`grlora_fine_payload_start_sample` 进一步加入整数 CFO 对应的等效采样偏移、`netid_offset` 和 payload 起点处的 STO_frac 采样修正，更接近 gr-lora_sdr 进入 payload 符号输出时使用的起点。
+
+`grlora_sfo_hat` 的单位是 **chip / symbol**，和 gr-lora_sdr 原版一致；如果要换成原始 IQ 的 sample / symbol，需要乘以过采样倍数 `os_factor`，对应 CSV 里的 `grlora_sfo_samples_per_symbol`。`grlora_payload_sto_frac_est` 也是 chip 单位的小数 STO，真正挪原始采样点时使用 `round(grlora_payload_sto_frac_est * os_factor)`，对应 `grlora_payload_sto_sample_correction`。
 
 注意：gr-lora_sdr 的 `frame_sync` 输出 payload 时主要消除 STO/SFO 造成的采样点偏差，但 CFO 会随 `cfo_int`、`cfo_frac` 一起传给后面的 `fft_demod`，由 CFO-aware downchirp 继续处理。因此，当前频谱图里的“after framesync”仍展示粗同步挪窗后的前导码 peak 是否回到 bin0；CFO/STO/SFO 的数值验证主要看 CSV 字段。
 

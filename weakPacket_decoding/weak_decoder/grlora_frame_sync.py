@@ -67,10 +67,12 @@ class GrloraFrameSyncResult:
     cfo_total_est: float
     cfo_hz_est: float
     sfo_hat: float
+    sfo_samples_per_symbol: float
     clk_off: float
     fs_p: float
     netid_sto_frac_est: float
     payload_sto_frac_est: float
+    payload_sto_sample_correction: int
     netid1_est: int
     netid2_est: int
     netid_offset: int
@@ -517,6 +519,7 @@ def run_grlora_frame_sync_validation(
     cfo_total_est = float(cfo_int_est + cfo_frac_est)
     cfo_hz_est = float(cfo_total_est * float(detector_config.bw) / n_bins)
     sfo_hat = float(cfo_total_est * float(detector_config.bw) / float(center_freq))
+    sfo_samples_per_symbol = float(sfo_hat * os_factor)
     clk_off = float(sfo_hat / n_bins)
     fs_p = float(detector_config.bw * (1.0 - clk_off))
 
@@ -536,6 +539,7 @@ def run_grlora_frame_sync_validation(
     sto_sample_correction = _grlora_round(sto_frac_used * os_factor)
     netid_sto_frac_est = _wrap_half(sto_frac_used + sfo_hat * preamble_symbols)
     payload_sto_frac_est = _wrap_half(sto_frac_used + sfo_hat * (preamble_symbols + 4.25))
+    payload_sto_sample_correction = _grlora_round(payload_sto_frac_est * os_factor)
     netid1_est, netid2_est = _estimate_net_ids(
         samples,
         synced_preamble_start,
@@ -552,7 +556,7 @@ def run_grlora_frame_sync_validation(
         and positive_mod(netid2_est - netid_offset, n_bins) == positive_mod(int(sync2_expected), n_bins)
     )
     sfo_cum_initial = float(
-        (payload_sto_frac_est * os_factor - _grlora_round(payload_sto_frac_est * os_factor))
+        (payload_sto_frac_est * os_factor - payload_sto_sample_correction)
         / os_factor
     )
     fine_preamble_start = int(synced_preamble_start - sto_sample_correction)
@@ -560,7 +564,7 @@ def run_grlora_frame_sync_validation(
         synced_payload_start
         + os_factor * int(cfo_int_est)
         - (os_factor * netid_offset if netid_valid else 0)
-        - _grlora_round(payload_sto_frac_est * os_factor)
+        - payload_sto_sample_correction
     )
 
     fine_chirps = _build_corrected_preamble_chirps(
@@ -621,10 +625,12 @@ def run_grlora_frame_sync_validation(
         cfo_total_est=float(cfo_total_est),
         cfo_hz_est=float(cfo_hz_est),
         sfo_hat=float(sfo_hat),
+        sfo_samples_per_symbol=float(sfo_samples_per_symbol),
         clk_off=float(clk_off),
         fs_p=float(fs_p),
         netid_sto_frac_est=float(netid_sto_frac_est),
         payload_sto_frac_est=float(payload_sto_frac_est),
+        payload_sto_sample_correction=int(payload_sto_sample_correction),
         netid1_est=int(netid1_est),
         netid2_est=int(netid2_est),
         netid_offset=int(netid_offset),
