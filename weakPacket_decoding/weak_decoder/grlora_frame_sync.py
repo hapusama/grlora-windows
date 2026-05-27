@@ -583,12 +583,11 @@ def run_grlora_frame_sync_validation(
         bin0_tol,
     )
 
-    valid = (
-        bin0_count == len(preamble_peaks)
-        and sync1_distance == 0
-        and sync2_distance == 0
-        and netid_valid
-    )
+    # 最终同步有效性只要求两件事：
+    # 1) 前导码经 CFO/STO/SFO 校正后全部回到 bin0；
+    # 2) 两个 sync word / netID 作为一组满足 gr-lora_sdr 风格的共同偏移检查。
+    # sync1_distance/sync2_distance 继续保留为调试字段，但不再要求绝对精确为 0。
+    valid = bin0_count == len(preamble_peaks) and netid_valid
 
     return GrloraFrameSyncResult(
         event_index=int(frame_location.event_index),
