@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""从 gr-lora 风格 framesync 候选开始，执行 header-first FFT demod。"""
-# D:\mysoft2\miniconda3\envs\gr-lora\python.exe weakPacket_decoding\scripts\run_header_first_demod.py -i data\USRP_IQ\0_0_0_10_14_16.bin -s weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_16_sync_chain_stft.csv -o weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_16_header_first_symbols.csv --frames-output weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_16_header_first_frames.csv --sf 10 --bw 125000 --samp-rate 500000 --ldro-mode 2
+"""从同步候选开始，执行 header-first FFT demod 和 payload 一致性检查。"""
+# D:\mysoft2\miniconda3\envs\gr-lora\python.exe weakPacket_decoding\scripts\run_header_first_demod.py -i data\USRP_IQ\0_0_0_10_14_16.bin -s weakPacket_decoding\data\weak_sync_chain\sync_chain\0_0_0_10_14_16_sync_chain.csv -o weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv --frames-output weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_frames.csv --sf 10 --bw 125000 --samp-rate 500000 --ldro-mode 2
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import csv
 from pathlib import Path
 import sys
@@ -28,7 +29,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "读取 run_weak_sync_chain.py 输出的 gr-lora framesync 候选，"
-            "只对 grlora_framesync_valid==1 的 frame 做 header-first FFT demod。"
+            "执行 header-first FFT demod。默认只处理 grlora_framesync_valid==1 的 frame。"
         )
     )
     parser.add_argument("-i", "--input", type=Path, required=True, help="raw complex64 IQ 文件。")
@@ -39,12 +40,38 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--bw", type=float, default=125000.0, help="LoRa BW Hz，默认 125000。")
     parser.add_argument("--samp-rate", type=float, default=500000.0, help="IQ 采样率 Hz，默认 500000。")
     parser.add_argument("--ldro-mode", type=int, default=2, help="LDRO 模式：0 关，1 开，2 自动，默认 2。")
-    parser.add_argument("--max-frames", type=int, default=None, help="最多处理多少个有效 framesync 候选。")
+    parser.add_argument("--max-frames", type=int, default=None, help="最多处理多少个被选中的同步候选。")
+    parser.add_argument(
+        "--frame-filter",
+        choices=("framesync-valid", "netid-valid", "frame-valid", "all"),
+        default="framesync-valid",
+        help=(
+            "同步候选筛选方式：framesync-valid 只处理最终同步有效候选；"
+            "netid-valid 只要求 netID 成组检查通过；frame-valid 只要求粗帧定界通过；"
+            "all 会把所有检测候选都送进 FFT demod。默认 framesync-valid。"
+        ),
+    )
     parser.add_argument(
         "--include-invalid-header",
         action="store_true",
         default=False,
         help="header checksum 失败时仍保留该 frame 的 8 个 header symbol 输出。",
+    )
+    parser.add_argument(
+        "--invalid-header-payload-policy",
+        choices=("skip", "mode"),
+        default="skip",
+        help=(
+            "header 无效时是否继续解 payload：skip 表示跳过 payload；"
+            "mode 表示使用有效 header 中最常见的 payload symbol 数继续解调，"
+            "适合做同一 bin 文件内的 payload FFT bin 一致性检查。默认 skip。"
+        ),
+    )
+    parser.add_argument(
+        "--consistency-output",
+        type=Path,
+        default=None,
+        help="可选：输出 payload FFT bin 逐 symbol 位置的一致性检查 CSV。",
     )
     return parser.parse_args()
 
@@ -67,6 +94,18 @@ def _valid_flag(row: dict[str, str], key: str) -> bool:
     return str(row.get(key, "0")).strip() in {"1", "true", "True"}
 
 
+def _passes_frame_filter(row: dict[str, str], frame_filter: str) -> bool:
+    if frame_filter == "framesync-valid":
+        return _valid_flag(row, "grlora_framesync_valid")
+    if frame_filter == "netid-valid":
+        return _valid_flag(row, "grlora_netid_valid")
+    if frame_filter == "frame-valid":
+        return _valid_flag(row, "frame_valid")
+    if frame_filter == "all":
+        return True
+    raise ValueError(f"unknown frame filter: {frame_filter}")
+
+
 def _header_start_sample(row: dict[str, str], os_factor: int) -> int:
     """优先使用 gr-lora 精同步后的 data 起点；这个位置就是 PHY header 第 0 个 symbol 起点。"""
 
@@ -84,9 +123,9 @@ def _header_start_sample(row: dict[str, str], os_factor: int) -> int:
     raise ValueError("sync CSV row does not contain a usable header start sample.")
 
 
-def load_valid_sync_rows(path: Path, max_frames: int | None, os_factor: int) -> list[dict[str, str]]:
+def load_sync_rows(path: Path, max_frames: int | None, os_factor: int, frame_filter: str) -> list[dict[str, str]]:
     with path.open("r", encoding="utf-8", newline="") as handle:
-        rows = [row for row in csv.DictReader(handle) if _valid_flag(row, "grlora_framesync_valid")]
+        rows = [row for row in csv.DictReader(handle) if _passes_frame_filter(row, frame_filter)]
     rows.sort(key=lambda item: _header_start_sample(item, os_factor=os_factor))
     if max_frames is not None:
         rows = rows[: int(max_frames)]
@@ -110,6 +149,7 @@ def frame_summary_row(
         "event_index": source_row.get("event_index", ""),
         "header_start_sample": int(header_start_sample),
         "source_grlora_framesync_valid": int(_valid_flag(source_row, "grlora_framesync_valid")),
+        "source_frame_valid": int(_valid_flag(source_row, "frame_valid")),
         "source_grlora_netid_valid": source_row.get("grlora_netid_valid", ""),
         "source_grlora_cfo_int": source_row.get("grlora_cfo_int_est", ""),
         "source_grlora_cfo_frac": source_row.get("grlora_cfo_frac_est", ""),
@@ -203,6 +243,52 @@ def symbol_row(
     }
 
 
+def payload_consistency_rows(symbol_rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    """按 payload symbol 位置检查所有候选包的 FFT bin 是否一致。"""
+
+    by_symbol: dict[int, list[dict[str, object]]] = {}
+    for row in symbol_rows:
+        if row.get("stage") != "payload":
+            continue
+        by_symbol.setdefault(int(row.get("stage_symbol_index", 0)), []).append(row)
+
+    rows: list[dict[str, object]] = []
+    for stage_symbol_index in sorted(by_symbol):
+        items = by_symbol[stage_symbol_index]
+        raw_values = [int(item["raw_fft_bin"]) for item in items]
+        signed_values = [int(item["signed_fft_bin"]) for item in items]
+        symbol_values = [int(item["symbol_value"]) for item in items]
+
+        raw_counter = Counter(raw_values)
+        signed_counter = Counter(signed_values)
+        symbol_counter = Counter(symbol_values)
+        mode_raw, mode_raw_count = raw_counter.most_common(1)[0]
+        mode_signed, mode_signed_count = signed_counter.most_common(1)[0]
+        mode_symbol, mode_symbol_count = symbol_counter.most_common(1)[0]
+
+        mismatch_items = [item for item in items if int(item["raw_fft_bin"]) != int(mode_raw)]
+        rows.append(
+            {
+                "payload_symbol_index": int(stage_symbol_index),
+                "frame_count": len(items),
+                "mode_raw_fft_bin": int(mode_raw),
+                "mode_signed_fft_bin": int(mode_signed),
+                "mode_symbol_value": int(mode_symbol),
+                "mode_raw_count": int(mode_raw_count),
+                "mode_symbol_count": int(mode_symbol_count),
+                "raw_mismatch_count": len(mismatch_items),
+                "raw_unique_count": len(raw_counter),
+                "symbol_unique_count": len(symbol_counter),
+                "unique_raw_fft_bins": _join_ints(sorted(raw_counter)),
+                "unique_symbol_values": _join_ints(sorted(symbol_counter)),
+                "mismatch_frame_indices": _join_ints([int(item["frame_index"]) for item in mismatch_items]),
+                "mismatch_packet_indices": _join_ints([int(item["packet_index"]) for item in mismatch_items if str(item.get("packet_index", "")) != ""]),
+                "mismatch_event_indices": _join_ints([int(item["event_index"]) for item in mismatch_items if str(item.get("event_index", "")) != ""]),
+            }
+        )
+    return rows
+
+
 def write_csv(path: Path, rows: list[dict[str, object]], fields: list[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_name(path.name + ".tmp")
@@ -222,9 +308,10 @@ def main() -> None:
         raise ValueError(f"--samp-rate / --bw must be an integer, got {ratio}.")
 
     samples = load_complex64_file(args.input)
-    sync_rows = load_valid_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor)
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
     symbol_rows: list[dict[str, object]] = []
     frame_rows: list[dict[str, object]] = []
+    prepared_frames: list[dict[str, object]] = []
 
     for frame_index, row in enumerate(sync_rows):
         frame_sf = _to_int(row, "sf", args.sf)
@@ -256,8 +343,78 @@ def main() -> None:
                 bw=frame_bw,
                 ldro_mode=args.ldro_mode,
             )
-            frame_rows.append(frame_summary_row(row, frame_index, header_start, header))
-            if header.header_valid:
+            prepared_frames.append(
+                {
+                    "row": row,
+                    "frame_index": frame_index,
+                    "frame_sf": frame_sf,
+                    "frame_bw": frame_bw,
+                    "frame_os_factor": frame_os_factor,
+                    "header_start": header_start,
+                    "cfo_int": cfo_int,
+                    "cfo_frac": cfo_frac,
+                    "sfo_hat": sfo_hat,
+                    "sfo_cum_initial": sfo_cum_initial,
+                    "header": header,
+                    "header_symbols": header_symbols,
+                    "error": "",
+                }
+            )
+        except Exception as exc:
+            prepared_frames.append(
+                {
+                    "row": row,
+                    "frame_index": frame_index,
+                    "frame_sf": frame_sf,
+                    "frame_bw": frame_bw,
+                    "frame_os_factor": frame_os_factor,
+                    "header_start": header_start,
+                    "cfo_int": cfo_int,
+                    "cfo_frac": cfo_frac,
+                    "sfo_hat": sfo_hat,
+                    "sfo_cum_initial": sfo_cum_initial,
+                    "header": None,
+                    "header_symbols": [],
+                    "error": f"{type(exc).__name__}: {exc}",
+                }
+            )
+
+    valid_payload_counts = [
+        int(item["header"].payload_symbol_count)
+        for item in prepared_frames
+        if item.get("header") is not None and item["header"].header_valid
+    ]
+    fallback_payload_count = 0
+    if args.invalid_header_payload_policy == "mode" and valid_payload_counts:
+        fallback_payload_count = Counter(valid_payload_counts).most_common(1)[0][0]
+
+    for item in prepared_frames:
+        row = item["row"]
+        frame_index = int(item["frame_index"])
+        frame_sf = int(item["frame_sf"])
+        frame_bw = float(item["frame_bw"])
+        frame_os_factor = int(item["frame_os_factor"])
+        header_start = int(item["header_start"])
+        cfo_int = int(item["cfo_int"])
+        cfo_frac = float(item["cfo_frac"])
+        sfo_hat = float(item["sfo_hat"])
+        sfo_cum_initial = float(item["sfo_cum_initial"])
+        header = item["header"]
+        error = str(item.get("error", ""))
+
+        if error:
+            frame_rows.append(frame_summary_row(row, frame_index, header_start, None, error=error))
+            continue
+
+        frame_rows.append(frame_summary_row(row, frame_index, header_start, header))
+        if header is None:
+            continue
+
+        payload_count = int(header.payload_symbol_count) if header.header_valid else int(fallback_payload_count)
+        payload_ldro = bool(header.ldro) if header.header_valid else False
+
+        if header.header_valid or payload_count > 0:
+            try:
                 symbols = demod_symbol_sequence(
                     samples=samples,
                     header_start_sample=header_start,
@@ -268,16 +425,16 @@ def main() -> None:
                     sfo_hat=sfo_hat,
                     sfo_cum_initial=sfo_cum_initial,
                     header_count=8,
-                    payload_count=header.payload_symbol_count,
-                    payload_ldro=header.ldro,
+                    payload_count=payload_count,
+                    payload_ldro=payload_ldro,
                 )
                 for symbol in symbols:
                     symbol_rows.append(symbol_row(row, frame_index, header, symbol, frame_sf, frame_bw, frame_os_factor))
-            elif args.include_invalid_header:
-                for symbol in header_symbols:
-                    symbol_rows.append(symbol_row(row, frame_index, header, symbol, frame_sf, frame_bw, frame_os_factor))
-        except Exception as exc:
-            frame_rows.append(frame_summary_row(row, frame_index, header_start, None, error=f"{type(exc).__name__}: {exc}"))
+            except Exception as exc:
+                frame_rows[-1]["error"] = f"{type(exc).__name__}: {exc}"
+        elif args.include_invalid_header:
+            for symbol in item["header_symbols"]:
+                symbol_rows.append(symbol_row(row, frame_index, header, symbol, frame_sf, frame_bw, frame_os_factor))
 
     symbol_fields = [
         "frame_index",
@@ -317,6 +474,7 @@ def main() -> None:
         "packet_index",
         "event_index",
         "header_start_sample",
+        "source_frame_valid",
         "source_grlora_framesync_valid",
         "source_grlora_netid_valid",
         "source_grlora_cfo_int",
@@ -342,15 +500,40 @@ def main() -> None:
     write_csv(args.output, symbol_rows, symbol_fields)
     frames_output = args.frames_output or args.output.with_name(args.output.stem + "_frames.csv")
     write_csv(frames_output, frame_rows, frame_fields)
+    consistency_output = args.consistency_output
+    if consistency_output is not None:
+        consistency_fields = [
+            "payload_symbol_index",
+            "frame_count",
+            "mode_raw_fft_bin",
+            "mode_signed_fft_bin",
+            "mode_symbol_value",
+            "mode_raw_count",
+            "mode_symbol_count",
+            "raw_mismatch_count",
+            "raw_unique_count",
+            "symbol_unique_count",
+            "unique_raw_fft_bins",
+            "unique_symbol_values",
+            "mismatch_frame_indices",
+            "mismatch_packet_indices",
+            "mismatch_event_indices",
+        ]
+        write_csv(consistency_output, payload_consistency_rows(symbol_rows), consistency_fields)
 
     valid_headers = sum(int(row.get("header_valid", 0)) for row in frame_rows)
     payload_rows = sum(1 for row in symbol_rows if row.get("stage") == "payload")
-    print(f"framesync_candidates={len(sync_rows)}")
+    print(f"selected_candidates={len(sync_rows)}")
+    print(f"frame_filter={args.frame_filter}")
     print(f"header_valid={valid_headers}/{len(frame_rows)}")
+    if fallback_payload_count:
+        print(f"fallback_payload_symbol_count={fallback_payload_count}")
     print(f"symbol_rows={len(symbol_rows)}")
     print(f"payload_rows={payload_rows}")
     print(f"wrote={args.output}")
     print(f"wrote_frames={frames_output}")
+    if consistency_output is not None:
+        print(f"wrote_consistency={consistency_output}")
 
 
 if __name__ == "__main__":
