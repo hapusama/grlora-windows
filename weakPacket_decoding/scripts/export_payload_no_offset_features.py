@@ -6,7 +6,7 @@
 1. 只复用已有 sync_chain 里的有效帧边界；
 2. 不重新做 weak detection、sync word / netID 检查；
 3. payload FFT 阶段不使用 CFO/STO/SFO 补偿；
-4. 只用理想 downchirp 对 raw IQ 固定切片做 dechirp + FFT。
+4. 用 gr-lora_sdr 同款 chip-rate FFT：每 chip 取中心样点，再用无补偿 downchirp 做 FFT。
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ if str(WEAK_ROOT) not in sys.path:
     # 允许直接从 scripts/ 目录运行，同时还能导入旁边的 weak_decoder 包。
     sys.path.insert(0, str(WEAK_ROOT))
 
-from weak_decoder.chirp import build_upchirp  # noqa: E402
+from weak_decoder.chirp import build_downchirp, dechirp_fft  # noqa: E402
 from weak_decoder.preamble_detector import load_complex64_file  # noqa: E402
 
 
@@ -331,22 +331,34 @@ def header_start_from_row(row: dict[str, str], anchor: str) -> int:
     raise ValueError(f"row does not contain a usable {anchor} header anchor.")
 
 
-def build_ideal_downchirp(sf: int, os_factor: int) -> np.ndarray:
-    """构造理想过采样 downchirp。
+def build_no_offset_downchirp(sf: int) -> np.ndarray:
+    """构造 chip-rate no-offset downchirp。
 
-    这里没有 CFO_int、CFO_frac 或 SFO 相位项，是 no-offset demod 的核心约束。
+    这和 corrected 路径使用同一个 downchirp 构造函数，但显式把 CFO_int/CFO_frac 置零。
     """
 
-    upchirp = build_upchirp(sf, symbol_id=0, os_factor=os_factor)
-    return np.conjugate(upchirp).astype(np.complex64)
+    return build_downchirp(sf, cfo_int=0, cfo_frac=0.0)
+
+
+def chiprate_sample_indexes(start_sample: int, sf: int, os_factor: int) -> np.ndarray:
+    """复刻 corrected demod 的 chip-rate 抽样位置。
+
+    每个 LoRa chip 只取一个中心样点，因此 FFT 长度是 2^SF，而不是 2^SF * os_factor。
+    """
+
+    n_bins = 1 << int(sf)
+    os_value = int(os_factor)
+    return int(start_sample) + int(os_value / 2) + os_value * np.arange(n_bins, dtype=np.int64)
 
 
 def demod_no_offset_symbol(
     samples: np.ndarray,
     start_sample: int,
+    sf: int,
+    os_factor: int,
     downchirp: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray, int, float, float, float, float, float, float]:
-    """对单个 payload symbol 做 no-offset dechirp + FFT。
+    """对单个 payload symbol 做 no-offset chip-rate dechirp + FFT。
 
     禁用项：
     - 不做 CFO_int 采样偏移；
@@ -356,14 +368,14 @@ def demod_no_offset_symbol(
     - 不使用 gr-lora_sdr corrected downchirp。
     """
 
-    length = int(downchirp.size)
-    start = int(start_sample)
-    stop = start + length
-    if start < 0 or stop > samples.size:
-        raise ValueError(f"symbol slice [{start}, {stop}) exceeds input samples.")
-    # 固定长度直接从 raw IQ 切片，这是 no-offset 消融里唯一允许的采样动作。
-    raw_symbol = np.asarray(samples[start:stop], dtype=np.complex64)
-    spectrum = np.fft.fft(raw_symbol * downchirp)
+    indexes = chiprate_sample_indexes(start_sample, sf=sf, os_factor=os_factor)
+    if int(indexes[0]) < 0 or int(indexes[-1]) >= samples.size:
+        raise ValueError(
+            f"chip-rate symbol indexes [{int(indexes[0])}, {int(indexes[-1])}] exceed input samples."
+        )
+    # 只复刻 corrected 的 chip-rate 抽样和 FFT 口径；不引入任何 offsets 补偿。
+    raw_symbol = np.asarray(samples[indexes], dtype=np.complex64)
+    spectrum = dechirp_fft(raw_symbol, downchirp)
     power = np.abs(spectrum) ** 2
     raw_bin = int(np.argmax(power))
     peak = complex(spectrum[raw_bin])
@@ -492,7 +504,7 @@ def export_features(
     """
 
     rows: list[dict[str, object]] = []
-    downchirps: dict[tuple[int, int], np.ndarray] = {}
+    downchirps: dict[int, np.ndarray] = {}
 
     for selected in selected_rows:
         source = selected["raw"]
@@ -506,16 +518,16 @@ def export_features(
         header_start = header_start_from_row(source, anchor)
         # 这里把 header 起点向后平移 8 个 explicit-header symbol，得到 payload 第 0 个符号起点。
         payload_start = int(header_start + HEADER_SYMBOLS * samples_per_symbol)
-        key = (sf, os_factor)
+        key = sf
         if key not in downchirps:
-            # 同一组 SF/os_factor 的理想 downchirp 可以复用。
-            downchirps[key] = build_ideal_downchirp(sf, os_factor)
+            # 同一组 SF 的 chip-rate no-offset downchirp 可以复用。
+            downchirps[key] = build_no_offset_downchirp(sf)
         downchirp = downchirps[key]
 
         for payload_idx in range(payload_count):
             start = int(payload_start + payload_idx * samples_per_symbol)
             spectrum, power, raw_bin, amp, peak_power, phase, margin_db, total_energy, ratio = (
-                demod_no_offset_symbol(samples, start, downchirp)
+                demod_no_offset_symbol(samples, start, sf=sf, os_factor=os_factor, downchirp=downchirp)
             )
             gt_row = find_gt_row(gt_rows, packet_id, frame_id, payload_idx)
             row: dict[str, object] = {
@@ -703,7 +715,7 @@ def _plot_no_offset_packet_pillow(
     ]
     _plot_panels_pillow(
         out_path,
-        f"packet_id={packet_id} | frame_id={frame_id} | event_id={event_id} | mode=no_offset",
+        f"packet_id={packet_id} | frame_id={frame_id} | event_id={event_id} | mode=no_offset_chiprate",
         panels,
         dpi,
     )
@@ -757,7 +769,7 @@ def plot_no_offset_packet(packet_id: int, packet_rows: list[dict[str, object]], 
     for axis in axes:
         axis.title.set_fontsize(12)
     fig.suptitle(
-        f"Packet {packet_id} no-offset payload FFT selected peak trends | frame {frame_id} | event {event_id}",
+        f"Packet {packet_id} no-offset chip-rate FFT selected peak trends | frame {frame_id} | event {event_id}",
         fontsize=12,
     )
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.94))
@@ -841,7 +853,7 @@ def _plot_comparison_packet_pillow(
     ]
     _plot_panels_pillow(
         out_path,
-        f"packet_id={packet_id} | frame_id={frame_id} | event_id={event_id} | no_offset vs corrected",
+        f"packet_id={packet_id} | frame_id={frame_id} | event_id={event_id} | no_offset_chiprate vs corrected",
         panels,
         dpi,
     )
@@ -902,7 +914,7 @@ def plot_comparison_packet(
     axes[0].set_ylim(-1.05, 1.05)
     axes[-1].set_xlabel("Payload symbol index")
     fig.suptitle(
-        f"packet_id={packet_id} | frame_id={frame_id} | event_id={event_id} | no_offset vs corrected",
+        f"packet_id={packet_id} | frame_id={frame_id} | event_id={event_id} | no_offset_chiprate vs corrected",
         fontsize=12,
     )
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))

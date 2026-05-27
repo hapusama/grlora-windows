@@ -286,7 +286,7 @@ D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\sc
 scripts/export_payload_no_offset_features.py
 ```
 
-该脚本只读取 `grlora_framesync_valid == 1` 的候选，不重新做弱检测、sync word / netID 检查，也不使用 CFO_int、CFO_frac、STO_frac、SFO 或 gr-lora_sdr corrected downchirp。它从原始 IQ 里按固定 raw symbol 长度切 payload symbol，用理想 oversampled downchirp 做 `dechirp + FFT`，导出 selected peak 的幅度、功率、相位、unwrap 相位、peak margin 和 peak energy ratio。
+该脚本只读取 `grlora_framesync_valid == 1` 的候选，不重新做弱检测、sync word / netID 检查，也不使用 CFO_int、CFO_frac、STO_frac、SFO 或 gr-lora_sdr corrected downchirp。它从原始 IQ 里按固定 raw symbol 起点切 payload symbol，但 FFT 口径和 corrected 版本一致：每个 chip 取中心样点，做 `2^SF` 点 chip-rate `dechirp + FFT`，导出 selected peak 的幅度、功率、相位、unwrap 相位、peak margin 和 peak energy ratio。
 
 默认 `--anchor located` 使用 `frame_locator` 的 `located_payload_start_sample` 作为 PHY header 第 0 个 symbol 起点，然后跳过 8 个 header symbol 到真正 payload。这个模式更接近“完全不做 offsets 补偿”的消融。如果只想保持 gr-lora fine header 起点、消融 FFT 内部补偿，可以改用 `--anchor fine`。
 
