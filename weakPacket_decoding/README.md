@@ -278,6 +278,22 @@ header_valid == 1
 D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\plot_payload_peak_trends.py -i gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv -o gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_16_payload_peak_trends --analysis-output gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_16_payload_peak_trends\0_0_0_10_14_16_payload_peak_trends.csv --dpi 220
 ```
 
+### Corrected phase 诊断图
+
+入口：
+
+```text
+scripts/plot_corrected_phase_diagnostics.py
+```
+
+该脚本读取 `run_header_first_demod.py` 导出的 symbol CSV，只分析 `header_valid == 1` 的 payload symbol。它会为每个 packet 画四联图：wrapped phase、unwrap phase 与一次拟合、去线性趋势后的 residual、residual 与 `raw_fft_bin` 的关系；同时输出 summary CSV，用来判断锯齿相位主要来自 residual/global CFO、SFO/drift，还是 STO 与 bin 的耦合。
+
+示例：
+
+```powershell
+D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\plot_corrected_phase_diagnostics.py -i gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv --packet 5 -o gr-lora_sdr\weakPacket_decoding\data\payload_feature_no_offset\plots
+```
+
 ### No-offset payload FFT feature 对照导出
 
 入口：
