@@ -1,0 +1,1414 @@
+{
+  "config": {
+    "anchor_mode": "none",
+    "alpha": 0.97,
+    "confidence_margin_db": 3.0,
+    "top_k": 16,
+    "top_l": 10,
+    "phase_states": 64,
+    "transition_window": 2,
+    "max_symbols": null,
+    "crc_mode": 0,
+    "impl_header": false
+  },
+  "aggregate": {
+    "compared_packets": 59,
+    "symbols": 2537,
+    "hard_errors": 18,
+    "map_errors": 17,
+    "map_delta": 1,
+    "map_fixed": 1,
+    "map_broke": 0,
+    "changed": 3,
+    "hard_exact_packets": 52,
+    "map_exact_packets": 53,
+    "soft_payload_available": 59,
+    "soft_payload_crc_valid": 57,
+    "soft_payload_correct": 53,
+    "soft_payload_wrong": 6
+  },
+  "summaries": [
+    {
+      "file": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\noisy_iq\\0_0_0_10_14_16\\0_0_0_10_14_16_noise_rel_10p0dB.json",
+      "relative_file": "0_0_0_10_14_16\\0_0_0_10_14_16_noise_rel_10p0dB.json",
+      "noise_db": 10.0,
+      "expected_packets": 8,
+      "detected": 7,
+      "grlora_correct": 7,
+      "grlora_crc_valid": 7,
+      "compared_packets": 7,
+      "symbols": 301,
+      "hard_errors": 0,
+      "map_errors": 0,
+      "map_delta": 0,
+      "map_fixed": 0,
+      "map_broke": 0,
+      "changed": 0,
+      "hard_exact_packets": 7,
+      "map_exact_packets": 7,
+      "soft_payload_available": 7,
+      "soft_payload_crc_valid": 7,
+      "soft_payload_correct": 7,
+      "soft_payload_wrong": 0,
+      "soft_payload_rows": [
+        {
+          "packet_index": 0,
+          "payload_hex": "404433221100010058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 1,
+          "payload_hex": "404433221100030058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 2,
+          "payload_hex": "404433221100050058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 3,
+          "payload_hex": "404433221100070058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 4,
+          "payload_hex": "404433221100090058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 5,
+          "payload_hex": "4044332211000b0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 6,
+          "payload_hex": "4044332211000d0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        }
+      ],
+      "per_packets": [
+        {
+          "packet_index": 0,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 1,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 2,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 3,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 4,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 5,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 6,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        }
+      ]
+    },
+    {
+      "file": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\noisy_iq\\0_0_0_10_14_16\\0_0_0_10_14_16_noise_rel_15p0dB.json",
+      "relative_file": "0_0_0_10_14_16\\0_0_0_10_14_16_noise_rel_15p0dB.json",
+      "noise_db": 15.0,
+      "expected_packets": 8,
+      "detected": 7,
+      "grlora_correct": 7,
+      "grlora_crc_valid": 7,
+      "compared_packets": 7,
+      "symbols": 301,
+      "hard_errors": 0,
+      "map_errors": 0,
+      "map_delta": 0,
+      "map_fixed": 0,
+      "map_broke": 0,
+      "changed": 0,
+      "hard_exact_packets": 7,
+      "map_exact_packets": 7,
+      "soft_payload_available": 7,
+      "soft_payload_crc_valid": 7,
+      "soft_payload_correct": 7,
+      "soft_payload_wrong": 0,
+      "soft_payload_rows": [
+        {
+          "packet_index": 0,
+          "payload_hex": "404433221100010058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 1,
+          "payload_hex": "404433221100030058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 2,
+          "payload_hex": "404433221100050058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 3,
+          "payload_hex": "404433221100070058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 4,
+          "payload_hex": "404433221100090058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 5,
+          "payload_hex": "4044332211000b0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 6,
+          "payload_hex": "4044332211000d0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        }
+      ],
+      "per_packets": [
+        {
+          "packet_index": 0,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 1,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 2,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 3,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 4,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 5,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 6,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        }
+      ]
+    },
+    {
+      "file": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\noisy_iq\\0_0_0_10_14_16\\0_0_0_10_14_16_noise_rel_25p0dB.json",
+      "relative_file": "0_0_0_10_14_16\\0_0_0_10_14_16_noise_rel_25p0dB.json",
+      "noise_db": 25.0,
+      "expected_packets": 8,
+      "detected": 7,
+      "grlora_correct": 3,
+      "grlora_crc_valid": 5,
+      "compared_packets": 7,
+      "symbols": 301,
+      "hard_errors": 4,
+      "map_errors": 3,
+      "map_delta": 1,
+      "map_fixed": 1,
+      "map_broke": 0,
+      "changed": 2,
+      "hard_exact_packets": 5,
+      "map_exact_packets": 6,
+      "soft_payload_available": 7,
+      "soft_payload_crc_valid": 7,
+      "soft_payload_correct": 5,
+      "soft_payload_wrong": 2,
+      "soft_payload_rows": [
+        {
+          "packet_index": 0,
+          "payload_hex": "404433221100010058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 1,
+          "payload_hex": "404433221100030058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 2,
+          "payload_hex": "404433221100050058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 3,
+          "payload_hex": "404433221100070058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 4,
+          "payload_hex": "404433221100090058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 5,
+          "payload_hex": "4044332211000c0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 6,
+          "payload_hex": "4044332211000e0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        }
+      ],
+      "per_packets": [
+        {
+          "packet_index": 0,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 1,
+          "symbols": 43,
+          "hard_errors": 3,
+          "map_errors": 3,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 1,
+          "hard_exact": 0,
+          "map_exact": 0
+        },
+        {
+          "packet_index": 2,
+          "symbols": 43,
+          "hard_errors": 1,
+          "map_errors": 0,
+          "fixed": 1,
+          "broke": 0,
+          "changed": 1,
+          "hard_exact": 0,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 3,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 4,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 5,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 6,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        }
+      ]
+    },
+    {
+      "file": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\noisy_iq\\0_0_0_10_14_16\\0_0_0_10_14_16_noise_rel_30p0dB.json",
+      "relative_file": "0_0_0_10_14_16\\0_0_0_10_14_16_noise_rel_30p0dB.json",
+      "noise_db": 30.0,
+      "expected_packets": 8,
+      "detected": 0,
+      "grlora_correct": 0,
+      "grlora_crc_valid": 0,
+      "compared_packets": 0,
+      "symbols": 0,
+      "hard_errors": null,
+      "map_errors": null,
+      "map_delta": null,
+      "map_fixed": 0,
+      "map_broke": 0,
+      "changed": 0,
+      "hard_exact_packets": 0,
+      "map_exact_packets": 0,
+      "soft_payload_available": 0,
+      "soft_payload_crc_valid": 0,
+      "soft_payload_correct": 0,
+      "soft_payload_wrong": 0,
+      "per_packets": [],
+      "soft_payload_rows": []
+    },
+    {
+      "file": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\noisy_iq\\0_0_0_10_14_32\\0_0_0_10_14_32_noise_rel_10p0dB.json",
+      "relative_file": "0_0_0_10_14_32\\0_0_0_10_14_32_noise_rel_10p0dB.json",
+      "noise_db": 10.0,
+      "expected_packets": 7,
+      "detected": 7,
+      "grlora_correct": 7,
+      "grlora_crc_valid": 7,
+      "compared_packets": 7,
+      "symbols": 301,
+      "hard_errors": 0,
+      "map_errors": 0,
+      "map_delta": 0,
+      "map_fixed": 0,
+      "map_broke": 0,
+      "changed": 0,
+      "hard_exact_packets": 7,
+      "map_exact_packets": 7,
+      "soft_payload_available": 7,
+      "soft_payload_crc_valid": 7,
+      "soft_payload_correct": 7,
+      "soft_payload_wrong": 0,
+      "soft_payload_rows": [
+        {
+          "packet_index": 0,
+          "payload_hex": "404433221100010058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 1,
+          "payload_hex": "404433221100030058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 2,
+          "payload_hex": "404433221100050058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 3,
+          "payload_hex": "404433221100070058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 4,
+          "payload_hex": "404433221100090058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 5,
+          "payload_hex": "4044332211000b0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 6,
+          "payload_hex": "4044332211000d0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        }
+      ],
+      "per_packets": [
+        {
+          "packet_index": 0,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 1,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 2,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 3,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 4,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 5,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 6,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        }
+      ]
+    },
+    {
+      "file": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\noisy_iq\\0_0_0_10_14_32\\0_0_0_10_14_32_noise_rel_15p0dB.json",
+      "relative_file": "0_0_0_10_14_32\\0_0_0_10_14_32_noise_rel_15p0dB.json",
+      "noise_db": 15.0,
+      "expected_packets": 7,
+      "detected": 7,
+      "grlora_correct": 6,
+      "grlora_crc_valid": 6,
+      "compared_packets": 7,
+      "symbols": 301,
+      "hard_errors": 4,
+      "map_errors": 4,
+      "map_delta": 0,
+      "map_fixed": 0,
+      "map_broke": 0,
+      "changed": 0,
+      "hard_exact_packets": 6,
+      "map_exact_packets": 6,
+      "soft_payload_available": 7,
+      "soft_payload_crc_valid": 6,
+      "soft_payload_correct": 6,
+      "soft_payload_wrong": 1,
+      "soft_payload_rows": [
+        {
+          "packet_index": 0,
+          "payload_hex": "404433221100010058303132333435363738393a3b3c3d3e3f4041424378566456",
+          "crc_valid": false,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 1,
+          "payload_hex": "404433221100030058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 2,
+          "payload_hex": "404433221100050058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 3,
+          "payload_hex": "404433221100070058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 4,
+          "payload_hex": "404433221100090058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 5,
+          "payload_hex": "4044332211000b0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 6,
+          "payload_hex": "4044332211000d0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        }
+      ],
+      "per_packets": [
+        {
+          "packet_index": 0,
+          "symbols": 43,
+          "hard_errors": 4,
+          "map_errors": 4,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 0,
+          "map_exact": 0
+        },
+        {
+          "packet_index": 1,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 2,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 3,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 4,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 5,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 6,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        }
+      ]
+    },
+    {
+      "file": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\noisy_iq\\0_0_0_10_14_32\\0_0_0_10_14_32_noise_rel_25p0dB.json",
+      "relative_file": "0_0_0_10_14_32\\0_0_0_10_14_32_noise_rel_25p0dB.json",
+      "noise_db": 25.0,
+      "expected_packets": 7,
+      "detected": 5,
+      "grlora_correct": 2,
+      "grlora_crc_valid": 2,
+      "compared_packets": 5,
+      "symbols": 215,
+      "hard_errors": 7,
+      "map_errors": 7,
+      "map_delta": 0,
+      "map_fixed": 0,
+      "map_broke": 0,
+      "changed": 0,
+      "hard_exact_packets": 2,
+      "map_exact_packets": 2,
+      "soft_payload_available": 5,
+      "soft_payload_crc_valid": 5,
+      "soft_payload_correct": 3,
+      "soft_payload_wrong": 2,
+      "soft_payload_rows": [
+        {
+          "packet_index": 0,
+          "payload_hex": "404433221100030058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 1,
+          "payload_hex": "404433221100060058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 2,
+          "payload_hex": "404433221100080058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 3,
+          "payload_hex": "4044332211000b0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 4,
+          "payload_hex": "4044332211000d0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        }
+      ],
+      "per_packets": [
+        {
+          "packet_index": 0,
+          "symbols": 43,
+          "hard_errors": 4,
+          "map_errors": 4,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 0,
+          "map_exact": 0
+        },
+        {
+          "packet_index": 1,
+          "symbols": 43,
+          "hard_errors": 2,
+          "map_errors": 2,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 0,
+          "map_exact": 0
+        },
+        {
+          "packet_index": 2,
+          "symbols": 43,
+          "hard_errors": 1,
+          "map_errors": 1,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 0,
+          "map_exact": 0
+        },
+        {
+          "packet_index": 3,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 4,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        }
+      ]
+    },
+    {
+      "file": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\noisy_iq\\0_0_0_10_14_32\\0_0_0_10_14_32_noise_rel_30p0dB.json",
+      "relative_file": "0_0_0_10_14_32\\0_0_0_10_14_32_noise_rel_30p0dB.json",
+      "noise_db": 30.0,
+      "expected_packets": 7,
+      "detected": 0,
+      "grlora_correct": 0,
+      "grlora_crc_valid": 0,
+      "compared_packets": 0,
+      "symbols": 0,
+      "hard_errors": null,
+      "map_errors": null,
+      "map_delta": null,
+      "map_fixed": 0,
+      "map_broke": 0,
+      "changed": 0,
+      "hard_exact_packets": 0,
+      "map_exact_packets": 0,
+      "soft_payload_available": 0,
+      "soft_payload_crc_valid": 0,
+      "soft_payload_correct": 0,
+      "soft_payload_wrong": 0,
+      "per_packets": [],
+      "soft_payload_rows": []
+    },
+    {
+      "file": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\noisy_iq\\0_0_0_10_14_8\\0_0_0_10_14_8_noise_rel_10p0dB.json",
+      "relative_file": "0_0_0_10_14_8\\0_0_0_10_14_8_noise_rel_10p0dB.json",
+      "noise_db": 10.0,
+      "expected_packets": 7,
+      "detected": 7,
+      "grlora_correct": 7,
+      "grlora_crc_valid": 7,
+      "compared_packets": 7,
+      "symbols": 301,
+      "hard_errors": 0,
+      "map_errors": 0,
+      "map_delta": 0,
+      "map_fixed": 0,
+      "map_broke": 0,
+      "changed": 0,
+      "hard_exact_packets": 7,
+      "map_exact_packets": 7,
+      "soft_payload_available": 7,
+      "soft_payload_crc_valid": 7,
+      "soft_payload_correct": 7,
+      "soft_payload_wrong": 0,
+      "soft_payload_rows": [
+        {
+          "packet_index": 0,
+          "payload_hex": "404433221100130058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 1,
+          "payload_hex": "404433221100150058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 2,
+          "payload_hex": "404433221100170058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 3,
+          "payload_hex": "404433221100190058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 4,
+          "payload_hex": "4044332211001a0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 5,
+          "payload_hex": "4044332211001b0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 6,
+          "payload_hex": "4044332211001c0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        }
+      ],
+      "per_packets": [
+        {
+          "packet_index": 0,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 1,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 2,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 3,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 4,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 5,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 6,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        }
+      ]
+    },
+    {
+      "file": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\noisy_iq\\0_0_0_10_14_8\\0_0_0_10_14_8_noise_rel_15p0dB.json",
+      "relative_file": "0_0_0_10_14_8\\0_0_0_10_14_8_noise_rel_15p0dB.json",
+      "noise_db": 15.0,
+      "expected_packets": 7,
+      "detected": 7,
+      "grlora_correct": 7,
+      "grlora_crc_valid": 7,
+      "compared_packets": 7,
+      "symbols": 301,
+      "hard_errors": 0,
+      "map_errors": 0,
+      "map_delta": 0,
+      "map_fixed": 0,
+      "map_broke": 0,
+      "changed": 0,
+      "hard_exact_packets": 7,
+      "map_exact_packets": 7,
+      "soft_payload_available": 7,
+      "soft_payload_crc_valid": 7,
+      "soft_payload_correct": 7,
+      "soft_payload_wrong": 0,
+      "soft_payload_rows": [
+        {
+          "packet_index": 0,
+          "payload_hex": "404433221100130058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 1,
+          "payload_hex": "404433221100150058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 2,
+          "payload_hex": "404433221100170058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 3,
+          "payload_hex": "404433221100190058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 4,
+          "payload_hex": "4044332211001a0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 5,
+          "payload_hex": "4044332211001b0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 6,
+          "payload_hex": "4044332211001c0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        }
+      ],
+      "per_packets": [
+        {
+          "packet_index": 0,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 1,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 2,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 3,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 4,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 5,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 6,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        }
+      ]
+    },
+    {
+      "file": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\noisy_iq\\0_0_0_10_14_8\\0_0_0_10_14_8_noise_rel_25p0dB.json",
+      "relative_file": "0_0_0_10_14_8\\0_0_0_10_14_8_noise_rel_25p0dB.json",
+      "noise_db": 25.0,
+      "expected_packets": 7,
+      "detected": 4,
+      "grlora_correct": 4,
+      "grlora_crc_valid": 4,
+      "compared_packets": 4,
+      "symbols": 172,
+      "hard_errors": 0,
+      "map_errors": 0,
+      "map_delta": 0,
+      "map_fixed": 0,
+      "map_broke": 0,
+      "changed": 0,
+      "hard_exact_packets": 4,
+      "map_exact_packets": 4,
+      "soft_payload_available": 4,
+      "soft_payload_crc_valid": 4,
+      "soft_payload_correct": 4,
+      "soft_payload_wrong": 0,
+      "soft_payload_rows": [
+        {
+          "packet_index": 0,
+          "payload_hex": "404433221100130058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 1,
+          "payload_hex": "404433221100150058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 2,
+          "payload_hex": "4044332211001b0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        },
+        {
+          "packet_index": 3,
+          "payload_hex": "4044332211001c0058303132333435363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": true,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        }
+      ],
+      "per_packets": [
+        {
+          "packet_index": 0,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 1,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 2,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        },
+        {
+          "packet_index": 3,
+          "symbols": 43,
+          "hard_errors": 0,
+          "map_errors": 0,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 0,
+          "hard_exact": 1,
+          "map_exact": 1
+        }
+      ]
+    },
+    {
+      "file": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\noisy_iq\\0_0_0_10_14_8\\0_0_0_10_14_8_noise_rel_30p0dB.json",
+      "relative_file": "0_0_0_10_14_8\\0_0_0_10_14_8_noise_rel_30p0dB.json",
+      "noise_db": 30.0,
+      "expected_packets": 7,
+      "detected": 1,
+      "grlora_correct": 0,
+      "grlora_crc_valid": 0,
+      "compared_packets": 1,
+      "symbols": 43,
+      "hard_errors": 3,
+      "map_errors": 3,
+      "map_delta": 0,
+      "map_fixed": 0,
+      "map_broke": 0,
+      "changed": 1,
+      "hard_exact_packets": 0,
+      "map_exact_packets": 0,
+      "soft_payload_available": 1,
+      "soft_payload_crc_valid": 0,
+      "soft_payload_correct": 0,
+      "soft_payload_wrong": 1,
+      "soft_payload_rows": [
+        {
+          "packet_index": 0,
+          "payload_hex": "404433221100160058303132003735363738393a3b3c3d3e3f4041424378563412",
+          "crc_valid": false,
+          "payload_available": true,
+          "header_source": "decoded_header"
+        }
+      ],
+      "per_packets": [
+        {
+          "packet_index": 0,
+          "symbols": 43,
+          "hard_errors": 3,
+          "map_errors": 3,
+          "fixed": 0,
+          "broke": 0,
+          "changed": 1,
+          "hard_exact": 0,
+          "map_exact": 0
+        }
+      ]
+    }
+  ]
+}

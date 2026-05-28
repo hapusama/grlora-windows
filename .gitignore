@@ -10,6 +10,7 @@ data/USRP_IQ/**/*.log
 examples/_file_source_staging/
 examples/_full_debug.log
 
-# Generated weak-packet IQ sweeps and local experiment outputs.
-weakPacket_decoding/data/
+# Generated weak-packet IQ sweeps.
+weakPacket_decoding/data/*.bin
+weakPacket_decoding/data/**/*.bin
 weakPacket_decoding/_file_source_staging/

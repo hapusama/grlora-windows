@@ -1,0 +1,53 @@
+{
+  "source_observations": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\noisy_iq\\0_0_0_10_14_8\\0_0_0_10_14_8_noise_rel_30p0dB.json",
+  "config": {
+    "beam_width": 16,
+    "energy_weight": 1.0,
+    "phase_weight": 0.35,
+    "drift_weight": 0.08
+  },
+  "packet_results": [
+    {
+      "frame_count": 1,
+      "packet_index": 0,
+      "symbols": 6,
+      "hard_bins": [
+        4095,
+        4095,
+        0,
+        0,
+        4095,
+        0
+      ],
+      "hard_lora_bins": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "map_bins": [
+        4095,
+        0,
+        4095,
+        0,
+        4095,
+        0
+      ],
+      "map_lora_bins": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "changed_bins": 2,
+      "changed_lora_bins": 0,
+      "hard_log_energy_score": -29.25565397365725,
+      "map_score": -30.063381688055838,
+      "final_phase_rate": 0.3113454790310368
+    }
+  ]
+}

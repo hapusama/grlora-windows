@@ -57,7 +57,7 @@ scripts/run_weak_sync_chain.py
 
 ```text
 弱前导码 detection event
-  -> chirp 起点粗对齐
+  -> preamble anchor refinement（非严格 chirp boundary alignment）
   -> frame_locator 搜索 preamble + sync word + SFD
   -> 输出 frame_valid
   -> gr-lora 风格 CFO/STO/SFO 估计
@@ -86,6 +86,34 @@ grlora_framesync_valid =
 ```
 
 `grlora_sync1_distance` 和 `grlora_sync2_distance` 仍会输出，但只作为调试字段，不再要求二者都严格为 0。这样比“两个 sync word 绝对落在固定 bin”更合理，因为实际同步残差可能让两个 sync word 共同偏移。
+
+### 接口契约与命名注意事项
+
+`run_weak_sync_chain.py` 里的 `align_event_start` 不应理解成严格的 chirp boundary alignment。它是在检测事件附近，用多个 preamble upchirp 的累加 FFT peak power 寻找更好的 sample anchor。整数 chip 偏移时，preamble dechirp 后的能量仍然会集中，只是 FFT bin 整体平移，所以这一步不能唯一消除整数 chip ambiguity。后面的 `grlora_frame_sync.py` 会继续用：
+
+```text
+preamble_ref_bin -> signed bin -> coarse_offset_chips -> coarse_offset_samples
+```
+
+把这个 bin 平移解释成粗同步偏移，再得到 `grlora_synced_preamble_start_sample` / `grlora_fine_payload_start_sample`。因此这一步更建议描述成 `preamble anchor refinement` 或 `sample-level preamble anchor search`，不要写成“精确 chirp 边界对齐”。
+
+弱检测和粗帧定界阶段使用过采样 FFT：
+
+```text
+fft_len = chirp_samples = 2^SF * os_factor
+```
+
+对应字段包括 `detected_reference_bin`、`align_peak_bin`、`preamble_ref_bin`、`sync1_bin`、`sync2_bin`、`sfd1_bin`、`sfd2_bin`。而 gr-lora 风格 framesync、header-first demod 和 corrected/no-offset chip-rate FFT 使用：
+
+```text
+fft_len = 2^SF
+```
+
+对应字段包括 `grlora_netid1_est`、`grlora_netid2_est`、`raw_fft_bin`、`signed_fft_bin`、`symbol_value`。后续新增模块时要先确认字段来自哪个阶段，避免把 oversampled bin 和 chip-rate bin 混用。
+
+另外，`grlora_synced_payload_start_sample` 和 `grlora_fine_payload_start_sample` 里的 `payload_start` 是沿用历史命名。它在 explicit header 模式下实际表示 LoRa data region 的起点，也就是 PHY header 第 0 个 symbol 的起点，不是 MAC payload 第 0 个 symbol。`run_header_first_demod.py` 会从这里先解 8 个 explicit header symbol，再进入真正的 payload symbol。
+
+弱前导码检测本身是高召回候选生成器，不是强判决器。`preamble_detector.py` 主要依靠连续窗口 peak bin 稳定性，不设置强绝对能量门限，因此窄带干扰或稳定杂散也可能形成 detection event。后面的 sync word / SFD / framesync / header checksum 才是逐级过滤。
 
 ### STFT 图的 valid 含义
 
