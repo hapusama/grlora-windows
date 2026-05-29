@@ -322,6 +322,38 @@ scripts/plot_corrected_phase_diagnostics.py
 D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\plot_corrected_phase_diagnostics.py -i gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv --packet 5 -o gr-lora_sdr\weakPacket_decoding\data\payload_feature_no_offset\plots
 ```
 
+### Wrong-bin phase/amplitude 对照实验
+
+入口：
+
+```text
+scripts/plot_wrong_bin_phase_diagnostics.py
+```
+
+该脚本用于检查 corrected FFT demod 后的相位平滑性是否只属于 selected/正确 bin。它读取 `run_header_first_demod.py` 的 symbol CSV，从原始 IQ 里按已经校正后的 `start_sample`、`CFO_int/CFO_frac` 和 chip-rate 采样口径重算每个 payload symbol 的完整 FFT，然后同时观察：
+
+```text
+selected bin
+selected + offset 的错误 bin
+固定 raw FFT bin
+```
+
+每个 packet 会输出一张四联图：wrapped phase、unwrap phase、amplitude、energy ratio。绘图时会故意选 wrong-bin 中 unwrap phase 线性 R2 最高的几条，直接验证“错误 bin 是否也能看起来很平滑”。summary CSV 会额外记录每条 candidate 的 phase R2、residual、平均幅度、平均能量占比、bin rank 以及相对 selected 的 dB 损失。
+
+示例：
+
+```powershell
+D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\plot_wrong_bin_phase_diagnostics.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin -s gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv -o gr-lora_sdr\weakPacket_decoding\data\payload_wrong_bin_diagnostics
+```
+
+默认输出：
+
+```text
+data/payload_wrong_bin_diagnostics/<basename>_wrong_bin_symbol_features.csv
+data/payload_wrong_bin_diagnostics/<basename>_wrong_bin_summary.csv
+data/payload_wrong_bin_diagnostics/plots/packet_xxx_wrong_bin_phase_amplitude_compare.png
+```
+
 ### No-offset payload FFT feature 对照导出
 
 入口：
