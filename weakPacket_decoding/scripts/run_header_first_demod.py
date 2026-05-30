@@ -73,6 +73,16 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="可选：输出 payload FFT bin 逐 symbol 位置的一致性检查 CSV。",
     )
+    parser.add_argument(
+        "--cfo-correction-mode",
+        choices=("symbol", "continuous"),
+        default="continuous",
+        help=(
+            "CFO 补偿模式：continuous 默认按整帧连续 chip 时间补偿公共 CFO 相位；"
+            "symbol 为旧 gr-lora_sdr-like 口径，只在每个 symbol 内用 CFO downchirp 聚峰。"
+            "默认 continuous。"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -221,6 +231,9 @@ def symbol_row(
         "os_factor": int(os_factor),
         "cfo_int": source_row.get("grlora_cfo_int_est", ""),
         "cfo_frac": source_row.get("grlora_cfo_frac_est", ""),
+        "cfo_correction_mode": symbol.cfo_correction_mode,
+        "cfo_common_phase_rad": symbol.cfo_common_phase_rad,
+        "cfo_common_phase_pi": symbol.cfo_common_phase_rad / np.pi,
         "sto_frac": source_row.get("grlora_payload_sto_frac_est", ""),
         "sfo_hat": source_row.get("grlora_sfo_hat", ""),
         "sfo_cum_before": symbol.sfo_cum_before,
@@ -336,6 +349,7 @@ def main() -> None:
                 header_count=8,
                 payload_count=0,
                 payload_ldro=False,
+                cfo_correction_mode=args.cfo_correction_mode,
             )
             header = decode_explicit_header(
                 [item.symbol_value for item in header_symbols],
@@ -427,6 +441,7 @@ def main() -> None:
                     header_count=8,
                     payload_count=payload_count,
                     payload_ldro=payload_ldro,
+                    cfo_correction_mode=args.cfo_correction_mode,
                 )
                 for symbol in symbols:
                     symbol_rows.append(symbol_row(row, frame_index, header, symbol, frame_sf, frame_bw, frame_os_factor))
@@ -449,6 +464,9 @@ def main() -> None:
         "os_factor",
         "cfo_int",
         "cfo_frac",
+        "cfo_correction_mode",
+        "cfo_common_phase_rad",
+        "cfo_common_phase_pi",
         "sto_frac",
         "sfo_hat",
         "sfo_cum_before",

@@ -222,6 +222,14 @@ LDRO
 D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin -s gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\sync_chain\0_0_0_10_14_16_sync_chain.csv -o gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv --frames-output gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_frames.csv --sf 10 --bw 125000 --samp-rate 500000 --ldro-mode 2
 ```
 
+默认 `--cfo-correction-mode continuous` 会在 FFT demod 前按整帧连续 chip 时间补偿公共 CFO 相位。这样既保留 CFO-aware downchirp 对 FFT 聚峰的作用，也会消掉从帧起点累计到当前 symbol 的 CFO phase accumulation，避免 selected peak phase 被固定 CFO 斜率主导。
+
+```text
+--cfo-correction-mode continuous
+```
+
+如果需要复现实验早期的 gr-lora_sdr-like 口径，可以显式传 `--cfo-correction-mode symbol`。该旧口径只在每个 symbol 内用 CFO-aware downchirp 聚峰，不额外消除跨 symbol 累积的公共 CFO 相位，因此 phase trend 中会保留明显线性漂移。两种口径理论上不改变 FFT argmax 选 bin，差异主要体现在 selected peak phase 的相位参考。
+
 输出：
 
 ```text

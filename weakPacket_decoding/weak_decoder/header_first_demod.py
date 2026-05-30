@@ -29,6 +29,8 @@ class SymbolDemodResult:
     peak_phase: float
     peak_margin_db: float
     total_power: float
+    cfo_correction_mode: str
+    cfo_common_phase_rad: float
     sfo_cum_before: float
     sfo_sample_adjust_after: int
 
@@ -249,6 +251,8 @@ def demod_one_symbol(
     frame_symbol_index: int,
     stage_symbol_index: int,
     ldro: bool,
+    cfo_correction_mode: str,
+    cfo_common_phase_rad: float,
     sfo_cum_before: float,
     sfo_sample_adjust_after: int,
 ) -> SymbolDemodResult:
@@ -259,6 +263,10 @@ def demod_one_symbol(
         raise ValueError(f"symbol {frame_symbol_index} exceeds input sample range.")
 
     symbol = np.asarray(samples[indexes], dtype=np.complex64)
+    if str(cfo_correction_mode) == "continuous":
+        # gr-lora_sdr 的 downchirp 只消掉 symbol 内的 CFO 斜率；
+        # 这里额外补偿从帧起点累计到当前 symbol 的公共 CFO 相位。
+        symbol = (symbol * np.exp(-1j * float(cfo_common_phase_rad))).astype(np.complex64)
     spectrum = dechirp_fft(symbol, downchirp)
     power = np.abs(spectrum) ** 2
     raw_bin = int(np.argmax(power))
@@ -284,6 +292,8 @@ def demod_one_symbol(
         peak_phase=float(math.atan2(peak.imag, peak.real)),
         peak_margin_db=float(10.0 * math.log10((peak_power + 1e-30) / (second_power + 1e-30))),
         total_power=total_power,
+        cfo_correction_mode=str(cfo_correction_mode),
+        cfo_common_phase_rad=float(cfo_common_phase_rad),
         sfo_cum_before=float(sfo_cum_before),
         sfo_sample_adjust_after=int(sfo_sample_adjust_after),
     )
@@ -322,14 +332,21 @@ def demod_symbol_sequence(
     header_count: int,
     payload_count: int,
     payload_ldro: bool,
+    cfo_correction_mode: str = "continuous",
 ) -> list[SymbolDemodResult]:
     """从 header 起点连续解调 header + payload FFT peak。"""
+
+    mode = str(cfo_correction_mode)
+    if mode not in {"symbol", "continuous"}:
+        raise ValueError(f"unknown CFO correction mode: {mode}")
 
     downchirp = build_downchirp(sf, cfo_int=cfo_int, cfo_frac=cfo_frac)
     results: list[SymbolDemodResult] = []
     cursor = int(header_start_sample)
     sfo_cum = float(sfo_cum_initial)
     total_count = int(header_count) + int(payload_count)
+    n_bins = 1 << int(sf)
+    cfo_total = float(cfo_int) + float(cfo_frac)
     for frame_symbol_index in range(total_count):
         stage = "header" if frame_symbol_index < int(header_count) else "payload"
         stage_symbol_index = frame_symbol_index if stage == "header" else frame_symbol_index - int(header_count)
@@ -341,6 +358,11 @@ def demod_symbol_sequence(
             sfo_cum=sfo_cum,
             sfo_hat=sfo_hat,
         )
+        if mode == "continuous":
+            relative_chip_start = float(cursor - int(header_start_sample)) / float(os_factor)
+            cfo_common_phase_rad = float(2.0 * math.pi * cfo_total * relative_chip_start / n_bins)
+        else:
+            cfo_common_phase_rad = 0.0
         result = demod_one_symbol(
             samples=samples,
             start_sample=cursor,
@@ -351,6 +373,8 @@ def demod_symbol_sequence(
             frame_symbol_index=frame_symbol_index,
             stage_symbol_index=stage_symbol_index,
             ldro=bool(payload_ldro),
+            cfo_correction_mode=mode,
+            cfo_common_phase_rad=cfo_common_phase_rad,
             sfo_cum_before=sfo_before,
             sfo_sample_adjust_after=sample_adjust,
         )
