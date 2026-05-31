@@ -26,7 +26,7 @@ from typing import Iterable
 import numpy as np
 
 
-WEAK_ROOT = Path(__file__).resolve().parents[1]
+WEAK_ROOT = Path(__file__).resolve().parents[2]
 
 
 def parse_args() -> argparse.Namespace:

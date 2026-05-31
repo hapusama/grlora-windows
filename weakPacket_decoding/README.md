@@ -146,6 +146,7 @@ framesync_peaks/            framesync 后前导码 FFT peak 验证表
 header_first/               header-first demod 的 frame / symbol CSV
 payload_consistency/        payload FFT bin 内部一致性检查表
 legacy_experiments/         早期或对照实验输出
+low_snr_gt_bin/             低 SNR GT-bin / wrong-bin 相位幅度对照实验输出
 *_stft/                     STFT PNG / CSV
 *_framesync_spectrum/       framesync 前后频谱对比图
 *_payload_peak_trends/      每包 payload peak 相位/幅度趋势图
@@ -314,12 +315,29 @@ header_valid == 1
 D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\plot_payload_peak_trends.py -i gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv -o gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_16_payload_peak_trends --analysis-output gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\0_0_0_10_14_16_payload_peak_trends\0_0_0_10_14_16_payload_peak_trends.csv --dpi 220
 ```
 
+## 非解码链实验脚本
+
+这些脚本统一放在：
+
+```text
+scripts/experiments/
+```
+
+它们不是弱包解码主链的必要步骤，而是围绕某个科研问题做对照实验、可视化诊断或数据集构造。主链入口仍然保留在 `scripts/` 根目录，包括：
+
+```text
+scripts/detect_weak_preamble.py
+scripts/run_weak_sync_chain.py
+scripts/run_header_first_demod.py
+scripts/plot_payload_peak_trends.py
+```
+
 ### Corrected phase 诊断图
 
 入口：
 
 ```text
-scripts/plot_corrected_phase_diagnostics.py
+scripts/experiments/plot_corrected_phase_diagnostics.py
 ```
 
 该脚本读取 `run_header_first_demod.py` 导出的 symbol CSV，只分析 `header_valid == 1` 的 payload symbol。它会为每个 packet 画四联图：wrapped phase、unwrap phase 与一次拟合、去线性趋势后的 residual、residual 与 `raw_fft_bin` 的关系；同时输出 summary CSV，用来判断锯齿相位主要来自 residual/global CFO、SFO/drift，还是 STO 与 bin 的耦合。
@@ -327,7 +345,7 @@ scripts/plot_corrected_phase_diagnostics.py
 示例：
 
 ```powershell
-D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\plot_corrected_phase_diagnostics.py -i gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv --packet 5 -o gr-lora_sdr\weakPacket_decoding\data\payload_feature_no_offset\plots
+D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\experiments\plot_corrected_phase_diagnostics.py -i gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv --packet 5 -o gr-lora_sdr\weakPacket_decoding\data\payload_feature_no_offset\plots
 ```
 
 ### Wrong-bin phase/amplitude 对照实验
@@ -335,7 +353,7 @@ D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\sc
 入口：
 
 ```text
-scripts/plot_wrong_bin_phase_diagnostics.py
+scripts/experiments/plot_wrong_bin_phase_diagnostics.py
 ```
 
 该脚本用于检查 corrected FFT demod 后的相位平滑性是否只属于 selected/正确 bin。它读取 `run_header_first_demod.py` 的 symbol CSV，从原始 IQ 里按已经校正后的 `start_sample`、`CFO_int/CFO_frac` 和 chip-rate 采样口径重算每个 payload symbol 的完整 FFT，然后同时观察：
@@ -351,7 +369,7 @@ selected + offset 的错误 bin
 示例：
 
 ```powershell
-D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\plot_wrong_bin_phase_diagnostics.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin -s gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv -o gr-lora_sdr\weakPacket_decoding\data\payload_wrong_bin_diagnostics
+D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\experiments\plot_wrong_bin_phase_diagnostics.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin -s gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv -o gr-lora_sdr\weakPacket_decoding\data\payload_wrong_bin_diagnostics
 ```
 
 默认输出：
@@ -367,7 +385,7 @@ data/payload_wrong_bin_diagnostics/plots/packet_xxx_wrong_bin_phase_amplitude_co
 入口：
 
 ```text
-scripts/export_payload_no_offset_features.py
+scripts/experiments/export_payload_no_offset_features.py
 ```
 
 该脚本只读取 `grlora_framesync_valid == 1` 的候选，不重新做弱检测、sync word / netID 检查，也不使用 CFO_int、CFO_frac、STO_frac、SFO 或 gr-lora_sdr corrected downchirp。它从原始 IQ 里按固定 raw symbol 起点切 payload symbol，但 FFT 口径和 corrected 版本一致：每个 chip 取中心样点，做 `2^SF` 点 chip-rate `dechirp + FFT`，导出 selected peak 的幅度、功率、相位、unwrap 相位、peak margin 和 peak energy ratio。
@@ -377,7 +395,7 @@ scripts/export_payload_no_offset_features.py
 示例：
 
 ```powershell
-D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\export_payload_no_offset_features.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin -s gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\sync_chain\0_0_0_10_14_16_sync_chain.csv --sf 10 --bw 125000 --samp-rate 500000 --sync-word 0x34 --preamble-len 16 --peak-gt-csv gr-lora_sdr\weakPacket_decoding\data\peak_groundtruth\0_0_0_10_14_16_peak_gt_preamble8.csv
+D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\experiments\export_payload_no_offset_features.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin -s gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\sync_chain\0_0_0_10_14_16_sync_chain.csv --sf 10 --bw 125000 --samp-rate 500000 --sync-word 0x34 --preamble-len 16 --peak-gt-csv gr-lora_sdr\weakPacket_decoding\data\peak_groundtruth\0_0_0_10_14_16_peak_gt_preamble8.csv
 ```
 
 默认输出：
@@ -388,12 +406,80 @@ data/payload_feature_no_offset/plots/packet_xxx_no_offset_peak_trends.png
 data/payload_feature_no_offset/plots/packet_xxx_raw_vs_corrected_peak_trends.png
 ```
 
+### 低 SNR GT-bin 相位/幅度实验
+
+入口：
+
+```text
+scripts/experiments/run_low_snr_gt_bin_experiment.py
+```
+
+这个脚本用于验证：在给 clean IQ 加入 AWGN 后，clean header-first CSV 里已经确认的 payload `raw_fft_bin` 是否仍然保留稳定的相位/幅度轨迹。它不会重新做弱检测、framesync 或低 SNR argmax 判决，而是把：
+
+```text
+stage == payload
+header_valid == 1
+raw_fft_bin
+```
+
+作为 GT bin，从 noisy IQ 的 corrected FFT 里强行读取该 bin 的复数值。这样可以把“正确 bin 的物理相位结构是否还在”和“低 SNR 下 argmax 是否选错”分开观察。
+
+示例：
+
+```powershell
+D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\experiments\run_low_snr_gt_bin_experiment.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin -g gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv -o gr-lora_sdr\weakPacket_decoding\data\low_snr_gt_bin\0_0_0_10_14_16 --target-snr-db -10 -15 -20 --cfo-correction-mode continuous --overwrite
+```
+
+主要输出：
+
+```text
+data/low_snr_gt_bin/<basename>/<basename>_snr_m10dB.bin
+data/low_snr_gt_bin/<basename>/<basename>_snr_m10dB_gt_bin_features.csv
+data/low_snr_gt_bin/<basename>/<basename>_low_snr_gt_bin_features_all.csv
+data/low_snr_gt_bin/<basename>/<basename>_low_snr_gt_bin_summary.csv
+data/low_snr_gt_bin/<basename>/plots/snr_mXXdB/packet_xxx_gt_bin_phase_amp_diagnostics.png
+```
+
+### 低 SNR wrong-bin 对照实验
+
+入口：
+
+```text
+scripts/experiments/run_low_snr_wrong_bin_experiment.py
+```
+
+这个脚本复用上一节生成的 noisy IQ，对每个 payload symbol 同时观察 GT bin 和多类错误 bin：
+
+```text
+gt          clean CSV 中的正确 bin
+argmax      低 SNR FFT hard decision 会选的最大峰
+wrong_peak  除 GT bin 之外的最高峰
+off+/-N     相对 GT bin 人为偏移的错误 bin
+fixXXXX     固定 raw FFT bin
+```
+
+实验目标是判断：错误 bin 在低 SNR 下是否也能产生类似 GT bin 的相位 residual 曲线。如果 `wrong_peak` 的幅度/能量接近 GT，但 residual 结构明显更乱，则说明跨符号相位一致性可以为低 SNR FFT demod 提供额外判别力。
+
+示例：
+
+```powershell
+D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\experiments\run_low_snr_wrong_bin_experiment.py -d gr-lora_sdr\weakPacket_decoding\data\low_snr_gt_bin\0_0_0_10_14_16 -g gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv --cfo-correction-mode continuous
+```
+
+主要输出：
+
+```text
+data/low_snr_gt_bin/<basename>/wrong_bin_control/<basename>_low_snr_wrong_bin_features_all.csv
+data/low_snr_gt_bin/<basename>/wrong_bin_control/<basename>_low_snr_wrong_bin_summary.csv
+data/low_snr_gt_bin/<basename>/wrong_bin_control/plots/snr_mXXdB/packet_xxx_wrong_bin_phase_amp_control.png
+```
+
 ## gr-lora_sdr peak groundtruth 导出
 
 入口：
 
 ```text
-scripts/export_peak_groundtruth.py
+scripts/experiments/export_peak_groundtruth.py
 ```
 
 该脚本运行 gr-lora_sdr 原始接收链，并监听 `fft_demod` 的 `peak_candidates` 消息端口，导出 high-SNR / clean IQ 的 FFT peak label。
@@ -401,7 +487,7 @@ scripts/export_peak_groundtruth.py
 示例：
 
 ```powershell
-D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\export_peak_groundtruth.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin -o gr-lora_sdr\weakPacket_decoding\data\peak_groundtruth\0_0_0_10_14_16_peak_gt_preamble8.csv --summary-output gr-lora_sdr\weakPacket_decoding\data\peak_groundtruth\0_0_0_10_14_16_peak_gt_preamble8_summary.csv --sf 10 --bw 125000 --samp-rate 500000 --cr 1 --center-freq 487.7e6 --sync-word 0x34 --preamble-len 8 --ldro-mode 2 --crc-mode 0
+D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\experiments\export_peak_groundtruth.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin -o gr-lora_sdr\weakPacket_decoding\data\peak_groundtruth\0_0_0_10_14_16_peak_gt_preamble8.csv --summary-output gr-lora_sdr\weakPacket_decoding\data\peak_groundtruth\0_0_0_10_14_16_peak_gt_preamble8_summary.csv --sf 10 --bw 125000 --samp-rate 500000 --cr 1 --center-freq 487.7e6 --sync-word 0x34 --preamble-len 8 --ldro-mode 2 --crc-mode 0
 ```
 
 注意：`frame_sync` 的 `preamble_len` 更像同步触发门限，不一定必须等于真实前导码长度。比如 `0_0_0_10_14_16.bin` 用 `--preamble-len 8` 更容易复现 gr-lora_sdr 历史 clean decode 结果。
@@ -440,7 +526,17 @@ weak_decoder/header_first_demod.py header-first FFT demod 与 header hard decode
 scripts/detect_weak_preamble.py    独立弱前导码检测入口
 scripts/run_weak_sync_chain.py     检测、帧定界、framesync 一体化入口
 scripts/run_header_first_demod.py  从 framesync 有效候选继续做 header/payload FFT demod
-scripts/export_peak_groundtruth.py gr-lora_sdr 原链 peak groundtruth 导出
+scripts/plot_payload_peak_trends.py header-first demod 后的 payload selected peak 趋势图
+
+scripts/experiments/export_peak_groundtruth.py              gr-lora_sdr 原链 peak groundtruth 导出
+scripts/experiments/export_payload_no_offset_features.py    no-offset payload FFT 消融导出
+scripts/experiments/plot_corrected_phase_diagnostics.py     corrected selected peak 相位诊断四联图
+scripts/experiments/plot_wrong_bin_phase_diagnostics.py     clean IQ corrected wrong-bin 对照实验
+scripts/experiments/run_low_snr_gt_bin_experiment.py        低 SNR 下强行读取 GT bin 的相位/幅度实验
+scripts/experiments/run_low_snr_wrong_bin_experiment.py     低 SNR 下 GT bin 与 wrong bin 对照实验
+scripts/experiments/make_noisy_iq.py                        通用 AWGN 加噪 IQ 生成工具
+scripts/experiments/make_failure_limit_iq.py                噪声失败边界扫描工具
+scripts/experiments/analyze_peak_groundtruth.py             peak groundtruth CSV 统计分析
 ```
 
 ## Legacy / 历史实验

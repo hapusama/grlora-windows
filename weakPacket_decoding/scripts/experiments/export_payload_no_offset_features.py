@@ -22,9 +22,9 @@ from typing import Iterable
 import numpy as np
 
 
-WEAK_ROOT = Path(__file__).resolve().parents[1]
+WEAK_ROOT = Path(__file__).resolve().parents[2]
 if str(WEAK_ROOT) not in sys.path:
-    # 允许直接从 scripts/ 目录运行，同时还能导入旁边的 weak_decoder 包。
+    # 允许直接从 scripts/experiments/ 目录运行，同时还能导入 weak_decoder 包。
     sys.path.insert(0, str(WEAK_ROOT))
 
 from weak_decoder.chirp import build_downchirp, dechirp_fft  # noqa: E402

@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Add AWGN to an IQ capture and trace payload features at clean GT FFT bins.
+"""低信噪比 GT-bin 相位/幅度特征实验。
 
-This script is meant for low-SNR ablation experiments. It does not rerun weak
-detection, frame sync, or hard FFT-bin decisions. Instead, it uses a clean
-header-first symbol CSV as ground truth and reads the complex FFT value at the
-clean payload bin from each noisy capture.
+这个脚本只做“非解码链”的消融验证：给 clean IQ 人为加入复高斯白噪声，
+然后使用 clean header-first symbol CSV 里已经确认的 payload raw_fft_bin
+作为 GT bin，从 noisy IQ 的 corrected FFT 结果里强行读取该 bin 的复数值。
+
+注意：这里不重新做弱检测、不重新做 framesync，也不把低 SNR 下的 argmax
+当真值；目标是观察正确 bin 在低 SNR 下的相位/幅度轨迹是否仍有结构。
 """
 
 from __future__ import annotations
@@ -22,7 +24,9 @@ from typing import Any
 import numpy as np
 
 
-WEAK_ROOT = Path(__file__).resolve().parents[1]
+# 当前文件位于 weakPacket_decoding/scripts/experiments/，所以 parents[2]
+# 才是 weakPacket_decoding 根目录。加入 sys.path 后可直接导入 weak_decoder。
+WEAK_ROOT = Path(__file__).resolve().parents[2]
 if str(WEAK_ROOT) not in sys.path:
     sys.path.insert(0, str(WEAK_ROOT))
 
@@ -52,24 +56,24 @@ class GtPayloadSymbol:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Generate low-SNR IQ captures and export payload phase/amplitude at "
-            "clean GT FFT bins from a header-first symbol CSV."
+            "给 clean IQ 加 AWGN，并用 clean header-first CSV 的 payload raw_fft_bin "
+            "作为 GT bin，导出低 SNR 下的相位/幅度特征。"
         )
     )
-    parser.add_argument("-i", "--input", type=Path, required=True, help="Clean complex64 IQ .bin file.")
+    parser.add_argument("-i", "--input", type=Path, required=True, help="clean complex64 IQ .bin 文件。")
     parser.add_argument(
         "-g",
         "--gt-symbol-csv",
         type=Path,
         required=True,
-        help="Clean header-first symbol CSV. Payload rows with header_valid=1 provide GT raw_fft_bin.",
+        help="clean header-first symbol CSV；其中 header_valid=1 的 payload 行提供 GT raw_fft_bin。",
     )
     parser.add_argument(
         "-o",
         "--output-dir",
         type=Path,
-        default=Path("weakPacket_decoding/data/low_snr_gt_bin"),
-        help="Output directory for noisy IQ, feature CSVs, summaries, and plots.",
+        default=WEAK_ROOT / "data" / "low_snr_gt_bin",
+        help="输出目录：保存 noisy IQ、feature CSV、summary 和 plots。",
     )
     parser.add_argument(
         "--target-snr-db",
@@ -77,37 +81,37 @@ def parse_args() -> argparse.Namespace:
         nargs="+",
         default=[-10.0, -15.0, -20.0],
         help=(
-            "Target added-noise SNR values in dB, relative to the clean payload "
-            "symbol sample power. Defaults: -10 -15 -20."
+            "目标加噪 SNR，单位 dB。SNR 相对于 clean payload symbol 采样功率定义；"
+            "默认：-10 -15 -20。"
         ),
     )
     parser.add_argument(
         "--cfo-correction-mode",
         choices=("symbol", "continuous"),
         default="continuous",
-        help="FFT correction mode used before reading the GT bin. Default: continuous.",
+        help="读取 GT bin 前使用的 FFT CFO 补偿模式，默认 continuous。",
     )
-    parser.add_argument("--packet", type=int, default=None, help="Optional packet_index filter.")
+    parser.add_argument("--packet", type=int, default=None, help="可选：只处理指定 packet_index。")
     parser.add_argument(
         "--seed",
         type=int,
         default=20260531,
-        help="Base random seed. Each SNR step uses seed + step_index.",
+        help="随机种子基准；independent-noise 模式下每个 SNR 使用 seed + step_index。",
     )
     parser.add_argument(
         "--independent-noise",
         action="store_true",
         default=False,
-        help="Use a different random unit-noise realization for each SNR step.",
+        help="每个 SNR 档使用不同的单位噪声 realization。",
     )
     parser.add_argument(
         "--no-write-noisy-bin",
         action="store_true",
         default=False,
-        help="Do not save the noisy IQ .bin files; only export features and plots.",
+        help="不保存 noisy IQ .bin，只导出特征 CSV 和图。",
     )
-    parser.add_argument("--overwrite", action="store_true", default=False, help="Overwrite existing outputs.")
-    parser.add_argument("--dpi", type=int, default=220, help="PNG DPI. Default: 220.")
+    parser.add_argument("--overwrite", action="store_true", default=False, help="允许覆盖已有输出。")
+    parser.add_argument("--dpi", type=int, default=220, help="PNG DPI，默认 220。")
     return parser.parse_args()
 
 
@@ -146,6 +150,7 @@ def _symbol_indexes(start_sample: int, sf: int, os_factor: int) -> np.ndarray:
 
 
 def load_gt_payload_symbols(path: Path, packet_filter: int | None) -> list[GtPayloadSymbol]:
+    """从 clean header-first symbol CSV 中读取可作为 GT 的 payload 符号。"""
     with path.open("r", encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
 
@@ -202,6 +207,7 @@ def load_gt_payload_symbols(path: Path, packet_filter: int | None) -> list[GtPay
 
 
 def estimate_payload_reference_power(samples: np.ndarray, symbols: list[GtPayloadSymbol]) -> float:
+    """用 GT payload 符号采样点估计信号参考功率，用于定义目标 SNR。"""
     total_power = 0.0
     total_count = 0
     for item in symbols:
@@ -220,6 +226,7 @@ def estimate_payload_reference_power(samples: np.ndarray, symbols: list[GtPayloa
 
 
 def add_awgn(samples: np.ndarray, noise_power: float, seed: int) -> np.ndarray:
+    """给整段 complex64 IQ 加复高斯白噪声。"""
     rng = np.random.default_rng(int(seed))
     sigma = math.sqrt(float(noise_power) / 2.0)
     noise_i = rng.normal(0.0, sigma, size=samples.size).astype(np.float32)
@@ -258,6 +265,7 @@ def export_features_for_snr(
     file_name: str,
     cfo_correction_mode: str,
 ) -> list[dict[str, Any]]:
+    """在某一档 SNR 下重算 FFT，并强行读取每个 payload 符号的 GT bin。"""
     downchirps: dict[tuple[int, int, float], np.ndarray] = {}
     rows: list[dict[str, Any]] = []
     for item in symbols:
@@ -345,6 +353,7 @@ def export_features_for_snr(
 
 
 def add_packet_phase_columns(rows: list[dict[str, Any]]) -> None:
+    """按 packet 对 GT-bin phase 做 unwrap、线性拟合和 residual 诊断。"""
     grouped: dict[int, list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
         grouped[int(row["packet_index"])].append(row)
@@ -417,6 +426,7 @@ def summarize_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def plot_packet_diagnostics(packet_rows: list[dict[str, Any]], out_path: Path, dpi: int) -> None:
+    """绘制单个 packet 的 GT-bin wrapped/unwrap/residual/幅度能量四联图。"""
     import matplotlib
 
     matplotlib.use("Agg")

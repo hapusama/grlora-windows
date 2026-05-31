@@ -10,7 +10,7 @@
 
 最终会分别保存两个 raw complex64 二进制 IQ 文件，并写同名 JSON 记录搜索结果。
 """
-# python .\gr-lora_sdr\weakPacket_decoding\scripts\make_failure_limit_iq.py --samp-rate 500000 --bw 125000 --sync-word 0x34 --coarse-start-db -30 --coarse-stop-db 20 --coarse-step-db 2 --refine-iterations 6 --overwrite
+# python .\gr-lora_sdr\weakPacket_decoding\scripts\experiments\make_failure_limit_iq.py --samp-rate 500000 --bw 125000 --sync-word 0x34 --coarse-start-db -30 --coarse-stop-db 20 --coarse-step-db 2 --refine-iterations 6 --overwrite
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ from typing import Any
 import numpy as np
 
 
-WEAKPACKET_ROOT = Path(__file__).resolve().parents[1]
+WEAKPACKET_ROOT = Path(__file__).resolve().parents[2]
 if str(WEAKPACKET_ROOT) not in sys.path:
     sys.path.insert(0, str(WEAKPACKET_ROOT))
 

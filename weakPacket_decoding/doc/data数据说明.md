@@ -13,7 +13,7 @@ weakPacket_decoding/data/noisy_iq/
 这些数据由 `weakPacket_decoding/noisy_iq/` 包生成，常用入口是：
 
 ```powershell
-python gr-lora_sdr/weakPacket_decoding/scripts/make_noisy_iq.py `
+python gr-lora_sdr/weakPacket_decoding/scripts/experiments/make_noisy_iq.py `
   -i gr-lora_sdr/data/USRP_IQ/0_0_0_10_14_8.bin `
   --samp-rate 500000 --bw 125000 --sync-word 0x34 `
   --noise-power-db 10 15 25 30 `

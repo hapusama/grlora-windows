@@ -1,6 +1,18 @@
-# Peak Groundtruth CSV 列说明
+# peak_groundtruth 数据目录说明
 
-本目录保存 `scripts/export_peak_groundtruth.py` 导出的 peak 级 groundtruth。每个 CSV 文件对应一个 IQ 输入文件。默认情况下，每一行对应一个 **payload chirp**；如果运行脚本时加 `--include-header`，则 PHY header 符号也会被写入 CSV。
+本目录保存 `scripts/experiments/export_peak_groundtruth.py` 导出的 peak 级 groundtruth。每个 CSV 文件对应一个 IQ 输入文件。默认情况下，每一行对应一个 **payload chirp**；如果运行脚本时加 `--include-header`，则 PHY header 符号也会被写入 CSV。
+
+这些文件来自 gr-lora_sdr 原始接收链，主要用途是给弱包原型实验提供 high-SNR / clean 条件下的 symbol-level 或 peak-level label。
+
+## 文件类型
+
+```text
+*_peak_gt.csv              peak/symbol 级 groundtruth 主表
+*_peak_gt_summary.csv      每个 frame/packet 的摘要
+*_peak_gt_plots/           对 groundtruth phase/amplitude 的辅助可视化
+```
+
+注意：这里的 GT 是 gr-lora_sdr 原链在 clean/high-SNR IQ 上跑出来的 peak label，不等价于最终 payload CRC 解码结果。
 
 ## 固定列
 

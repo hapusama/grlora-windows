@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """导出 gr-lora_sdr fft_demod 内部的 peak 级 groundtruth。"""
-# D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\export_peak_groundtruth.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_8.bin -o gr-lora_sdr\weakPacket_decoding\data\peak_groundtruth\0_0_0_10_14_8_peak_gt.csv --sf 10 --bw 125000 --samp-rate 500000 --cr 1 --center-freq 487.7e6 --sync-word 0x34 --preamble-len 8 --ldro-mode 2 --crc-mode 0
+# D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\experiments\export_peak_groundtruth.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_8.bin -o gr-lora_sdr\weakPacket_decoding\data\peak_groundtruth\0_0_0_10_14_8_peak_gt.csv --sf 10 --bw 125000 --samp-rate 500000 --cr 1 --center-freq 487.7e6 --sync-word 0x34 --preamble-len 8 --ldro-mode 2 --crc-mode 0
 from __future__ import annotations
 
 import argparse
@@ -12,8 +12,8 @@ import threading
 from typing import Any
 
 
-ROOT = Path(__file__).resolve().parents[2]
-WEAK_ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
+WEAK_ROOT = Path(__file__).resolve().parents[2]
 if str(WEAK_ROOT) not in sys.path:
     sys.path.insert(0, str(WEAK_ROOT))
 

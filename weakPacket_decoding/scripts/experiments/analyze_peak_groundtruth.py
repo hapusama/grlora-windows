@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """分析 peak groundtruth CSV 中 hard peak 的相位和幅度趋势。"""
-# D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\analyze_peak_groundtruth.py -i gr-lora_sdr\weakPacket_decoding\data\peak_groundtruth\0_0_0_10_14_8_peak_gt.csv
+# D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\experiments\analyze_peak_groundtruth.py -i gr-lora_sdr\weakPacket_decoding\data\peak_groundtruth\0_0_0_10_14_8_peak_gt.csv
 
 from __future__ import annotations
 
