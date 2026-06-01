@@ -238,6 +238,15 @@ D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\sc
 *_header_first_symbols.csv  每个 header/payload symbol 的 FFT peak
 ```
 
+`*_header_first_symbols.csv` 就是后续低 SNR / wrong-bin 实验里常用的 clean GT-bin 来源。该文件由 `scripts/run_header_first_demod.py` 的 `-o` 参数生成；如果只想取 payload 的正确 FFT bin，筛选：
+
+```text
+stage == payload
+header_valid == 1
+```
+
+然后读取 `raw_fft_bin` 即可。这里的 GT 不是低 SNR 条件下重新判决出来的，而是 clean IQ 经过 header-first demod 后记录下来的 payload selected bin。
+
 重要字段：
 
 ```text
@@ -430,6 +439,12 @@ raw_fft_bin
 D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\experiments\run_low_snr_gt_bin_experiment.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin -g gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv -o gr-lora_sdr\weakPacket_decoding\data\low_snr_gt_bin\0_0_0_10_14_16 --target-snr-db -10 -15 -20 --cfo-correction-mode continuous --overwrite
 ```
 
+更低 SNR 的一组对照可以单独放到新目录，避免覆盖前一组 summary：
+
+```powershell
+D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\experiments\run_low_snr_gt_bin_experiment.py -i gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin -g gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv -o gr-lora_sdr\weakPacket_decoding\data\low_snr_gt_bin\0_0_0_10_14_16_extreme_snr --target-snr-db -23 -25 -27 --cfo-correction-mode continuous --overwrite
+```
+
 主要输出：
 
 ```text
@@ -466,12 +481,50 @@ fixXXXX     固定 raw FFT bin
 D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\experiments\run_low_snr_wrong_bin_experiment.py -d gr-lora_sdr\weakPacket_decoding\data\low_snr_gt_bin\0_0_0_10_14_16 -g gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv --cfo-correction-mode continuous
 ```
 
+如果只跑更低 SNR 组：
+
+```powershell
+D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\experiments\run_low_snr_wrong_bin_experiment.py -d gr-lora_sdr\weakPacket_decoding\data\low_snr_gt_bin\0_0_0_10_14_16_extreme_snr -g gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv --snr-db -23 -25 -27 --cfo-correction-mode continuous
+```
+
 主要输出：
 
 ```text
 data/low_snr_gt_bin/<basename>/wrong_bin_control/<basename>_low_snr_wrong_bin_features_all.csv
 data/low_snr_gt_bin/<basename>/wrong_bin_control/<basename>_low_snr_wrong_bin_summary.csv
 data/low_snr_gt_bin/<basename>/wrong_bin_control/plots/snr_mXXdB/packet_xxx_wrong_bin_phase_amp_control.png
+```
+
+### 低 SNR STO phase-jump 补偿实验
+
+入口：
+
+```text
+scripts/experiments/run_low_snr_sto_phase_jump_experiment.py
+```
+
+这个脚本用于验证一个更细的 LoRa chirp 现象：residual STO 会让循环移位 chirp 在 wrap 前后出现常相位差，进而让 dechirp+FFT 的相干叠加有亏损；而 residual STO 又会随着 SFO 在 payload symbol 之间缓慢漂移。脚本复用低 SNR noisy IQ 和 clean header-first GT bin，不重新做检测或同步，只在 corrected FFT 前额外做：
+
+```text
+tau_s = sfo_cum_before
+wrap_cut ~= 2^SF - gt_raw_fft_bin + tau_s
+dechirped[wrap_cut:] *= exp(+j * 2*pi*tau_s)
+```
+
+这里 `tau_s` 的默认来源是 `*_header_first_symbols.csv` 里的 `sfo_cum_before`，单位是 chip。`phase-sign=plus` 是按当前代码里 `sfo_cum_before` 的符号定义设置的；如果要做符号 sanity check，可以改成 `--phase-sign minus` 对照。
+
+示例：
+
+```powershell
+D:\mysoft2\miniconda3\envs\gr-lora\python.exe gr-lora_sdr\weakPacket_decoding\scripts\experiments\run_low_snr_sto_phase_jump_experiment.py -d gr-lora_sdr\weakPacket_decoding\data\low_snr_gt_bin\0_0_0_10_14_16_extreme_snr -g gr-lora_sdr\weakPacket_decoding\data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv --snr-db -23 -25 -27 --cfo-correction-mode continuous --tau-source sfo_cum_before --phase-sign plus
+```
+
+主要输出：
+
+```text
+data/low_snr_gt_bin/<basename>_extreme_snr/sto_phase_jump_corrected/<basename>_sto_jump_gt_bin_features_all.csv
+data/low_snr_gt_bin/<basename>_extreme_snr/sto_phase_jump_corrected/<basename>_sto_jump_gt_bin_summary.csv
+data/low_snr_gt_bin/<basename>_extreme_snr/sto_phase_jump_corrected/plots/snr_mXXdB/packet_xxx_event_xxx_sto_jump_gt_bin_diagnostics.png
 ```
 
 ## gr-lora_sdr peak groundtruth 导出
@@ -534,6 +587,7 @@ scripts/experiments/plot_corrected_phase_diagnostics.py     corrected selected p
 scripts/experiments/plot_wrong_bin_phase_diagnostics.py     clean IQ corrected wrong-bin 对照实验
 scripts/experiments/run_low_snr_gt_bin_experiment.py        低 SNR 下强行读取 GT bin 的相位/幅度实验
 scripts/experiments/run_low_snr_wrong_bin_experiment.py     低 SNR 下 GT bin 与 wrong bin 对照实验
+scripts/experiments/run_low_snr_sto_phase_jump_experiment.py 低 SNR 下 STO phase-jump 补偿实验
 scripts/experiments/make_noisy_iq.py                        通用 AWGN 加噪 IQ 生成工具
 scripts/experiments/make_failure_limit_iq.py                噪声失败边界扫描工具
 scripts/experiments/analyze_peak_groundtruth.py             peak groundtruth CSV 统计分析
