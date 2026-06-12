@@ -400,6 +400,7 @@ def summarize_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         argmax_correct = np.asarray([int(row["is_argmax_correct"]) for row in packet_rows], dtype=np.float64)
         gt_amp = np.asarray([float(row["gt_bin_amp"]) for row in packet_rows], dtype=np.float64)
         gt_er = np.asarray([float(row["gt_peak_energy_ratio"]) for row in packet_rows], dtype=np.float64)
+        gt_rank = np.asarray([int(row["gt_bin_rank"]) for row in packet_rows], dtype=np.float64)
         residual = np.asarray([float(row["phase_linear_residual"]) for row in packet_rows], dtype=np.float64)
         summary.append(
             {
@@ -419,7 +420,10 @@ def summarize_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "phase_residual_std_pi": float(np.std(residual) / math.pi),
                 "phase_residual_peak_to_peak_pi": float((np.max(residual) - np.min(residual)) / math.pi),
                 "phase_residual_quad_r2": float(packet_rows[0]["packet_residual_quad_r2"]),
-                "mean_gt_bin_rank": float(np.mean([int(row["gt_bin_rank"]) for row in packet_rows])),
+                "mean_gt_bin_rank": float(np.mean(gt_rank)),
+                "gt_top8_recall": float(np.mean(gt_rank <= 8)),
+                "gt_top16_recall": float(np.mean(gt_rank <= 16)),
+                "gt_top32_recall": float(np.mean(gt_rank <= 32)),
             }
         )
     return summary

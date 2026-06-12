@@ -455,6 +455,16 @@ data/low_snr_gt_bin/<basename>/<basename>_low_snr_gt_bin_summary.csv
 data/low_snr_gt_bin/<basename>/plots/snr_mXXdB/packet_xxx_gt_bin_phase_amp_diagnostics.png
 ```
 
+`*_summary.csv` 会额外给出 top-K 召回率：
+
+```text
+gt_top8_recall   = mean(gt_bin_rank <= 8)
+gt_top16_recall  = mean(gt_bin_rank <= 16)
+gt_top32_recall  = mean(gt_bin_rank <= 32)
+```
+
+这几个指标用于评估后续 peak rerank 算法只在 top-K 候选里搜索时，GT bin 是否还保留在候选集合中。
+
 ### 低 SNR wrong-bin 对照实验
 
 入口：
@@ -494,6 +504,16 @@ data/low_snr_gt_bin/<basename>/wrong_bin_control/<basename>_low_snr_wrong_bin_fe
 data/low_snr_gt_bin/<basename>/wrong_bin_control/<basename>_low_snr_wrong_bin_summary.csv
 data/low_snr_gt_bin/<basename>/wrong_bin_control/plots/snr_mXXdB/packet_xxx_wrong_bin_phase_amp_control.png
 ```
+
+wrong-bin summary 中对应的通用字段为：
+
+```text
+target_top8_hit_rate
+target_top16_hit_rate
+target_top32_hit_rate
+```
+
+当 `candidate_label == gt` 时，它们就是 GT bin 的 top-K recall。
 
 ### 低 SNR STO phase-jump 补偿实验
 
