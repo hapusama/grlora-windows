@@ -1,0 +1,8 @@
+input_file,packet_index,frame_count,total_symbols,header_symbols,payload_chirps,first_payload_frame_symbol_index,last_payload_frame_symbol_index,min_payload_confidence_db,mean_payload_confidence_db,all_payload_labels_reliable,cfo_int,cfo_frac
+D:\Desktop\proj\gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin,0,1,43,8,35,8,42,11.901480674743652,19.57710007258824,1,-23,-0.20747864246368408
+D:\Desktop\proj\gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin,1,2,43,8,35,8,42,14.184891700744629,20.01458317892892,1,-23,-0.278986394405365
+D:\Desktop\proj\gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin,2,3,43,8,35,8,42,15.01050853729248,19.158249037606375,1,-23,-0.22953957319259644
+D:\Desktop\proj\gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin,3,4,43,8,35,8,42,13.471113204956055,20.04495939527239,1,-23,-0.26959657669067383
+D:\Desktop\proj\gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin,4,5,43,8,35,8,42,15.83980655670166,19.672044508797782,1,-23,-0.34833434224128723
+D:\Desktop\proj\gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin,5,6,43,8,35,8,42,13.186180114746094,19.828481565202985,1,-23,-0.43954336643218994
+D:\Desktop\proj\gr-lora_sdr\data\USRP_IQ\0_0_0_10_14_16.bin,6,7,43,8,35,8,42,12.402268409729004,20.75782792227609,1,-24,-0.11853834241628647

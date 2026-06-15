@@ -1,0 +1,13 @@
+{
+  "candidate_csv": "weakPacket_decoding copy\\data\\phase_guided\\joint_residual_signal_m27\\0_0_0_10_14_16_snr_m27dB_residual_candidates.csv",
+  "packets": 5,
+  "score_field": "signal_score",
+  "affine_slope": 1,
+  "affine_intercept": 1,
+  "total_score": 3.248665089,
+  "expected_affine_ok": 1,
+  "app_compared": 5,
+  "joint_app_exact": 5,
+  "independent_app_exact": 2,
+  "output_csv": "weakPacket_decoding copy\\data\\phase_guided\\joint_residual_signal_m27\\joint_affine_decisions_with_payload.csv"
+}

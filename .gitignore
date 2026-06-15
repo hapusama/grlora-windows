@@ -14,3 +14,6 @@ examples/_full_debug.log
 weakPacket_decoding/data/*.bin
 weakPacket_decoding/data/**/*.bin
 weakPacket_decoding/_file_source_staging/
+weakPacket_decoding copy/data/*.bin
+weakPacket_decoding copy/data/**/*.bin
+weakPacket_decoding copy/_file_source_staging/

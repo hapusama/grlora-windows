@@ -1,0 +1,9 @@
+[
+  {
+    "ser_threshold": 0.1,
+    "argmax_crossing_snr_db": -16.139989706639216,
+    "map_residual_crossing_snr_db": -22.62390670553936,
+    "estimated_gain_db": 6.483916998900142,
+    "note": "linear interpolation over sparse SNR sweep points"
+  }
+]

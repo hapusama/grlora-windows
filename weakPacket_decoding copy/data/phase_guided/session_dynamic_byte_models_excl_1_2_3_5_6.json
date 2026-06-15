@@ -1,0 +1,17 @@
+{
+  "source_json": "weakPacket_decoding copy\\data\\noisy_iq\\_phase_symbol_eval_summary.json",
+  "byte_template_file": "weakPacket_decoding copy\\data\\phase_guided\\session_payload_byte_template_summary_excl_1_2_3_5_6.json",
+  "packet_count": 16,
+  "dynamic_indices": [
+    6
+  ],
+  "models": [
+    {
+      "byte_index": 6,
+      "model": "affine_mod_256",
+      "slope": 2,
+      "intercept": 1,
+      "observations": 2
+    }
+  ]
+}

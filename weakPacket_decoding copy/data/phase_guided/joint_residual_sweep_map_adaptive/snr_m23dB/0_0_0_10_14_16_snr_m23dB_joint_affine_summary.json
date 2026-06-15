@@ -1,0 +1,21 @@
+{
+  "candidate_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\phase_guided\\joint_residual_sweep_map_adaptive\\snr_m23dB\\0_0_0_10_14_16_snr_m23dB_residual_candidates.csv",
+  "packets": 5,
+  "score_field": "signal_score",
+  "affine_slope": 1,
+  "affine_intercept": 1,
+  "total_score": 2.5748802399999997,
+  "second_affine_slope": 129,
+  "second_affine_intercept": 129,
+  "second_total_score": 2.192377751,
+  "model_score_margin": 0.3825024889999997,
+  "model_score_margin_per_packet": 0.07650049779999994,
+  "expected_affine_ok": 1,
+  "app_compared": 5,
+  "joint_app_exact": 5,
+  "independent_app_exact": 4,
+  "joint_top1_count": 4,
+  "mean_joint_candidate_rank": 1.2,
+  "mean_independent_minus_joint_score_gap": 0.0008221368000000007,
+  "output_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\phase_guided\\joint_residual_sweep_map_adaptive\\snr_m23dB\\0_0_0_10_14_16_snr_m23dB_joint_affine_decisions.csv"
+}

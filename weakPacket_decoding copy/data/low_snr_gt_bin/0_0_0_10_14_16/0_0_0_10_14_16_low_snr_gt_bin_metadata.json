@@ -1,0 +1,16 @@
+{
+  "input": "D:\\Desktop\\proj\\gr-lora_sdr\\data\\USRP_IQ\\0_0_0_10_14_16.bin",
+  "gt_symbol_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\weak_sync_chain\\header_first\\0_0_0_10_14_16_header_first_symbols.csv",
+  "payload_symbol_count": 385,
+  "packet_count": 11,
+  "signal_reference_power": 7.297427983845209e-05,
+  "signal_reference_power_db": -41.368301822423746,
+  "target_snr_db": [
+    -10.0,
+    -15.0,
+    -20.0
+  ],
+  "cfo_correction_mode": "continuous",
+  "seed": 20260531,
+  "independent_noise": false
+}

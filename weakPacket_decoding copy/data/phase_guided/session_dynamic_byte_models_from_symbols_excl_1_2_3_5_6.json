@@ -1,0 +1,17 @@
+{
+  "source_symbol_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\weak_sync_chain\\header_first\\0_0_0_10_14_16_header_first_symbols.csv",
+  "byte_template_file": "weakPacket_decoding copy\\data\\phase_guided\\session_payload_byte_template_from_symbols_excl_1_2_3_5_6.json",
+  "packet_count": 6,
+  "dynamic_indices": [
+    6
+  ],
+  "models": [
+    {
+      "byte_index": 6,
+      "model": "affine_mod_256",
+      "slope": 1,
+      "intercept": 1,
+      "observations": 6
+    }
+  ]
+}

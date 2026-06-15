@@ -1,0 +1,316 @@
+{
+  "expected_payload_bytes": [
+    64,
+    68,
+    51,
+    34,
+    17,
+    0,
+    -1,
+    0,
+    88,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    120,
+    86,
+    52,
+    18
+  ],
+  "stable_count": 32,
+  "total_bytes": 33,
+  "min_stability": 0.8,
+  "packet_count": 6,
+  "crc_valid_symbol_packets": 6,
+  "source_symbol_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\weak_sync_chain\\header_first\\0_0_0_10_14_16_header_first_symbols.csv",
+  "excluded_packets": [
+    1,
+    2,
+    3,
+    5,
+    6
+  ],
+  "rows": [
+    {
+      "byte_index": 0,
+      "expected_byte": 64,
+      "modal_byte": 64,
+      "modal_hex": "40",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 1,
+      "expected_byte": 68,
+      "modal_byte": 68,
+      "modal_hex": "44",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 2,
+      "expected_byte": 51,
+      "modal_byte": 51,
+      "modal_hex": "33",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 3,
+      "expected_byte": 34,
+      "modal_byte": 34,
+      "modal_hex": "22",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 4,
+      "expected_byte": 17,
+      "modal_byte": 17,
+      "modal_hex": "11",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 5,
+      "expected_byte": 0,
+      "modal_byte": 0,
+      "modal_hex": "00",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 6,
+      "expected_byte": -1,
+      "modal_byte": 9,
+      "modal_hex": "09",
+      "stability": 0.16666666666666666,
+      "observations": 6
+    },
+    {
+      "byte_index": 7,
+      "expected_byte": 0,
+      "modal_byte": 0,
+      "modal_hex": "00",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 8,
+      "expected_byte": 88,
+      "modal_byte": 88,
+      "modal_hex": "58",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 9,
+      "expected_byte": 48,
+      "modal_byte": 48,
+      "modal_hex": "30",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 10,
+      "expected_byte": 49,
+      "modal_byte": 49,
+      "modal_hex": "31",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 11,
+      "expected_byte": 50,
+      "modal_byte": 50,
+      "modal_hex": "32",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 12,
+      "expected_byte": 51,
+      "modal_byte": 51,
+      "modal_hex": "33",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 13,
+      "expected_byte": 52,
+      "modal_byte": 52,
+      "modal_hex": "34",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 14,
+      "expected_byte": 53,
+      "modal_byte": 53,
+      "modal_hex": "35",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 15,
+      "expected_byte": 54,
+      "modal_byte": 54,
+      "modal_hex": "36",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 16,
+      "expected_byte": 55,
+      "modal_byte": 55,
+      "modal_hex": "37",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 17,
+      "expected_byte": 56,
+      "modal_byte": 56,
+      "modal_hex": "38",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 18,
+      "expected_byte": 57,
+      "modal_byte": 57,
+      "modal_hex": "39",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 19,
+      "expected_byte": 58,
+      "modal_byte": 58,
+      "modal_hex": "3a",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 20,
+      "expected_byte": 59,
+      "modal_byte": 59,
+      "modal_hex": "3b",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 21,
+      "expected_byte": 60,
+      "modal_byte": 60,
+      "modal_hex": "3c",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 22,
+      "expected_byte": 61,
+      "modal_byte": 61,
+      "modal_hex": "3d",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 23,
+      "expected_byte": 62,
+      "modal_byte": 62,
+      "modal_hex": "3e",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 24,
+      "expected_byte": 63,
+      "modal_byte": 63,
+      "modal_hex": "3f",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 25,
+      "expected_byte": 64,
+      "modal_byte": 64,
+      "modal_hex": "40",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 26,
+      "expected_byte": 65,
+      "modal_byte": 65,
+      "modal_hex": "41",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 27,
+      "expected_byte": 66,
+      "modal_byte": 66,
+      "modal_hex": "42",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 28,
+      "expected_byte": 67,
+      "modal_byte": 67,
+      "modal_hex": "43",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 29,
+      "expected_byte": 120,
+      "modal_byte": 120,
+      "modal_hex": "78",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 30,
+      "expected_byte": 86,
+      "modal_byte": 86,
+      "modal_hex": "56",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 31,
+      "expected_byte": 52,
+      "modal_byte": 52,
+      "modal_hex": "34",
+      "stability": 1.0,
+      "observations": 6
+    },
+    {
+      "byte_index": 32,
+      "expected_byte": 18,
+      "modal_byte": 18,
+      "modal_hex": "12",
+      "stability": 1.0,
+      "observations": 6
+    }
+  ]
+}

@@ -1,0 +1,964 @@
+{
+  "input_file": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\noisy_iq\\0_0_0_10_14_8\\0_0_0_10_14_8_noise_rel_30p0dB.bin",
+  "frame_count": 1,
+  "sf": 10,
+  "bw": 125000.0,
+  "sample_rate": 500000.0,
+  "os_factor": 4,
+  "samples_per_symbol": 4096,
+  "n_bins": 1024,
+  "symbol_start_sample": 8196509,
+  "requested_symbols": 12,
+  "extracted_symbols": 12,
+  "cfo": -21.451244354248047,
+  "sto": 738.7601318359375,
+  "sfo": -0.005498063284903765,
+  "ldro": false,
+  "packet_metadata": {
+    "frame_count": 1,
+    "sf": 10,
+    "bw": 125000.0,
+    "sample_rate": 500000.0,
+    "samples_per_symbol": 4096,
+    "preamble_len": 8,
+    "start_sample": 8146333,
+    "end_sample": 8196509,
+    "n_samples": 50176,
+    "n_symbols": 12.25,
+    "grlora_snr_db": -19.782922744750977,
+    "cfo": -21.451244354248047,
+    "sto": 738.7601318359375,
+    "sfo": -0.005498063284903765,
+    "netid1": 25,
+    "netid2": 33,
+    "cr": 1,
+    "pay_len": 33,
+    "crc": 1,
+    "ldro_mode": 2,
+    "header_err": 0,
+    "decoded_payload_len": 33,
+    "decoded_payload_available": true,
+    "decoded_payload_hex": "404433221100160058303132112635263638393a3b3c3d3e3f4041424378567456",
+    "decoded_payload_text": "@D3\"\u0011\u0000\u0016\u0000X012\u0011&5&689:;<=>?@ABCxVtV",
+    "crc_valid": false,
+    "payload_symbols": 43,
+    "packet_symbols": 55.25,
+    "packet_start_sample": 8146333,
+    "packet_end_sample": 8372637,
+    "packet_samples": 226304
+  },
+  "symbols": [
+    {
+      "symbol_index": 0,
+      "absolute_sample": 8196509,
+      "is_header": true,
+      "confidence_db": 5.330485275785296,
+      "total_power": 8090.220693418756,
+      "noise_power_est": 7.726566830988634,
+      "candidates": [
+        {
+          "bin": 301,
+          "grlora_symbol": 75,
+          "gray": 110,
+          "value_real": -6.661746025085449,
+          "value_imag": -11.898065567016602,
+          "magnitude": 13.636085374467552,
+          "power": 185.9428253173828,
+          "phase": -2.081209741861723,
+          "rank": 1
+        },
+        {
+          "bin": 279,
+          "grlora_symbol": 69,
+          "gray": 103,
+          "value_real": -0.0057575092650949955,
+          "value_imag": -7.381852149963379,
+          "magnitude": 7.381854395260848,
+          "power": 54.49176788330078,
+          "phase": -1.5715762811993799,
+          "rank": 2
+        },
+        {
+          "bin": 153,
+          "grlora_symbol": 38,
+          "gray": 53,
+          "value_real": 1.4977575540542603,
+          "value_imag": -6.967734336853027,
+          "magnitude": 7.126892694554009,
+          "power": 50.792598724365234,
+          "phase": -1.3590620513767462,
+          "rank": 3
+        },
+        {
+          "bin": 132,
+          "grlora_symbol": 32,
+          "gray": 48,
+          "value_real": -3.4684882164001465,
+          "value_imag": 6.162049293518066,
+          "magnitude": 7.071157048394072,
+          "power": 50.00126266479492,
+          "phase": 2.0834736544116788,
+          "rank": 4
+        },
+        {
+          "bin": 741,
+          "grlora_symbol": 185,
+          "gray": 229,
+          "value_real": -3.9672257900238037,
+          "value_imag": 5.657254695892334,
+          "magnitude": 6.909660712598402,
+          "power": 47.743404388427734,
+          "phase": 2.1823697225517797,
+          "rank": 5
+        },
+        {
+          "bin": 518,
+          "grlora_symbol": 129,
+          "gray": 193,
+          "value_real": 3.2723569869995117,
+          "value_imag": -5.89029598236084,
+          "magnitude": 6.738242130569424,
+          "power": 45.403907775878906,
+          "phase": -1.0637016714970506,
+          "rank": 6
+        }
+      ]
+    },
+    {
+      "symbol_index": 1,
+      "absolute_sample": 8200605,
+      "is_header": true,
+      "confidence_db": 0.5402150456100816,
+      "total_power": 8127.183246798348,
+      "noise_power_est": 7.880252241687294,
+      "candidates": [
+        {
+          "bin": 653,
+          "grlora_symbol": 163,
+          "gray": 242,
+          "value_real": -1.717272400856018,
+          "value_imag": 7.920618057250977,
+          "magnitude": 8.104641565645702,
+          "power": 65.6852035522461,
+          "phase": 1.7843022570800444,
+          "rank": 1
+        },
+        {
+          "bin": 656,
+          "grlora_symbol": 163,
+          "gray": 242,
+          "value_real": -7.530679702758789,
+          "value_imag": 1.136342167854309,
+          "magnitude": 7.615931348691835,
+          "power": 58.002410888671875,
+          "phase": 2.9918274824975373,
+          "rank": 2
+        },
+        {
+          "bin": 180,
+          "grlora_symbol": 44,
+          "gray": 58,
+          "value_real": 6.832788467407227,
+          "value_imag": 1.6631832122802734,
+          "magnitude": 7.032295261004342,
+          "power": 49.45317459106445,
+          "phase": 0.23876871587923792,
+          "rank": 3
+        },
+        {
+          "bin": 554,
+          "grlora_symbol": 138,
+          "gray": 207,
+          "value_real": -1.6265184879302979,
+          "value_imag": 6.503727912902832,
+          "magnitude": 6.7040315599384295,
+          "power": 44.94404602050781,
+          "phase": 1.8158598639243317,
+          "rank": 4
+        },
+        {
+          "bin": 35,
+          "grlora_symbol": 8,
+          "gray": 12,
+          "value_real": 6.56149435043335,
+          "value_imag": 1.0947173833847046,
+          "magnitude": 6.652188681949229,
+          "power": 44.251617431640625,
+          "phase": 0.1653169752368689,
+          "rank": 5
+        },
+        {
+          "bin": 364,
+          "grlora_symbol": 90,
+          "gray": 119,
+          "value_real": 5.161617755889893,
+          "value_imag": -3.8635735511779785,
+          "magnitude": 6.447441232247086,
+          "power": 41.569496154785156,
+          "phase": -0.6425531647505643,
+          "rank": 6
+        }
+      ]
+    },
+    {
+      "symbol_index": 2,
+      "absolute_sample": 8204701,
+      "is_header": true,
+      "confidence_db": 3.5026923132904733,
+      "total_power": 8048.251961461967,
+      "noise_power_est": 7.717595590516799,
+      "candidates": [
+        {
+          "bin": 61,
+          "grlora_symbol": 15,
+          "gray": 8,
+          "value_real": 6.061843395233154,
+          "value_imag": -10.789148330688477,
+          "magnitude": 12.375446135389614,
+          "power": 153.15167236328125,
+          "phase": -1.0589035614883748,
+          "rank": 1
+        },
+        {
+          "bin": 683,
+          "grlora_symbol": 170,
+          "gray": 255,
+          "value_real": -8.26782512664795,
+          "value_imag": 0.10489654541015625,
+          "magnitude": 8.268490527905934,
+          "power": 68.3679428100586,
+          "phase": 3.128906013994186,
+          "rank": 2
+        },
+        {
+          "bin": 319,
+          "grlora_symbol": 79,
+          "gray": 104,
+          "value_real": -7.337254524230957,
+          "value_imag": -1.6437158584594727,
+          "magnitude": 7.519116023622645,
+          "power": 56.5370979309082,
+          "phase": -2.9212080572508423,
+          "rank": 3
+        },
+        {
+          "bin": 1001,
+          "grlora_symbol": 250,
+          "gray": 135,
+          "value_real": -7.0813984870910645,
+          "value_imag": -1.7536312341690063,
+          "magnitude": 7.29530170989718,
+          "power": 53.2214241027832,
+          "phase": -2.898837233908466,
+          "rank": 4
+        },
+        {
+          "bin": 248,
+          "grlora_symbol": 61,
+          "gray": 35,
+          "value_real": -1.0492210388183594,
+          "value_imag": -7.038626670837402,
+          "magnitude": 7.116398681898218,
+          "power": 50.643123626708984,
+          "phase": -1.7187728570887462,
+          "rank": 5
+        },
+        {
+          "bin": 325,
+          "grlora_symbol": 81,
+          "gray": 121,
+          "value_real": 3.3093371391296387,
+          "value_imag": -5.978598117828369,
+          "magnitude": 6.833399428902401,
+          "power": 46.69534683227539,
+          "phase": -1.065246506818311,
+          "rank": 6
+        }
+      ]
+    },
+    {
+      "symbol_index": 3,
+      "absolute_sample": 8208797,
+      "is_header": true,
+      "confidence_db": 2.528461303023094,
+      "total_power": 8260.68302075006,
+      "noise_power_est": 7.9668542475677215,
+      "candidates": [
+        {
+          "bin": 81,
+          "grlora_symbol": 20,
+          "gray": 30,
+          "value_real": -7.157533168792725,
+          "value_imag": 7.704598903656006,
+          "magnitude": 10.516231517448889,
+          "power": 110.59112548828125,
+          "phase": 2.3194017302900525,
+          "rank": 1
+        },
+        {
+          "bin": 196,
+          "grlora_symbol": 48,
+          "gray": 40,
+          "value_real": 5.604005336761475,
+          "value_imag": -5.511702060699463,
+          "magnitude": 7.8602630630513755,
+          "power": 61.78373336791992,
+          "phase": -0.7770944944282447,
+          "rank": 2
+        },
+        {
+          "bin": 314,
+          "grlora_symbol": 78,
+          "gray": 105,
+          "value_real": 4.895590782165527,
+          "value_imag": -5.2328691482543945,
+          "magnitude": 7.165872496017268,
+          "power": 51.3497314453125,
+          "phase": -0.8186859270458949,
+          "rank": 3
+        },
+        {
+          "bin": 628,
+          "grlora_symbol": 156,
+          "gray": 210,
+          "value_real": 4.23176383972168,
+          "value_imag": 5.179843902587891,
+          "magnitude": 6.688692551639141,
+          "power": 44.738609313964844,
+          "phase": 0.8857946703814452,
+          "rank": 4
+        },
+        {
+          "bin": 728,
+          "grlora_symbol": 181,
+          "gray": 239,
+          "value_real": 6.686379909515381,
+          "value_imag": 0.13172443211078644,
+          "magnitude": 6.68767729637023,
+          "power": 44.72502899169922,
+          "phase": 0.01969786294492406,
+          "rank": 5
+        },
+        {
+          "bin": 130,
+          "grlora_symbol": 32,
+          "gray": 48,
+          "value_real": -1.1633554697036743,
+          "value_imag": -6.294235706329346,
+          "magnitude": 6.400843622189245,
+          "power": 40.97079849243164,
+          "phase": -1.7535624669190826,
+          "rank": 6
+        }
+      ]
+    },
+    {
+      "symbol_index": 4,
+      "absolute_sample": 8212893,
+      "is_header": true,
+      "confidence_db": 2.9108744105255493,
+      "total_power": 8231.795995229855,
+      "noise_power_est": 7.9534425833303475,
+      "candidates": [
+        {
+          "bin": 845,
+          "grlora_symbol": 211,
+          "gray": 186,
+          "value_real": 9.717852592468262,
+          "value_imag": 0.9937713742256165,
+          "magnitude": 9.768533183296885,
+          "power": 95.42423248291016,
+          "phase": 0.10190819244553725,
+          "rank": 1
+        },
+        {
+          "bin": 236,
+          "grlora_symbol": 58,
+          "gray": 39,
+          "value_real": -5.2401251792907715,
+          "value_imag": 4.621483325958252,
+          "magnitude": 6.986917777299751,
+          "power": 48.8170166015625,
+          "phase": 2.4188447404293747,
+          "rank": 2
+        },
+        {
+          "bin": 62,
+          "grlora_symbol": 15,
+          "gray": 8,
+          "value_real": 1.616036057472229,
+          "value_imag": -6.649903297424316,
+          "magnitude": 6.843448429274907,
+          "power": 46.83278274536133,
+          "phase": -1.3324011160701663,
+          "rank": 3
+        },
+        {
+          "bin": 984,
+          "grlora_symbol": 245,
+          "gray": 143,
+          "value_real": 4.299030303955078,
+          "value_imag": -5.236584663391113,
+          "magnitude": 6.775210734079576,
+          "power": 45.90347671508789,
+          "phase": -0.8834044930280373,
+          "rank": 4
+        },
+        {
+          "bin": 570,
+          "grlora_symbol": 142,
+          "gray": 201,
+          "value_real": -6.594603061676025,
+          "value_imag": 1.25413179397583,
+          "magnitude": 6.712796443936599,
+          "power": 45.06163787841797,
+          "phase": 2.953661347907872,
+          "rank": 5
+        },
+        {
+          "bin": 111,
+          "grlora_symbol": 27,
+          "gray": 22,
+          "value_real": -1.2962794303894043,
+          "value_imag": 6.5739521980285645,
+          "magnitude": 6.700536386261571,
+          "power": 44.897186279296875,
+          "phase": 1.765482915440143,
+          "rank": 6
+        }
+      ]
+    },
+    {
+      "symbol_index": 5,
+      "absolute_sample": 8216989,
+      "is_header": true,
+      "confidence_db": 2.7933126365470318,
+      "total_power": 7990.948958215653,
+      "noise_power_est": 7.715227672254293,
+      "candidates": [
+        {
+          "bin": 825,
+          "grlora_symbol": 206,
+          "gray": 169,
+          "value_real": -7.927702903747559,
+          "value_imag": -5.951685905456543,
+          "magnitude": 9.91317499327524,
+          "power": 98.27104949951172,
+          "phase": -2.4976147064173784,
+          "rank": 1
+        },
+        {
+          "bin": 719,
+          "grlora_symbol": 179,
+          "gray": 234,
+          "value_real": 3.79042387008667,
+          "value_imag": -6.106189250946045,
+          "magnitude": 7.18699243656843,
+          "power": 51.652854919433594,
+          "phase": -1.0152582156646455,
+          "rank": 2
+        },
+        {
+          "bin": 431,
+          "grlora_symbol": 107,
+          "gray": 94,
+          "value_real": -4.173198223114014,
+          "value_imag": -5.485213756561279,
+          "magnitude": 6.892253141358859,
+          "power": 47.50315856933594,
+          "phase": -2.2211791762837234,
+          "rank": 3
+        },
+        {
+          "bin": 1017,
+          "grlora_symbol": 254,
+          "gray": 129,
+          "value_real": -1.339638352394104,
+          "value_imag": 6.725870132446289,
+          "magnitude": 6.8579851234701765,
+          "power": 47.031959533691406,
+          "phase": 1.7674003749232314,
+          "rank": 4
+        },
+        {
+          "bin": 885,
+          "grlora_symbol": 221,
+          "gray": 179,
+          "value_real": 5.510796070098877,
+          "value_imag": 3.9380953311920166,
+          "magnitude": 6.7732907927958905,
+          "power": 45.877471923828125,
+          "phase": 0.6204672280098688,
+          "rank": 5
+        },
+        {
+          "bin": 991,
+          "grlora_symbol": 247,
+          "gray": 140,
+          "value_real": 6.145429611206055,
+          "value_imag": -2.1913881301879883,
+          "magnitude": 6.52445300721961,
+          "power": 42.56848907470703,
+          "phase": -0.34253200541937,
+          "rank": 6
+        }
+      ]
+    },
+    {
+      "symbol_index": 6,
+      "absolute_sample": 8221085,
+      "is_header": true,
+      "confidence_db": 6.380257040001305,
+      "total_power": 8236.80779709469,
+      "noise_power_est": 7.838499392369031,
+      "candidates": [
+        {
+          "bin": 729,
+          "grlora_symbol": 182,
+          "gray": 237,
+          "value_real": 8.450787544250488,
+          "value_imag": 12.108142852783203,
+          "magnitude": 14.765599664810914,
+          "power": 218.02291870117188,
+          "phase": 0.9614525672216304,
+          "rank": 1
+        },
+        {
+          "bin": 527,
+          "grlora_symbol": 131,
+          "gray": 194,
+          "value_real": -6.858673095703125,
+          "value_imag": 1.769842505455017,
+          "magnitude": 7.0833423698023505,
+          "power": 50.173736572265625,
+          "phase": 2.889057194028176,
+          "rank": 2
+        },
+        {
+          "bin": 596,
+          "grlora_symbol": 148,
+          "gray": 222,
+          "value_real": -0.9440971612930298,
+          "value_imag": 6.981462001800537,
+          "magnitude": 7.045007532469097,
+          "power": 49.63214111328125,
+          "phase": 1.7052100948548816,
+          "rank": 3
+        },
+        {
+          "bin": 662,
+          "grlora_symbol": 165,
+          "gray": 247,
+          "value_real": -5.282476425170898,
+          "value_imag": 4.339735984802246,
+          "magnitude": 6.836509752810555,
+          "power": 46.73786544799805,
+          "phase": 2.4538582230432113,
+          "rank": 4
+        },
+        {
+          "bin": 58,
+          "grlora_symbol": 14,
+          "gray": 9,
+          "value_real": -6.788483619689941,
+          "value_imag": 0.6580222845077515,
+          "magnitude": 6.820300813139216,
+          "power": 46.51650619506836,
+          "phase": 3.044962393986672,
+          "rank": 5
+        },
+        {
+          "bin": 300,
+          "grlora_symbol": 74,
+          "gray": 111,
+          "value_real": 4.596885681152344,
+          "value_imag": -4.792450428009033,
+          "magnitude": 6.640703206024751,
+          "power": 44.09893798828125,
+          "phase": -0.8062235414496234,
+          "rank": 6
+        }
+      ]
+    },
+    {
+      "symbol_index": 7,
+      "absolute_sample": 8225181,
+      "is_header": true,
+      "confidence_db": 5.0457256890400455,
+      "total_power": 8169.2574788481,
+      "noise_power_est": 7.800174137145893,
+      "candidates": [
+        {
+          "bin": 345,
+          "grlora_symbol": 86,
+          "gray": 125,
+          "value_real": -2.494906187057495,
+          "value_imag": -13.544548034667969,
+          "magnitude": 13.772412219565812,
+          "power": 189.67933654785156,
+          "phase": -1.752954487757686,
+          "rank": 1
+        },
+        {
+          "bin": 321,
+          "grlora_symbol": 80,
+          "gray": 120,
+          "value_real": 1.8726543188095093,
+          "value_imag": -7.473072528839111,
+          "magnitude": 7.704131827730214,
+          "power": 59.35365295410156,
+          "phase": -1.3252653332633257,
+          "rank": 2
+        },
+        {
+          "bin": 265,
+          "grlora_symbol": 66,
+          "gray": 99,
+          "value_real": 7.3039984703063965,
+          "value_imag": -1.3409597873687744,
+          "magnitude": 7.426073444666319,
+          "power": 55.14656066894531,
+          "phase": -0.18157056128318294,
+          "rank": 3
+        },
+        {
+          "bin": 525,
+          "grlora_symbol": 131,
+          "gray": 194,
+          "value_real": 1.558835506439209,
+          "value_imag": -6.781996250152588,
+          "magnitude": 6.9588390751058,
+          "power": 48.425445556640625,
+          "phase": -1.344871293890321,
+          "rank": 4
+        },
+        {
+          "bin": 468,
+          "grlora_symbol": 116,
+          "gray": 78,
+          "value_real": -4.502238750457764,
+          "value_imag": -4.72996187210083,
+          "magnitude": 6.530137293935793,
+          "power": 42.642696380615234,
+          "phase": -2.331533310913062,
+          "rank": 5
+        },
+        {
+          "bin": 691,
+          "grlora_symbol": 172,
+          "gray": 250,
+          "value_real": -5.415989398956299,
+          "value_imag": -3.5009312629699707,
+          "magnitude": 6.44898913610866,
+          "power": 41.58946228027344,
+          "phase": -2.567747702146568,
+          "rank": 6
+        }
+      ]
+    },
+    {
+      "symbol_index": 8,
+      "absolute_sample": 8229277,
+      "is_header": false,
+      "confidence_db": 2.4338963918550025,
+      "total_power": 7747.561648214003,
+      "noise_power_est": 7.469730965284911,
+      "candidates": [
+        {
+          "bin": 222,
+          "grlora_symbol": 221,
+          "gray": 179,
+          "value_real": -3.508620262145996,
+          "value_imag": 9.680726051330566,
+          "magnitude": 10.296935127738339,
+          "power": 106.02687072753906,
+          "phase": 1.9185046133930348,
+          "rank": 1
+        },
+        {
+          "bin": 211,
+          "grlora_symbol": 210,
+          "gray": 187,
+          "value_real": -4.055301189422607,
+          "value_imag": 6.640202045440674,
+          "magnitude": 7.78060093702324,
+          "power": 60.53775405883789,
+          "phase": 2.1190605861699896,
+          "rank": 2
+        },
+        {
+          "bin": 100,
+          "grlora_symbol": 99,
+          "gray": 82,
+          "value_real": 5.524758338928223,
+          "value_imag": 3.9463441371917725,
+          "magnitude": 6.789446719188892,
+          "power": 46.096580505371094,
+          "phase": 0.6202600546908801,
+          "rank": 3
+        },
+        {
+          "bin": 171,
+          "grlora_symbol": 170,
+          "gray": 255,
+          "value_real": -0.4394261837005615,
+          "value_imag": 6.734711170196533,
+          "magnitude": 6.749031776254398,
+          "power": 45.549434661865234,
+          "phase": 1.6359519320554683,
+          "rank": 4
+        },
+        {
+          "bin": 956,
+          "grlora_symbol": 955,
+          "gray": 614,
+          "value_real": 2.986847162246704,
+          "value_imag": -5.686044216156006,
+          "magnitude": 6.422799607546724,
+          "power": 41.25236129760742,
+          "phase": -1.087118567485042,
+          "rank": 5
+        },
+        {
+          "bin": 208,
+          "grlora_symbol": 207,
+          "gray": 168,
+          "value_real": -6.07875394821167,
+          "value_imag": -1.0369216203689575,
+          "magnitude": 6.1665594953497,
+          "power": 38.026451110839844,
+          "phase": -2.9726375993202976,
+          "rank": 6
+        }
+      ]
+    },
+    {
+      "symbol_index": 9,
+      "absolute_sample": 8233373,
+      "is_header": false,
+      "confidence_db": 4.036464747017379,
+      "total_power": 7931.750676919706,
+      "noise_power_est": 7.62559418832266,
+      "candidates": [
+        {
+          "bin": 826,
+          "grlora_symbol": 825,
+          "gray": 677,
+          "value_real": 6.6550798416137695,
+          "value_imag": -9.299341201782227,
+          "magnitude": 11.435376447035685,
+          "power": 130.767822265625,
+          "phase": -0.9496435964610749,
+          "rank": 1
+        },
+        {
+          "bin": 674,
+          "grlora_symbol": 673,
+          "gray": 1009,
+          "value_real": -6.028960704803467,
+          "value_imag": 3.908447504043579,
+          "magnitude": 7.185007242301764,
+          "power": 51.62432861328125,
+          "phase": 2.5664283563473003,
+          "rank": 2
+        },
+        {
+          "bin": 222,
+          "grlora_symbol": 221,
+          "gray": 179,
+          "value_real": -6.661759376525879,
+          "value_imag": 2.678992986679077,
+          "magnitude": 7.180253575842997,
+          "power": 51.55604553222656,
+          "phase": 2.7592385380891407,
+          "rank": 3
+        },
+        {
+          "bin": 840,
+          "grlora_symbol": 839,
+          "gray": 740,
+          "value_real": 6.796741962432861,
+          "value_imag": 2.1907684803009033,
+          "magnitude": 7.141090101530412,
+          "power": 50.99516677856445,
+          "phase": 0.31181170370543265,
+          "rank": 4
+        },
+        {
+          "bin": 1013,
+          "grlora_symbol": 1012,
+          "gray": 526,
+          "value_real": -6.5365705490112305,
+          "value_imag": 2.7798383235931396,
+          "magnitude": 7.103115911170118,
+          "power": 50.45425033569336,
+          "phase": 2.7394893241328004,
+          "rank": 5
+        },
+        {
+          "bin": 306,
+          "grlora_symbol": 305,
+          "gray": 425,
+          "value_real": -2.6461527347564697,
+          "value_imag": 6.487593173980713,
+          "magnitude": 7.00649623469108,
+          "power": 49.09099197387695,
+          "phase": 1.958076400672593,
+          "rank": 6
+        }
+      ]
+    },
+    {
+      "symbol_index": 10,
+      "absolute_sample": 8237469,
+      "is_header": false,
+      "confidence_db": 2.0531009125071966,
+      "total_power": 8000.045647164341,
+      "noise_power_est": 7.701800774755129,
+      "candidates": [
+        {
+          "bin": 871,
+          "grlora_symbol": 870,
+          "gray": 725,
+          "value_real": -9.088287353515625,
+          "value_imag": 6.205358505249023,
+          "magnitude": 11.004700868208024,
+          "power": 121.10345458984375,
+          "phase": 2.5425131396712377,
+          "rank": 1
+        },
+        {
+          "bin": 784,
+          "grlora_symbol": 783,
+          "gray": 648,
+          "value_real": 8.260784149169922,
+          "value_imag": 2.6910924911499023,
+          "magnitude": 8.688068459393055,
+          "power": 75.48252868652344,
+          "phase": 0.31492564529570305,
+          "rank": 2
+        },
+        {
+          "bin": 788,
+          "grlora_symbol": 787,
+          "gray": 666,
+          "value_real": 6.316861152648926,
+          "value_imag": 4.440357208251953,
+          "magnitude": 7.721366909992051,
+          "power": 59.6195068359375,
+          "phase": 0.6126945753730284,
+          "rank": 3
+        },
+        {
+          "bin": 402,
+          "grlora_symbol": 401,
+          "gray": 345,
+          "value_real": 7.475703239440918,
+          "value_imag": -1.4400237798690796,
+          "magnitude": 7.613133875794899,
+          "power": 57.959808349609375,
+          "phase": -0.190296382225481,
+          "rank": 4
+        },
+        {
+          "bin": 448,
+          "grlora_symbol": 447,
+          "gray": 352,
+          "value_real": -1.7855510711669922,
+          "value_imag": 6.8707356452941895,
+          "magnitude": 7.098957735841351,
+          "power": 50.395206451416016,
+          "phase": 1.8250498387878313,
+          "rank": 5
+        },
+        {
+          "bin": 830,
+          "grlora_symbol": 829,
+          "gray": 675,
+          "value_real": 6.289785861968994,
+          "value_imag": -2.871572732925415,
+          "magnitude": 6.914284934098809,
+          "power": 47.807334899902344,
+          "phase": -0.42828372371165746,
+          "rank": 6
+        }
+      ]
+    },
+    {
+      "symbol_index": 11,
+      "absolute_sample": 8241565,
+      "is_header": false,
+      "confidence_db": 4.74976096163916,
+      "total_power": 7874.612515866291,
+      "noise_power_est": 7.540845180594454,
+      "candidates": [
+        {
+          "bin": 718,
+          "grlora_symbol": 717,
+          "gray": 939,
+          "value_real": 12.659655570983887,
+          "value_imag": -0.24707265198230743,
+          "magnitude": 12.662066342872357,
+          "power": 160.32789611816406,
+          "phase": -0.01951406088129639,
+          "rank": 1
+        },
+        {
+          "bin": 672,
+          "grlora_symbol": 671,
+          "gray": 976,
+          "value_real": 6.666795253753662,
+          "value_imag": 3.043205499649048,
+          "magnitude": 7.3285236349872385,
+          "power": 53.70726013183594,
+          "phase": 0.42822300832165133,
+          "rank": 2
+        },
+        {
+          "bin": 368,
+          "grlora_symbol": 367,
+          "gray": 472,
+          "value_real": -5.822808265686035,
+          "value_imag": 3.399778127670288,
+          "magnitude": 6.7426691611206095,
+          "power": 45.463584899902344,
+          "phase": 2.613115954635555,
+          "rank": 3
+        },
+        {
+          "bin": 492,
+          "grlora_symbol": 491,
+          "gray": 286,
+          "value_real": 3.9237704277038574,
+          "value_imag": -5.2174248695373535,
+          "magnitude": 6.528207766193581,
+          "power": 42.617496490478516,
+          "phase": -0.9259837672633031,
+          "rank": 4
+        },
+        {
+          "bin": 661,
+          "grlora_symbol": 660,
+          "gray": 990,
+          "value_real": 4.3535356521606445,
+          "value_imag": -4.320920467376709,
+          "magnitude": 6.133810101399355,
+          "power": 37.623626708984375,
+          "phase": -0.7816382699075389,
+          "rank": 5
+        },
+        {
+          "bin": 769,
+          "grlora_symbol": 768,
+          "gray": 640,
+          "value_real": 5.782325267791748,
+          "value_imag": -1.4454677104949951,
+          "magnitude": 5.960256907602772,
+          "power": 35.524658203125,
+          "phase": -0.2449601715668518,
+          "rank": 6
+        }
+      ]
+    }
+  ]
+}

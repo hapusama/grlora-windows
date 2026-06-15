@@ -1,0 +1,4 @@
+packet_index,event_index,success,total_payload,correct_count,final_error_rate,initial_slope_pi,final_slope_pi,initial_line_r2,final_line_r2,preamble_anchors,header_anchors,header_method,header_rescue_score,header_rescue_visited,preamble_line_slope_pi,header_line_slope_pi,hough_line_slope_pi,hough_score,preamble_line_r2,header_line_r2,refinement_rounds,round0_acc,round1_acc,round2_acc,payload_len,gt_bins_available
+1,1,1,35,3,0.9143,0.0098,0.0098,0.2118,0.2118,16,8,session_header_prior,-0.6331,32,-0.0008,0.0098,0.0000,0.0000,-0.0018,0.2118,2,0.5143,0.0857,,33,35
+2,2,1,35,7,0.8000,-0.0346,-0.0346,0.6599,0.6599,16,8,session_header_prior,0.0150,32,-0.0038,-0.0346,0.0000,0.0000,0.0821,0.6599,2,0.5429,0.2000,,33,35
+3,3,1,35,8,0.7714,-0.0110,-0.0110,0.2512,0.2512,16,8,session_header_prior,-0.3025,32,-0.0045,-0.0110,0.0000,0.0000,0.1505,0.2512,2,0.6571,0.2286,,33,35
