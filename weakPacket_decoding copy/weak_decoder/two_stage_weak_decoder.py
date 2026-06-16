@@ -38,7 +38,11 @@ from .payload_codec import (
     payload_symbols_to_nibbles,
     reencoded_payload_known_prefix_symbols,
 )
-from .phase_guided_demod import PhaseLine
+from .phase_guided_demod import (
+    PhaseGuidedPayloadConfig,
+    PhaseLine,
+    _score_payload_symbol_prior_candidate,
+)
 
 
 def _logsumexp(values: np.ndarray) -> float:
@@ -163,6 +167,7 @@ class TwoStageWeakConfig:
     block_trim_fraction: float = 0.20
     projection_trim_fraction: float = 0.10
     projection_score_weight: float = 1.00
+    trajectory_score_weight: float = 0.00
     crc_observed_bonus: float = 4.0
     crc_candidate_min_evidence_margin: float = 0.0
     crc_candidate_max_beam_rank: int = 2048
@@ -249,6 +254,7 @@ class PayloadBeamCandidate:
     raw_bins: tuple[int, ...]
     block_score: float
     projection_score: float
+    trajectory_score: float
     total_score: float
     beam_rank: int
     selection_source: str = "beam"
@@ -276,6 +282,7 @@ def build_symbol_likelihood(
     ldro: bool,
     predicted_phase_rad: float,
     config: TwoStageWeakConfig,
+    raw_score_override: np.ndarray | None = None,
 ) -> SymbolLikelihood:
     """Build raw-bin and demod-symbol likelihoods from one FFT spectrum."""
 
@@ -286,15 +293,30 @@ def build_symbol_likelihood(
         raise ValueError(f"spectrum has {spec.size} bins, expected {n_bins}")
 
     power = np.abs(spec).astype(np.float64) ** 2
-    max_power = float(np.max(power)) if power.size else 0.0
-    rel_db = 10.0 * np.log10((power + 1e-30) / (max_power + 1e-30))
-    floor_db = max(1.0, float(config.amplitude_floor_db))
-    amp_score = np.maximum(rel_db, -floor_db) / floor_db
+    if raw_score_override is None:
+        max_power = float(np.max(power)) if power.size else 0.0
+        rel_db = 10.0 * np.log10((power + 1e-30) / (max_power + 1e-30))
+        floor_db = max(1.0, float(config.amplitude_floor_db))
+        amp_score = np.maximum(rel_db, -floor_db) / floor_db
 
-    phases = np.angle(spec)
-    residual = np.angle(np.exp(1j * (phases - float(predicted_phase_rad))))
-    phase_penalty = 0.5 * (np.cos(residual) - 1.0)
-    raw_scores = amp_score + float(config.phase_weight) * phase_penalty
+        phases = np.angle(spec)
+        residual = np.angle(np.exp(1j * (phases - float(predicted_phase_rad))))
+        phase_penalty = 0.5 * (np.cos(residual) - 1.0)
+        raw_scores = amp_score + float(config.phase_weight) * phase_penalty
+        argmax_metric = power
+    else:
+        raw_scores = np.asarray(raw_score_override, dtype=np.float64)
+        if raw_scores.size != n_bins:
+            raise ValueError(
+                f"raw_score_override has {raw_scores.size} bins, expected {n_bins}"
+            )
+        finite = np.isfinite(raw_scores)
+        if not np.any(finite):
+            raw_scores = np.zeros(n_bins, dtype=np.float64)
+        else:
+            floor = float(np.min(raw_scores[finite])) - 1.0
+            raw_scores = np.where(finite, raw_scores, floor)
+        argmax_metric = raw_scores
     raw_scores = raw_scores - float(np.max(raw_scores))
 
     score_by_value = np.full(alphabet, -np.inf, dtype=np.float64)
@@ -309,7 +331,7 @@ def build_symbol_likelihood(
     top_count = min(int(config.top_k_metrics), int(order.size))
     top_bins = tuple(int(v) for v in order[:top_count])
     top_scores = tuple(float(raw_scores[v]) for v in top_bins)
-    argmax_bin = int(np.argmax(power))
+    argmax_bin = int(np.argmax(argmax_metric))
     argmax_symbol_value = bin_to_grlora_symbol(argmax_bin, sf=sf, is_header=False, ldro=ldro)
     return SymbolLikelihood(
         symbol_index=int(symbol_index),
@@ -558,9 +580,51 @@ def _score_full_payload_projection(
     return float(score), payload_symbols, raw_bins
 
 
+def _score_payload_phase_trajectory(
+    payload_symbols: Sequence[int],
+    trajectory_spectra: Sequence[np.ndarray],
+    payload_abs_indices: Sequence[float],
+    line: PhaseLine,
+    sf: int,
+    ldro: bool,
+    config: TwoStageWeakConfig,
+) -> float:
+    """Score whether a projected payload candidate forms a smooth phase track."""
+
+    if float(config.trajectory_score_weight) <= 0.0:
+        return 0.0
+    if len(payload_symbols) == 0 or len(trajectory_spectra) == 0:
+        return 0.0
+    if int(getattr(line, "anchor_count", 0)) < 2:
+        return 0.0
+
+    limit = min(len(payload_symbols), len(trajectory_spectra), len(payload_abs_indices))
+    if limit <= 0:
+        return 0.0
+    phase_config = PhaseGuidedPayloadConfig()
+    score, _meta = _score_payload_symbol_prior_candidate(
+        expected_symbols=tuple(int(v) for v in payload_symbols[:limit]),
+        score_positions=set(range(limit)),
+        payload_spectra=tuple(trajectory_spectra[:limit]),
+        payload_dechirped=(),
+        payload_abs_indices=tuple(float(v) for v in payload_abs_indices[:limit]),
+        line=line,
+        sf=int(sf),
+        ldro=bool(ldro),
+        config=phase_config,
+        preamble_profile=None,
+        preamble_profile_quality=0.0,
+        kappa_line=line,
+    )
+    return float(score) if math.isfinite(float(score)) else 0.0
+
+
 def _make_argmax_fallback_candidate(
     likelihoods: Sequence[SymbolLikelihood],
+    trajectory_spectra: Sequence[np.ndarray],
+    payload_abs_indices: Sequence[float],
     header_tail: Sequence[int],
+    phase_line: PhaseLine,
     sf: int,
     cr: int,
     payload_len: int,
@@ -568,11 +632,14 @@ def _make_argmax_fallback_candidate(
     ldro: bool,
     config: TwoStageWeakConfig,
 ) -> PayloadBeamCandidate | None:
-    """Build the traditional hard-argmax payload as an explicit fallback.
+    """Build the active-evidence hard-argmax payload as an explicit fallback.
 
     If none of the codec-list candidates satisfies CRC, the weak-packet decoder
-    should abstain from destructive repair and report the baseline argmax path.
-    This fallback is not given access to GT or payload templates.
+    should abstain from destructive repair and report the hard-decision path for
+    the currently supplied likelihood.  With center evidence this is the
+    traditional FFT argmax path; with phase-gated raw scores it is the
+    phase-gated top-1 path.  This fallback is not given access to GT or payload
+    templates.
     """
 
     if not likelihoods:
@@ -615,7 +682,20 @@ def _make_argmax_fallback_candidate(
         likelihoods,
         trim_fraction=0.0,
     )
-    total_score = float(direct_score + config.projection_score_weight * projection_score)
+    trajectory_score = _score_payload_phase_trajectory(
+        payload_symbols=projected_symbols,
+        trajectory_spectra=trajectory_spectra,
+        payload_abs_indices=payload_abs_indices,
+        line=phase_line,
+        sf=sf,
+        ldro=ldro,
+        config=config,
+    )
+    total_score = float(
+        direct_score
+        + config.projection_score_weight * projection_score
+        + config.trajectory_score_weight * trajectory_score
+    )
     if observed_crc_valid:
         total_score += float(config.crc_observed_bonus)
     return PayloadBeamCandidate(
@@ -631,6 +711,7 @@ def _make_argmax_fallback_candidate(
         raw_bins=argmax_raw_bins,
         block_score=float(direct_score),
         projection_score=float(projection_score),
+        trajectory_score=float(trajectory_score),
         total_score=float(total_score),
         beam_rank=-1,
         selection_source="argmax_fallback",
@@ -641,7 +722,11 @@ def _candidate_evidence_score(
     candidate: PayloadBeamCandidate,
     config: TwoStageWeakConfig,
 ) -> float:
-    return float(candidate.block_score + config.projection_score_weight * candidate.projection_score)
+    return float(
+        candidate.block_score
+        + config.projection_score_weight * candidate.projection_score
+        + config.trajectory_score_weight * candidate.trajectory_score
+    )
 
 
 def _accept_crc_candidate(
@@ -674,6 +759,8 @@ def decode_two_stage_weak_payload(
     has_crc: bool,
     ldro: bool,
     config: TwoStageWeakConfig | None = None,
+    raw_score_overrides: Sequence[np.ndarray] | None = None,
+    trajectory_spectra: Sequence[np.ndarray] | None = None,
 ) -> TwoStageWeakResult:
     """Decode one packet payload from full FFT evidence."""
 
@@ -696,9 +783,22 @@ def decode_two_stage_weak_payload(
         )
 
     line = phase_line or PhaseLine()
+    trajectory_source_spectra = (
+        list(trajectory_spectra)
+        if trajectory_spectra is not None
+        else list(payload_spectra)
+    )
+    payload_abs_indices = [
+        float(payload_symbol_start_abs_index) + float(idx)
+        for idx in range(len(payload_spectra))
+    ]
     likelihoods: list[SymbolLikelihood] = []
+    overrides = list(raw_score_overrides) if raw_score_overrides is not None else None
     for idx, spectrum in enumerate(payload_spectra):
         predicted = line.predict(float(payload_symbol_start_abs_index) + float(idx))
+        score_override = None
+        if overrides is not None and idx < len(overrides):
+            score_override = np.asarray(overrides[idx], dtype=np.float64)
         likelihoods.append(
             build_symbol_likelihood(
                 spectrum=spectrum,
@@ -707,6 +807,7 @@ def decode_two_stage_weak_payload(
                 ldro=ldro,
                 predicted_phase_rad=predicted,
                 config=cfg,
+                raw_score_override=score_override,
             )
         )
     timings["likelihood_ms"] = (time.perf_counter() - t0) * 1000.0
@@ -721,6 +822,8 @@ def decode_two_stage_weak_payload(
     )
     if expected_payload_symbols > 0:
         likelihoods = likelihoods[: min(len(likelihoods), expected_payload_symbols)]
+        trajectory_source_spectra = trajectory_source_spectra[: len(likelihoods)]
+        payload_abs_indices = payload_abs_indices[: len(likelihoods)]
 
     cw_len = int(cr) + 4
     full_symbol_count = (len(likelihoods) // cw_len) * cw_len
@@ -739,6 +842,8 @@ def decode_two_stage_weak_payload(
             error="not enough symbols for one interleaver block",
         )
     likelihoods = likelihoods[:full_symbol_count]
+    trajectory_source_spectra = trajectory_source_spectra[:full_symbol_count]
+    payload_abs_indices = payload_abs_indices[:full_symbol_count]
 
     t1 = time.perf_counter()
     all_codeword_lists: list[CodewordList] = []
@@ -809,7 +914,20 @@ def decode_two_stage_weak_payload(
             crc_mode=cfg.crc_mode,
             trim_fraction=cfg.projection_trim_fraction,
         )
-        total_score = float(state.score + cfg.projection_score_weight * projection_score)
+        trajectory_score = _score_payload_phase_trajectory(
+            payload_symbols=projected_symbols,
+            trajectory_spectra=trajectory_source_spectra,
+            payload_abs_indices=payload_abs_indices,
+            line=line,
+            sf=sf,
+            ldro=ldro,
+            config=cfg,
+        )
+        total_score = float(
+            state.score
+            + cfg.projection_score_weight * projection_score
+            + cfg.trajectory_score_weight * trajectory_score
+        )
         if observed_crc_valid:
             total_score += float(cfg.crc_observed_bonus)
         payload_candidates.append(
@@ -826,6 +944,7 @@ def decode_two_stage_weak_payload(
                 raw_bins=tuple(int(v) for v in state.raw_bins),
                 block_score=float(state.score),
                 projection_score=float(projection_score),
+                trajectory_score=float(trajectory_score),
                 total_score=float(total_score),
                 beam_rank=int(rank),
                 selection_source="beam",
@@ -835,7 +954,10 @@ def decode_two_stage_weak_payload(
     beam_payload_candidates = tuple(payload_candidates)
     argmax_fallback = _make_argmax_fallback_candidate(
         likelihoods=likelihoods,
+        trajectory_spectra=trajectory_source_spectra,
+        payload_abs_indices=payload_abs_indices,
         header_tail=header_tail,
+        phase_line=line,
         sf=sf,
         cr=cr,
         payload_len=payload_len,

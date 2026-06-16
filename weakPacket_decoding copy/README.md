@@ -34,6 +34,29 @@ weak_decoder/candidate_pruning.py
 data/candidate_pruning/
 ```
 
+## Two-stage phase-gated decoder
+
+2026-06-16 已将 phase-aware peak scoring 接入实际 two-stage payload decoder：
+
+```text
+scripts/experiments/run_two_stage_weak_decoder.py --fft-evidence-mode phase-gated
+```
+
+该模式先用过采样 FFT / multi-offset evidence 做第一阶段候选筛选，再在筛出的
+候选内用 `weak_decoder/candidate_pruning.py` 里的相位一致性加分决定 raw FFT bin
+likelihood。随后 two-stage codec beam 产生的候选 payload 会被重编码，并调用
+`phase_guided_demod.py::_score_payload_symbol_prior_candidate()` 做包内轨迹级相位
+平滑打分。相位趋势只从当前 packet 的 header / early payload high-energy anchors
+估计，不使用 payload bytes 先验，不使用 counter/template，也不跨包或利用重传。
+
+最小复现实验见：
+
+```text
+TWO_STAGE_WEAK_DECODER.md
+data/two_stage_weak_decoder/phase_gated_snr_m20_all_summary.json
+data/two_stage_weak_decoder/phase_gated_len8_snr_m23_summary.json
+```
+
 ## 当前主流程
 
 ### 1. 弱前导码检测
