@@ -62,12 +62,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--preamble-len", type=float, default=8.0)
     parser.add_argument("--ldro-mode", type=int, default=2)
 
-    parser.add_argument("--top-l-low-confidence", type=int, default=8)
+    parser.add_argument("--top-l-low-confidence", type=int, default=24)
     parser.add_argument("--lock-margin-db", type=float, default=1.5)
     parser.add_argument("--lock-peak-to-median-db", type=float, default=5.0)
     parser.add_argument("--lock-phase-score", type=float, default=0.35)
     parser.add_argument("--min-locked-for-line", type=int, default=4)
     parser.add_argument("--line-trim-frac", type=float, default=0.25)
+    parser.add_argument("--phase-model", choices=("linear", "quadratic"), default="linear")
+    parser.add_argument("--selection-mode", choices=("override", "smooth", "coherence"), default="coherence")
     parser.add_argument("--beam-width", type=int, default=128)
     parser.add_argument("--trajectory-rmse-scale-pi", type=float, default=0.30)
     parser.add_argument("--trajectory-phase-weight", type=float, default=0.20)
@@ -79,6 +81,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--phase-override-score-margin", type=float, default=0.06)
     parser.add_argument("--phase-override-min-line-anchors", type=int, default=8)
     parser.add_argument("--phase-override-max-line-rmse-pi", type=float, default=0.25)
+    parser.add_argument("--coherence-weight", type=float, default=0.0)
+    parser.add_argument("--coherence-candidate-top-l", type=int, default=0)
+    parser.add_argument("--lock-min-coherence", type=float, default=0.0)
+    parser.add_argument("--smooth-phase-weight", type=float, default=0.05)
+    parser.add_argument("--smooth-amp-weight", type=float, default=0.50)
+    parser.add_argument("--smooth-coherence-weight", type=float, default=0.90)
+    parser.add_argument("--smooth-slope-penalty", type=float, default=0.05)
+    parser.add_argument("--smooth-curvature-penalty", type=float, default=0.10)
+    parser.add_argument("--smooth-max-energy-drop-db", type=float, default=20.0)
+    parser.add_argument("--smooth-min-line-anchors", type=int, default=4)
+    parser.add_argument("--smooth-min-locked-ratio", type=float, default=0.0)
+    parser.add_argument("--smooth-max-line-rmse-pi", type=float, default=float("inf"))
     return parser.parse_args()
 
 
@@ -90,6 +104,8 @@ def build_config(args: argparse.Namespace) -> SymbolPhaseConfig:
         lock_phase_score=float(args.lock_phase_score),
         min_locked_for_line=int(args.min_locked_for_line),
         line_trim_frac=float(args.line_trim_frac),
+        phase_model=str(args.phase_model),
+        selection_mode=str(args.selection_mode),
         beam_width=int(args.beam_width),
         trajectory_rmse_scale_pi=float(args.trajectory_rmse_scale_pi),
         phase_weight=float(args.trajectory_phase_weight),
@@ -101,6 +117,18 @@ def build_config(args: argparse.Namespace) -> SymbolPhaseConfig:
         phase_override_score_margin=float(args.phase_override_score_margin),
         phase_override_min_line_anchors=int(args.phase_override_min_line_anchors),
         phase_override_max_line_rmse_pi=float(args.phase_override_max_line_rmse_pi),
+        coherence_weight=float(args.coherence_weight),
+        coherence_candidate_top_l=int(args.coherence_candidate_top_l),
+        lock_min_coherence=float(args.lock_min_coherence),
+        smooth_phase_weight=float(args.smooth_phase_weight),
+        smooth_amp_weight=float(args.smooth_amp_weight),
+        smooth_coherence_weight=float(args.smooth_coherence_weight),
+        smooth_slope_penalty=float(args.smooth_slope_penalty),
+        smooth_curvature_penalty=float(args.smooth_curvature_penalty),
+        smooth_max_energy_drop_db=float(args.smooth_max_energy_drop_db),
+        smooth_min_line_anchors=int(args.smooth_min_line_anchors),
+        smooth_min_locked_ratio=float(args.smooth_min_locked_ratio),
+        smooth_max_line_rmse_pi=float(args.smooth_max_line_rmse_pi),
     )
 
 
@@ -123,6 +151,49 @@ def _packet_phase_line(
     if header_abs.size >= 2:
         return fit_phase_line(header_abs, header_phases)
     return PhaseLine()
+
+
+def extract_multi_offset_fft_evidence_with_coherence(
+    samples: np.ndarray,
+    start_sample: int,
+    sf: int,
+    os_factor: int,
+    downchirp: np.ndarray,
+    cfo_total: float,
+    header_start_sample: int,
+    cfo_correction_mode: str,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return fused multi-offset evidence plus offset-phase coherence per bin."""
+
+    n_bins = 1 << int(sf)
+    os_value = int(os_factor)
+    fused_power = np.zeros(n_bins, dtype=np.float64)
+    sum_complex = np.zeros(n_bins, dtype=np.complex128)
+    sum_magnitude = np.zeros(n_bins, dtype=np.float64)
+    center_spectrum: np.ndarray | None = None
+    for offset in range(os_value):
+        indexes = int(start_sample) + int(offset) + os_value * np.arange(n_bins, dtype=np.int64)
+        if int(indexes[0]) < 0 or int(indexes[-1]) >= samples.size:
+            raise ValueError(f"symbol at {start_sample} offset {offset} exceeds IQ range")
+        symbol = np.asarray(samples[indexes], dtype=np.complex64)
+        if str(cfo_correction_mode) == "continuous":
+            rel_chip_start = float(start_sample - header_start_sample) / float(os_value)
+            cfo_phase = float(2.0 * math.pi * float(cfo_total) * rel_chip_start / n_bins)
+            symbol = (symbol * np.exp(-1j * cfo_phase)).astype(np.complex64)
+        spectrum = np.fft.fft((symbol * downchirp).astype(np.complex64)).astype(np.complex64)
+        power = np.abs(spectrum).astype(np.float64) ** 2
+        fused_power += power / (float(np.max(power)) + 1e-30)
+        sum_complex += spectrum.astype(np.complex128)
+        sum_magnitude += np.abs(spectrum).astype(np.float64)
+        if offset == os_value // 2:
+            center_spectrum = spectrum
+
+    if center_spectrum is None:
+        center_spectrum = np.ones(n_bins, dtype=np.complex64)
+    phase = np.exp(1j * np.angle(center_spectrum))
+    fused = (np.sqrt(fused_power).astype(np.float64) * phase).astype(np.complex64)
+    coherence = np.clip(np.abs(sum_complex) / (sum_magnitude + 1e-30), 0.0, 1.0)
+    return fused, coherence.astype(np.float64)
 
 
 def _extract_payload_spectra(
@@ -169,6 +240,54 @@ def _extract_payload_spectra(
         abs_indices.append(float(packet.get("preamble_len", args.preamble_len)) + 12.25 + float(payload_idx))
         gt_bins.append(int(symbol.get("gt_bin", -1)))
     return center_spectra, multi_spectra, abs_indices, gt_bins
+
+
+def _extract_payload_spectra_with_coherence(
+    samples: np.ndarray,
+    packet: dict[str, Any],
+    args: argparse.Namespace,
+) -> tuple[list[np.ndarray], list[np.ndarray], list[float], list[int], list[np.ndarray]]:
+    sf = int(packet["sf"])
+    cfo_total = float(packet["cfo_int"]) + float(packet["cfo_frac"])
+    downchirp = build_downchirp(sf, cfo_int=packet["cfo_int"], cfo_frac=packet["cfo_frac"])
+    header_start = int(packet["header_start_sample"])
+
+    center_spectra: list[np.ndarray] = []
+    multi_spectra: list[np.ndarray] = []
+    abs_indices: list[float] = []
+    gt_bins: list[int] = []
+    coherences: list[np.ndarray] = []
+    for symbol in packet["payload_symbols"]:
+        try:
+            center = extract_fft(
+                samples=samples,
+                start_sample=int(symbol["start_sample"]),
+                sf=sf,
+                os_factor=int(packet["os_factor"]),
+                downchirp=downchirp,
+                cfo_total=cfo_total,
+                header_start_sample=header_start,
+                cfo_correction_mode=str(args.cfo_correction_mode),
+            )
+            multi, coherence = extract_multi_offset_fft_evidence_with_coherence(
+                samples=samples,
+                start_sample=int(symbol["start_sample"]),
+                sf=sf,
+                os_factor=int(packet["os_factor"]),
+                downchirp=downchirp,
+                cfo_total=cfo_total,
+                header_start_sample=header_start,
+                cfo_correction_mode=str(args.cfo_correction_mode),
+            )
+        except ValueError:
+            continue
+        payload_idx = int(symbol.get("payload_symbol_index", len(center_spectra)))
+        center_spectra.append(center)
+        multi_spectra.append(multi)
+        abs_indices.append(float(packet.get("preamble_len", args.preamble_len)) + 12.25 + float(payload_idx))
+        gt_bins.append(int(symbol.get("gt_bin", -1)))
+        coherences.append(coherence)
+    return center_spectra, multi_spectra, abs_indices, gt_bins, coherences
 
 
 def _argmax_bins(spectra: Sequence[np.ndarray]) -> tuple[int, ...]:
@@ -264,7 +383,9 @@ def evaluate_packet(
     args: argparse.Namespace,
     config: SymbolPhaseConfig,
 ) -> dict[str, Any]:
-    center_spectra, multi_spectra, abs_indices, gt_bins = _extract_payload_spectra(samples, packet, args)
+    center_spectra, multi_spectra, abs_indices, gt_bins, coherences = _extract_payload_spectra_with_coherence(
+        samples, packet, args
+    )
     evidence_powers = [np.abs(spec).astype(np.float64) ** 2 for spec in multi_spectra]
     header_line = _packet_phase_line(samples, packet, args)
     result = select_symbol_bins_two_stage(
@@ -273,6 +394,7 @@ def evaluate_packet(
         abs_indices=abs_indices,
         config=config,
         fallback_line=header_line,
+        offset_coherences=coherences,
     )
 
     sf = int(packet["sf"])
@@ -286,6 +408,12 @@ def evaluate_packet(
     candidate_hits, candidate_total = _candidate_recall(result, gt_bins)
     false_locks, locked_with_gt = _false_locks(result, gt_bins)
     decoded = _decode_selected(packet, selected_bins, args)
+    selected_coherences: list[float] = []
+    for idx, raw_bin in enumerate(selected_bins):
+        if idx < len(coherences):
+            b = int(raw_bin)
+            if 0 <= b < coherences[idx].size:
+                selected_coherences.append(float(coherences[idx][b]))
 
     row: dict[str, Any] = {
         "packet_index": int(packet["packet_index"]),
@@ -318,6 +446,7 @@ def evaluate_packet(
         "line_score": float(result.line_score),
         "mean_phase_score": float(result.mean_phase_score),
         "mean_amp_score": float(result.mean_amp_score),
+        "mean_selected_offset_coherence": float(np.mean(selected_coherences)) if selected_coherences else 0.0,
         "phase_line_slope_pi": float(result.phase_line.slope_pi),
         "phase_line_r2": float(result.phase_line.fit_r2) if math.isfinite(result.phase_line.fit_r2) else "",
         "phase_line_rmse_pi": float(result.phase_line.fit_rmse_pi) if math.isfinite(result.phase_line.fit_rmse_pi) else "",
@@ -367,6 +496,7 @@ def build_summary(rows: list[dict[str, Any]], args: argparse.Namespace) -> dict[
         "mean_locked_ratio": _avg(rows, "locked_ratio"),
         "mean_false_lock_rate": _avg(rows, "false_lock_rate"),
         "mean_uncertain_candidate_recall": _avg(rows, "uncertain_candidate_recall"),
+        "mean_selected_offset_coherence": _avg(rows, "mean_selected_offset_coherence"),
         "mean_phase_line_r2": _avg(rows, "phase_line_r2"),
         "mean_phase_line_rmse_pi": _avg(rows, "phase_line_rmse_pi"),
         "parameters": {
@@ -376,6 +506,8 @@ def build_summary(rows: list[dict[str, Any]], args: argparse.Namespace) -> dict[
             "lock_phase_score": args.lock_phase_score,
             "min_locked_for_line": args.min_locked_for_line,
             "line_trim_frac": args.line_trim_frac,
+            "phase_model": args.phase_model,
+            "selection_mode": args.selection_mode,
             "beam_width": args.beam_width,
             "trajectory_rmse_scale_pi": args.trajectory_rmse_scale_pi,
             "trajectory_phase_weight": args.trajectory_phase_weight,
@@ -387,6 +519,18 @@ def build_summary(rows: list[dict[str, Any]], args: argparse.Namespace) -> dict[
             "phase_override_score_margin": args.phase_override_score_margin,
             "phase_override_min_line_anchors": args.phase_override_min_line_anchors,
             "phase_override_max_line_rmse_pi": args.phase_override_max_line_rmse_pi,
+            "coherence_weight": args.coherence_weight,
+            "coherence_candidate_top_l": args.coherence_candidate_top_l,
+            "lock_min_coherence": args.lock_min_coherence,
+            "smooth_phase_weight": args.smooth_phase_weight,
+            "smooth_amp_weight": args.smooth_amp_weight,
+            "smooth_coherence_weight": args.smooth_coherence_weight,
+            "smooth_slope_penalty": args.smooth_slope_penalty,
+            "smooth_curvature_penalty": args.smooth_curvature_penalty,
+            "smooth_max_energy_drop_db": args.smooth_max_energy_drop_db,
+            "smooth_min_line_anchors": args.smooth_min_line_anchors,
+            "smooth_min_locked_ratio": args.smooth_min_locked_ratio,
+            "smooth_max_line_rmse_pi": args.smooth_max_line_rmse_pi,
             "uses_payload_template": False,
             "uses_counter_prior": False,
             "uses_cross_packet_joint_prior": False,

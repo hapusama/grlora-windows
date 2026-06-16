@@ -1,0 +1,1132 @@
+{
+  "snr_values": [
+    -22.0
+  ],
+  "datasets": [
+    "0_0_0_10_14_8",
+    "0_0_0_10_14_16",
+    "0_0_0_10_14_32"
+  ],
+  "summary_rows": [
+    {
+      "dataset": "0_0_0_10_14_8",
+      "target_snr_db": -22.0,
+      "packet_count": 10,
+      "center_symbol_ser": 0.6628571428571428,
+      "center_symbol_accuracy": 0.33714285714285713,
+      "center_crc_valid_rate": 0.0,
+      "multi_symbol_ser": 0.18857142857142856,
+      "multi_symbol_accuracy": 0.8114285714285716,
+      "multi_crc_valid_rate": 0.3,
+      "selected_symbol_ser": 0.09428571428571428,
+      "selected_symbol_accuracy": 0.9057142857142859,
+      "selected_crc_valid_rate": 0.4,
+      "selected_ser_gain_vs_center": 0.5685714285714285,
+      "selected_crc_gain_vs_center": 0.4,
+      "selected_ser_gain_vs_multi": 0.09428571428571428,
+      "selected_crc_gain_vs_multi": 0.10000000000000003,
+      "mean_locked_ratio": 0.4228571428571429,
+      "mean_false_lock_rate": 0.0,
+      "mean_uncertain_candidate_recall": 0.9459513546798031,
+      "mean_selected_offset_coherence": 0.9457574538005347,
+      "mean_phase_line_r2": 0.8087522448471312,
+      "mean_phase_line_rmse_pi": 0.26706696576670713
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "target_snr_db": -22.0,
+      "packet_count": 11,
+      "center_symbol_ser": 0.6025974025974027,
+      "center_symbol_accuracy": 0.3974025974025974,
+      "center_crc_valid_rate": 0.0,
+      "multi_symbol_ser": 0.17922077922077922,
+      "multi_symbol_accuracy": 0.8207792207792209,
+      "multi_crc_valid_rate": 0.0,
+      "selected_symbol_ser": 0.07012987012987014,
+      "selected_symbol_accuracy": 0.9298701298701298,
+      "selected_crc_valid_rate": 0.2727272727272727,
+      "selected_ser_gain_vs_center": 0.5324675324675325,
+      "selected_crc_gain_vs_center": 0.2727272727272727,
+      "selected_ser_gain_vs_multi": 0.10909090909090909,
+      "selected_crc_gain_vs_multi": 0.2727272727272727,
+      "mean_locked_ratio": 0.41558441558441556,
+      "mean_false_lock_rate": 0.00505050505050505,
+      "mean_uncertain_candidate_recall": 0.9471396637067411,
+      "mean_selected_offset_coherence": 0.947920905740033,
+      "mean_phase_line_r2": 0.9362360660625847,
+      "mean_phase_line_rmse_pi": 0.22233741298572252
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "target_snr_db": -22.0,
+      "packet_count": 7,
+      "center_symbol_ser": 0.673469387755102,
+      "center_symbol_accuracy": 0.32653061224489793,
+      "center_crc_valid_rate": 0.0,
+      "multi_symbol_ser": 0.24489795918367346,
+      "multi_symbol_accuracy": 0.7551020408163266,
+      "multi_crc_valid_rate": 0.0,
+      "selected_symbol_ser": 0.14693877551020407,
+      "selected_symbol_accuracy": 0.8530612244897959,
+      "selected_crc_valid_rate": 0.42857142857142855,
+      "selected_ser_gain_vs_center": 0.5265306122448979,
+      "selected_crc_gain_vs_center": 0.42857142857142855,
+      "selected_ser_gain_vs_multi": 0.0979591836734694,
+      "selected_crc_gain_vs_multi": 0.42857142857142855,
+      "mean_locked_ratio": 0.36326530612244895,
+      "mean_false_lock_rate": 0.0,
+      "mean_uncertain_candidate_recall": 0.8738095238095239,
+      "mean_selected_offset_coherence": 0.9451888931243628,
+      "mean_phase_line_r2": 0.8385853341692805,
+      "mean_phase_line_rmse_pi": 0.44155411474793993
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "target_snr_db": -22.0,
+      "packet_count": 28,
+      "center_symbol_ser": 0.6463079777365492,
+      "center_symbol_accuracy": 0.3536920222634508,
+      "center_crc_valid_rate": 0.0,
+      "multi_symbol_ser": 0.2042300556586271,
+      "multi_symbol_accuracy": 0.795769944341373,
+      "multi_crc_valid_rate": 0.09999999999999999,
+      "selected_symbol_ser": 0.10378478664192949,
+      "selected_symbol_accuracy": 0.8962152133580705,
+      "selected_crc_valid_rate": 0.3670995670995671,
+      "selected_ser_gain_vs_center": 0.5425231910946197,
+      "selected_crc_gain_vs_center": 0.3670995670995671,
+      "selected_ser_gain_vs_multi": 0.10044526901669759,
+      "selected_crc_gain_vs_multi": 0.2670995670995671,
+      "mean_locked_ratio": 0.40056895485466915,
+      "mean_false_lock_rate": 0.0016835016835016834,
+      "mean_uncertain_candidate_recall": 0.9223001807320227,
+      "mean_selected_offset_coherence": 0.9462890842216435,
+      "mean_phase_line_r2": 0.8611912150263321,
+      "mean_phase_line_rmse_pi": 0.3103194978334565
+    }
+  ],
+  "threshold_rows": [
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "center",
+      "metric": "SER<=10%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "center",
+      "metric": "accuracy>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "center",
+      "metric": "CRC/PRR>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "center",
+      "metric": "CRC/PRR>=80%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "center",
+      "metric": "CRC/PRR>=50%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "multi",
+      "metric": "SER<=10%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "multi",
+      "metric": "accuracy>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "multi",
+      "metric": "CRC/PRR>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "multi",
+      "metric": "CRC/PRR>=80%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "multi",
+      "metric": "CRC/PRR>=50%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "metric": "SER<=10%",
+      "threshold_snr_db": -22.0,
+      "status": "all_pass"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "metric": "accuracy>=90%",
+      "threshold_snr_db": -22.0,
+      "status": "all_pass"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "metric": "CRC/PRR>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "metric": "CRC/PRR>=80%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "metric": "CRC/PRR>=50%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "center",
+      "metric": "SER<=10%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "center",
+      "metric": "accuracy>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "center",
+      "metric": "CRC/PRR>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "center",
+      "metric": "CRC/PRR>=80%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "center",
+      "metric": "CRC/PRR>=50%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "multi",
+      "metric": "SER<=10%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "multi",
+      "metric": "accuracy>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "multi",
+      "metric": "CRC/PRR>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "multi",
+      "metric": "CRC/PRR>=80%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "multi",
+      "metric": "CRC/PRR>=50%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "metric": "SER<=10%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "metric": "accuracy>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "metric": "CRC/PRR>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "metric": "CRC/PRR>=80%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "metric": "CRC/PRR>=50%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "center",
+      "metric": "SER<=10%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "center",
+      "metric": "accuracy>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "center",
+      "metric": "CRC/PRR>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "center",
+      "metric": "CRC/PRR>=80%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "center",
+      "metric": "CRC/PRR>=50%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "multi",
+      "metric": "SER<=10%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "multi",
+      "metric": "accuracy>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "multi",
+      "metric": "CRC/PRR>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "multi",
+      "metric": "CRC/PRR>=80%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "multi",
+      "metric": "CRC/PRR>=50%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "metric": "SER<=10%",
+      "threshold_snr_db": -22.0,
+      "status": "all_pass"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "metric": "accuracy>=90%",
+      "threshold_snr_db": -22.0,
+      "status": "all_pass"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "metric": "CRC/PRR>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "metric": "CRC/PRR>=80%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "metric": "CRC/PRR>=50%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "center",
+      "metric": "SER<=10%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "center",
+      "metric": "accuracy>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "center",
+      "metric": "CRC/PRR>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "center",
+      "metric": "CRC/PRR>=80%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "center",
+      "metric": "CRC/PRR>=50%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "multi",
+      "metric": "SER<=10%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "multi",
+      "metric": "accuracy>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "multi",
+      "metric": "CRC/PRR>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "multi",
+      "metric": "CRC/PRR>=80%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "multi",
+      "metric": "CRC/PRR>=50%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "metric": "SER<=10%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "metric": "accuracy>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "metric": "CRC/PRR>=90%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "metric": "CRC/PRR>=80%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "metric": "CRC/PRR>=50%",
+      "threshold_snr_db": "",
+      "status": "all_fail"
+    }
+  ],
+  "gain_rows": [
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "SER<=10%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "accuracy>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "CRC/PRR>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "CRC/PRR>=80%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "CRC/PRR>=50%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "SER<=10%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "accuracy>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "CRC/PRR>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "CRC/PRR>=80%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "CRC/PRR>=50%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "SER<=10%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "accuracy>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "CRC/PRR>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "CRC/PRR>=80%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "CRC/PRR>=50%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "SER<=10%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "accuracy>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "CRC/PRR>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "CRC/PRR>=80%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "CRC/PRR>=50%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "SER<=10%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "accuracy>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "CRC/PRR>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "CRC/PRR>=80%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "CRC/PRR>=50%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "SER<=10%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "accuracy>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "CRC/PRR>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "CRC/PRR>=80%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "CRC/PRR>=50%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "SER<=10%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "accuracy>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "CRC/PRR>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "CRC/PRR>=80%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "CRC/PRR>=50%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "SER<=10%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "accuracy>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "CRC/PRR>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "CRC/PRR>=80%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "CRC/PRR>=50%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "SER<=10%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "accuracy>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "CRC/PRR>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "CRC/PRR>=80%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "0_0_0_10_14_8",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "CRC/PRR>=50%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "SER<=10%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "accuracy>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "CRC/PRR>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "CRC/PRR>=80%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "baseline": "center",
+      "metric": "CRC/PRR>=50%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "SER<=10%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "accuracy>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "CRC/PRR>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "CRC/PRR>=80%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "multi",
+      "baseline": "center",
+      "metric": "CRC/PRR>=50%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "SER<=10%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "accuracy>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "CRC/PRR>=90%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "CRC/PRR>=80%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    },
+    {
+      "dataset": "mean_of_datasets",
+      "method": "selected",
+      "baseline": "multi",
+      "metric": "CRC/PRR>=50%",
+      "method_threshold_snr_db": "",
+      "baseline_threshold_snr_db": "",
+      "gain_db": "",
+      "status": "missing_threshold"
+    }
+  ]
+}

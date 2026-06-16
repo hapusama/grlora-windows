@@ -147,3 +147,44 @@ uncertain_candidate_recall
 phase_line_rmse_pi
 crc_valid_rate
 ```
+
+## Later Update - Current Default Selector
+
+The current default is no longer the conservative Top-8 phase override above.
+It was replaced by a low-complexity offset-phase-coherence selector:
+
+```text
+energy Top-24 candidates
+  -> offset coherence per candidate bin
+  -> small packet-line phase auxiliary score
+  -> hard symbol bins
+  -> LoRa codec + CRC after selection
+```
+
+Offset coherence:
+
+```text
+C_k[b] = |sum_o Z_o[k,b]| / (sum_o |Z_o[k,b]| + eps)
+```
+
+This uses phase consistency across oversampling offsets inside one packet and
+one symbol.  It does not enumerate payload bytes and does not use CRC to choose
+bins.
+
+Updated formal threshold sweep:
+
+```text
+data/symbol_phase_threshold_sweep_coherence_default/
+```
+
+Mean gain vs traditional center FFT argmax:
+
+```text
+SER<=10% gain:       4.74 dB
+accuracy>=90% gain:  4.74 dB
+CRC/PRR>=90% gain:   4.14 dB
+```
+
+The SER target is just below 5 dB, while the CRC/PRR target is met.  Smooth
+trajectory beam probes were tested after this and made the -22 dB SER worse, so
+the current recommended system is the simpler offset-coherence selector.

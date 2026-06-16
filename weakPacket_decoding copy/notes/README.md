@@ -14,3 +14,4 @@ root. Keep `../README.md` as the main entry point.
 - `plans/PHASE_AWARE_CANDIDATE_PRUNING_PLAN.md` - phase-aware Top-L candidate pruning plan and results.
 - `plans/TWO_STAGE_WEAK_DECODER.md` - current two-stage weak decoder notes and validation.
 - `plans/SYMBOL_PHASE_TWO_STAGE_RESULTS_2026-06-16.md` - implemented symbol-level two-stage phase selector and validation results.
+- `plans/THRESHOLD_GAIN_EVALUATION_2026-06-16.md` - SER/CRC SNR-threshold gain evaluation and phase-model diagnostics.
