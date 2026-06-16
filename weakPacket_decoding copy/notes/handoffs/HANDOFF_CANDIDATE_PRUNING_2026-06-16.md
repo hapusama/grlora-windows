@@ -33,7 +33,7 @@ d:\Desktop\proj\gr-lora_sdr\weakPacket_decoding copy
 
 新增/更新：
 
-- `PHASE_AWARE_CANDIDATE_PRUNING_PLAN.md`
+- `notes/plans/PHASE_AWARE_CANDIDATE_PRUNING_PLAN.md`
   - 整理当前目录结构、关键脚本、已有实验流程、输入输出、第一阶段设计方案、评估指标。
   - 追加 2026-06-15 实现状态和初步 Recall@L 结果。
 - `README.md`
@@ -134,8 +134,8 @@ data/candidate_pruning/
 
 ```text
 weakPacket_decoding copy/README.md
-weakPacket_decoding copy/PHASE_AWARE_CANDIDATE_PRUNING_PLAN.md
-weakPacket_decoding copy/HANDOFF_CANDIDATE_PRUNING_2026-06-16.md
+weakPacket_decoding copy/notes/plans/PHASE_AWARE_CANDIDATE_PRUNING_PLAN.md
+weakPacket_decoding copy/notes/handoffs/HANDOFF_CANDIDATE_PRUNING_2026-06-16.md
 weakPacket_decoding copy/weak_decoder/candidate_pruning.py
 weakPacket_decoding copy/scripts/experiments/evaluate_candidate_pruning_metric.py
 weakPacket_decoding copy/data/candidate_pruning/
@@ -252,8 +252,8 @@ normalized multi-offset peak-consensus score
  M "weakPacket_decoding copy/README.md"
  M "weakPacket_decoding copy/weak_decoder/phase_guided_demod.py"
  D "weakPacket_decoding/doc/弱包解码方案粗设计.md"
-?? "weakPacket_decoding copy/PHASE_AWARE_CANDIDATE_PRUNING_PLAN.md"
-?? "weakPacket_decoding copy/TWO_STAGE_WEAK_DECODER.md"
+?? "weakPacket_decoding copy/notes/plans/PHASE_AWARE_CANDIDATE_PRUNING_PLAN.md"
+?? "weakPacket_decoding copy/notes/plans/TWO_STAGE_WEAK_DECODER.md"
 ?? "weakPacket_decoding copy/data/candidate_pruning/"
 ?? "weakPacket_decoding copy/data/two_stage_weak_decoder/"
 ?? "weakPacket_decoding copy/scripts/experiments/evaluate_candidate_pruning_metric.py"
@@ -518,4 +518,3 @@ run_two_stage_weak_decoder.py --fft-evidence-mode phase-gated
 ```
 
 否则先不要把它放进主解码链，避免把不稳定 phase bonus 带入后续复杂搜索。
-

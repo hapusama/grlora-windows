@@ -13,9 +13,9 @@
 ```text
 weakPacket_decoding copy/
 ├── README.md                         主流程说明：弱检测 -> framesync -> header-first -> payload FFT peak
-├── TWO_STAGE_WEAK_DECODER.md          当前 two-stage PHY-only 解码器说明和已验证结果
+├── notes/plans/TWO_STAGE_WEAK_DECODER.md          当前 two-stage PHY-only 解码器说明和已验证结果
 ├── HANDOFF.md                         历史实验长记录
-├── PHASE_AWARE_CANDIDATE_PRUNING_PLAN.md  当前第一阶段候选筛选入口
+├── notes/plans/PHASE_AWARE_CANDIDATE_PRUNING_PLAN.md  当前第一阶段候选筛选入口
 ├── weak_decoder/                      核心 Python 模块
 ├── scripts/                           主链入口和 session/phase 实验脚本
 ├── scripts/experiments/               非主链科研实验、评估和诊断脚本

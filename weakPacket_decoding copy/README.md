@@ -18,7 +18,7 @@ raw complex64 IQ
 第一阶段候选筛选指标的设计与实测记录见：
 
 ```text
-PHASE_AWARE_CANDIDATE_PRUNING_PLAN.md
+notes/plans/PHASE_AWARE_CANDIDATE_PRUNING_PLAN.md
 ```
 
 当前已新增轻量 phase-aware Top-L 评估脚本：
@@ -52,7 +52,7 @@ likelihood。随后 two-stage codec beam 产生的候选 payload 会被重编码
 最小复现实验见：
 
 ```text
-TWO_STAGE_WEAK_DECODER.md
+notes/plans/TWO_STAGE_WEAK_DECODER.md
 data/two_stage_weak_decoder/phase_gated_snr_m20_all_summary.json
 data/two_stage_weak_decoder/phase_gated_len8_snr_m23_summary.json
 ```
