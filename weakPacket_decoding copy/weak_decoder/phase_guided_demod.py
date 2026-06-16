@@ -23,7 +23,7 @@ Reference: FFTbin选择算法设计.md, HANDOFF.md, 弱包解码方案粗设计.
 
 from __future__ import annotations
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Sequence, Tuple, List, Dict, Any
 
 import numpy as np
@@ -72,9 +72,9 @@ class PhaseSegments:
     Used for slope mismatch diagnosis and for choosing the best phase line
     to predict payload phases.
     """
-    preamble_line: PhaseLine = PhaseLine()
-    header_line: PhaseLine = PhaseLine()
-    payload_own_line: PhaseLine = PhaseLine()
+    preamble_line: PhaseLine = field(default_factory=PhaseLine)
+    header_line: PhaseLine = field(default_factory=PhaseLine)
+    payload_own_line: PhaseLine = field(default_factory=PhaseLine)
     preamble_to_payload_slope_delta_pi: float = 0.0
     header_to_payload_slope_delta_pi: float = 0.0
 

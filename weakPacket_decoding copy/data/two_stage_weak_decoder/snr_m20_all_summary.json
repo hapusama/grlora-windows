@@ -1,0 +1,33 @@
+{
+  "packet_count": 11,
+  "success_rate": 1.0,
+  "observed_crc_valid_rate": 0.0,
+  "argmax_raw_ser": 0.35844155844155845,
+  "two_stage_raw_ser": 0.35064935064935066,
+  "argmax_symbol_ser": 0.35844155844155845,
+  "two_stage_symbol_ser": 0.35064935064935066,
+  "topk_recall": 0.9272727272727272,
+  "mean_gt_rank": 13.571428571428573,
+  "mean_total_ms": 339.69836363636364,
+  "mean_likelihood_ms": 52.38772727272727,
+  "mean_block_search_ms": 166.76072727272728,
+  "mean_global_beam_ms": 81.80472727272728,
+  "mean_final_projection_ms": 38.73772727272728,
+  "parameters": {
+    "top_k_metrics": 32,
+    "amplitude_floor_db": 24.0,
+    "phase_weight": 0.0,
+    "bit_metric": "max",
+    "nibble_candidates": 4,
+    "row_beam_width": 256,
+    "block_candidate_limit": 64,
+    "global_beam_width": 64,
+    "final_candidate_limit": 128,
+    "block_trim_fraction": 0.2,
+    "projection_trim_fraction": 0.1,
+    "crc_mode": "grlora",
+    "uses_payload_template": false,
+    "uses_counter_prior": false,
+    "uses_cross_packet_joint_prior": false
+  }
+}

@@ -1,0 +1,8 @@
+packet_index,block_index,gt_codewords_all_in_top_n,gt_codeword_min_rank,gt_codeword_max_rank,gt_codeword_mean_rank,gt_nibble_max_rank,gt_block_in_default_candidates,gt_block_in_wide_candidates,gt_block_wide_rank,default_block_candidate_count,wide_block_candidate_count,selected_source,selected_crc_valid
+12,0,1,1,1,1.0,1,1,1,1,64,512,argmax_fallback,0
+12,1,1,1,1,1.0,1,1,1,1,64,512,argmax_fallback,0
+12,2,1,1,1,1.0,1,1,1,1,64,512,argmax_fallback,0
+12,3,1,1,1,1.0,1,1,1,1,64,512,argmax_fallback,0
+12,4,1,1,2,1.6,2,0,1,2,64,512,argmax_fallback,0
+12,5,1,1,1,1.0,1,1,1,1,64,512,argmax_fallback,0
+12,6,1,1,1,1.0,1,1,1,1,64,512,argmax_fallback,0

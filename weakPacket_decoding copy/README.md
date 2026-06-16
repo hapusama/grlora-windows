@@ -13,6 +13,27 @@ raw complex64 IQ
 
 当前还没有接完整的 dewhitening / CRC payload 解码链。现阶段重点是验证：弱检测和同步结果能否稳定支撑 header 解码与 payload FFT peak 导出。
 
+## 当前研究入口：phase-aware candidate pruning
+
+第一阶段候选筛选指标的设计与实测记录见：
+
+```text
+PHASE_AWARE_CANDIDATE_PRUNING_PLAN.md
+```
+
+当前已新增轻量 phase-aware Top-L 评估脚本：
+
+```text
+scripts/experiments/evaluate_candidate_pruning_metric.py
+weak_decoder/candidate_pruning.py
+```
+
+它只评估每个 payload symbol 的 GT-bin Recall@L，不接 payload codec，也不改变主解码链路。输出默认写到：
+
+```text
+data/candidate_pruning/
+```
+
 ## 当前主流程
 
 ### 1. 弱前导码检测

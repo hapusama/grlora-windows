@@ -1,0 +1,10 @@
+{
+  "block_count": 7,
+  "gt_codewords_all_in_top_n_rate": 1.0,
+  "gt_block_in_default_candidates_rate": 0.8571428571428571,
+  "gt_block_in_wide_candidates_rate": 1.0,
+  "mean_gt_codeword_max_rank": 1.4285714285714286,
+  "mean_gt_block_wide_rank": 3.142857142857143,
+  "mean_default_block_candidate_count": 64.0,
+  "mean_wide_block_candidate_count": 512.0
+}
