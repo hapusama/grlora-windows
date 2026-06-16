@@ -111,6 +111,7 @@ def parse_args() -> argparse.Namespace:
         help="不保存 noisy IQ .bin，只导出特征 CSV 和图。",
     )
     parser.add_argument("--overwrite", action="store_true", default=False, help="允许覆盖已有输出。")
+    parser.add_argument("--no-plots", action="store_true", default=False, help="Skip diagnostic PNG generation.")
     parser.add_argument("--dpi", type=int, default=220, help="PNG DPI，默认 220。")
     return parser.parse_args()
 
@@ -599,13 +600,16 @@ def main() -> int:
     summary_rows = summarize_rows(all_rows)
     summary_csv = out_dir / f"{input_path.stem}_low_snr_gt_bin_summary.csv"
     write_csv(summary_csv, summary_rows)
-    plot_paths = plot_all(all_rows, out_dir=out_dir, dpi=args.dpi)
+    plot_paths = [] if args.no_plots else plot_all(all_rows, out_dir=out_dir, dpi=args.dpi)
 
     print(f"signal_reference_power={signal_reference_power:.6e}")
     print(f"wrote_metadata={out_dir / f'{input_path.stem}_low_snr_gt_bin_metadata.json'}")
     print(f"wrote_all_features={all_feature_csv}")
     print(f"wrote_summary={summary_csv}")
-    print(f"wrote_plots={len(plot_paths)} under {out_dir / 'plots'}")
+    if args.no_plots:
+        print("wrote_plots=0 (skipped)")
+    else:
+        print(f"wrote_plots={len(plot_paths)} under {out_dir / 'plots'}")
     return 0
 
 
