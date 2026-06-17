@@ -196,6 +196,159 @@ low_snr_gt_bin/             低 SNR GT-bin / wrong-bin 相位幅度对照实验�
 *_payload_peak_trends/      每包 payload peak 相位/幅度趋势图
 ```
 
+## data 目录地图：脚本来源、意义与复现入口
+
+`data/` 里现在混有主链中间结果、诊断图、正式 sweep、调参 probe 和早期探索结果。看结果时建议先按下面四类区分：
+
+```text
+主链输入/中间结果      weak_preamble_detections/, weak_sync_chain/
+物理诊断/数据构造      peak_groundtruth/, low_snr_gt_bin/, payload_* 等
+当前正式结论          ablation_offset_coherence_summary/, ablation_current_default/
+历史调参/探针          probe_*/, symbol_phase_threshold_sweep_*/, phase_guided/ 等
+```
+
+### 最常看的正式结果
+
+| 目录 | 产出脚本 | 主要意义 | 备注 |
+| --- | --- | --- | --- |
+| `data/ablation_offset_coherence_summary/` | `scripts/experiments/make_offset_coherence_ablation_table.py` | 汇总 offset-coherence 消融实验，回答 multi-offset、Top-L、locking、coherence、packet-line 各自贡献 | 当前最清爽的论文式表格入口 |
+| `data/ablation_current_default/` | `scripts/experiments/run_symbol_phase_threshold_sweep.py` | 当前默认 selector 的完整 SNR threshold sweep | A5/current default |
+| `data/ablation_energy_only_top24/` | 同上 | energy-only selected，对照 multi-offset argmax | 证明 selected path 本身不带来额外收益 |
+| `data/ablation_amp_coherence_no_line/` | 同上 | energy + offset coherence，但去掉 packet-line phase | 隔离 offset coherence 主增益 |
+| `data/ablation_topL_8/16/24/32/` | 同上 | Top-L 候选规模消融 | 当前 Top-24 是低复杂度折中 |
+| `data/ablation_no_high_conf_lock/` | 同上 | 关闭高置信 Top-1 locking | 验证 lock 是否保护强符号 |
+| `data/ablation_coherence_candidate_top*/` | 同上 | coherence-candidate expansion quick probe | 只跑 `-20..-23 dB`，不要和完整阈值 sweep 混比 |
+| `data/ablation_smooth_beam_probe/` | 同上 | smooth trajectory beam quick probe | 负结果/复杂度不划算的记录 |
+
+当前最推荐打开：
+
+```text
+data/ablation_offset_coherence_summary/ablation_report.md
+data/ablation_offset_coherence_summary/ablation_threshold_summary.csv
+data/ablation_offset_coherence_summary/ablation_probe_curve_m20_m23.csv
+```
+
+### 主链数据
+
+| 目录 | 产出脚本 | 主要意义 | 常用下游 |
+| --- | --- | --- | --- |
+| `data/weak_preamble_detections/` | `scripts/detect_weak_preamble.py`，也可由 `scripts/run_weak_sync_chain.py` 顺手写出 | 弱前导码 detection event 和 sliding-window 调试表 | frame locator / sync chain |
+| `data/weak_sync_chain/sync_chain/` | `scripts/run_weak_sync_chain.py` | detection -> frame locator -> gr-lora 风格 framesync 的主 CSV | header-first demod |
+| `data/weak_sync_chain/framesync_peaks/` | `scripts/run_weak_sync_chain.py --framesync-peaks-csv` | framesync 后前导码 peak 是否回到 bin0 的验证 | sync 质量诊断 |
+| `data/weak_sync_chain/header_first/` | `scripts/run_header_first_demod.py` | PHY header decode 与 payload symbol FFT peak CSV | low-SNR GT、threshold sweep |
+| `data/weak_sync_chain/payload_consistency/` | `scripts/run_header_first_demod.py --consistency-output` | payload raw FFT bin 在候选包之间是否一致 | 检查 invalid candidate 偏离 |
+| `data/weak_sync_chain/*_stft/` | `scripts/run_weak_sync_chain.py --stft-dir` | event 级 STFT 图 | 人眼检查 burst / preamble |
+| `data/weak_sync_chain/*_payload_peak_trends/` | `scripts/plot_payload_peak_trends.py` | 每包 payload selected peak 的相位/幅度趋势图 | phase 诊断 |
+
+### 物理诊断与数据构造
+
+| 目录 | 产出脚本 | 主要意义 |
+| --- | --- | --- |
+| `data/peak_groundtruth/` | `scripts/experiments/export_peak_groundtruth.py` | gr-lora_sdr 原链导出的 clean peak/symbol groundtruth |
+| `data/low_snr_gt_bin/` | `scripts/experiments/run_low_snr_gt_bin_experiment.py` | clean GT bin 在加噪 IQ 中的相位/幅度是否仍可读 |
+| `data/low_snr_gt_bin/*/wrong_bin_control/` | `scripts/experiments/run_low_snr_wrong_bin_experiment.py` | 低 SNR 下 GT bin 与 wrong bin 的相位/幅度对照 |
+| `data/low_snr_gt_bin/*/sto_phase_jump_corrected/` | `scripts/experiments/run_low_snr_sto_phase_jump_experiment.py` | residual STO phase-jump 补偿实验 |
+| `data/payload_feature_no_offset/` | `scripts/experiments/export_payload_no_offset_features.py`，`plot_corrected_phase_diagnostics.py` | no-offset/corrected payload FFT 特征与相位诊断图 |
+| `data/payload_wrong_bin_diagnostics/` | `scripts/experiments/plot_wrong_bin_phase_diagnostics.py` | clean IQ 下 selected bin 与 wrong bin 的 phase/amplitude 对照 |
+| `data/candidate_pruning/` | `scripts/experiments/evaluate_candidate_pruning_metric.py`，`run_candidate_pruning_sweep.py` | Top-L candidate recall 和 phase-aware pruning 指标评估 |
+| `data/two_stage_weak_decoder/` | `scripts/experiments/run_two_stage_weak_decoder.py` | 早期 two-stage codec/phase-gated payload decoder 输出 |
+| `data/symbol_phase_two_stage/` | `scripts/experiments/run_symbol_phase_two_stage.py` | symbol-level two-stage selector 单点实验 |
+| `data/symbol_phase_model_diagnostics/` | `scripts/experiments/diagnose_symbol_phase_models.py` | GT-only phase model 排名诊断 |
+| `data/phase_vs_argmax/` | `scripts/experiments/run_phase_vs_argmax_comparison.py` | phase-aware bin 选择与 argmax 对比 |
+
+### 历史 sweep / probe 怎么看
+
+`data/symbol_phase_threshold_sweep*` 和 `data/probe_*` 大多是 2026-06-16 的调参过程产物，基本都来自：
+
+```text
+scripts/experiments/run_symbol_phase_threshold_sweep.py
+```
+
+命名大致含义：
+
+```text
+symbol_phase_threshold_sweep_coherence_default/   当时的正式 coherence default 结果
+symbol_phase_threshold_sweep_smooth_*/            smooth/trajectory beam 探针
+symbol_phase_threshold_sweep_coherence_l*/        Top-L 探针
+probe_e24_phase005_a050_q09_m22/                  手动调权重 probe，e/topL=24, phase=0.05, amp=0.50, coherence=0.90, max drop=22 dB
+probe_smooth_*/                                   smooth beam 参数 probe
+```
+
+这些目录可以作为调参追溯材料，但写论文/汇报时优先引用：
+
+```text
+data/ablation_offset_coherence_summary/
+data/ablation_current_default/
+notes/plans/THRESHOLD_GAIN_EVALUATION_2026-06-16.md
+```
+
+### 常用复现命令
+
+以下命令建议在本目录运行：
+
+```powershell
+cd "d:\Desktop\proj\gr-lora_sdr\weakPacket_decoding copy"
+```
+
+生成 header-first clean GT：
+
+```powershell
+python scripts\run_header_first_demod.py `
+  -i ..\data\USRP_IQ\0_0_0_10_14_16.bin `
+  -s data\weak_sync_chain\sync_chain\0_0_0_10_14_16_sync_chain.csv `
+  -o data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv `
+  --frames-output data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_frames.csv `
+  --sf 10 --bw 125000 --samp-rate 500000 --ldro-mode 2
+```
+
+生成低 SNR GT-bin 数据集：
+
+```powershell
+python scripts\experiments\run_low_snr_gt_bin_experiment.py `
+  -i ..\data\USRP_IQ\0_0_0_10_14_16.bin `
+  -g data\weak_sync_chain\header_first\0_0_0_10_14_16_header_first_symbols.csv `
+  -o data\low_snr_gt_bin\0_0_0_10_14_16 `
+  --target-snr-db -10 -15 -20 `
+  --cfo-correction-mode continuous `
+  --overwrite
+```
+
+跑当前默认 threshold sweep：
+
+```powershell
+python scripts\experiments\run_symbol_phase_threshold_sweep.py `
+  --snr-start -12 --snr-stop -26 --snr-step -1 `
+  --output-dir data\ablation_current_default
+```
+
+跑 offset coherence ablation 里的一个典型对照：energy + coherence，无 packet-line：
+
+```powershell
+python scripts\experiments\run_symbol_phase_threshold_sweep.py `
+  --selection-mode coherence `
+  --top-l-low-confidence 24 `
+  --smooth-phase-weight 0.0 `
+  --smooth-amp-weight 0.50 `
+  --smooth-coherence-weight 0.90 `
+  --smooth-max-energy-drop-db 20 `
+  --snr-start -12 --snr-stop -26 --snr-step -1 `
+  --output-dir data\ablation_amp_coherence_no_line
+```
+
+重新生成 ablation 汇总表：
+
+```powershell
+python scripts\experiments\make_offset_coherence_ablation_table.py
+```
+
+如果只想快速试探一个 selector，不想跑完整阈值曲线，可以先用：
+
+```powershell
+python scripts\experiments\run_symbol_phase_threshold_sweep.py `
+  --snr-start -20 --snr-stop -23 --snr-step -1 `
+  --output-dir data\my_quick_probe
+```
+
 ## 推荐运行命令
 
 ### 16 前导码文件：检测 + 帧定界 + framesync + STFT

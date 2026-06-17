@@ -1,0 +1,21 @@
+variant_id,variant,output_dir,sweep,snr_db,selected_ser,selected_crc_prr,ser_delta_vs_default,crc_delta_vs_default,mean_locked_ratio,mean_false_lock_rate,mean_uncertain_candidate_recall,mean_selected_offset_coherence
+A5,current default,data/ablation_current_default,full,-20,0.044,0.858,0.000,0.000,0.710,0.000,0.939,0.963
+A5,current default,data/ablation_current_default,full,-21,0.060,0.668,0.000,0.000,0.584,0.000,0.958,0.955
+A5,current default,data/ablation_current_default,full,-22,0.101,0.397,0.000,0.000,0.401,0.002,0.922,0.946
+A5,current default,data/ablation_current_default,full,-23,0.184,0.114,0.000,0.000,0.256,0.005,0.875,0.934
+A9-C32,coherence candidate Top-32,data/ablation_coherence_candidate_top32,probe -20..-23,-20,0.044,0.858,0.000,0.000,0.710,0.000,0.948,0.965
+A9-C32,coherence candidate Top-32,data/ablation_coherence_candidate_top32,probe -20..-23,-21,0.063,0.637,0.003,-0.030,0.584,0.000,0.972,0.958
+A9-C32,coherence candidate Top-32,data/ablation_coherence_candidate_top32,probe -20..-23,-22,0.105,0.397,0.004,0.000,0.401,0.002,0.947,0.949
+A9-C32,coherence candidate Top-32,data/ablation_coherence_candidate_top32,probe -20..-23,-23,0.183,0.081,-0.000,-0.033,0.256,0.005,0.920,0.940
+A9-C64,coherence candidate Top-64,data/ablation_coherence_candidate_top64,probe -20..-23,-20,0.044,0.858,0.000,0.000,0.710,0.000,0.948,0.965
+A9-C64,coherence candidate Top-64,data/ablation_coherence_candidate_top64,probe -20..-23,-21,0.063,0.637,0.003,-0.030,0.584,0.000,0.975,0.958
+A9-C64,coherence candidate Top-64,data/ablation_coherence_candidate_top64,probe -20..-23,-22,0.105,0.397,0.004,0.000,0.401,0.002,0.968,0.949
+A9-C64,coherence candidate Top-64,data/ablation_coherence_candidate_top64,probe -20..-23,-23,0.183,0.081,-0.000,-0.033,0.256,0.005,0.941,0.940
+A9-C128,coherence candidate Top-128,data/ablation_coherence_candidate_top128,probe -20..-23,-20,0.044,0.858,0.000,0.000,0.710,0.000,0.954,0.965
+A9-C128,coherence candidate Top-128,data/ablation_coherence_candidate_top128,probe -20..-23,-21,0.063,0.637,0.003,-0.030,0.584,0.000,0.982,0.958
+A9-C128,coherence candidate Top-128,data/ablation_coherence_candidate_top128,probe -20..-23,-22,0.105,0.397,0.004,0.000,0.401,0.002,0.975,0.949
+A9-C128,coherence candidate Top-128,data/ablation_coherence_candidate_top128,probe -20..-23,-23,0.183,0.081,-0.000,-0.033,0.256,0.005,0.966,0.940
+A10,smooth trajectory beam probe,data/ablation_smooth_beam_probe,probe -20..-23,-20,0.065,0.690,0.020,-0.168,0.710,0.000,0.939,0.961
+A10,smooth trajectory beam probe,data/ablation_smooth_beam_probe,probe -20..-23,-21,0.084,0.491,0.024,-0.176,0.584,0.000,0.958,0.953
+A10,smooth trajectory beam probe,data/ablation_smooth_beam_probe,probe -20..-23,-22,0.135,0.197,0.034,-0.200,0.401,0.002,0.922,0.942
+A10,smooth trajectory beam probe,data/ablation_smooth_beam_probe,probe -20..-23,-23,0.208,0.097,0.024,-0.017,0.256,0.005,0.875,0.929

@@ -256,6 +256,112 @@ Do not add the smooth beam path to the main claim unless a future diagnostic
 shows a clear gain; current probes made the -22 dB SER worse.
 ```
 
+## 2026-06-17 Update - Offset-Coherence Ablation
+
+Full ablation sweeps were run across:
+
+```text
+0_0_0_10_14_8
+0_0_0_10_14_16
+0_0_0_10_14_32
+```
+
+Formal full sweeps used:
+
+```text
+--snr-start -12 --snr-stop -26 --snr-step -1
+```
+
+Artifacts:
+
+```text
+data/ablation_energy_only_top24/
+data/ablation_coherence_only_top24/
+data/ablation_amp_coherence_no_line/
+data/ablation_current_default/
+data/ablation_packet_line_only/
+data/ablation_topL_8/
+data/ablation_topL_16/
+data/ablation_topL_24/
+data/ablation_topL_32/
+data/ablation_no_high_conf_lock/
+data/ablation_coherence_candidate_top32/
+data/ablation_coherence_candidate_top64/
+data/ablation_coherence_candidate_top128/
+data/ablation_smooth_beam_probe/
+data/ablation_offset_coherence_summary/
+```
+
+Summary files:
+
+```text
+data/ablation_offset_coherence_summary/ablation_threshold_summary.csv
+data/ablation_offset_coherence_summary/ablation_probe_curve_m20_m23.csv
+data/ablation_offset_coherence_summary/ablation_report.md
+```
+
+Main full-sweep ablation:
+
+| ID | Variant | Multi-offset | Top-L | Locking | Offset coherence | Packet line | SER gain | CRC90 gain | SER gain vs multi | SER @ -22 dB |
+| --- | --- | --- | ---: | --- | --- | --- | ---: | ---: | ---: | ---: |
+| A0 | center argmax | no | 1 | no | no | no | 0.00 dB | 0.00 dB |  | 0.646 |
+| A1 | multi-offset argmax | yes | 1 | no | no | no | 3.38 dB | 2.65 dB | 0.00 dB | 0.204 |
+| A2 | energy-only selected Top-24 | yes | 24 | yes | no | no | 3.38 dB | 2.65 dB | 0.00 dB | 0.204 |
+| A3 | offset coherence only Top-24 | yes | 24 | yes | yes | no | 3.20 dB | missing | -0.18 dB | 0.203 |
+| A4 | energy + offset coherence, no line | yes | 24 | yes | yes | no | 4.69 dB | 4.14 dB | 1.31 dB | 0.103 |
+| A5 | current default | yes | 24 | yes | yes | small | 4.74 dB | 4.14 dB | 1.36 dB | 0.101 |
+| A6 | packet-line phase only Top-24 | yes | 24 | yes | no | yes | missing | missing | missing | 0.576 |
+| A8 | no high-confidence lock | yes | 24 | no | yes | small | 4.65 dB | 4.14 dB | 1.27 dB | 0.104 |
+
+Top-L full-sweep ablation:
+
+| Top-L | SER gain | CRC90 gain | SER gain vs multi | SER @ -20 dB | SER @ -21 dB | SER @ -22 dB | SER @ -23 dB |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 8 | 4.60 dB | 4.03 dB | 1.22 dB | 0.046 | 0.063 | 0.108 | 0.212 |
+| 16 | 4.73 dB | 4.14 dB | 1.34 dB | 0.044 | 0.063 | 0.102 | 0.188 |
+| 24 | 4.74 dB | 4.14 dB | 1.36 dB | 0.044 | 0.060 | 0.101 | 0.184 |
+| 32 | 4.71 dB | 4.14 dB | 1.32 dB | 0.044 | 0.060 | 0.103 | 0.182 |
+
+Quick probes at `-20..-23 dB`:
+
+| Variant | Mean SER | Mean CRC/PRR | SER delta vs default | CRC delta vs default |
+| --- | ---: | ---: | ---: | ---: |
+| current default | 0.097 | 0.509 | 0.000 | 0.000 |
+| coherence candidate Top-32 | 0.099 | 0.493 | +0.002 | -0.016 |
+| coherence candidate Top-64 | 0.099 | 0.493 | +0.002 | -0.016 |
+| coherence candidate Top-128 | 0.099 | 0.493 | +0.002 | -0.016 |
+| smooth trajectory beam probe | 0.123 | 0.369 | +0.026 | -0.140 |
+
+Ablation interpretation:
+
+```text
+Energy-only selected is identical to multi-offset argmax, so the selected-path
+machinery itself is not the source of the extra gain.
+
+Most of the total gain comes from multi-offset FFT evidence:
+  center -> multi: +3.38 dB SER threshold gain.
+
+Offset coherence provides the main additional gain beyond multi-offset energy:
+  multi -> current default: +1.36 dB SER threshold gain.
+
+Amplitude protection is necessary.  Coherence-only has weaker threshold
+behavior and fails the CRC90 threshold on the mean curve.
+
+Packet-line phase alone is not competitive.  The current default only uses it
+as a small auxiliary term; removing it changes SER gain from 4.74 dB to
+4.69 dB.
+
+Top-24 remains the best low-complexity candidate size in this matrix.  Top-32
+improves candidate recall but does not improve the formal SER/CRC thresholds.
+
+Disabling high-confidence locks degrades SER threshold gain from 4.74 dB to
+4.65 dB, supporting the claim that locks protect already-reliable symbols from
+unnecessary re-ranking.
+
+Coherence-candidate expansion and the smooth beam probe do not justify
+replacing the current default on the -20..-23 dB probe range.
+```
+
 ## Next Optimization Direction
 
 The next work should avoid simply relaxing phase gates.  More promising:
