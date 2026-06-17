@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="520" viewBox="0 0 920 520">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<style>text{font-family:Arial,Helvetica,sans-serif;font-size:15px;fill:#20242a}.small{font-size:13px;fill:#4b5563}.title{font-size:20px;font-weight:700}.axis{stroke:#222;stroke-width:1.4}.grid{stroke:#d7dce2;stroke-width:1}.line{fill:none;stroke-width:3}.tick{stroke:#222;stroke-width:1}</style>
+<text class="title" x="80" y="28">Phase-line consistency vs SNR</text>
+<line class="grid" x1="80" y1="448.00" x2="886" y2="448.00"/>
+<line class="tick" x1="75" y1="448.00" x2="80" y2="448.00"/>
+<text class="small" text-anchor="end" x="70" y="452.00">0.0</text>
+<line class="grid" x1="80" y1="366.80" x2="886" y2="366.80"/>
+<line class="tick" x1="75" y1="366.80" x2="80" y2="366.80"/>
+<text class="small" text-anchor="end" x="70" y="370.80">0.2</text>
+<line class="grid" x1="80" y1="285.60" x2="886" y2="285.60"/>
+<line class="tick" x1="75" y1="285.60" x2="80" y2="285.60"/>
+<text class="small" text-anchor="end" x="70" y="289.60">0.4</text>
+<line class="grid" x1="80" y1="204.40" x2="886" y2="204.40"/>
+<line class="tick" x1="75" y1="204.40" x2="80" y2="204.40"/>
+<text class="small" text-anchor="end" x="70" y="208.40">0.6</text>
+<line class="grid" x1="80" y1="123.20" x2="886" y2="123.20"/>
+<line class="tick" x1="75" y1="123.20" x2="80" y2="123.20"/>
+<text class="small" text-anchor="end" x="70" y="127.20">0.8</text>
+<line class="grid" x1="80" y1="42.00" x2="886" y2="42.00"/>
+<line class="tick" x1="75" y1="42.00" x2="80" y2="42.00"/>
+<text class="small" text-anchor="end" x="70" y="46.00">1.0</text>
+<line class="grid" x1="80.00" y1="42" x2="80.00" y2="448"/>
+<line class="tick" x1="80.00" y1="448" x2="80.00" y2="453"/>
+<text class="small" text-anchor="middle" x="80.00" y="473">-27</text>
+<line class="grid" x1="241.20" y1="42" x2="241.20" y2="448"/>
+<line class="tick" x1="241.20" y1="448" x2="241.20" y2="453"/>
+<text class="small" text-anchor="middle" x="241.20" y="473">-26</text>
+<line class="grid" x1="402.40" y1="42" x2="402.40" y2="448"/>
+<line class="tick" x1="402.40" y1="448" x2="402.40" y2="453"/>
+<text class="small" text-anchor="middle" x="402.40" y="473">-25</text>
+<line class="grid" x1="563.60" y1="42" x2="563.60" y2="448"/>
+<line class="tick" x1="563.60" y1="448" x2="563.60" y2="453"/>
+<text class="small" text-anchor="middle" x="563.60" y="473">-24</text>
+<line class="grid" x1="724.80" y1="42" x2="724.80" y2="448"/>
+<line class="tick" x1="724.80" y1="448" x2="724.80" y2="453"/>
+<text class="small" text-anchor="middle" x="724.80" y="473">-23</text>
+<line class="grid" x1="886.00" y1="42" x2="886.00" y2="448"/>
+<line class="tick" x1="886.00" y1="448" x2="886.00" y2="453"/>
+<text class="small" text-anchor="middle" x="886.00" y="473">-22</text>
+<line class="axis" x1="80" y1="448" x2="886" y2="448"/>
+<line class="axis" x1="80" y1="42" x2="80" y2="448"/>
+<text text-anchor="middle" x="483.00" y="498">SNR (dB)</text>
+<text transform="translate(24 245.00) rotate(-90)" text-anchor="middle">phase-line R2</text>
+<polyline class="line" stroke="#2764b3" points="80.00,212.17 241.20,183.52 402.40,143.15 563.60,133.55 724.80,95.29 886.00,101.70"/>
+<circle cx="80.00" cy="212.17" r="4.5" fill="#2764b3"/>
+<circle cx="241.20" cy="183.52" r="4.5" fill="#2764b3"/>
+<circle cx="402.40" cy="143.15" r="4.5" fill="#2764b3"/>
+<circle cx="563.60" cy="133.55" r="4.5" fill="#2764b3"/>
+<circle cx="724.80" cy="95.29" r="4.5" fill="#2764b3"/>
+<circle cx="886.00" cy="101.70" r="4.5" fill="#2764b3"/>
+<line x1="616" y1="60" x2="646" y2="60" stroke="#2764b3" stroke-width="3"/>
+<text class="small" x="656" y="64">selector line R2</text>
+<polyline class="line" stroke="#2f8a46" points="80.00,213.46 241.20,205.85 402.40,186.49 563.60,175.40 724.80,179.47 886.00,155.03"/>
+<circle cx="80.00" cy="213.46" r="4.5" fill="#2f8a46"/>
+<circle cx="241.20" cy="205.85" r="4.5" fill="#2f8a46"/>
+<circle cx="402.40" cy="186.49" r="4.5" fill="#2f8a46"/>
+<circle cx="563.60" cy="175.40" r="4.5" fill="#2f8a46"/>
+<circle cx="724.80" cy="179.47" r="4.5" fill="#2f8a46"/>
+<circle cx="886.00" cy="155.03" r="4.5" fill="#2f8a46"/>
+<line x1="616" y1="84" x2="646" y2="84" stroke="#2f8a46" stroke-width="3"/>
+<text class="small" x="656" y="88">GT noisy payload R2</text>
+<polyline class="line" stroke="#b35424" points="80.00,231.89 241.20,238.15 402.40,250.11 563.60,244.35 724.80,251.70 886.00,244.86"/>
+<circle cx="80.00" cy="231.89" r="4.5" fill="#b35424"/>
+<circle cx="241.20" cy="238.15" r="4.5" fill="#b35424"/>
+<circle cx="402.40" cy="250.11" r="4.5" fill="#b35424"/>
+<circle cx="563.60" cy="244.35" r="4.5" fill="#b35424"/>
+<circle cx="724.80" cy="251.70" r="4.5" fill="#b35424"/>
+<circle cx="886.00" cy="244.86" r="4.5" fill="#b35424"/>
+<line x1="616" y1="108" x2="646" y2="108" stroke="#b35424" stroke-width="3"/>
+<text class="small" x="656" y="112">center FFT argmax line R2</text>
+</svg>

@@ -208,8 +208,12 @@ def compare_packet(
     _center_raw_ser, center_symbol_ser, _ = _ser(center_bins, gt_bins, sf=sf, ldro=ldro)
     _multi_raw_ser, multi_symbol_ser, _ = _ser(multi_bins, gt_bins, sf=sf, ldro=ldro)
     _selected_raw_ser, selected_symbol_ser, compared = _ser(selected_bins, gt_bins, sf=sf, ldro=ldro)
+    center_argmax_line, center_argmax_x, center_argmax_phase = fit_gt_payload_line(
+        center, center_bins, abs_indices
+    )
 
     selector_resid = circular_residuals(gt_phase, result.phase_line, gt_x)
+    center_argmax_resid = circular_residuals(gt_phase, center_argmax_line, center_argmax_x)
     header_resid = circular_residuals(gt_phase, header_line, gt_x)
     clean_header_resid = circular_residuals(clean_gt_phase, clean_header_line, clean_gt_x)
     clean_selector_resid = circular_residuals(clean_gt_phase, result.phase_line, clean_gt_x)
@@ -236,11 +240,13 @@ def compare_packet(
         ),
     }
     row.update(line_fields("selector_line", result.phase_line))
+    row.update(line_fields("center_argmax_line", center_argmax_line))
     row.update(line_fields("header_line", header_line))
     row.update(line_fields("clean_header_line", clean_header_line))
     row.update(line_fields("gt_noisy_payload_line", gt_line))
     row.update(line_fields("gt_clean_payload_line", clean_gt_line))
     row.update(residual_metrics("selector_vs_gt_noisy", selector_resid))
+    row.update(residual_metrics("center_argmax_vs_gt_noisy", center_argmax_resid))
     row.update(residual_metrics("header_vs_gt_noisy", header_resid))
     row.update(residual_metrics("selector_vs_gt_clean", clean_selector_resid))
     row.update(residual_metrics("clean_header_vs_gt_clean", clean_header_resid))
@@ -291,6 +297,8 @@ def summarize(rows: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
         "false_locked_gt_bins",
         "selector_line_r2",
         "selector_line_rmse_pi",
+        "center_argmax_line_r2",
+        "center_argmax_line_rmse_pi",
         "header_line_r2",
         "header_line_rmse_pi",
         "gt_noisy_payload_line_r2",
@@ -300,6 +308,9 @@ def summarize(rows: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
         "selector_vs_gt_noisy_resid_mean_abs_pi",
         "selector_vs_gt_noisy_resid_std_pi",
         "selector_vs_gt_noisy_resid_ptp_pi",
+        "center_argmax_vs_gt_noisy_resid_mean_abs_pi",
+        "center_argmax_vs_gt_noisy_resid_std_pi",
+        "center_argmax_vs_gt_noisy_resid_ptp_pi",
         "header_vs_gt_noisy_resid_mean_abs_pi",
         "header_vs_gt_noisy_resid_std_pi",
         "selector_slope_minus_gt_noisy_pi",

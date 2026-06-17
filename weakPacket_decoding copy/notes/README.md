@@ -16,3 +16,7 @@ root. Keep `../README.md` as the main entry point.
 - `plans/TWO_STAGE_WEAK_DECODER.md` - current two-stage weak decoder notes and validation.
 - `plans/SYMBOL_PHASE_TWO_STAGE_RESULTS_2026-06-16.md` - implemented symbol-level two-stage phase selector and validation results.
 - `plans/THRESHOLD_GAIN_EVALUATION_2026-06-16.md` - SER/CRC SNR-threshold gain evaluation and phase-model diagnostics.
+
+## Baselines
+
+- `baselines/PAPER_OVERSAMPLED_DEMOD_BASELINE_2026-06-17.md` - paper-only baseline for Savaux, "A Low-Complexity Demodulation for Oversampled LoRa Signal".
