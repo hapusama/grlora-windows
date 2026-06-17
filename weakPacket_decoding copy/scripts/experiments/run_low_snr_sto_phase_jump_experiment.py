@@ -117,6 +117,7 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument("--dpi", type=int, default=220, help="PNG DPI。")
+    parser.add_argument("--no-plots", action="store_true", default=False, help="Skip diagnostic PNG generation.")
     return parser.parse_args()
 
 
@@ -640,11 +641,11 @@ def main() -> int:
     summary_csv = output_dir / f"{input_stem}_sto_jump_gt_bin_summary.csv"
     write_csv(all_feature_csv, all_rows)
     write_csv(summary_csv, summarize_rows(all_rows))
-    plot_paths = plot_all(all_rows, output_dir=output_dir, dpi=args.dpi)
+    plot_paths = [] if args.no_plots else plot_all(all_rows, output_dir=output_dir, dpi=args.dpi)
 
     print(f"summary={summary_csv}")
     print(f"features={all_feature_csv}")
-    print(f"plots={output_dir / 'plots'}")
+    print(f"plots={output_dir / 'plots'}" if not args.no_plots else "plots=skipped")
     print(f"wrote_pngs={len(plot_paths)}")
     return 0
 
