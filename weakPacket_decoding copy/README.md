@@ -11,51 +11,70 @@ raw complex64 IQ
   -> 导出 header/payload symbol 级 FFT peak
 ```
 
-当前还没有接完整的 dewhitening / CRC payload 解码链。现阶段重点是验证：弱检测和同步结果能否稳定支撑 header 解码与 payload FFT peak 导出。
+当前主线已经具备离线 payload codec 工具和 symbol-level selector 评估。现阶段重点是验证：弱检测和同步结果能否稳定支撑 header 解码、payload FFT peak 导出，以及不依赖 payload byte 先验的低 SNR symbol 修复。
 
-## 当前研究入口：phase-aware candidate pruning
+## 当前研究入口：symbol-level offset coherence
 
-第一阶段候选筛选指标的设计与实测记录见：
+当前正式主线是单包、PHY-only 的 multi-offset + offset-coherence symbol selector：
 
 ```text
-notes/plans/PHASE_AWARE_CANDIDATE_PRUNING_PLAN.md
+scripts/experiments/run_symbol_phase_threshold_sweep.py
+weak_decoder/symbol_phase_two_stage.py
 ```
 
-当前已新增轻量 phase-aware Top-L 评估脚本：
+核心流程是：
+
+```text
+header-first timing/header
+  -> payload multi-offset FFT evidence
+  -> high-confidence Top-1 locking
+  -> low-confidence Top-L candidates
+  -> offset coherence + energy + small packet-line phase score
+  -> selected raw FFT bin
+  -> LoRa PHY hard-decision codec/CRC metrics for evaluation
+```
+
+这条线不使用 payload byte 先验，不使用 counter/template，不跨包，不用 CRC 参与 symbol 选择。CRC 只作为最终 hard-decision payload 是否自洽的评估字段。
+
+第一阶段 Top-L 候选召回仍可用这个轻量脚本单独观察：
 
 ```text
 scripts/experiments/evaluate_candidate_pruning_metric.py
 weak_decoder/candidate_pruning.py
-```
-
-它只评估每个 payload symbol 的 GT-bin Recall@L，不接 payload codec，也不改变主解码链路。输出默认写到：
-
-```text
 data/candidate_pruning/
 ```
 
-## Two-stage phase-gated decoder
-
-2026-06-16 已将 phase-aware peak scoring 接入实际 two-stage payload decoder：
+早期 two-stage codec-block decoder 仍保留为历史对照：
 
 ```text
-scripts/experiments/run_two_stage_weak_decoder.py --fft-evidence-mode phase-gated
+scripts/experiments/run_two_stage_weak_decoder.py
+weak_decoder/two_stage_weak_decoder.py
+data/two_stage_weak_decoder/
 ```
 
-该模式先用过采样 FFT / multi-offset evidence 做第一阶段候选筛选，再在筛出的
-候选内用 `weak_decoder/candidate_pruning.py` 里的相位一致性加分决定 raw FFT bin
-likelihood。随后 two-stage codec beam 产生的候选 payload 会被重编码，并调用
-`phase_guided_demod.py::_score_payload_symbol_prior_candidate()` 做包内轨迹级相位
-平滑打分。相位趋势只从当前 packet 的 header / early payload high-energy anchors
-估计，不使用 payload bytes 先验，不使用 counter/template，也不跨包或利用重传。
+它的候选也只来自当前 packet 内的 FFT evidence、LoRa FEC/CRC 结构和重编码轨迹评分；旧的 learn-session / byte-template / residual-prior 实验入口已在 2026-06-17 清理。
 
-最小复现实验见：
+## 已清理的 session-prior 线
+
+2026-06-17 已移除基于已知包结构或跨包学习的旧实验线，包括：
 
 ```text
-notes/plans/TWO_STAGE_WEAK_DECODER.md
-data/two_stage_weak_decoder/phase_gated_snr_m20_all_summary.json
-data/two_stage_weak_decoder/phase_gated_len8_snr_m23_summary.json
+scripts/learn_session_*.py
+scripts/evaluate_session_priors.py
+scripts/reconstruct_session_payloads.py
+scripts/sweep_phase_guided_session.py
+scripts/sweep_joint_residual_session.py
+scripts/joint_decode_residual_candidates.py
+scripts/run_phase_guided_demod.py
+scripts/reproduce_phase_map_paper_artifacts.py
+scripts/make_phase_ablation_table.py
+scripts/make_generalization_validation_table.py
+scripts/make_joint_threshold_table.py
+scripts/sweep_map_kappa_from_candidates.py
+data/phase_guided/
 ```
+
+后续实验默认按“单包 PHY evidence”口径理解：不使用 payload byte prior、payload template、counter model、cross-packet joint decoding 或重传信息。
 
 ## 当前主流程
 
@@ -182,29 +201,28 @@ grlora_framesync_valid
 
 ## 输出目录约定
 
-`data/weak_sync_chain/` 根目录保持干净，当前 CSV 按用途放在这些子目录里：
+`data/weak_sync_chain/` 根目录保持干净，当前只保留主流程 CSV；STFT、频谱图和趋势图按需重新生成，不默认留在 `data/` 里：
 
 ```text
 sync_chain/                 run_weak_sync_chain.py 的主表 CSV
 framesync_peaks/            framesync 后前导码 FFT peak 验证表
 header_first/               header-first demod 的 frame / symbol CSV
 payload_consistency/        payload FFT bin 内部一致性检查表
-legacy_experiments/         早期或对照实验输出
-low_snr_gt_bin/             低 SNR GT-bin / wrong-bin 相位幅度对照实验输出
-*_stft/                     STFT PNG / CSV
-*_framesync_spectrum/       framesync 前后频谱对比图
-*_payload_peak_trends/      每包 payload peak 相位/幅度趋势图
+*_stft/                     按需生成的 STFT PNG / CSV，默认已清理
+*_framesync_spectrum/       按需生成的 framesync 前后频谱对比图，默认已清理
+*_payload_peak_trends/      按需生成的 payload peak 相位/幅度趋势图，默认已清理
 ```
 
 ## data 目录地图：脚本来源、意义与复现入口
 
-`data/` 里现在混有主链中间结果、诊断图、正式 sweep、调参 probe 和早期探索结果。看结果时建议先按下面四类区分：
+`data/` 已瘦身：只保留主链/两阶段主流程相关 CSV 和少量正式摘要；大体积构造数据、诊断图、probe/sweep 中间结果由脚本按需再生成。
 
 ```text
 主链输入/中间结果      weak_preamble_detections/, weak_sync_chain/
-物理诊断/数据构造      peak_groundtruth/, low_snr_gt_bin/, payload_* 等
-当前正式结论          ablation_offset_coherence_summary/, ablation_current_default/
-历史调参/探针          probe_*/, symbol_phase_threshold_sweep_*/, phase_guided/ 等
+两阶段主流程结果      two_stage_weak_decoder/, symbol_phase_two_stage/
+当前正式结论          ablation_offset_coherence_summary/, ablation_current_default/, phase_opportunity_space/
+按需生成诊断数据      peak_groundtruth/, low_snr_gt_bin/, noisy_iq/, payload_* 等
+默认不保留探针数据    probe_*/, symbol_phase_threshold_sweep_* 等
 ```
 
 ### 最常看的正式结果
@@ -212,13 +230,14 @@ low_snr_gt_bin/             低 SNR GT-bin / wrong-bin 相位幅度对照实验�
 | 目录 | 产出脚本 | 主要意义 | 备注 |
 | --- | --- | --- | --- |
 | `data/ablation_offset_coherence_summary/` | `scripts/experiments/make_offset_coherence_ablation_table.py` | 汇总 offset-coherence 消融实验，回答 multi-offset、Top-L、locking、coherence、packet-line 各自贡献 | 当前最清爽的论文式表格入口 |
+| `data/phase_opportunity_space/` | `scripts/experiments/analyze_phase_opportunity_space.py` | 分析 multi-offset Top-L 给第二阶段留下多少可修复空间，统计 already_correct / repairable / unrecoverable、phase repair/damage | 判断瓶颈是候选漏 GT 还是 phase selector 不够强 |
 | `data/ablation_current_default/` | `scripts/experiments/run_symbol_phase_threshold_sweep.py` | 当前默认 selector 的完整 SNR threshold sweep | A5/current default |
 | `data/ablation_energy_only_top24/` | 同上 | energy-only selected，对照 multi-offset argmax | 证明 selected path 本身不带来额外收益 |
 | `data/ablation_amp_coherence_no_line/` | 同上 | energy + offset coherence，但去掉 packet-line phase | 隔离 offset coherence 主增益 |
 | `data/ablation_topL_8/16/24/32/` | 同上 | Top-L 候选规模消融 | 当前 Top-24 是低复杂度折中 |
 | `data/ablation_no_high_conf_lock/` | 同上 | 关闭高置信 Top-1 locking | 验证 lock 是否保护强符号 |
-| `data/ablation_coherence_candidate_top*/` | 同上 | coherence-candidate expansion quick probe | 只跑 `-20..-23 dB`，不要和完整阈值 sweep 混比 |
-| `data/ablation_smooth_beam_probe/` | 同上 | smooth trajectory beam quick probe | 负结果/复杂度不划算的记录 |
+| `data/ablation_coherence_only_top24/` | 同上 | 只看 offset coherence 评分 | 隔离 coherence 本身 |
+| `data/ablation_packet_line_only/` | 同上 | 只看 packet-line phase 评分 | 当前不是主增益来源 |
 
 当前最推荐打开：
 
@@ -226,6 +245,8 @@ low_snr_gt_bin/             低 SNR GT-bin / wrong-bin 相位幅度对照实验�
 data/ablation_offset_coherence_summary/ablation_report.md
 data/ablation_offset_coherence_summary/ablation_threshold_summary.csv
 data/ablation_offset_coherence_summary/ablation_probe_curve_m20_m23.csv
+data/phase_opportunity_space/phase_opportunity_summary.csv
+data/phase_opportunity_space/phase_opportunity_summary.json
 ```
 
 ### 主链数据
@@ -237,10 +258,12 @@ data/ablation_offset_coherence_summary/ablation_probe_curve_m20_m23.csv
 | `data/weak_sync_chain/framesync_peaks/` | `scripts/run_weak_sync_chain.py --framesync-peaks-csv` | framesync 后前导码 peak 是否回到 bin0 的验证 | sync 质量诊断 |
 | `data/weak_sync_chain/header_first/` | `scripts/run_header_first_demod.py` | PHY header decode 与 payload symbol FFT peak CSV | low-SNR GT、threshold sweep |
 | `data/weak_sync_chain/payload_consistency/` | `scripts/run_header_first_demod.py --consistency-output` | payload raw FFT bin 在候选包之间是否一致 | 检查 invalid candidate 偏离 |
-| `data/weak_sync_chain/*_stft/` | `scripts/run_weak_sync_chain.py --stft-dir` | event 级 STFT 图 | 人眼检查 burst / preamble |
-| `data/weak_sync_chain/*_payload_peak_trends/` | `scripts/plot_payload_peak_trends.py` | 每包 payload selected peak 的相位/幅度趋势图 | phase 诊断 |
+| `data/weak_sync_chain/*_stft/` | `scripts/run_weak_sync_chain.py --stft-dir` | event 级 STFT 图 | 按需生成，默认已清理 |
+| `data/weak_sync_chain/*_payload_peak_trends/` | `scripts/plot_payload_peak_trends.py` | 每包 payload selected peak 的相位/幅度趋势图 | 按需生成，默认已清理 |
 
 ### 物理诊断与数据构造
+
+这些目录多数是按需生成产物，当前为了控制体积默认不保留。脚本和命令说明保留在 README 中。
 
 | 目录 | 产出脚本 | 主要意义 |
 | --- | --- | --- |
@@ -254,11 +277,12 @@ data/ablation_offset_coherence_summary/ablation_probe_curve_m20_m23.csv
 | `data/two_stage_weak_decoder/` | `scripts/experiments/run_two_stage_weak_decoder.py` | 早期 two-stage codec/phase-gated payload decoder 输出 |
 | `data/symbol_phase_two_stage/` | `scripts/experiments/run_symbol_phase_two_stage.py` | symbol-level two-stage selector 单点实验 |
 | `data/symbol_phase_model_diagnostics/` | `scripts/experiments/diagnose_symbol_phase_models.py` | GT-only phase model 排名诊断 |
+| `data/phase_opportunity_space/` | `scripts/experiments/analyze_phase_opportunity_space.py` | Top-L repairable/unrecoverable 空间与当前 phase/coherence selector 救回率分析 |
 | `data/phase_vs_argmax/` | `scripts/experiments/run_phase_vs_argmax_comparison.py` | phase-aware bin 选择与 argmax 对比 |
 
 ### 历史 sweep / probe 怎么看
 
-`data/symbol_phase_threshold_sweep*` 和 `data/probe_*` 大多是 2026-06-16 的调参过程产物，基本都来自：
+`data/symbol_phase_threshold_sweep*` 和 `data/probe_*` 大多是 2026-06-16 的调参过程产物，已经默认清理。需要追溯时重新运行：
 
 ```text
 scripts/experiments/run_symbol_phase_threshold_sweep.py
@@ -274,7 +298,7 @@ probe_e24_phase005_a050_q09_m22/                  手动调权重 probe，e/topL
 probe_smooth_*/                                   smooth beam 参数 probe
 ```
 
-这些目录可以作为调参追溯材料，但写论文/汇报时优先引用：
+这些目录只作为调参追溯材料，写论文/汇报时优先引用当前保留的小表：
 
 ```text
 data/ablation_offset_coherence_summary/
@@ -339,6 +363,12 @@ python scripts\experiments\run_symbol_phase_threshold_sweep.py `
 
 ```powershell
 python scripts\experiments\make_offset_coherence_ablation_table.py
+```
+
+分析 phase 可发挥空间：
+
+```powershell
+python scripts\experiments\analyze_phase_opportunity_space.py
 ```
 
 如果只想快速试探一个 selector，不想跑完整阈值曲线，可以先用：
@@ -537,6 +567,17 @@ scripts/run_weak_sync_chain.py
 scripts/run_header_first_demod.py
 scripts/plot_payload_peak_trends.py
 ```
+
+### 近期新增实验脚本
+
+| 脚本 | 输出目录 | 解决的问题 |
+| --- | --- | --- |
+| `scripts/experiments/run_symbol_phase_threshold_sweep.py` | `data/ablation_*`、`data/symbol_phase_threshold_sweep_*` | 对 symbol-level selector 跑 SNR threshold sweep，比较 multi-offset argmax、energy-only、offset coherence、Top-L、locking、packet-line 等配置 |
+| `scripts/experiments/make_offset_coherence_ablation_table.py` | `data/ablation_offset_coherence_summary/` | 汇总多组 sweep/probe 成论文式 ablation 表和 `ablation_report.md`，避免手动翻一堆中间 CSV |
+| `scripts/experiments/analyze_phase_opportunity_space.py` | `data/phase_opportunity_space/` | 把每个 payload symbol 分成 already_correct / repairable / unrecoverable，评估 Top-L 召回、phase_repair_rate、phase_damage_rate 和 selected_SER |
+| `scripts/experiments/run_symbol_phase_two_stage.py` | `data/symbol_phase_two_stage/` | 单点运行当前 symbol-level two-stage selector，便于对某个 IQ/SNR/packet 做细查 |
+| `scripts/experiments/diagnose_symbol_phase_models.py` | `data/symbol_phase_model_diagnostics/` | 用 GT-only 口径诊断 phase/coherence 模型本身能否把正确 bin 排高，不参与主解码 |
+| `scripts/experiments/run_two_stage_weak_decoder.py` | `data/two_stage_weak_decoder/` | 早期 codec-block beam decoder，对照 LoRa FEC/CRC 约束的收益；不使用 session template/counter/cross-packet prior |
 
 ### Corrected phase 诊断图
 
@@ -787,16 +828,22 @@ payload FFT peak rows
 ## 代码位置
 
 ```text
-weak_decoder/chirp.py              gr-lora_sdr 兼容 chirp / dechirp FFT
-weak_decoder/preamble_detector.py  多 chirp 能量累加的弱前导码检测
-weak_decoder/frame_locator.py      sync word + SFD 粗帧定界
-weak_decoder/grlora_frame_sync.py  CFO/STO/SFO 估计与 framesync 验证
-weak_decoder/header_first_demod.py header-first FFT demod 与 header hard decode
+weak_decoder/chirp.py                  gr-lora_sdr 兼容 chirp / dechirp FFT
+weak_decoder/preamble_detector.py      多 chirp 能量累加的弱前导码检测
+weak_decoder/frame_locator.py          sync word + SFD 粗帧定界
+weak_decoder/grlora_frame_sync.py      CFO/STO/SFO 估计与 framesync 验证
+weak_decoder/header_first_demod.py     header-first FFT demod 与 header hard decode
+weak_decoder/payload_codec.py          LoRa PHY payload 编解码/重编码离线工具
+weak_decoder/candidate_pruning.py      phase-aware Top-L 候选筛选指标
+weak_decoder/symbol_phase_two_stage.py 当前 symbol-level offset/coherence selector
+weak_decoder/two_stage_weak_decoder.py 早期 codec-block beam decoder 对照
+weak_decoder/phase_guided_demod.py     phase line/anchor/candidate scoring 基础工具
 
-scripts/detect_weak_preamble.py    独立弱前导码检测入口
-scripts/run_weak_sync_chain.py     检测、帧定界、framesync 一体化入口
-scripts/run_header_first_demod.py  从 framesync 有效候选继续做 header/payload FFT demod
+scripts/detect_weak_preamble.py     独立弱前导码检测入口
+scripts/run_weak_sync_chain.py      检测、帧定界、framesync 一体化入口
+scripts/run_header_first_demod.py   从 framesync 有效候选继续做 header/payload FFT demod
 scripts/plot_payload_peak_trends.py header-first demod 后的 payload selected peak 趋势图
+scripts/verify_payload_codec_alignment.py payload codec 与 header-first symbol 对齐检查
 
 scripts/experiments/export_peak_groundtruth.py              gr-lora_sdr 原链 peak groundtruth 导出
 scripts/experiments/export_payload_no_offset_features.py    no-offset payload FFT 消融导出
@@ -808,18 +855,34 @@ scripts/experiments/run_low_snr_sto_phase_jump_experiment.py 低 SNR 下 STO pha
 scripts/experiments/make_noisy_iq.py                        通用 AWGN 加噪 IQ 生成工具
 scripts/experiments/make_failure_limit_iq.py                噪声失败边界扫描工具
 scripts/experiments/analyze_peak_groundtruth.py             peak groundtruth CSV 统计分析
+scripts/experiments/evaluate_candidate_pruning_metric.py    Top-L/phase-aware candidate recall 评估
+scripts/experiments/run_candidate_pruning_sweep.py          candidate pruning 参数 sweep
+scripts/experiments/run_symbol_phase_two_stage.py           symbol-level selector 单点实验
+scripts/experiments/run_symbol_phase_threshold_sweep.py     symbol-level selector SNR threshold sweep
+scripts/experiments/make_offset_coherence_ablation_table.py offset-coherence 消融汇总表生成
+scripts/experiments/analyze_phase_opportunity_space.py      Top-L repairable/unrecoverable 空间分析
+scripts/experiments/diagnose_symbol_phase_models.py         GT-only phase/coherence 排名诊断
+scripts/experiments/run_two_stage_weak_decoder.py           早期 codec-block beam decoder 对照
 ```
 
-## Legacy / 历史实验
+## Legacy / 已清理内容
 
-以下模块属于早期探索，当前主流程暂不依赖：
+2026-06-17 已清理 learn-session / byte-template / packet-structure-prior 相关脚本和数据。当前工作区不再保留这些入口：
 
 ```text
-scripts/estimate_initial_state.py
-weak_decoder/initial_state.py
-scripts/decode_weak_packet.py
-weak_decoder/phase_model.py
-weak_decoder/observations.py
+scripts/learn_session_*.py
+scripts/evaluate_session_priors.py
+scripts/reconstruct_session_payloads.py
+scripts/sweep_phase_guided_session.py
+scripts/sweep_joint_residual_session.py
+scripts/joint_decode_residual_candidates.py
+scripts/run_phase_guided_demod.py
+scripts/reproduce_phase_map_paper_artifacts.py
+scripts/make_phase_ablation_table.py
+scripts/make_generalization_validation_table.py
+scripts/make_joint_threshold_table.py
+scripts/sweep_map_kappa_from_candidates.py
+data/phase_guided/
 ```
 
-它们主要用于早期相干初始状态估计、phase anchor rerank 和 noisy IQ peak 搜索实验。当前主线以 `run_weak_sync_chain.py` 和 `run_header_first_demod.py` 为准。
+如果后面要复现实验结论，优先看 `data/ablation_offset_coherence_summary/`、`data/phase_opportunity_space/` 和 `notes/plans/THRESHOLD_GAIN_EVALUATION_2026-06-16.md`。

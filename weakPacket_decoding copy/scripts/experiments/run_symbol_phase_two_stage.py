@@ -531,7 +531,7 @@ def build_summary(rows: list[dict[str, Any]], args: argparse.Namespace) -> dict[
             "smooth_min_line_anchors": args.smooth_min_line_anchors,
             "smooth_min_locked_ratio": args.smooth_min_locked_ratio,
             "smooth_max_line_rmse_pi": args.smooth_max_line_rmse_pi,
-            "uses_payload_template": False,
+            "uses_packet_structure_prior": False,
             "uses_counter_prior": False,
             "uses_cross_packet_joint_prior": False,
             "uses_payload_byte_enumeration": False,

@@ -41,7 +41,7 @@ from .payload_codec import (
 from .phase_guided_demod import (
     PhaseGuidedPayloadConfig,
     PhaseLine,
-    _score_payload_symbol_prior_candidate,
+    score_projected_payload_symbols,
 )
 
 
@@ -602,8 +602,8 @@ def _score_payload_phase_trajectory(
     if limit <= 0:
         return 0.0
     phase_config = PhaseGuidedPayloadConfig()
-    score, _meta = _score_payload_symbol_prior_candidate(
-        expected_symbols=tuple(int(v) for v in payload_symbols[:limit]),
+    score, _meta = score_projected_payload_symbols(
+        projected_symbols=tuple(int(v) for v in payload_symbols[:limit]),
         score_positions=set(range(limit)),
         payload_spectra=tuple(trajectory_spectra[:limit]),
         payload_dechirped=(),
@@ -812,7 +812,7 @@ def decode_two_stage_weak_payload(
         )
     timings["likelihood_ms"] = (time.perf_counter() - t0) * 1000.0
 
-    expected_payload_symbols = _expected_payload_symbol_count(
+    expected_payload_symbol_count = _expected_payload_symbol_count(
         payload_len=payload_len,
         sf=sf,
         cr=cr,
@@ -820,8 +820,8 @@ def decode_two_stage_weak_payload(
         ldro=ldro,
         crc_mode=cfg.crc_mode,
     )
-    if expected_payload_symbols > 0:
-        likelihoods = likelihoods[: min(len(likelihoods), expected_payload_symbols)]
+    if expected_payload_symbol_count > 0:
+        likelihoods = likelihoods[: min(len(likelihoods), expected_payload_symbol_count)]
         trajectory_source_spectra = trajectory_source_spectra[: len(likelihoods)]
         payload_abs_indices = payload_abs_indices[: len(likelihoods)]
 
@@ -988,7 +988,7 @@ def decode_two_stage_weak_payload(
         )
     metrics: dict[str, float | int] = {
         "payload_symbol_count": int(len(likelihoods)),
-        "expected_payload_symbol_count": int(expected_payload_symbols),
+        "expected_payload_symbol_count": int(expected_payload_symbol_count),
         "block_count": int(len(block_candidates)),
         "codeword_list_count": int(len(all_codeword_lists)),
         "candidate_payload_count": int(len(beam_payload_candidates)),

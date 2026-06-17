@@ -1,7 +1,0 @@
-snr_db,argmax_ser,map_independent_ser,ser_reduction,argmax_correct_symbols,independent_correct_symbols,total_symbols,independent_app_exact,joint_app_exact,joint_model_margin,mean_joint_candidate_rank
--10,0.0,0.0,0.0,175,175,175,5/5,5/5,0.511667,1.0
--15,0.0114,0.0,0.0114,173,175,175,5/5,5/5,0.414201,1.0
--20,0.4,0.04,0.36000000000000004,105,168,175,5/5,5/5,0.315587,1.0
--23,0.7657,0.1086,0.6571,41,156,175,5/5,5/5,0.265137,1.0
--25,0.9486,0.1657,0.7829,9,146,175,2/5,5/5,0.222221,9.4
--27,0.9886,0.2,0.7886,2,140,175,2/5,5/5,0.14562,18.4

@@ -1,5 +1,0 @@
-snr_db,packets,total_symbols,argmax_correct_symbols,argmax_ser,independent_correct_symbols,independent_ser,independent_app_exact,joint_app_exact,app_compared,joint_affine_slope,joint_affine_intercept,joint_model_margin,joint_model_margin_per_packet,joint_top1_count,mean_joint_candidate_rank,mean_independent_minus_joint_score_gap,expected_affine_ok,run_dir
--20,5,175,105,0.4000,168,0.0400,5,5,5,1,1,0.086932,0.017386,5,1.000,0.000000,1,D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding copy\data\phase_guided\joint_residual_sweep\snr_m20dB
--23,5,175,41,0.7657,156,0.1086,5,5,5,1,1,0.080830,0.016166,5,1.000,0.000000,1,D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding copy\data\phase_guided\joint_residual_sweep\snr_m23dB
--25,5,175,9,0.9486,146,0.1657,2,5,5,1,1,0.030223,0.006045,2,30.400,0.049835,1,D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding copy\data\phase_guided\joint_residual_sweep\snr_m25dB
--27,5,175,2,0.9886,138,0.2114,2,5,5,1,1,0.020324,0.004065,2,27.200,0.040964,1,D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding copy\data\phase_guided\joint_residual_sweep\snr_m27dB

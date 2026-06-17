@@ -1,17 +1,17 @@
 """复刻 gr-lora_sdr payload 编解码链的离线工具。
 
 这个模块不负责同步、dechirp 或 FFT，也不直接读取 IQ。它的作用是把
-Phase-MAP / residual search 里的“payload 字节候选”和 LoRa PHY symbol
-候选对齐起来：
+LoRa PHY payload bytes、nibble/codeword 流和 demod symbol 序列对齐起来：
 
 * 正向：payload bytes -> whitening/CRC/Hamming/interleaver/gray -> symbols。
-  用于把枚举出来的 byte 候选投影成它理论上应该对应的 FFT bin/symbol 轨迹。
+  用于把当前 packet decoder 产生的 payload 候选投影成它理论上应该对应的
+  FFT bin/symbol 轨迹。
 * 反向：header symbols + payload symbols -> header/payload bytes/CRC。
   用于离线检查某条 hard-decision symbol 序列是否能解出合法 payload。
 
-输入通常来自 run_phase_guided_demod.py 里的 byte template/residual 枚举，
-或者来自 header-first/phase-guided demod 导出的 symbol 序列。输出则交给
-phase_guided_demod.py 做候选评分，或给实验脚本写入 CSV/summary。
+输入通常来自 header-first demod、symbol-level selector 或 two-stage decoder
+当前 packet 内部生成的候选。这个模块不学习 session byte template，也不使用
+payload 结构先验。
 """
 
 from __future__ import annotations
@@ -324,8 +324,8 @@ def encode_explicit_frame_symbols(
     """把 payload bytes 重编码成 explicit header symbols 和 payload symbols。
 
     输入：
-      payload: 一个完整 payload byte 候选，通常来自 session byte template
-        或 residual byte 枚举。
+      payload: 一个完整 payload byte 候选，通常来自当前 packet 的 hard decision
+        或 decoder beam。
       sf/cr/has_crc/ldro/crc_mode: header-first 解码得到的 PHY 参数，或实验
         命令行指定的参数。
 

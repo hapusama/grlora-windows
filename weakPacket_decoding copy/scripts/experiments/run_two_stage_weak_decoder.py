@@ -117,7 +117,7 @@ def parse_args() -> argparse.Namespace:
         default=2.0,
         help=(
             "weight for packet-local re-encoded payload trajectory scoring via "
-            "_score_payload_symbol_prior_candidate; set 0 to disable"
+            "score_projected_payload_symbols; set 0 to disable"
         ),
     )
     parser.add_argument("--crc-observed-bonus", type=float, default=4.0)
@@ -652,7 +652,7 @@ def build_summary(rows: list[dict[str, Any]], args: argparse.Namespace) -> dict[
             "crc_candidate_min_evidence_margin": args.crc_candidate_min_evidence_margin,
             "crc_candidate_max_beam_rank": args.crc_candidate_max_beam_rank,
             "argmax_fallback_on_crc_failure": not bool(args.disable_argmax_fallback),
-            "uses_payload_template": False,
+            "uses_packet_structure_prior": False,
             "uses_counter_prior": False,
             "uses_cross_packet_joint_prior": False,
         },

@@ -1,5 +1,0 @@
-capture,snr_db,packets,argmax_ser,map_independent_ser,ser_reduction,independent_app_exact,joint_app_exact,joint_model_margin,mean_joint_candidate_rank
-0_0_0_10_14_32,-20,5,0.4686,0.0914,0.37720000000000004,3/5,5/5,0.086025,16.4
-0_0_0_10_14_32,-23,5,0.8,0.1943,0.6057,3/5,3/5,0.12291,30.4
-0_0_0_10_14_8,-20,5,0.2,0.0286,0.1714,5/5,5/5,0.550786,1.0
-0_0_0_10_14_8,-23,5,0.6914,0.08,0.6114,5/5,5/5,0.405474,1.0
