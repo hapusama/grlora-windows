@@ -8,6 +8,7 @@ root. Keep `../README.md` as the main entry point.
 - `handoffs/HANDOFF.md` - long historical experiment handoff.
 - `handoffs/HANDOFF_CANDIDATE_PRUNING_2026-06-16.md` - phase-aware candidate-pruning recall validation handoff.
 - `handoffs/HANDOFF_SYMBOL_LEVEL_PHASE_TWO_STAGE_2026-06-16.md` - corrected symbol-level two-stage phase decoder direction.
+- `handoffs/HANDOFF_OFFSET_COHERENCE_ABLATION_2026-06-17.md` - next-step ablation plan for the offset-phase-coherence selector.
 
 ## Plans
 
