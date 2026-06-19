@@ -1,0 +1,1 @@
+event_index,start_sample,end_sample,first_window_index,last_window_index,window_count,reference_bin,reference_signed_bin,bin_min,bin_max,mean_peak_power,mean_confidence_db,max_peak_share,sf,bw,samp_rate,os_factor,chirp_samples,win_chirps,hop_samples,min_periodic_peaks,bin_tol

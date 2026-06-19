@@ -6,7 +6,8 @@ The intended flow is:
 
 1. Use oversampled / multi-offset evidence to lock high-confidence symbol bins.
 2. Keep only Top-L candidates for low-confidence symbols.
-3. Fit a packet-local phase line from locked bins.
+3. Fit a packet-local phase line from locked bins, or build a local phase
+   trajectory directly with a sliding window.
 4. Select bins for low-confidence symbols with a small beam over symbol bins.
 """
 
@@ -89,6 +90,24 @@ class SymbolPhaseConfig:
     smooth_min_line_anchors: int = 4
     smooth_min_locked_ratio: float = 0.0
     smooth_max_line_rmse_pi: float = float("inf")
+    window_size: int = 5
+    window_degree: int = 1
+    window_phase_weight: float = 0.05
+    window_amp_weight: float = 0.50
+    window_coherence_weight: float = 0.90
+    window_slope_weight: float = 0.00
+    window_curvature_weight: float = 0.00
+    window_phase_scale_pi: float = 0.25
+    window_slope_scale_pi: float = 0.45
+    window_curvature_scale_pi: float = 0.25
+    window_recent_decay: float = 0.75
+    window_anchor_span: float = 8.0
+    window_anchor_min: int = 2
+    window_anchor_max_rmse_pi: float = 0.40
+    window_min_locked_ratio: float = 0.10
+    window_guard_min_phase_gain: float = 0.10
+    window_guard_max_energy_drop_db: float = 0.75
+    window_guard_max_coherence_drop: float = 0.08
 
 
 @dataclass(frozen=True)
@@ -158,6 +177,14 @@ class _SmoothBeamState:
     last_residual: float | None = None
     last_slope: float | None = None
     last_abs_index: float | None = None
+
+
+@dataclass(frozen=True)
+class _WindowBeamState:
+    selected_bins: tuple[int, ...]
+    selected_uncertain_indexes: tuple[int, ...]
+    phases: tuple[float, ...]
+    score: float
 
 
 def _db_ratio(numerator: float, denominator: float) -> float:
@@ -408,6 +435,372 @@ def _smooth_local_score(
         + float(config.smooth_coherence_weight) * coherence
     )
     return float(score), residual, phase, amp
+
+
+def _unwrap_phase_against(reference: float, phase: float) -> float:
+    """Return `phase` shifted by 2pi so it is closest to `reference`."""
+
+    return float(float(reference) + wrap_phase(float(phase) - float(reference)))
+
+
+def _window_weights(count: int, decay: float) -> np.ndarray:
+    n = int(count)
+    if n <= 0:
+        return np.asarray([], dtype=np.float64)
+    d = float(decay)
+    if d <= 0.0 or d >= 1.0:
+        return np.ones(n, dtype=np.float64)
+    # Older samples get smaller weights; the newest point has weight 1.
+    return np.asarray([d ** float(n - 1 - idx) for idx in range(n)], dtype=np.float64)
+
+
+def _predict_phase_from_window(
+    abs_indices: Sequence[float],
+    phases: Sequence[float],
+    target_abs_index: float,
+    config: SymbolPhaseConfig,
+) -> tuple[float, float, float]:
+    """Predict local phase and return predicted phase, slope, and curvature.
+
+    This is deliberately local.  It avoids declaring one global line to be the
+    packet truth, and instead asks whether the current candidate continues the
+    recent smooth phase trajectory.
+    """
+
+    count = min(len(abs_indices), len(phases), max(1, int(config.window_size)))
+    if count <= 0:
+        return 0.0, 0.0, 0.0
+
+    xs = np.asarray(list(abs_indices)[-count:], dtype=np.float64)
+    ys = np.asarray(list(phases)[-count:], dtype=np.float64)
+    target = float(target_abs_index)
+    if count == 1:
+        return float(ys[-1]), 0.0, 0.0
+
+    degree = min(max(0, int(config.window_degree)), 2, count - 1)
+    if degree <= 0:
+        return float(np.average(ys, weights=_window_weights(count, config.window_recent_decay))), 0.0, 0.0
+
+    x0 = float(xs[-1])
+    x_rel = xs - x0
+    target_rel = target - x0
+    weights = _window_weights(count, config.window_recent_decay)
+    try:
+        coef = np.polyfit(x_rel, ys, deg=degree, w=weights)
+        pred = float(np.polyval(coef, target_rel))
+        deriv = np.polyder(coef, m=1)
+        slope = float(np.polyval(deriv, target_rel)) if deriv.size else 0.0
+        second = np.polyder(coef, m=2)
+        curvature = float(np.polyval(second, target_rel)) if second.size else 0.0
+    except np.linalg.LinAlgError:
+        dx = max(1e-6, float(xs[-1] - xs[-2]))
+        slope = float((ys[-1] - ys[-2]) / dx)
+        pred = float(ys[-1] + slope * (target - float(xs[-1])))
+        curvature = 0.0
+    return pred, slope, curvature
+
+
+def _local_anchor_phase_prediction(
+    evidences: Sequence[SymbolEvidence],
+    locked: Sequence[bool],
+    selected: Sequence[int],
+    target_index: int,
+    fallback_line: PhaseLine | PhaseCurve,
+    config: SymbolPhaseConfig,
+) -> tuple[bool, float, float, float]:
+    target_idx = int(target_index)
+    if target_idx < 0 or target_idx >= len(evidences):
+        return False, 0.0, 0.0, 0.0
+    target_abs = float(evidences[target_idx].abs_symbol_index)
+    anchors: list[tuple[float, float, float]] = []
+    span = float(config.window_anchor_span)
+    for idx, ev in enumerate(evidences):
+        if idx >= len(locked) or idx >= len(selected) or not bool(locked[idx]):
+            continue
+        raw_bin = int(selected[idx])
+        if raw_bin < 0 or raw_bin >= ev.center_spectrum.size:
+            continue
+        distance = abs(float(ev.abs_symbol_index) - target_abs)
+        if distance > span:
+            continue
+        # Prefer nearby anchors, but keep a floor so two adjacent anchors do not
+        # create an infinitely sharp local model.
+        weight = math.exp(-0.5 * (distance / max(1e-6, span * 0.5)) ** 2)
+        anchors.append((float(ev.abs_symbol_index), float(np.angle(ev.center_spectrum[raw_bin])), float(weight)))
+
+    if len(anchors) < max(1, int(config.window_anchor_min)):
+        if int(fallback_line.anchor_count) >= 2:
+            return True, float(fallback_line.predict(target_abs)), float(getattr(fallback_line, "slope_rad", 0.0)), 0.0
+        return False, 0.0, 0.0, 0.0
+
+    anchors.sort(key=lambda item: item[0])
+    xs = np.asarray([item[0] for item in anchors], dtype=np.float64)
+    phases = np.unwrap(np.asarray([item[1] for item in anchors], dtype=np.float64))
+    weights = np.asarray([item[2] for item in anchors], dtype=np.float64)
+    degree = min(max(0, int(config.window_degree)), 2, len(anchors) - 1)
+    if degree <= 0:
+        pred = float(np.average(phases, weights=weights))
+        return True, pred, 0.0, 0.0
+
+    x0 = target_abs
+    x_rel = xs - x0
+    try:
+        coef = np.polyfit(x_rel, phases, deg=degree, w=weights)
+    except np.linalg.LinAlgError:
+        if int(fallback_line.anchor_count) >= 2:
+            return True, float(fallback_line.predict(target_abs)), float(getattr(fallback_line, "slope_rad", 0.0)), 0.0
+        return False, 0.0, 0.0, 0.0
+    fitted = np.polyval(coef, x_rel)
+    rmse_pi = float(math.sqrt(float(np.average((phases - fitted) ** 2, weights=weights))) / math.pi)
+    if math.isfinite(rmse_pi) and rmse_pi > float(config.window_anchor_max_rmse_pi):
+        if int(fallback_line.anchor_count) >= 2:
+            return True, float(fallback_line.predict(target_abs)), float(getattr(fallback_line, "slope_rad", 0.0)), 0.0
+        return False, 0.0, 0.0, 0.0
+    pred = float(np.polyval(coef, 0.0))
+    deriv = np.polyder(coef, m=1)
+    slope = float(np.polyval(deriv, 0.0)) if deriv.size else 0.0
+    second = np.polyder(coef, m=2)
+    curvature = float(np.polyval(second, 0.0)) if second.size else 0.0
+    return True, pred, slope, curvature
+
+
+def _window_local_score(
+    ev: SymbolEvidence,
+    raw_bin: int,
+    predicted_phase: float,
+    predicted_slope: float,
+    predicted_curvature: float,
+    has_phase_prediction: bool,
+    previous_phase: float | None,
+    previous_slope: float | None,
+    previous_abs_index: float | None,
+    config: SymbolPhaseConfig,
+) -> tuple[float, float, float, float, float, float]:
+    b = int(raw_bin)
+    if b < 0 or b >= ev.center_spectrum.size:
+        return -float("inf"), 0.0, 0.0, 0.0, 0.0, 0.0
+
+    observed_raw = float(np.angle(ev.center_spectrum[b]))
+    reference = float(predicted_phase)
+    if previous_phase is not None:
+        reference = float(previous_phase)
+    observed = _unwrap_phase_against(reference, observed_raw)
+    residual = float(wrap_phase(observed - float(predicted_phase)))
+
+    phase_scale = max(1e-6, float(config.window_phase_scale_pi) * math.pi)
+    slope_scale = max(1e-6, float(config.window_slope_scale_pi) * math.pi)
+    curvature_scale = max(1e-6, float(config.window_curvature_scale_pi) * math.pi)
+
+    phase_score = float(math.exp(-((residual / phase_scale) ** 2))) if bool(has_phase_prediction) else 0.0
+    amp = _amp_score(ev.evidence_power, b)
+    coherence = _coherence_score(ev, b)
+
+    slope_penalty = 0.0
+    curvature_penalty = 0.0
+    local_slope = float(predicted_slope)
+    if previous_phase is not None and previous_abs_index is not None:
+        dx = max(1e-6, float(ev.abs_symbol_index) - float(previous_abs_index))
+        local_slope = float((observed - float(previous_phase)) / dx)
+        slope_penalty = float((local_slope / slope_scale) ** 2)
+        if previous_slope is not None:
+            local_curvature = float(local_slope - float(previous_slope))
+            curvature_penalty = float((local_curvature / curvature_scale) ** 2)
+    elif bool(has_phase_prediction):
+        slope_penalty = float((float(predicted_slope) / slope_scale) ** 2)
+        curvature_penalty = float((float(predicted_curvature) / curvature_scale) ** 2)
+
+    score = (
+        (float(config.window_phase_weight) * phase_score if bool(has_phase_prediction) else 0.0)
+        + float(config.window_amp_weight) * amp
+        + float(config.window_coherence_weight) * coherence
+        - float(config.window_slope_weight) * slope_penalty
+        - float(config.window_curvature_weight) * curvature_penalty
+    )
+    return float(score), observed, residual, phase_score, amp, coherence
+
+
+def _select_with_window_path(
+    evidences: Sequence[SymbolEvidence],
+    selected: Sequence[int],
+    locked: Sequence[bool],
+    anchor_line: PhaseLine | PhaseCurve,
+    config: SymbolPhaseConfig,
+) -> tuple[tuple[int, ...], int, float] | None:
+    if not evidences:
+        return None
+
+    beam = [
+        _WindowBeamState(
+            selected_bins=(),
+            selected_uncertain_indexes=(),
+            phases=(),
+            score=0.0,
+        )
+    ]
+    for idx in range(len(evidences)):
+        ev = evidences[idx]
+        candidates = _smooth_candidates(ev, bool(locked[idx]), config)
+        next_beam: list[_WindowBeamState] = []
+        for state in beam:
+            history_count = min(len(state.phases), max(1, int(config.window_size)))
+            hist_indices = [float(evidences[j].abs_symbol_index) for j in range(len(state.phases) - history_count, len(state.phases))]
+            hist_phases = list(state.phases[-history_count:])
+            has_phase_prediction, predicted, pred_slope, pred_curvature = _local_anchor_phase_prediction(
+                evidences=evidences,
+                locked=locked,
+                selected=selected,
+                target_index=idx,
+                fallback_line=anchor_line,
+                config=config,
+            )
+            if not has_phase_prediction and hist_phases:
+                has_phase_prediction = True
+                predicted, pred_slope, pred_curvature = _predict_phase_from_window(
+                    hist_indices,
+                    hist_phases,
+                    ev.abs_symbol_index,
+                    config,
+                )
+
+            previous_phase = state.phases[-1] if state.phases else None
+            previous_abs = evidences[len(state.phases) - 1].abs_symbol_index if state.phases else None
+            previous_slope = None
+            if len(state.phases) >= 2:
+                dx = max(
+                    1e-6,
+                    float(evidences[len(state.phases) - 1].abs_symbol_index)
+                    - float(evidences[len(state.phases) - 2].abs_symbol_index),
+                )
+                previous_slope = float((state.phases[-1] - state.phases[-2]) / dx)
+
+            for raw_bin in candidates:
+                local_score, observed, _residual, _phase_score, _amp, _coherence = _window_local_score(
+                    ev=ev,
+                    raw_bin=int(raw_bin),
+                    predicted_phase=predicted,
+                    predicted_slope=pred_slope,
+                    predicted_curvature=pred_curvature,
+                    previous_phase=previous_phase,
+                    previous_slope=previous_slope,
+                    previous_abs_index=previous_abs,
+                    has_phase_prediction=has_phase_prediction,
+                    config=config,
+                )
+                if not math.isfinite(local_score):
+                    continue
+                next_beam.append(
+                    _WindowBeamState(
+                        selected_bins=state.selected_bins + (int(raw_bin),),
+                        selected_uncertain_indexes=(
+                            state.selected_uncertain_indexes
+                            if bool(locked[idx])
+                            else state.selected_uncertain_indexes + (int(idx),)
+                        ),
+                        phases=state.phases + (float(observed),),
+                        score=float(state.score + local_score),
+                    )
+                )
+        next_beam.sort(key=lambda item: item.score, reverse=True)
+        beam = next_beam[: max(1, int(config.beam_width))]
+        if not beam:
+            return None
+
+    best = beam[0]
+    if len(best.selected_bins) != len(evidences):
+        return None
+    return tuple(int(v) for v in best.selected_bins), int(len(beam)), float(best.score)
+
+
+def _select_with_guarded_window(
+    evidences: Sequence[SymbolEvidence],
+    selected: Sequence[int],
+    locked: Sequence[bool],
+    anchor_line: PhaseLine | PhaseCurve,
+    config: SymbolPhaseConfig,
+) -> tuple[int, ...]:
+    guarded = [int(v) for v in selected]
+    for idx, ev in enumerate(evidences):
+        if idx >= len(guarded) or (idx < len(locked) and bool(locked[idx])):
+            continue
+        has_pred, predicted, pred_slope, pred_curvature = _local_anchor_phase_prediction(
+            evidences=evidences,
+            locked=locked,
+            selected=guarded,
+            target_index=idx,
+            fallback_line=anchor_line,
+            config=config,
+        )
+        if not has_pred:
+            continue
+        base_bin = int(guarded[idx])
+        base_score, _base_observed, _base_residual, base_phase, base_amp, base_coherence = _window_local_score(
+            ev=ev,
+            raw_bin=base_bin,
+            predicted_phase=predicted,
+            predicted_slope=pred_slope,
+            predicted_curvature=pred_curvature,
+            has_phase_prediction=True,
+            previous_phase=None,
+            previous_slope=None,
+            previous_abs_index=None,
+            config=config,
+        )
+        base_power = float(ev.evidence_power[base_bin]) if 0 <= base_bin < ev.evidence_power.size else 0.0
+        best_bin = base_bin
+        best_score = float(base_score)
+        for raw_bin in _smooth_candidates(ev, False, config):
+            b = int(raw_bin)
+            if b == base_bin or b < 0 or b >= ev.evidence_power.size:
+                continue
+            score, _observed, _residual, phase_score, amp, coherence = _window_local_score(
+                ev=ev,
+                raw_bin=b,
+                predicted_phase=predicted,
+                predicted_slope=pred_slope,
+                predicted_curvature=pred_curvature,
+                has_phase_prediction=True,
+                previous_phase=None,
+                previous_slope=None,
+                previous_abs_index=None,
+                config=config,
+            )
+            phase_gain = float(phase_score - base_phase)
+            energy_drop_db = _db_ratio(float(ev.evidence_power[b]), base_power)
+            coherence_drop = float(base_coherence - coherence)
+            if phase_gain < float(config.window_guard_min_phase_gain):
+                continue
+            if energy_drop_db < -float(config.window_guard_max_energy_drop_db):
+                continue
+            if coherence_drop > float(config.window_guard_max_coherence_drop):
+                continue
+            if score > best_score:
+                best_score = float(score)
+                best_bin = b
+        guarded[idx] = int(best_bin)
+    return tuple(int(v) for v in guarded)
+
+
+def _select_with_local_coherence(
+    evidences: Sequence[SymbolEvidence],
+    selected: Sequence[int],
+    locked: Sequence[bool],
+    line: PhaseLine | PhaseCurve,
+    config: SymbolPhaseConfig,
+) -> tuple[int, ...]:
+    coherence_selected = [int(v) for v in selected]
+    for idx, ev in enumerate(evidences):
+        if idx < len(locked) and bool(locked[idx]):
+            continue
+        candidates = _smooth_candidates(ev, False, config)
+        best_bin = int(ev.top1_bin)
+        best_score = -float("inf")
+        for raw_bin in candidates:
+            score, _residual, _phase, _amp = _smooth_local_score(ev, int(raw_bin), line, config)
+            if score > best_score:
+                best_score = float(score)
+                best_bin = int(raw_bin)
+        coherence_selected[idx] = int(best_bin)
+    return tuple(int(v) for v in coherence_selected)
 
 
 def _select_with_smooth_path(
@@ -679,20 +1072,15 @@ def select_symbol_bins_two_stage(
 
     uncertain = [idx for idx, is_locked in enumerate(locked) if not is_locked]
     uncertain_sorted = sorted(uncertain, key=lambda idx: evidences[idx].confidence, reverse=True)
+    coherence_selected = _select_with_local_coherence(
+        evidences=evidences,
+        selected=selected,
+        locked=locked,
+        line=line,
+        config=cfg,
+    )
 
     if str(cfg.selection_mode).lower() == "coherence":
-        coherence_selected = list(selected)
-        for idx in uncertain:
-            ev = evidences[idx]
-            candidates = _smooth_candidates(ev, False, cfg)
-            best_bin = int(ev.top1_bin)
-            best_score = -float("inf")
-            for raw_bin in candidates:
-                score, _residual, _phase, _amp = _smooth_local_score(ev, int(raw_bin), line, cfg)
-                if score > best_score:
-                    best_score = float(score)
-                    best_bin = int(raw_bin)
-            coherence_selected[idx] = int(best_bin)
         final_line = _fit_phase_curve_for_bins(
             evidences,
             coherence_selected,
@@ -763,6 +1151,119 @@ def select_symbol_bins_two_stage(
                 beam_final_size=int(max(1, int(cfg.beam_width))),
                 error="",
             )
+
+    if str(cfg.selection_mode).lower() == "window":
+        locked_ratio = float(sum(bool(v) for v in locked) / max(1, len(locked)))
+        window_result = None
+        if locked_ratio >= float(cfg.window_min_locked_ratio):
+            window_result = _select_with_window_path(
+                evidences=evidences,
+                selected=coherence_selected,
+                locked=locked,
+                anchor_line=line,
+                config=cfg,
+            )
+        if window_result is not None:
+            window_selected, window_beam_size, window_score = window_result
+            final_line = _fit_phase_curve_for_bins(
+                evidences,
+                window_selected,
+                trim_frac=float(cfg.line_trim_frac),
+                phase_model=str(cfg.phase_model),
+            )
+            if int(final_line.anchor_count) < 2:
+                final_line = line
+            score_indexes = uncertain if uncertain else list(range(len(evidences)))
+            final_score, line_score, mean_phase, mean_amp = _trajectory_score(
+                evidences,
+                window_selected,
+                score_indexes,
+                final_line,
+                cfg,
+            )
+            return SymbolPhaseResult(
+                selected_raw_bins=tuple(int(v) for v in window_selected),
+                locked_mask=tuple(bool(v) for v in locked),
+                evidences=tuple(evidences),
+                phase_line=final_line,
+                trajectory_score=float(window_score + final_score),
+                line_score=float(line_score),
+                mean_phase_score=float(mean_phase),
+                mean_amp_score=float(mean_amp),
+                uncertain_count=int(len(uncertain)),
+                locked_count=int(sum(locked)),
+                beam_final_size=int(window_beam_size),
+                error="",
+            )
+        final_line = _fit_phase_curve_for_bins(
+            evidences,
+            coherence_selected,
+            trim_frac=float(cfg.line_trim_frac),
+            phase_model=str(cfg.phase_model),
+        )
+        if int(final_line.anchor_count) < 2:
+            final_line = line
+        score_indexes = uncertain if uncertain else list(range(len(evidences)))
+        final_score, line_score, mean_phase, mean_amp = _trajectory_score(
+            evidences,
+            coherence_selected,
+            score_indexes,
+            final_line,
+            cfg,
+        )
+        return SymbolPhaseResult(
+            selected_raw_bins=tuple(int(v) for v in coherence_selected),
+            locked_mask=tuple(bool(v) for v in locked),
+            evidences=tuple(evidences),
+            phase_line=final_line,
+            trajectory_score=float(final_score),
+            line_score=float(line_score),
+            mean_phase_score=float(mean_phase),
+            mean_amp_score=float(mean_amp),
+            uncertain_count=int(len(uncertain)),
+            locked_count=int(sum(locked)),
+            beam_final_size=1,
+            error="window fallback to coherence: low locked ratio or empty beam",
+        )
+
+    if str(cfg.selection_mode).lower() == "window_guarded":
+        guarded_selected = _select_with_guarded_window(
+            evidences=evidences,
+            selected=coherence_selected,
+            locked=locked,
+            anchor_line=line,
+            config=cfg,
+        )
+        final_line = _fit_phase_curve_for_bins(
+            evidences,
+            guarded_selected,
+            trim_frac=float(cfg.line_trim_frac),
+            phase_model=str(cfg.phase_model),
+        )
+        if int(final_line.anchor_count) < 2:
+            final_line = line
+        score_indexes = uncertain if uncertain else list(range(len(evidences)))
+        final_score, line_score, mean_phase, mean_amp = _trajectory_score(
+            evidences,
+            guarded_selected,
+            score_indexes,
+            final_line,
+            cfg,
+        )
+        return SymbolPhaseResult(
+            selected_raw_bins=tuple(int(v) for v in guarded_selected),
+            locked_mask=tuple(bool(v) for v in locked),
+            evidences=tuple(evidences),
+            phase_line=final_line,
+            trajectory_score=float(final_score),
+            line_score=float(line_score),
+            mean_phase_score=float(mean_phase),
+            mean_amp_score=float(mean_amp),
+            uncertain_count=int(len(uncertain)),
+            locked_count=int(sum(locked)),
+            beam_final_size=1,
+            error="",
+        )
 
     initial_selected = tuple(selected)
     initial_score, initial_line_score, initial_phase, initial_amp = _trajectory_score(

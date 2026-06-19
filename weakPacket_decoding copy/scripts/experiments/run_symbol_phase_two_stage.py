@@ -69,7 +69,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--min-locked-for-line", type=int, default=4)
     parser.add_argument("--line-trim-frac", type=float, default=0.25)
     parser.add_argument("--phase-model", choices=("linear", "quadratic"), default="linear")
-    parser.add_argument("--selection-mode", choices=("override", "smooth", "coherence"), default="coherence")
+    parser.add_argument("--selection-mode", choices=("override", "smooth", "coherence", "window", "window_guarded"), default="coherence")
     parser.add_argument("--beam-width", type=int, default=128)
     parser.add_argument("--trajectory-rmse-scale-pi", type=float, default=0.30)
     parser.add_argument("--trajectory-phase-weight", type=float, default=0.20)
@@ -93,6 +93,24 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--smooth-min-line-anchors", type=int, default=4)
     parser.add_argument("--smooth-min-locked-ratio", type=float, default=0.0)
     parser.add_argument("--smooth-max-line-rmse-pi", type=float, default=float("inf"))
+    parser.add_argument("--window-size", type=int, default=5)
+    parser.add_argument("--window-degree", type=int, choices=(0, 1, 2), default=1)
+    parser.add_argument("--window-phase-weight", type=float, default=0.05)
+    parser.add_argument("--window-amp-weight", type=float, default=0.50)
+    parser.add_argument("--window-coherence-weight", type=float, default=0.90)
+    parser.add_argument("--window-slope-weight", type=float, default=0.00)
+    parser.add_argument("--window-curvature-weight", type=float, default=0.00)
+    parser.add_argument("--window-phase-scale-pi", type=float, default=0.25)
+    parser.add_argument("--window-slope-scale-pi", type=float, default=0.45)
+    parser.add_argument("--window-curvature-scale-pi", type=float, default=0.25)
+    parser.add_argument("--window-recent-decay", type=float, default=0.75)
+    parser.add_argument("--window-anchor-span", type=float, default=8.0)
+    parser.add_argument("--window-anchor-min", type=int, default=2)
+    parser.add_argument("--window-anchor-max-rmse-pi", type=float, default=0.40)
+    parser.add_argument("--window-min-locked-ratio", type=float, default=0.10)
+    parser.add_argument("--window-guard-min-phase-gain", type=float, default=0.10)
+    parser.add_argument("--window-guard-max-energy-drop-db", type=float, default=0.75)
+    parser.add_argument("--window-guard-max-coherence-drop", type=float, default=0.08)
     return parser.parse_args()
 
 
@@ -129,6 +147,24 @@ def build_config(args: argparse.Namespace) -> SymbolPhaseConfig:
         smooth_min_line_anchors=int(args.smooth_min_line_anchors),
         smooth_min_locked_ratio=float(args.smooth_min_locked_ratio),
         smooth_max_line_rmse_pi=float(args.smooth_max_line_rmse_pi),
+        window_size=int(args.window_size),
+        window_degree=int(args.window_degree),
+        window_phase_weight=float(args.window_phase_weight),
+        window_amp_weight=float(args.window_amp_weight),
+        window_coherence_weight=float(args.window_coherence_weight),
+        window_slope_weight=float(args.window_slope_weight),
+        window_curvature_weight=float(args.window_curvature_weight),
+        window_phase_scale_pi=float(args.window_phase_scale_pi),
+        window_slope_scale_pi=float(args.window_slope_scale_pi),
+        window_curvature_scale_pi=float(args.window_curvature_scale_pi),
+        window_recent_decay=float(args.window_recent_decay),
+        window_anchor_span=float(args.window_anchor_span),
+        window_anchor_min=int(args.window_anchor_min),
+        window_anchor_max_rmse_pi=float(args.window_anchor_max_rmse_pi),
+        window_min_locked_ratio=float(args.window_min_locked_ratio),
+        window_guard_min_phase_gain=float(args.window_guard_min_phase_gain),
+        window_guard_max_energy_drop_db=float(args.window_guard_max_energy_drop_db),
+        window_guard_max_coherence_drop=float(args.window_guard_max_coherence_drop),
     )
 
 
@@ -531,6 +567,24 @@ def build_summary(rows: list[dict[str, Any]], args: argparse.Namespace) -> dict[
             "smooth_min_line_anchors": args.smooth_min_line_anchors,
             "smooth_min_locked_ratio": args.smooth_min_locked_ratio,
             "smooth_max_line_rmse_pi": args.smooth_max_line_rmse_pi,
+            "window_size": args.window_size,
+            "window_degree": args.window_degree,
+            "window_phase_weight": args.window_phase_weight,
+            "window_amp_weight": args.window_amp_weight,
+            "window_coherence_weight": args.window_coherence_weight,
+            "window_slope_weight": args.window_slope_weight,
+            "window_curvature_weight": args.window_curvature_weight,
+            "window_phase_scale_pi": args.window_phase_scale_pi,
+            "window_slope_scale_pi": args.window_slope_scale_pi,
+            "window_curvature_scale_pi": args.window_curvature_scale_pi,
+            "window_recent_decay": args.window_recent_decay,
+            "window_anchor_span": args.window_anchor_span,
+            "window_anchor_min": args.window_anchor_min,
+            "window_anchor_max_rmse_pi": args.window_anchor_max_rmse_pi,
+            "window_min_locked_ratio": args.window_min_locked_ratio,
+            "window_guard_min_phase_gain": args.window_guard_min_phase_gain,
+            "window_guard_max_energy_drop_db": args.window_guard_max_energy_drop_db,
+            "window_guard_max_coherence_drop": args.window_guard_max_coherence_drop,
             "uses_packet_structure_prior": False,
             "uses_counter_prior": False,
             "uses_cross_packet_joint_prior": False,

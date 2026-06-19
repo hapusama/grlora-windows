@@ -1,0 +1,21 @@
+{
+  "file_name": "0_0_0_10_14_32.bin",
+  "input_iq": "..\\data\\USRP_IQ\\0_0_0_10_14_32.bin",
+  "symbol_csv": "data\\weak_sync_chain\\header_first\\0_0_0_10_14_32_header_first_symbols.csv",
+  "detected_events": 7,
+  "framesync_valid": 7,
+  "header_valid_packets": 7,
+  "traditional_fft_crc_valid": 7,
+  "traditional_fft_crc_valid_rate": 1.0,
+  "multi_offset_argmax_crc_valid": 7,
+  "multi_offset_argmax_crc_valid_rate": 1.0,
+  "current_selected_crc_valid": 7,
+  "current_selected_crc_valid_rate": 1.0,
+  "savaux_paper_crc_valid": 7,
+  "savaux_paper_crc_valid_rate": 1.0,
+  "savaux_codec_crc_valid": 7,
+  "savaux_codec_crc_valid_rate": 1.0,
+  "savaux_codec_extra_crc_valid_vs_paper": 0,
+  "savaux_codec_mean_symbol_change_count": 0.0,
+  "note": "real IQ CRC/PRR probe only; no byte/symbol GT is used"
+}

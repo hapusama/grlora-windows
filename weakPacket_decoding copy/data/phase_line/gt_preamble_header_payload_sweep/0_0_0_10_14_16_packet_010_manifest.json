@@ -1,0 +1,23 @@
+{
+  "dataset": "0_0_0_10_14_16",
+  "packet": 10,
+  "snrs": [
+    -22.0,
+    -23.0,
+    -24.0,
+    -25.0,
+    -26.0,
+    -27.0
+  ],
+  "symbol_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\weak_sync_chain\\header_first\\0_0_0_10_14_16_header_first_symbols.csv",
+  "sync_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\weak_sync_chain\\sync_chain\\0_0_0_10_14_16_sync_chain.csv",
+  "framesync_peaks_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\weak_sync_chain\\framesync_peaks\\0_0_0_10_14_16_framesync_peaks.csv",
+  "noisy_dir": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\low_snr_gt_bin\\0_0_0_10_14_16_m22_m27_sto_input",
+  "preamble_len": 16,
+  "sf": 10,
+  "front_grid": "fine_payload_backtrack",
+  "sfd_gt_bins": [
+    977,
+    977
+  ]
+}

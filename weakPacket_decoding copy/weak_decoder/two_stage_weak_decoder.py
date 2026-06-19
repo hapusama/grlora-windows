@@ -19,6 +19,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import heapq
+from itertools import combinations, product
 import math
 import time
 from typing import Iterable, Sequence
@@ -26,7 +27,13 @@ from typing import Iterable, Sequence
 import numpy as np
 
 from .chirp import bin_to_grlora_symbol, positive_mod
-from .header_first_demod import bits_to_int, int_to_bits_msb
+from .header_first_demod import (
+    bits_to_int,
+    deinterleave_hard,
+    gray_demapping,
+    hamming_decode_hard,
+    int_to_bits_msb,
+)
 from .payload_codec import (
     WHITENING_SEQ,
     crc16,
@@ -162,7 +169,16 @@ class TwoStageWeakConfig:
     nibble_candidates_per_codeword: int = 4
     row_beam_width: int = 256
     block_candidate_limit: int = 64
+    block_symbol_seed_top_m: int = 0
+    block_symbol_seed_deep_top_l: int = 0
+    block_symbol_seed_max_deep_positions: int = 1
+    block_symbol_seed_quota: int = 0
+    block_symbol_seed_max_combinations: int = 50000
     global_beam_width: int = 64
+    global_rank_diverse_top_r: int = 0
+    global_rank_diverse_beam_width: int = 0
+    global_rank_cost_max: float = 0.0
+    global_rank_cost_state_limit: int = 0
     final_candidate_limit: int = 128
     block_trim_fraction: float = 0.20
     projection_trim_fraction: float = 0.10
@@ -170,7 +186,19 @@ class TwoStageWeakConfig:
     trajectory_score_weight: float = 0.00
     crc_observed_bonus: float = 4.0
     crc_candidate_min_evidence_margin: float = 0.0
-    crc_candidate_max_beam_rank: int = 2048
+    crc_candidate_max_beam_rank: int = 64
+    crc_candidate_high_rank_max_beam_rank: int = 256
+    crc_candidate_high_rank_min_evidence_margin: float = 4.0
+    crc_selection_policy: str = "best_score"  # "best_score", "earliest_rank", "score_unless_low_margin"
+    crc_non_earliest_min_evidence_margin: float = 0.50
+    crc_failure_selection_policy: str = "argmax_fallback"  # "argmax_fallback", "best_score", "small_change_best_score"
+    crc_failure_max_symbol_changes: int = 2
+    crc_failure_min_evidence_margin: float = -0.50
+    crc_state_search_block_top_r: int = 0
+    crc_state_search_state_limit: int = 20000
+    crc_state_search_keep_per_key: int = 1
+    crc_state_search_max_candidates: int = 256
+    crc_state_search_min_evidence_margin: float = 0.0
     crc_mode: str = "grlora"
     argmax_fallback_on_crc_failure: bool = True
 
@@ -228,6 +256,7 @@ class BlockCandidate:
     approx_score: float
     projection_score: float
     total_score: float
+    source: str = "row_beam"
 
 
 @dataclass(order=True)
@@ -238,6 +267,7 @@ class _BeamState:
     symbol_values: tuple[int, ...] = field(compare=False)
     raw_bins: tuple[int, ...] = field(compare=False)
     score: float = field(compare=False)
+    source: str = field(default="score_beam", compare=False)
 
 
 @dataclass(frozen=True)
@@ -436,6 +466,177 @@ def _score_projected_symbol_values(
     return _trimmed_sum(scores, trim_fraction)
 
 
+def _make_block_candidate(
+    block_index: int,
+    nibbles: Sequence[int],
+    codewords: Sequence[int],
+    approx_score: float,
+    block_likelihoods: Sequence[SymbolLikelihood],
+    sf: int,
+    cr: int,
+    ldro: bool,
+    config: TwoStageWeakConfig,
+    source: str = "row_beam",
+) -> BlockCandidate | None:
+    try:
+        symbol_values = _payload_codewords_to_symbol_values(
+            codewords,
+            sf=sf,
+            cr=cr,
+            ldro=ldro,
+        )
+    except ValueError:
+        return None
+    projection_score = _score_projected_symbol_values(
+        symbol_values,
+        block_likelihoods,
+        trim_fraction=config.block_trim_fraction,
+    )
+    raw_bins = tuple(_symbol_value_to_raw_bin(v, sf=sf, ldro=ldro) for v in symbol_values)
+    return BlockCandidate(
+        block_index=int(block_index),
+        nibbles=tuple(int(v) for v in nibbles),
+        codewords=tuple(int(v) for v in codewords),
+        symbol_values=tuple(int(v) for v in symbol_values),
+        raw_bins=tuple(int(v) for v in raw_bins),
+        approx_score=float(approx_score),
+        projection_score=float(projection_score),
+        total_score=float(projection_score),
+        source=str(source),
+    )
+
+
+def _symbol_seed_block_candidates(
+    block_index: int,
+    block_likelihoods: Sequence[SymbolLikelihood],
+    sf: int,
+    cr: int,
+    ldro: bool,
+    config: TwoStageWeakConfig,
+) -> list[BlockCandidate]:
+    """Decode Top-M symbol tuples into extra legal block candidates.
+
+    The row-wise Hamming beam scores each codeword independently.  Near the
+    noise limit, the correct row values can all be present but their joint
+    combination can still be trimmed before projection rescoring.  This seed
+    path starts from the symbol evidence itself, decodes each Top-M tuple
+    through the normal hard deinterleaver/Hamming path, then projects the
+    resulting legal codewords back to symbols before merging with the normal
+    block candidates.
+    """
+
+    top_m = int(getattr(config, "block_symbol_seed_top_m", 0))
+    if top_m <= 1 or not block_likelihoods:
+        return []
+    cw_len = int(cr) + 4
+    if len(block_likelihoods) != cw_len:
+        return []
+    max_combinations = max(1, int(getattr(config, "block_symbol_seed_max_combinations", 50000)))
+    effective_top_m = max(1, int(top_m))
+    while effective_top_m > 1 and int(effective_top_m) ** int(cw_len) > max_combinations:
+        effective_top_m -= 1
+    if effective_top_m <= 1:
+        return []
+
+    value_lists: list[tuple[int, ...]] = []
+    deep_value_lists: list[tuple[int, ...]] = []
+    score_by_value: list[dict[int, float]] = []
+    for likelihood in block_likelihoods:
+        finite = np.isfinite(likelihood.score_by_value)
+        if not np.any(finite):
+            return []
+        order = np.argsort(likelihood.score_by_value)[::-1]
+        values = tuple(int(v) for v in order[: max(1, min(effective_top_m, order.size))] if finite[int(v)])
+        if not values:
+            return []
+        value_lists.append(values)
+        deep_top_l = max(effective_top_m, int(getattr(config, "block_symbol_seed_deep_top_l", 0)))
+        max_deep_positions = max(0, int(getattr(config, "block_symbol_seed_max_deep_positions", 1)))
+        while (
+            deep_top_l > effective_top_m
+            and max_deep_positions > 0
+            and (
+                int(effective_top_m) ** int(cw_len)
+                + int(cw_len) * int(deep_top_l) * (int(effective_top_m) ** max(0, int(cw_len) - 1))
+            )
+            > max_combinations
+        ):
+            deep_top_l -= 1
+        deep_values = tuple(int(v) for v in order[: max(1, min(deep_top_l, order.size))] if finite[int(v)])
+        deep_value_lists.append(deep_values if deep_values else values)
+        score_by_value.append({int(v): float(likelihood.score_symbol(int(v))) for v in deep_values})
+
+    out: list[BlockCandidate] = []
+    sf_app = int(sf) - 2 if bool(ldro) else int(sf)
+    tuple_seen: set[tuple[int, ...]] = set()
+
+    def _symbol_tuple_iter() -> Iterable[tuple[int, ...]]:
+        for values in product(*value_lists):
+            yield tuple(int(v) for v in values)
+
+        deep_top_l = max(effective_top_m, int(getattr(config, "block_symbol_seed_deep_top_l", 0)))
+        max_deep_positions = max(0, int(getattr(config, "block_symbol_seed_max_deep_positions", 1)))
+        if deep_top_l <= effective_top_m or max_deep_positions <= 0:
+            return
+        for depth in range(1, min(cw_len, max_deep_positions) + 1):
+            for deep_positions in combinations(range(cw_len), depth):
+                lists = list(value_lists)
+                for deep_pos in deep_positions:
+                    lists[deep_pos] = tuple(int(v) for v in deep_value_lists[deep_pos][:deep_top_l])
+                for values in product(*lists):
+                    yield tuple(int(v) for v in values)
+
+    for symbol_values in _symbol_tuple_iter():
+        if symbol_values in tuple_seen:
+            continue
+        tuple_seen.add(symbol_values)
+        try:
+            gray_values = gray_demapping(symbol_values)
+            codewords = tuple(
+                int(v)
+                for v in deinterleave_hard(
+                    gray_values,
+                    sf=int(sf),
+                    is_header=False,
+                    cr=int(cr),
+                    ldro=bool(ldro),
+                )
+            )
+            if len(codewords) != sf_app:
+                continue
+            nibbles = tuple(
+                int(v) & 0xF
+                for v in hamming_decode_hard(
+                    codewords,
+                    is_header=False,
+                    cr=int(cr),
+                )
+            )
+            if len(nibbles) != sf_app:
+                continue
+        except Exception:
+            continue
+        approx_score = sum(
+            score_by_value[idx].get(int(symbol_value), float("-inf"))
+            for idx, symbol_value in enumerate(symbol_values)
+        )
+        candidate = _make_block_candidate(
+            block_index=block_index,
+            nibbles=nibbles,
+            codewords=codewords,
+            approx_score=float(approx_score),
+            block_likelihoods=block_likelihoods,
+            sf=sf,
+            cr=cr,
+            ldro=ldro,
+            config=config,
+            source="symbol_seed",
+        )
+        if candidate is not None:
+            out.append(candidate)
+    return out
+
+
 def enumerate_block_candidates(
     block_index: int,
     block_likelihoods: Sequence[SymbolLikelihood],
@@ -469,38 +670,70 @@ def enumerate_block_candidates(
         next_beam.sort(key=lambda item: item[2], reverse=True)
         beam = next_beam[: max(1, int(config.row_beam_width))]
 
-    block_candidates: list[BlockCandidate] = []
+    row_candidates: list[BlockCandidate] = []
     for nibbles, codewords, approx_score in beam:
-        try:
-            symbol_values = _payload_codewords_to_symbol_values(
-                codewords,
+        candidate = _make_block_candidate(
+            block_index=block_index,
+            nibbles=nibbles,
+            codewords=codewords,
+            approx_score=approx_score,
+            block_likelihoods=block_likelihoods,
+            sf=sf,
+            cr=cr,
+            ldro=ldro,
+            config=config,
+        )
+        if candidate is not None:
+            row_candidates.append(candidate)
+
+    seed_candidates: list[BlockCandidate] = []
+    if int(getattr(config, "block_symbol_seed_top_m", 0)) > 1:
+        seed_candidates.extend(
+            _symbol_seed_block_candidates(
+                block_index=block_index,
+                block_likelihoods=block_likelihoods,
                 sf=sf,
                 cr=cr,
                 ldro=ldro,
-            )
-        except ValueError:
-            continue
-        projection_score = _score_projected_symbol_values(
-            symbol_values,
-            block_likelihoods,
-            trim_fraction=config.block_trim_fraction,
-        )
-        raw_bins = tuple(_symbol_value_to_raw_bin(v, sf=sf, ldro=ldro) for v in symbol_values)
-        total_score = float(projection_score)
-        block_candidates.append(
-            BlockCandidate(
-                block_index=int(block_index),
-                nibbles=tuple(int(v) for v in nibbles),
-                codewords=tuple(int(v) for v in codewords),
-                symbol_values=tuple(int(v) for v in symbol_values),
-                raw_bins=tuple(int(v) for v in raw_bins),
-                approx_score=float(approx_score),
-                projection_score=float(projection_score),
-                total_score=total_score,
+                config=config,
             )
         )
+
+    def _dedup(candidates: Sequence[BlockCandidate]) -> list[BlockCandidate]:
+        dedup: dict[tuple[int, ...], BlockCandidate] = {}
+        for candidate in candidates:
+            key = tuple(candidate.nibbles)
+            previous = dedup.get(key)
+            if previous is None or float(candidate.total_score) > float(previous.total_score):
+                dedup[key] = candidate
+        out = list(dedup.values())
+        out.sort(key=lambda item: item.total_score, reverse=True)
+        return out
+
+    row_candidates = _dedup(row_candidates)
+    seed_candidates = _dedup(seed_candidates)
+    limit = max(1, int(config.block_candidate_limit))
+    seed_quota = max(0, min(limit, int(getattr(config, "block_symbol_seed_quota", 0))))
+    if seed_quota <= 0 or not seed_candidates:
+        block_candidates = row_candidates[:limit]
+    else:
+        selected: dict[tuple[int, ...], BlockCandidate] = {}
+        for candidate in seed_candidates[:seed_quota]:
+            key = tuple(candidate.nibbles)
+            selected[key] = candidate
+        for candidate in row_candidates:
+            key = tuple(candidate.nibbles)
+            previous = selected.get(key)
+            if previous is not None:
+                if float(candidate.total_score) > float(previous.total_score):
+                    selected[key] = candidate
+                continue
+            if len(selected) >= limit:
+                continue
+            selected[key] = candidate
+        block_candidates = list(selected.values())
     block_candidates.sort(key=lambda item: item.total_score, reverse=True)
-    return codeword_lists, tuple(block_candidates[: max(1, int(config.block_candidate_limit))])
+    return codeword_lists, tuple(block_candidates[:limit])
 
 
 def _beam_blocks(
@@ -549,6 +782,413 @@ def _beam_blocks(
         if not beam:
             break
     return beam
+
+
+def _rank_diverse_block_states(
+    block_candidates: Sequence[Sequence[BlockCandidate]],
+    top_r: int,
+    beam_width: int,
+) -> list[_BeamState]:
+    """Add low-rank-cost block combinations that a pure score beam can miss."""
+
+    rank_limit = max(0, int(top_r))
+    if rank_limit <= 0 or not block_candidates:
+        return []
+    width = max(1, int(beam_width))
+    usable = [tuple(candidates[:rank_limit]) for candidates in block_candidates if candidates]
+    if len(usable) != len(block_candidates):
+        return []
+
+    seen: set[tuple[int, ...]] = set()
+    beam: list[tuple[float, float, _BeamState]] = [
+        (
+            0.0,
+            0.0,
+            _BeamState(
+                sort_key=0.0,
+                nibbles=(),
+                codewords=(),
+                symbol_values=(),
+                raw_bins=(),
+                score=0.0,
+                source="rank_diverse",
+            ),
+        )
+    ]
+    for candidates in usable:
+        next_beam: list[tuple[float, float, _BeamState]] = []
+        for cost, _neg_score, state in beam:
+            for rank, block in enumerate(candidates):
+                score = float(state.score + block.total_score)
+                rank_cost = float(cost + math.log2(float(rank + 1)))
+                next_beam.append(
+                    (
+                        rank_cost,
+                        -score,
+                        _BeamState(
+                            sort_key=float(rank_cost),
+                            nibbles=state.nibbles + block.nibbles,
+                            codewords=state.codewords + block.codewords,
+                            symbol_values=state.symbol_values + block.symbol_values,
+                            raw_bins=state.raw_bins + block.raw_bins,
+                            score=score,
+                            source="rank_diverse",
+                        ),
+                    )
+                )
+        next_beam.sort(key=lambda item: (item[0], item[1]))
+        beam = next_beam[:width]
+        if not beam:
+            break
+
+    states: list[_BeamState] = []
+    for _cost, _neg_score, state in beam:
+        nibbles: list[int] = []
+        codewords: list[int] = []
+        symbol_values: list[int] = []
+        raw_bins: list[int] = []
+        nibbles.extend(state.nibbles)
+        codewords.extend(state.codewords)
+        symbol_values.extend(state.symbol_values)
+        raw_bins.extend(state.raw_bins)
+        key = tuple(int(v) for v in state.nibbles)
+        if key in seen:
+            continue
+        seen.add(key)
+        states.append(
+            _BeamState(
+                sort_key=state.sort_key,
+                nibbles=tuple(nibbles),
+                codewords=tuple(codewords),
+                symbol_values=tuple(symbol_values),
+                raw_bins=tuple(raw_bins),
+                score=float(state.score),
+                source="rank_diverse",
+            )
+        )
+    return states
+
+
+def _rank_cost_block_states(
+    block_candidates: Sequence[Sequence[BlockCandidate]],
+    top_r: int,
+    max_cost: float,
+    state_limit: int,
+) -> list[_BeamState]:
+    """Enumerate cross-block combinations under a rank-cost budget."""
+
+    rank_limit = max(0, int(top_r))
+    cost_limit = float(max_cost)
+    limit = max(0, int(state_limit))
+    if rank_limit <= 0 or cost_limit <= 0.0 or limit <= 0 or not block_candidates:
+        return []
+    usable = [tuple(candidates[:rank_limit]) for candidates in block_candidates if candidates]
+    if len(usable) != len(block_candidates):
+        return []
+
+    choices: list[list[tuple[float, BlockCandidate]]] = []
+    for candidates in usable:
+        block_choices: list[tuple[float, BlockCandidate]] = []
+        for rank, block in enumerate(candidates):
+            rank_cost = math.log2(float(rank + 1))
+            if rank_cost <= cost_limit:
+                block_choices.append((rank_cost, block))
+        if not block_choices:
+            return []
+        block_choices.sort(key=lambda item: (item[0], -float(item[1].total_score)))
+        choices.append(block_choices)
+
+    states: list[_BeamState] = []
+    emitted_nibbles: set[tuple[int, ...]] = set()
+    visited_patterns: set[tuple[int, ...]] = set()
+    start_pattern = tuple(0 for _ in choices)
+    heap: list[tuple[float, int, tuple[int, ...]]] = [(0.0, 0, start_pattern)]
+    visited_patterns.add(start_pattern)
+    counter = 1
+
+    def _pattern_cost(pattern: Sequence[int]) -> float:
+        return float(sum(choices[idx][rank][0] for idx, rank in enumerate(pattern)))
+
+    while heap and len(states) < limit:
+        cost, _counter, pattern = heapq.heappop(heap)
+        if float(cost) > cost_limit:
+            break
+
+        nibbles: list[int] = []
+        codewords: list[int] = []
+        symbol_values: list[int] = []
+        raw_bins: list[int] = []
+        score = 0.0
+        for block_index, rank in enumerate(pattern):
+            block = choices[block_index][rank][1]
+            nibbles.extend(block.nibbles)
+            codewords.extend(block.codewords)
+            symbol_values.extend(block.symbol_values)
+            raw_bins.extend(block.raw_bins)
+            score += float(block.total_score)
+        key = tuple(int(v) for v in nibbles)
+        if key not in emitted_nibbles:
+            emitted_nibbles.add(key)
+            states.append(
+                _BeamState(
+                    sort_key=float(cost),
+                    nibbles=tuple(nibbles),
+                    codewords=tuple(codewords),
+                    symbol_values=tuple(symbol_values),
+                    raw_bins=tuple(raw_bins),
+                    score=float(score),
+                    source="rank_cost",
+                )
+            )
+
+        for block_index, rank in enumerate(pattern):
+            next_rank = int(rank) + 1
+            if next_rank >= len(choices[block_index]):
+                continue
+            next_pattern_list = list(pattern)
+            next_pattern_list[block_index] = next_rank
+            next_pattern = tuple(next_pattern_list)
+            if next_pattern in visited_patterns:
+                continue
+            next_cost = _pattern_cost(next_pattern)
+            if next_cost > cost_limit:
+                continue
+            visited_patterns.add(next_pattern)
+            heapq.heappush(heap, (float(next_cost), counter, next_pattern))
+            counter += 1
+    return states
+
+
+def _crc16_update_byte(crc: int, byte: int) -> int:
+    """Incremental CRC-16(poly=0x1021, init=0) update for one byte."""
+
+    out = int(crc) & 0xFFFF
+    new_byte = int(byte) & 0xFF
+    for _ in range(8):
+        if (((out & 0x8000) >> 8) ^ (new_byte & 0x80)):
+            out = ((out << 1) ^ 0x1021) & 0xFFFF
+        else:
+            out = (out << 1) & 0xFFFF
+        new_byte = (new_byte << 1) & 0xFF
+    return int(out)
+
+
+def _crc_state_search_states(
+    block_candidates: Sequence[Sequence[BlockCandidate]],
+    header_tail: Sequence[int],
+    payload_len: int,
+    has_crc: bool,
+    crc_mode: str,
+    config: TwoStageWeakConfig,
+) -> list[_BeamState]:
+    """Search block combinations while pruning equivalent byte/CRC states.
+
+    This is an experimental PHY-only backend.  It treats decoded nibbles as a
+    stream, folds complete payload bytes through dewhitening and CRC, and keeps
+    only the strongest paths for identical byte-boundary states.  It avoids any
+    payload template or ground-truth information.
+    """
+
+    top_r = max(0, int(getattr(config, "crc_state_search_block_top_r", 0)))
+    if top_r <= 0 or not block_candidates:
+        return []
+    state_limit = max(1, int(getattr(config, "crc_state_search_state_limit", 20000)))
+    keep_per_key = max(1, int(getattr(config, "crc_state_search_keep_per_key", 1)))
+    max_candidates = max(1, int(getattr(config, "crc_state_search_max_candidates", 256)))
+    has_crc_bool = bool(has_crc)
+    payload_len_i = int(payload_len)
+    total_data_bytes = payload_len_i + (2 if has_crc_bool else 0)
+    total_data_nibbles = total_data_bytes * 2
+    header = tuple(int(v) & 0xF for v in header_tail)
+
+    @dataclass(frozen=True)
+    class _CrcState:
+        nibbles: tuple[int, ...]
+        codewords: tuple[int, ...]
+        symbol_values: tuple[int, ...]
+        raw_bins: tuple[int, ...]
+        score: float
+        byte_index: int
+        pending_low: int
+        crc: int
+        prev_payload_tail: tuple[int, ...]
+
+    def _advance_stream(
+        state: _CrcState,
+        stream_nibbles: Sequence[int],
+        absolute_start: int,
+    ) -> tuple[int, int, int, tuple[int, ...]]:
+        byte_index = int(state.byte_index)
+        pending_low = int(state.pending_low)
+        crc_value = int(state.crc)
+        prev_tail = tuple(int(v) & 0xFF for v in state.prev_payload_tail)
+
+        for rel_offset, value in enumerate(stream_nibbles):
+            offset = int(absolute_start) + int(rel_offset)
+            nibble = int(value) & 0xF
+            if offset % 2 == 0:
+                pending_low = nibble
+                continue
+
+            raw_byte = ((nibble & 0xF) << 4) | (pending_low & 0xF)
+            if byte_index < payload_len_i:
+                whiten = int(WHITENING_SEQ[byte_index])
+                payload_byte = raw_byte ^ whiten
+                if str(crc_mode).lower() == "sx1276":
+                    crc_value = _crc16_update_byte(crc_value, payload_byte)
+                else:
+                    if byte_index >= 2:
+                        crc_value = _crc16_update_byte(crc_value, prev_tail[0])
+                    prev_tail = (prev_tail + (payload_byte,))[-2:]
+            byte_index += 1
+        return byte_index, pending_low, crc_value, prev_tail
+
+    init_state = _CrcState(
+        nibbles=(),
+        codewords=(),
+        symbol_values=(),
+        raw_bins=(),
+        score=0.0,
+        byte_index=0,
+        pending_low=-1,
+        crc=0,
+        prev_payload_tail=(),
+    )
+    init_byte_index, init_pending_low, init_crc, init_prev_tail = _advance_stream(
+        init_state,
+        header,
+        absolute_start=0,
+    )
+
+    def _advance(
+        state: _CrcState,
+        block: BlockCandidate,
+    ) -> _CrcState | None:
+        block_nibbles = tuple(int(v) & 0xF for v in block.nibbles)
+        nibbles = state.nibbles + block_nibbles
+        frame_nibbles = header + nibbles
+        if len(frame_nibbles) > total_data_nibbles:
+            nibbles = nibbles[: max(0, total_data_nibbles - len(header))]
+            block_nibbles = block_nibbles[: max(0, total_data_nibbles - len(header) - len(state.nibbles))]
+            frame_nibbles = header + nibbles
+
+        byte_index, pending_low, crc_value, prev_tail = _advance_stream(
+            state,
+            block_nibbles,
+            absolute_start=len(header) + len(state.nibbles),
+        )
+
+        if len(frame_nibbles) == total_data_nibbles and byte_index >= total_data_bytes:
+            payload, crc_bytes = nibbles_to_dewhitened_bytes(
+                frame_nibbles,
+                payload_len=payload_len_i,
+                has_crc=has_crc_bool,
+            )
+            if len(payload) < payload_len_i:
+                return None
+            crc_ok, _computed, _received = _verify_payload_crc(
+                payload,
+                crc_bytes,
+                has_crc=has_crc_bool,
+                crc_mode=str(crc_mode),
+            )
+            if not crc_ok:
+                return None
+
+        return _CrcState(
+            nibbles=tuple(int(v) for v in nibbles),
+            codewords=state.codewords + tuple(int(v) for v in block.codewords),
+            symbol_values=state.symbol_values + tuple(int(v) for v in block.symbol_values),
+            raw_bins=state.raw_bins + tuple(int(v) for v in block.raw_bins),
+            score=float(state.score + block.total_score),
+            byte_index=byte_index,
+            pending_low=pending_low,
+            crc=crc_value,
+            prev_payload_tail=prev_tail,
+        )
+
+    def _key(state: _CrcState) -> tuple[int, int, int, tuple[int, ...], int]:
+        # Only merge at byte boundaries.  Mid-byte states keep pending_low in
+        # the key to avoid mixing incompatible nibble streams.
+        parity = (len(header) + len(state.nibbles)) & 1
+        return (
+            int(state.byte_index),
+            int(parity),
+            int(state.pending_low) if parity else -1,
+            tuple(int(v) for v in state.prev_payload_tail),
+            int(state.crc),
+        )
+
+    states = [
+        _CrcState(
+            nibbles=(),
+            codewords=(),
+            symbol_values=(),
+            raw_bins=(),
+            score=0.0,
+            byte_index=int(init_byte_index),
+            pending_low=int(init_pending_low),
+            crc=int(init_crc),
+            prev_payload_tail=tuple(init_prev_tail),
+        )
+    ]
+    for candidates in block_candidates:
+        choices = tuple(candidates[:top_r])
+        if not choices:
+            return []
+        buckets: dict[tuple[int, int, int, tuple[int, ...], int], list[_CrcState]] = {}
+        for state in states:
+            for block in choices:
+                next_state = _advance(state, block)
+                if next_state is None:
+                    continue
+                buckets.setdefault(_key(next_state), []).append(next_state)
+        merged: list[_CrcState] = []
+        for bucket in buckets.values():
+            bucket.sort(key=lambda item: item.score, reverse=True)
+            merged.extend(bucket[:keep_per_key])
+        merged.sort(key=lambda item: item.score, reverse=True)
+        states = merged[:state_limit]
+        if not states:
+            break
+
+    out: list[_BeamState] = []
+    seen: set[tuple[int, ...]] = set()
+    for state in sorted(states, key=lambda item: item.score, reverse=True):
+        frame_nibbles = header + state.nibbles
+        payload, crc_bytes = nibbles_to_dewhitened_bytes(
+            frame_nibbles,
+            payload_len=payload_len_i,
+            has_crc=has_crc_bool,
+        )
+        if len(payload) < payload_len_i:
+            continue
+        crc_ok, _computed, _received = _verify_payload_crc(
+            payload,
+            crc_bytes,
+            has_crc=has_crc_bool,
+            crc_mode=str(crc_mode),
+        )
+        if not crc_ok:
+            continue
+        key = tuple(int(v) for v in state.nibbles)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(
+            _BeamState(
+                sort_key=-float(state.score),
+                nibbles=tuple(int(v) for v in state.nibbles),
+                codewords=tuple(int(v) for v in state.codewords),
+                symbol_values=tuple(int(v) for v in state.symbol_values),
+                raw_bins=tuple(int(v) for v in state.raw_bins),
+                score=float(state.score),
+                source="crc_state",
+            )
+        )
+        if len(out) >= max_candidates:
+            break
+    return out
 
 
 def _score_full_payload_projection(
@@ -729,6 +1369,13 @@ def _candidate_evidence_score(
     )
 
 
+def _raw_bin_change_count(
+    left: Sequence[int],
+    right: Sequence[int],
+) -> int:
+    return sum(int(int(a) != int(b)) for a, b in zip(left, right))
+
+
 def _accept_crc_candidate(
     candidate: PayloadBeamCandidate,
     argmax_fallback: PayloadBeamCandidate | None,
@@ -736,16 +1383,35 @@ def _accept_crc_candidate(
 ) -> bool:
     if not candidate.observed_crc_valid:
         return False
-    max_rank = int(config.crc_candidate_max_beam_rank)
-    if max_rank >= 0 and int(candidate.beam_rank) > max_rank:
-        return False
     if argmax_fallback is None:
+        evidence_margin = float("inf")
+    else:
+        evidence_margin = (
+            _candidate_evidence_score(candidate, config)
+            - _candidate_evidence_score(argmax_fallback, config)
+        )
+    if argmax_fallback is None:
+        min_margin_ok = True
+    else:
+        min_margin_ok = bool(
+            evidence_margin >= float(config.crc_candidate_min_evidence_margin)
+        )
+    if not min_margin_ok:
+        return False
+
+    rank = int(candidate.beam_rank)
+    max_rank = int(config.crc_candidate_max_beam_rank)
+    if max_rank < 0 or rank <= max_rank:
         return True
-    margin = float(config.crc_candidate_min_evidence_margin)
-    return (
-        _candidate_evidence_score(candidate, config)
-        >= _candidate_evidence_score(argmax_fallback, config) + margin
-    )
+
+    high_rank_max = int(getattr(config, "crc_candidate_high_rank_max_beam_rank", -1))
+    if high_rank_max < 0 or rank > high_rank_max:
+        if candidate.selection_source == "crc_state":
+            state_margin = float(getattr(config, "crc_state_search_min_evidence_margin", 0.0))
+            return bool(evidence_margin >= state_margin)
+        return False
+    high_rank_margin = float(getattr(config, "crc_candidate_high_rank_min_evidence_margin", float("inf")))
+    return bool(evidence_margin >= high_rank_margin)
 
 
 def decode_two_stage_weak_payload(
@@ -880,6 +1546,35 @@ def decode_two_stage_weak_payload(
 
     t2 = time.perf_counter()
     block_beam = _beam_blocks(block_candidates, cfg.global_beam_width)
+    rank_diverse_states = _rank_diverse_block_states(
+        block_candidates,
+        top_r=int(getattr(cfg, "global_rank_diverse_top_r", 0)),
+        beam_width=int(getattr(cfg, "global_rank_diverse_beam_width", 0) or getattr(cfg, "global_beam_width", 64)),
+    )
+    rank_cost_states = _rank_cost_block_states(
+        block_candidates,
+        top_r=int(getattr(cfg, "global_rank_diverse_top_r", 0)),
+        max_cost=float(getattr(cfg, "global_rank_cost_max", 0.0)),
+        state_limit=int(getattr(cfg, "global_rank_cost_state_limit", 0)),
+    )
+    if rank_diverse_states:
+        seen_nibbles = {tuple(state.nibbles) for state in block_beam}
+        for state in rank_diverse_states:
+            key = tuple(state.nibbles)
+            if key in seen_nibbles:
+                continue
+            block_beam.append(state)
+            seen_nibbles.add(key)
+        block_beam.sort(key=lambda item: item.score, reverse=True)
+    if rank_cost_states:
+        seen_nibbles = {tuple(state.nibbles) for state in block_beam}
+        for state in rank_cost_states:
+            key = tuple(state.nibbles)
+            if key in seen_nibbles:
+                continue
+            block_beam.append(state)
+            seen_nibbles.add(key)
+        block_beam.sort(key=lambda item: item.score, reverse=True)
     timings["global_beam_ms"] = (time.perf_counter() - t2) * 1000.0
 
     t3 = time.perf_counter()
@@ -888,8 +1583,45 @@ def decode_two_stage_weak_payload(
     except Exception:
         header_tail = ()
 
+    t_crc_state = time.perf_counter()
+    crc_state_states = _crc_state_search_states(
+        block_candidates,
+        header_tail=header_tail,
+        payload_len=int(payload_len),
+        has_crc=bool(has_crc),
+        crc_mode=str(cfg.crc_mode),
+        config=cfg,
+    )
+    timings["crc_state_search_ms"] = (time.perf_counter() - t_crc_state) * 1000.0
+
     payload_candidates: list[PayloadBeamCandidate] = []
-    for rank, state in enumerate(block_beam[: max(1, int(cfg.final_candidate_limit))]):
+    final_states: list[_BeamState] = list(block_beam[: max(1, int(cfg.final_candidate_limit))])
+    if rank_diverse_states:
+        seen_nibbles = {tuple(state.nibbles) for state in final_states}
+        for state in rank_diverse_states:
+            key = tuple(state.nibbles)
+            if key in seen_nibbles:
+                continue
+            final_states.append(state)
+            seen_nibbles.add(key)
+    if crc_state_states:
+        seen_nibbles = {tuple(state.nibbles) for state in final_states}
+        for state in crc_state_states:
+            key = tuple(state.nibbles)
+            if key in seen_nibbles:
+                continue
+            final_states.append(state)
+            seen_nibbles.add(key)
+    if rank_cost_states:
+        seen_nibbles = {tuple(state.nibbles) for state in final_states}
+        for state in rank_cost_states:
+            key = tuple(state.nibbles)
+            if key in seen_nibbles:
+                continue
+            final_states.append(state)
+            seen_nibbles.add(key)
+
+    for rank, state in enumerate(final_states):
         frame_nibbles = tuple(header_tail) + tuple(state.nibbles)
         payload, crc_bytes = nibbles_to_dewhitened_bytes(
             frame_nibbles,
@@ -947,7 +1679,7 @@ def decode_two_stage_weak_payload(
                 trajectory_score=float(trajectory_score),
                 total_score=float(total_score),
                 beam_rank=int(rank),
-                selection_source="beam",
+                selection_source=str(state.source),
             )
         )
     payload_candidates.sort(key=lambda item: item.total_score, reverse=True)
@@ -976,9 +1708,42 @@ def decode_two_stage_weak_payload(
         if _accept_crc_candidate(item, argmax_fallback, cfg)
     ]
     if crc_valid_beam:
-        selected = max(crc_valid_beam, key=lambda item: item.total_score)
+        selection_policy = str(getattr(cfg, "crc_selection_policy", "best_score"))
+        best_score_crc = max(crc_valid_beam, key=lambda item: item.total_score)
+        earliest_crc = min(crc_valid_beam, key=lambda item: item.beam_rank)
+        if selection_policy == "earliest_rank":
+            selected = earliest_crc
+        elif selection_policy == "score_unless_low_margin":
+            margin = (
+                _candidate_evidence_score(best_score_crc, cfg)
+                - (_candidate_evidence_score(argmax_fallback, cfg) if argmax_fallback is not None else 0.0)
+            )
+            if (
+                int(best_score_crc.beam_rank) != int(earliest_crc.beam_rank)
+                and margin < float(cfg.crc_non_earliest_min_evidence_margin)
+            ):
+                selected = earliest_crc
+            else:
+                selected = best_score_crc
+        else:
+            selected = best_score_crc
     elif bool(cfg.argmax_fallback_on_crc_failure) and argmax_fallback is not None:
-        selected = argmax_fallback
+        failure_policy = str(getattr(cfg, "crc_failure_selection_policy", "argmax_fallback"))
+        if failure_policy == "best_score" and beam_payload_candidates:
+            selected = max(beam_payload_candidates, key=lambda item: item.total_score)
+        elif failure_policy == "small_change_best_score" and beam_payload_candidates:
+            max_changes = int(getattr(cfg, "crc_failure_max_symbol_changes", 2))
+            min_margin = float(getattr(cfg, "crc_failure_min_evidence_margin", -0.50))
+            fallback_evidence = _candidate_evidence_score(argmax_fallback, cfg)
+            conservative = [
+                item
+                for item in beam_payload_candidates
+                if _raw_bin_change_count(item.raw_bins, argmax_fallback.raw_bins) <= max_changes
+                and _candidate_evidence_score(item, cfg) >= fallback_evidence + min_margin
+            ]
+            selected = max(conservative, key=lambda item: item.total_score) if conservative else argmax_fallback
+        else:
+            selected = argmax_fallback
     else:
         selected = payload_candidates[0] if payload_candidates else None
     if selected is not None:
@@ -993,8 +1758,38 @@ def decode_two_stage_weak_payload(
         "codeword_list_count": int(len(all_codeword_lists)),
         "candidate_payload_count": int(len(beam_payload_candidates)),
         "candidate_payload_count_with_fallback": int(len(payload_candidates)),
+        "rank_diverse_state_count": int(len(rank_diverse_states)),
+        "rank_cost_state_count": int(len(rank_cost_states)),
+        "crc_state_state_count": int(len(crc_state_states)),
+        "final_state_count": int(len(final_states)),
         "observed_crc_valid_count": int(sum(1 for item in beam_payload_candidates if item.observed_crc_valid)),
         "accepted_crc_valid_count": int(len(crc_valid_beam)),
+        "accepted_crc_min_beam_rank": int(min((item.beam_rank for item in crc_valid_beam), default=-1)),
+        "accepted_crc_max_beam_rank": int(max((item.beam_rank for item in crc_valid_beam), default=-1)),
+        "accepted_crc_best_evidence_margin": float(
+            max(
+                (
+                    _candidate_evidence_score(item, cfg)
+                    - (_candidate_evidence_score(argmax_fallback, cfg) if argmax_fallback is not None else 0.0)
+                    for item in crc_valid_beam
+                ),
+                default=0.0,
+            )
+        ),
+        "selected_evidence_margin": float(
+            (
+                _candidate_evidence_score(selected, cfg)
+                - (_candidate_evidence_score(argmax_fallback, cfg) if argmax_fallback is not None else 0.0)
+            )
+            if selected is not None and selected.selection_source != "argmax_fallback"
+            else 0.0
+        ),
+        "selected_is_earliest_accepted_crc": int(
+            selected is not None
+            and selected.selection_source != "argmax_fallback"
+            and bool(crc_valid_beam)
+            and int(selected.beam_rank) == min(item.beam_rank for item in crc_valid_beam)
+        ),
         "selected_source_is_argmax_fallback": int(
             selected is not None and selected.selection_source == "argmax_fallback"
         ),

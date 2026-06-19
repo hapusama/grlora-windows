@@ -1,0 +1,7 @@
+selected_candidates=9
+frame_filter=framesync-valid
+header_valid=9/9
+symbol_rows=432
+payload_rows=360
+wrote=D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding copy\data\baseline_comparison\real_iq_crc_batch_representative_step8_probe4\header_first\1_1_0_11_2_16_header_first_symbols.csv
+wrote_frames=D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding copy\data\baseline_comparison\real_iq_crc_batch_representative_step8_probe4\header_first\1_1_0_11_2_16_header_first_frames.csv

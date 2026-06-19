@@ -1,0 +1,2 @@
+sf,tx_power_dbm,capture_count,ok_capture_count,header_valid_packets,probe_traditional_fft_crc_valid_rate,probe_current_selected_crc_valid_rate,probe_savaux_paper_crc_valid_rate,probe_savaux_codec_crc_valid_rate
+12,14,1,1,9,0.0,0.0,0.0,0.0

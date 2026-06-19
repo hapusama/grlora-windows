@@ -1,0 +1,12 @@
+{
+  "dataset": "0_0_0_10_14_16",
+  "snr_db": -24.0,
+  "symbols": 385,
+  "savaux_ser": 0.1038961038961039,
+  "gt_topk_recall": 0.974025974025974,
+  "wrong_symbols": 40,
+  "would_fix_wrong_symbols": 7,
+  "mean_gt_score_over_arg_db_wrong": -0.9893715444020204,
+  "mean_gt_path_gain_wrong": 0.14083053108822768,
+  "mean_arg_path_gain_wrong": 0.11258103115206977
+}
