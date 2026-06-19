@@ -1,0 +1,17 @@
+{
+  "dataset": "0_0_0_10_14_16",
+  "snr_db": -23.0,
+  "packet": 10,
+  "payload_len": 33,
+  "ser": {
+    "center": 0.7714285714285715,
+    "multi": 0.3142857142857143,
+    "v3": 0.17142857142857143,
+    "phase_line": 0.5142857142857142,
+    "phase_dp_first": 0.08571428571428572,
+    "phase_dp_first_header": 0.08571428571428572,
+    "phase_dp_second": 0.05714285714285714,
+    "phase_dp_second_anchor": 0.05714285714285714
+  },
+  "output_dir": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\phase_path_figures\\0_0_0_10_14_16_snr_m23p0_packet_10"
+}

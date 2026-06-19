@@ -1,0 +1,14 @@
+{
+  "dataset": "0_0_0_10_14_16",
+  "target_snr_db": -24.0,
+  "rows": 385,
+  "gt_recall_top_l": 0.8545454545454545,
+  "mean_gt_energy_rank": 3.6686930091185412,
+  "mean_gt_phase_rank": 12.361702127659575,
+  "mean_gt_combined_rank": 10.869300911854104,
+  "v3_error_rows": 58,
+  "v3_error_mean_gt_phase_rank": 13.086206896551724,
+  "v3_error_mean_gt_combined_rank": 12.89655172413793,
+  "v3_error_gt_phase_rank1_rate": 0.05172413793103448,
+  "v3_error_gt_combined_rank1_rate": 0.034482758620689655
+}

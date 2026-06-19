@@ -1,0 +1,20 @@
+{
+  "dataset": "0_0_0_10_14_16",
+  "target_snr_db": -22.0,
+  "rows": 385,
+  "gt_recall_top_l": 0.9688311688311688,
+  "mean_gt_energy_rank": 1.5576407506702412,
+  "mean_gt_phase_rank": 12.520107238605899,
+  "mean_gt_local_phase_rank": 12.689008042895443,
+  "mean_gt_combined_rank": 10.193029490616622,
+  "mean_gt_local_combined_rank": 10.404825737265416,
+  "v3_error_rows": 11,
+  "v3_error_mean_gt_phase_rank": 12.181818181818182,
+  "v3_error_mean_gt_local_phase_rank": 11.272727272727273,
+  "v3_error_mean_gt_combined_rank": 11.272727272727273,
+  "v3_error_mean_gt_local_combined_rank": 10.818181818181818,
+  "v3_error_gt_phase_rank1_rate": 0.09090909090909091,
+  "v3_error_gt_local_phase_rank1_rate": 0.18181818181818182,
+  "v3_error_gt_combined_rank1_rate": 0.09090909090909091,
+  "v3_error_gt_local_combined_rank1_rate": 0.09090909090909091
+}
