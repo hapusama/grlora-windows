@@ -47,6 +47,37 @@ class PhaseLineSelectorConfig:
     header_reference_weight: float = 0.0
     min_phase_history: int = 2
     line_trim_frac: float = 0.20
+    phase_proposal_enabled: bool = True
+    phase_proposal_use_hard_anchors: bool = False
+    phase_proposal_gated_hard_anchors: bool = True
+    phase_proposal_gated_hard_anchor_min_count: int = 5
+    phase_proposal_gated_hard_anchor_max_count: int = 8
+    phase_proposal_gated_hard_anchor_max_rmse_pi: float = 0.12
+    phase_proposal_rescue_count: int = 4
+    phase_proposal_energy_preselect_count: int = 128
+    phase_proposal_energy_preselect_factor: int = 6
+    phase_proposal_max_energy_drop_db: float = 24.0
+    phase_proposal_min_phase_score: float = 0.25
+    phase_proposal_phase_scale_pi: float = 0.32
+    phase_proposal_phase_weight: float = 0.78
+    phase_proposal_energy_weight: float = 0.18
+    phase_proposal_coherence_weight: float = 0.04
+    phase_proposal_anchor_span_symbols: float = 12.0
+    phase_proposal_anchor_min_count: int = 2
+    phase_proposal_anchor_max_rmse_pi: float = 0.45
+    phase_proposal_coherence_rescue_count: int = 12
+    phase_proposal_coherence_preselect_factor: int = 4
+    phase_proposal_coherence_min_gain: float = 0.10
+    phase_proposal_keep_energy_backup: bool = True
+    extra_coherence_candidates: int = 0
+    extra_coherence_preselect_factor: int = 4
+    extra_coherence_min_gain: float = 0.05
+    phase_proposal_consensus_enabled: bool = False
+    phase_proposal_consensus_top_l: int = 12
+    phase_proposal_consensus_slope_steps: int = 25
+    phase_proposal_consensus_intercept_steps: int = 48
+    phase_proposal_consensus_phase_weight: float = 0.70
+    phase_proposal_consensus_min_score: float = 0.20
 
     def phase_scale_rad(self) -> float:
         return max(1e-6, float(self.phase_scale_pi) * math.pi)
@@ -68,12 +99,21 @@ class PhasePathSelectorConfig:
     """
 
     top_l: int = 24
-    phase_order: int = 2
+    adaptive_top_l_high: int = 40
+    adaptive_top_l_anchor_threshold: int = 10
+    adaptive_top_l_mid: int = 28
+    adaptive_top_l_mid_anchor_threshold: int = 8
+    adaptive_top_l_mid_max_anchor_rmse_pi: float = 0.30
+    adaptive_phase_relax_anchor_threshold: int = 10
+    adaptive_phase_relax_first_order_weight: float = 0.10
+    adaptive_phase_relax_anchor_slope_weight: float = 0.08
+    adaptive_phase_relax_anchor_slope_max_rmse_pi: float = 0.35
+    phase_order: int = 1
     energy_weight: float = 0.35
-    coherence_weight: float = 0.05
-    rank_weight: float = 0.05
-    first_order_weight: float = 0.00
-    second_order_weight: float = 0.45
+    coherence_weight: float = 0.40
+    rank_weight: float = 0.00
+    first_order_weight: float = 0.18
+    second_order_weight: float = 0.00
     first_order_scale_pi: float = 0.75
     second_order_scale_pi: float = 0.35
     huber_delta: float = 1.0
@@ -87,6 +127,75 @@ class PhasePathSelectorConfig:
     header_slope_scale_pi: float = 0.50
     header_slope_span: int = 0
     line_trim_frac: float = 0.20
+    hard_anchor_top_k: int = 1
+    hard_anchor_margin_db: float = 0.0
+    hard_anchor_peak_to_median_db: float = 6.0
+    hard_anchor_min_coherence: float = 0.85
+    hard_anchor_soft_top_k: int = 1
+    hard_anchor_soft_max_margin_db: float = 0.0
+    hard_anchor_soft_max_peak_to_median_db: float = 0.0
+    adaptive_hard_anchor_softening_enabled: bool = True
+    adaptive_hard_anchor_softening_min_count: int = 10
+    adaptive_hard_anchor_softening_max_rmse_pi: float = 0.50
+    adaptive_hard_anchor_softening_top_k: int = 3
+    adaptive_hard_anchor_softening_max_margin_db: float = 0.50
+    adaptive_hard_anchor_softening_max_peak_to_median_db: float = 99.0
+    path_arbiter_enabled: bool = True
+    path_arbiter_first_abs_pi_threshold: float = 0.35
+    path_arbiter_second_abs_pi_threshold: float = 0.42
+    path_arbiter_top_l: int = 24
+    phase_proposal_enabled: bool = True
+    phase_proposal_use_hard_anchors: bool = False
+    phase_proposal_gated_hard_anchors: bool = True
+    phase_proposal_gated_hard_anchor_min_count: int = 5
+    phase_proposal_gated_hard_anchor_max_count: int = 8
+    phase_proposal_gated_hard_anchor_max_rmse_pi: float = 0.12
+    phase_proposal_rescue_count: int = 4
+    phase_proposal_energy_preselect_count: int = 128
+    phase_proposal_energy_preselect_factor: int = 6
+    phase_proposal_max_energy_drop_db: float = 24.0
+    phase_proposal_min_phase_score: float = 0.25
+    phase_proposal_phase_scale_pi: float = 0.32
+    phase_proposal_phase_weight: float = 0.78
+    phase_proposal_energy_weight: float = 0.18
+    phase_proposal_coherence_weight: float = 0.04
+    phase_proposal_anchor_span_symbols: float = 12.0
+    phase_proposal_anchor_min_count: int = 2
+    phase_proposal_anchor_max_rmse_pi: float = 0.45
+    phase_proposal_coherence_rescue_count: int = 12
+    phase_proposal_coherence_preselect_factor: int = 4
+    phase_proposal_coherence_min_gain: float = 0.10
+    phase_proposal_keep_energy_backup: bool = True
+    extra_coherence_candidates: int = 0
+    extra_coherence_preselect_factor: int = 4
+    extra_coherence_min_gain: float = 0.05
+    phase_proposal_consensus_enabled: bool = False
+    phase_proposal_consensus_top_l: int = 12
+    phase_proposal_consensus_slope_steps: int = 25
+    phase_proposal_consensus_intercept_steps: int = 48
+    phase_proposal_consensus_phase_weight: float = 0.70
+    phase_proposal_consensus_min_score: float = 0.20
+    sliding_window_refine_enabled: bool = True
+    sliding_window_radius: int = 6
+    sliding_window_min_anchors: int = 4
+    sliding_window_max_rmse_pi: float = 0.25
+    sliding_window_phase_scale_pi: float = 0.35
+    sliding_window_phase_weight: float = 0.15
+    sliding_window_energy_weight: float = 0.35
+    sliding_window_coherence_weight: float = 0.50
+    sliding_window_min_gain: float = 0.00
+    sliding_window_max_energy_drop_db: float = 24.0
+    sliding_window_max_switch_loss_db: float = 999.0
+    sliding_window_min_coherence_gain: float = -1.0
+    anchor_phase_bias_weight: float = 0.03
+    anchor_phase_bias_span: float = 8.0
+    anchor_phase_bias_min_anchors: int = 3
+    anchor_phase_bias_scale_pi: float = 0.35
+    anchor_phase_bias_max_rmse_pi: float = 0.35
+    anchor_slope_weight: float = 0.05
+    anchor_slope_scale_pi: float = 0.45
+    anchor_slope_min_anchors: int = 4
+    anchor_slope_max_rmse_pi: float = 0.25
 
     def first_order_scale_rad(self) -> float:
         return max(1e-6, float(self.first_order_scale_pi) * math.pi)
@@ -96,3 +205,6 @@ class PhasePathSelectorConfig:
 
     def header_slope_scale_rad(self) -> float:
         return max(1e-6, float(self.header_slope_scale_pi) * math.pi)
+
+    def anchor_slope_scale_rad(self) -> float:
+        return max(1e-6, float(self.anchor_slope_scale_pi) * math.pi)

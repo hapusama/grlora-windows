@@ -1,0 +1,12 @@
+{
+  "dataset": "0_0_0_10_14_16",
+  "target_snr_db": -26,
+  "packet_count": 11,
+  "loratrimmer_symbol_ser": 0.5142857142857143,
+  "loratrimmer_raw_ser": 0.5142857142857143,
+  "loratrimmer_crc_valid_rate": 0.0,
+  "loratrimmer_mean_gt_rank": 13.602597402597402,
+  "cfo_correction_mode": "continuous",
+  "origin_shift": 2,
+  "seconds": 0.902
+}

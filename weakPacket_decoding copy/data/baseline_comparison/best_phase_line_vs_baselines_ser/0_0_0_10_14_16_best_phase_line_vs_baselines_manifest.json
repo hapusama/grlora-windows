@@ -1,0 +1,27 @@
+{
+  "dataset": "0_0_0_10_14_16",
+  "comparison_scope": "Best method from weak_decoder/phase_line plus baselines from weak_decoder/baselines plus Argmax.",
+  "best_phase_line_source": "savaux_phase_symbol_ser",
+  "best_phase_line_label": "Savaux + Phase (unguarded)",
+  "phase_line_candidate_mean_ser": {
+    "legacy_phase_line_symbol_ser": 0.29122077922077916,
+    "savaux_hard_symbol_ser": 0.1656103896103896,
+    "savaux_phase_symbol_ser": 0.1468051948051948,
+    "savaux_guarded_symbol_ser": 0.1605194805194805
+  },
+  "baselines": {
+    "argmax": "center_argmax_symbol_ser from phase_line eval",
+    "savaux": "savaux_hard_symbol_ser / weak_decoder.baselines.savaux_oversampled behavior",
+    "loratrimmer": "rerun on same target dataset seeds, cfo continuous, origin_shift os_factor//2",
+    "symfec": "rerun on same target dataset seeds, evidence_mode multi-offset"
+  },
+  "inputs": {
+    "phase_and_loratrimmer_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\baseline_comparison\\phase_line_current_vs_baselines_ser\\0_0_0_10_14_16_phase_line_current_m22_m26_ser_comparison.csv",
+    "symfec_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\baseline_comparison\\best_phase_line_vs_baselines_ser\\0_0_0_10_14_16_symfec_phase_line_eval_summary.csv"
+  },
+  "outputs": {
+    "csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\baseline_comparison\\best_phase_line_vs_baselines_ser\\0_0_0_10_14_16_best_phase_line_vs_baselines_m22_m26_ser.csv",
+    "png": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\baseline_comparison\\best_phase_line_vs_baselines_ser\\0_0_0_10_14_16_best_phase_line_vs_baselines_m22_m26_ser.png",
+    "pdf": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\baseline_comparison\\best_phase_line_vs_baselines_ser\\0_0_0_10_14_16_best_phase_line_vs_baselines_m22_m26_ser.pdf"
+  }
+}
