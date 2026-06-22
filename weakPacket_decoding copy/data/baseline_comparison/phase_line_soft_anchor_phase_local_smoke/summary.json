@@ -1,0 +1,89 @@
+{
+  "datasets": [
+    "0_0_0_10_14_16"
+  ],
+  "snrs": [
+    -26.0,
+    -24.0
+  ],
+  "manifests": [
+    {
+      "dataset": "0_0_0_10_14_16",
+      "input_iq": "D:\\Desktop\\proj\\gr-lora_sdr\\data\\USRP_IQ\\0_0_0_10_14_16.bin",
+      "symbol_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\weak_sync_chain\\header_first\\0_0_0_10_14_16_header_first_symbols.csv",
+      "packet_count": 11,
+      "signal_reference_power": 7.297427983845209e-05,
+      "seeds": [
+        42
+      ]
+    }
+  ],
+  "summary_rows": [
+    {
+      "dataset": "0_0_0_10_14_16",
+      "target_snr_db": -26.0,
+      "packet_count": 11,
+      "center_argmax_symbol_ser": 0.9532467532467532,
+      "multi_offset_argmax_symbol_ser": 0.7948051948051947,
+      "legacy_phase_line_symbol_ser": 0.625974025974026,
+      "savaux_hard_symbol_ser": 0.37922077922077924,
+      "savaux_phase_symbol_ser": 0.35064935064935066,
+      "savaux_guarded_symbol_ser": 0.37922077922077924,
+      "savaux_phase_gain_vs_savaux": 0.02857142857142857,
+      "savaux_guarded_gain_vs_savaux": 0.0,
+      "savaux_phase_gain_vs_legacy": 0.2753246753246753,
+      "savaux_guarded_gain_vs_legacy": 0.2467532467532468,
+      "stage1_candidate_recall": 0.9298701298701298,
+      "legacy_candidate_recall": 0.6493506493506493,
+      "viterbi_candidate_recall": 0.9298701298701298,
+      "mean_hard_anchor_count": 5.0,
+      "mean_hard_anchor_error_rate": 0.0,
+      "savaux_phase_crc_valid_rate": 0.0,
+      "savaux_guarded_crc_valid_rate": 0.0,
+      "guard_accept_phase_rate": 0.0,
+      "mean_selected_branch_agreement": 0.926547650917206,
+      "noise_seed": 42,
+      "wins_vs_savaux": 9,
+      "ties_vs_savaux": 0,
+      "losses_vs_savaux": 2,
+      "guarded_wins_vs_savaux": 0,
+      "guarded_ties_vs_savaux": 11,
+      "guarded_losses_vs_savaux": 0,
+      "packet_win_rate_vs_savaux": 0.8181818181818182,
+      "guarded_packet_win_rate_vs_savaux": 0.0
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "target_snr_db": -24.0,
+      "packet_count": 11,
+      "center_argmax_symbol_ser": 0.8337662337662337,
+      "multi_offset_argmax_symbol_ser": 0.5168831168831168,
+      "legacy_phase_line_symbol_ser": 0.20519480519480515,
+      "savaux_hard_symbol_ser": 0.14285714285714285,
+      "savaux_phase_symbol_ser": 0.10129870129870128,
+      "savaux_guarded_symbol_ser": 0.13766233766233762,
+      "savaux_phase_gain_vs_savaux": 0.04155844155844155,
+      "savaux_guarded_gain_vs_savaux": 0.005194805194805196,
+      "savaux_phase_gain_vs_legacy": 0.10389610389610388,
+      "savaux_guarded_gain_vs_legacy": 0.06753246753246754,
+      "stage1_candidate_recall": 0.9922077922077922,
+      "legacy_candidate_recall": 0.9038961038961039,
+      "viterbi_candidate_recall": 0.9922077922077922,
+      "mean_hard_anchor_count": 15.909090909090908,
+      "mean_hard_anchor_error_rate": 0.0,
+      "savaux_phase_crc_valid_rate": 0.0,
+      "savaux_guarded_crc_valid_rate": 0.0,
+      "guard_accept_phase_rate": 0.18181818181818182,
+      "mean_selected_branch_agreement": 0.9425314974517209,
+      "noise_seed": 42,
+      "wins_vs_savaux": 9,
+      "ties_vs_savaux": 0,
+      "losses_vs_savaux": 2,
+      "guarded_wins_vs_savaux": 2,
+      "guarded_ties_vs_savaux": 9,
+      "guarded_losses_vs_savaux": 0,
+      "packet_win_rate_vs_savaux": 0.8181818181818182,
+      "guarded_packet_win_rate_vs_savaux": 0.18181818181818182
+    }
+  ]
+}

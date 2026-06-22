@@ -1,0 +1,53 @@
+{
+  "dataset": "0_0_0_10_14_16",
+  "snrs": [
+    -22.0,
+    -23.0,
+    -24.0,
+    -25.0,
+    -26.0
+  ],
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "note": "Strict taxonomy using actual _viterbi_candidates membership, not evidence top_bins membership.",
+  "categories": [
+    "A_savaux_ok_phase_ok",
+    "B_savaux_wrong_phase_rescue",
+    "C_savaux_ok_phase_break",
+    "D_gt_not_in_viterbi_candidates",
+    "E_gt_in_viterbi_candidates_phase_miss",
+    "Z_other"
+  ],
+  "overall": {
+    "dataset": "0_0_0_10_14_16",
+    "target_snr_db": "overall",
+    "seed_count": 5,
+    "snr_count": 5,
+    "symbol_count": 9625,
+    "raw_savaux_ser": 0.1656103896103896,
+    "raw_phase_line_ser": 0.1468051948051948,
+    "symbol_savaux_ser": 0.1656103896103896,
+    "symbol_phase_line_ser": 0.1468051948051948,
+    "stage1_top40_recall": 0.9822337662337662,
+    "actual_viterbi_candidate_recall": 0.9125194805194805,
+    "mean_evidence_topk_size": 40.0,
+    "mean_actual_viterbi_candidate_count": 6.047272727272727,
+    "raw_A_savaux_ok_phase_ok": 7991,
+    "raw_A_savaux_ok_phase_ok_rate": 0.8302337662337662,
+    "raw_B_savaux_wrong_phase_rescue": 221,
+    "raw_B_savaux_wrong_phase_rescue_rate": 0.02296103896103896,
+    "raw_C_savaux_ok_phase_break": 40,
+    "raw_C_savaux_ok_phase_break_rate": 0.004155844155844156,
+    "raw_D_gt_not_in_viterbi_candidates": 842,
+    "raw_D_gt_not_in_viterbi_candidates_rate": 0.08748051948051948,
+    "raw_E_gt_in_viterbi_candidates_phase_miss": 531,
+    "raw_E_gt_in_viterbi_candidates_phase_miss_rate": 0.055168831168831166,
+    "raw_Z_other": 0,
+    "raw_Z_other_rate": 0.0
+  }
+}

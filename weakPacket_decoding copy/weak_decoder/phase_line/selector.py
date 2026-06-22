@@ -852,6 +852,7 @@ def _sliding_window_refine_path(
 def _anchor_phase_prediction_for_path(
     evidences: Sequence[SymbolEvidence],
     anchor_mask: Sequence[bool],
+    phase_reference_mask: Sequence[bool],
     target_index: int,
     config: PhasePathSelectorConfig,
 ) -> tuple[bool, float]:
@@ -862,7 +863,9 @@ def _anchor_phase_prediction_for_path(
     span = max(1e-6, float(config.anchor_phase_bias_span))
     anchors: list[tuple[float, float, float]] = []
     for idx, ev in enumerate(evidences):
-        if idx >= len(anchor_mask) or not bool(anchor_mask[idx]) or idx == idx_target:
+        anchor_ref = idx < len(anchor_mask) and bool(anchor_mask[idx])
+        phase_ref = idx < len(phase_reference_mask) and bool(phase_reference_mask[idx])
+        if (not anchor_ref and not phase_ref) or idx == idx_target:
             continue
         raw_bin = int(ev.top1_bin)
         if raw_bin < 0 or raw_bin >= ev.center_spectrum.size:
@@ -878,12 +881,28 @@ def _anchor_phase_prediction_for_path(
     xs = np.asarray([item[0] for item in anchors], dtype=np.float64)
     phases = np.unwrap(np.asarray([item[1] for item in anchors], dtype=np.float64))
     weights = np.asarray([item[2] for item in anchors], dtype=np.float64)
+    trim_frac = max(0.0, min(0.45, float(getattr(config, "anchor_phase_bias_trim_frac", 0.20))))
     try:
         coef = np.polyfit(xs - target_abs, phases, deg=1, w=weights)
     except np.linalg.LinAlgError:
         return False, 0.0
     fitted = np.polyval(coef, xs - target_abs)
-    rmse_pi = float(math.sqrt(float(np.average((phases - fitted) ** 2, weights=weights))) / math.pi)
+    residual_abs = np.abs(phases - fitted)
+    keep_count = int(round(float(len(residual_abs)) * (1.0 - trim_frac)))
+    keep_count = max(max(2, int(config.anchor_phase_bias_min_anchors)), min(len(residual_abs), keep_count))
+    if keep_count < len(residual_abs):
+        keep = np.argsort(residual_abs)[:keep_count]
+        try:
+            coef = np.polyfit(xs[keep] - target_abs, phases[keep], deg=1, w=weights[keep])
+        except np.linalg.LinAlgError:
+            return False, 0.0
+        fitted = np.polyval(coef, xs[keep] - target_abs)
+        phases_for_rmse = phases[keep]
+        weights_for_rmse = weights[keep]
+    else:
+        phases_for_rmse = phases
+        weights_for_rmse = weights
+    rmse_pi = float(math.sqrt(float(np.average((phases_for_rmse - fitted) ** 2, weights=weights_for_rmse))) / math.pi)
     if math.isfinite(rmse_pi) and rmse_pi > float(config.anchor_phase_bias_max_rmse_pi):
         return False, 0.0
     return True, float(np.polyval(coef, 0.0))
@@ -893,6 +912,7 @@ def _apply_anchor_phase_bias(
     candidates: Sequence[tuple[_ViterbiCandidate, ...]],
     evidences: Sequence[SymbolEvidence],
     anchor_mask: Sequence[bool],
+    phase_reference_mask: Sequence[bool],
     config: PhasePathSelectorConfig,
 ) -> tuple[tuple[_ViterbiCandidate, ...], ...]:
     weight = float(config.anchor_phase_bias_weight)
@@ -904,7 +924,7 @@ def _apply_anchor_phase_bias(
         if idx >= len(evidences) or (idx < len(anchor_mask) and bool(anchor_mask[idx])):
             out.append(tuple(row))
             continue
-        has_pred, predicted = _anchor_phase_prediction_for_path(evidences, anchor_mask, idx, config)
+        has_pred, predicted = _anchor_phase_prediction_for_path(evidences, anchor_mask, phase_reference_mask, idx, config)
         if not has_pred:
             out.append(tuple(row))
             continue
@@ -1360,11 +1380,15 @@ def select_phase_viterbi_path(
                 hard_anchor_soft_max_peak_to_median_db=float(
                     getattr(cfg, "adaptive_hard_anchor_softening_max_peak_to_median_db", 0.0)
                 ),
-            )
+    )
     evidences = _augment_evidences_with_phase_proposals(evidences, proposal_anchor_mask, cfg)
     hard_anchor_mask = tuple(bool(_is_hard_anchor(ev, cfg)) for ev in evidences)
     candidates = tuple(_viterbi_candidates(ev, cfg) for ev in evidences)
-    candidates = _apply_anchor_phase_bias(candidates, evidences, hard_anchor_mask, cfg)
+    phase_reference_mask = tuple(
+        bool(high_confidence_mask[idx] or hard_anchor_mask[idx])
+        for idx in range(len(evidences))
+    )
+    candidates = _apply_anchor_phase_bias(candidates, evidences, hard_anchor_mask, phase_reference_mask, cfg)
     anchor_slope = _estimate_anchor_slope(evidences, hard_anchor_mask, cfg)
     header_slope: float | None = None
     if fallback_line is not None and int(fallback_line.anchor_count) >= 2 and float(cfg.header_slope_weight) > 0.0:

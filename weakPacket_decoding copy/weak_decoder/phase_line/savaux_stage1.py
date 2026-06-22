@@ -1,9 +1,8 @@
-"""Savaux-style Stage-1 evidence for phase-line FFT-bin selection.
+"""为 phase-line 峰选择准备 Savaux 风格的第一阶段证据。
 
-This module keeps the implementation local to ``weak_decoder.phase_line`` while
-reusing the paper OSR spectrum primitive from the existing baseline package.
-It deliberately stops at raw FFT-bin selection: no codec search, CRC feedback,
-payload template, or cross-packet prior is used.
+这个模块放在 ``weak_decoder.phase_line`` 内部实现，同时复用 baseline
+目录里已经实现的论文版过采样频谱计算。这里刻意只做到 raw FFT bin
+选择，不做 codec 搜索、CRC 反馈、payload 模板匹配，也不使用跨包先验。
 """
 
 from __future__ import annotations
@@ -30,7 +29,7 @@ CfoCorrectionMode = Literal["none", "symbol", "continuous"]
 
 @dataclass(frozen=True)
 class SavauxStage1Config:
-    """Parameters for synchronized oversampled Stage-1 evidence."""
+    """同步后的过采样第一阶段证据参数。"""
 
     cfo_correction_mode: CfoCorrectionMode = "continuous"
     origin_shift_samples: int | None = None
@@ -41,7 +40,7 @@ class SavauxStage1Config:
 
 @dataclass(frozen=True)
 class SavauxSymbolEvidence:
-    """Per-symbol Savaux Stage-1 observation."""
+    """单个 symbol 的 Savaux 第一阶段观测结果。"""
 
     symbol_index: int
     start_sample: int
@@ -59,7 +58,7 @@ class SavauxSymbolEvidence:
 
 @dataclass(frozen=True)
 class SavauxStage1PacketEvidence:
-    """Payload-level Stage-1 evidence ready for phase-path selection."""
+    """整段 payload 的第一阶段证据，供后续 phase-line 路径选择使用。"""
 
     symbols: tuple[SavauxSymbolEvidence, ...]
     center_spectra: tuple[np.ndarray, ...]
@@ -70,7 +69,7 @@ class SavauxStage1PacketEvidence:
 
 @dataclass(frozen=True)
 class SavauxPhaseGuardConfig:
-    """Runtime guard for accepting phase-line corrections over Savaux hard bins."""
+    """运行时 guard 参数，用来判断是否接受 phase-line 对 Savaux hard bin 的修正。"""
 
     enabled: bool = True
     min_changed_symbols: int = 1
@@ -83,7 +82,7 @@ class SavauxPhaseGuardConfig:
 
 @dataclass(frozen=True)
 class SavauxPhaseGuardDecision:
-    """Decision and diagnostics for guarded phase-line takeover."""
+    """guard 判断结果以及相关诊断信息。"""
 
     accept_phase: bool
     guarded_bins: tuple[int, ...]
@@ -99,7 +98,7 @@ class SavauxPhaseGuardDecision:
 
 
 def default_savaux_phase_path_config(top_l: int = 16) -> PhasePathSelectorConfig:
-    """Return the conservative phase selector used with Savaux Stage 1."""
+    """返回配合 Savaux 第一阶段使用的保守 phase-line 选择器配置。"""
 
     return PhasePathSelectorConfig(
         top_l=int(top_l),
@@ -109,14 +108,24 @@ def default_savaux_phase_path_config(top_l: int = 16) -> PhasePathSelectorConfig
         rank_weight=0.0,
         first_order_weight=0.08,
         second_order_weight=0.0,
+        top1_soft_bonus=0.0,
         hard_anchor_top_k=1,
-        hard_anchor_margin_db=0.40,
-        hard_anchor_peak_to_median_db=7.0,
-        hard_anchor_min_coherence=0.80,
-        high_confidence_top_k=1,
+        hard_anchor_margin_db=2.50,
+        hard_anchor_peak_to_median_db=12.0,
+        hard_anchor_min_coherence=0.90,
+        hard_anchor_soft_top_k=4,
+        hard_anchor_soft_max_margin_db=99.0,
+        hard_anchor_soft_max_peak_to_median_db=99.0,
+        high_confidence_top_k=4,
         high_confidence_margin_db=1.20,
         high_confidence_peak_to_median_db=9.0,
         high_confidence_min_coherence=0.80,
+        anchor_phase_bias_weight=0.16,
+        anchor_phase_bias_span=10.0,
+        anchor_phase_bias_min_anchors=4,
+        anchor_phase_bias_scale_pi=0.32,
+        anchor_phase_bias_max_rmse_pi=0.40,
+        anchor_phase_bias_trim_frac=0.25,
         sliding_window_refine_enabled=False,
         path_arbiter_enabled=False,
         phase_proposal_enabled=False,
@@ -192,7 +201,7 @@ def evaluate_savaux_phase_guard(
     hard_bins: Sequence[int] | None = None,
     config: SavauxPhaseGuardConfig | None = None,
 ) -> SavauxPhaseGuardDecision:
-    """Return a runtime-only guard decision for phase-line corrections."""
+    """根据运行时诊断决定是否采纳 phase-line 的修正结果。"""
 
     cfg = config or SavauxPhaseGuardConfig()
     phase_bins = tuple(int(v) for v in phase_result.selected_raw_bins)
@@ -263,7 +272,7 @@ def savaux_branch_phase_agreement(
     branch_spectra: Sequence[np.ndarray],
     os_factor: int,
 ) -> np.ndarray:
-    """Return Eq. (37)-aligned branch phase agreement for every raw FFT bin."""
+    """计算每个 raw FFT bin 在 Eq. (37) 相位对齐后的 branch 相位一致性。"""
 
     spectra = [np.asarray(item, dtype=np.complex64) for item in branch_spectra]
     if not spectra:
@@ -313,7 +322,7 @@ def build_savaux_symbol_evidence(
     header_start_sample: int | None = None,
     config: SavauxStage1Config | None = None,
 ) -> SavauxSymbolEvidence:
-    """Build one synchronized Savaux Stage-1 symbol observation."""
+    """构建一个同步后的 Savaux 第一阶段 symbol 观测。"""
 
     cfg = config or SavauxStage1Config()
     os_value = _validate_os_factor(os_factor)
@@ -365,7 +374,7 @@ def build_savaux_stage1_packet_evidence(
     header_start_sample: int | None = None,
     config: SavauxStage1Config | None = None,
 ) -> SavauxStage1PacketEvidence:
-    """Build payload evidence arrays accepted by ``select_phase_viterbi_path``."""
+    """构建 ``select_phase_viterbi_path`` 需要的 payload 证据数组。"""
 
     cfg = config or SavauxStage1Config()
     count = min(len(start_samples), len(abs_indices))
@@ -398,7 +407,7 @@ def payload_abs_indices(
     payload_symbol_indexes: Sequence[int],
     preamble_len: float = 8.0,
 ) -> tuple[float, ...]:
-    """Return the absolute symbol indexes used by the existing phase-line tests."""
+    """返回现有 phase-line 测试使用的绝对 symbol 序号。"""
 
     return tuple(float(preamble_len) + 12.25 + float(idx) for idx in payload_symbol_indexes)
 
@@ -416,7 +425,7 @@ def select_savaux_phase_viterbi_path(
     selector_config: PhasePathSelectorConfig | None = None,
     fallback_line: PhaseLine | None = None,
 ) -> SymbolPhaseResult:
-    """Run Savaux Stage 1 followed by the phase-line Viterbi selector."""
+    """先运行 Savaux 第一阶段，再运行 phase-line 路径选择器。"""
 
     stage1 = build_savaux_stage1_packet_evidence(
         samples=samples,

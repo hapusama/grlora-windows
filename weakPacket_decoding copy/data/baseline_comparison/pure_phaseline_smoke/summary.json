@@ -1,0 +1,74 @@
+{
+  "datasets": [
+    "0_0_0_10_14_16"
+  ],
+  "snrs": [
+    -24.0
+  ],
+  "config": {
+    "candidate_mode": "energy_floor",
+    "energy_floor_db": 24.0,
+    "top_l": 128,
+    "phase_weight": 1.0,
+    "amplitude_weight": 0.05,
+    "refine_iterations": 1,
+    "trim_frac": 0.2,
+    "fallback_line_source": "argmax",
+    "fallback_anchor_fraction": 0.5,
+    "fallback_min_margin_db": 0.0
+  },
+  "spectrum_source": "center",
+  "line_source": "header",
+  "manifests": [
+    {
+      "dataset": "0_0_0_10_14_16",
+      "input_iq": "D:\\Desktop\\proj\\gr-lora_sdr\\data\\USRP_IQ\\0_0_0_10_14_16.bin",
+      "symbol_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\weak_sync_chain\\header_first\\0_0_0_10_14_16_header_first_symbols.csv",
+      "signal_reference_power": 7.297427983845209e-05,
+      "seeds": [
+        42
+      ],
+      "packet_count": 1
+    }
+  ],
+  "summary_rows": [
+    {
+      "dataset": "0_0_0_10_14_16",
+      "target_snr_db": -24.0,
+      "noise_seed": 42,
+      "packet_count": 1,
+      "center_symbol_ser": 0.8571428571428571,
+      "multi_symbol_ser": 0.7142857142857143,
+      "pure_symbol_ser": 0.9428571428571428,
+      "pure_gain_vs_center": -0.08571428571428574,
+      "pure_gain_vs_multi": -0.22857142857142854,
+      "pure_crc_valid_rate": 0.0,
+      "mean_phase_score": 0.9966147218431746,
+      "mean_amp_score": 0.6705215494156799,
+      "mean_candidate_count": 994.7142857142857,
+      "mean_selected_energy_drop_db": -1.94099605490801,
+      "mean_phase_line_r2": 0.9913101368830227,
+      "mean_phase_line_rmse_pi": 0.02432497439584482
+    }
+  ],
+  "aggregate_rows": [
+    {
+      "dataset": "mean",
+      "target_snr_db": -24.0,
+      "noise_seed": "mean",
+      "packet_count": 1,
+      "center_symbol_ser": 0.8571428571428571,
+      "multi_symbol_ser": 0.7142857142857143,
+      "pure_symbol_ser": 0.9428571428571428,
+      "pure_gain_vs_center": -0.08571428571428574,
+      "pure_gain_vs_multi": -0.22857142857142854,
+      "pure_crc_valid_rate": 0.0,
+      "mean_phase_score": 0.9966147218431746,
+      "mean_amp_score": 0.6705215494156799,
+      "mean_candidate_count": 994.7142857142857,
+      "mean_selected_energy_drop_db": -1.94099605490801,
+      "mean_phase_line_r2": 0.9913101368830227,
+      "mean_phase_line_rmse_pi": 0.02432497439584482
+    }
+  ]
+}

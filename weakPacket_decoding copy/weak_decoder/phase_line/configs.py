@@ -192,6 +192,7 @@ class PhasePathSelectorConfig:
     anchor_phase_bias_min_anchors: int = 3
     anchor_phase_bias_scale_pi: float = 0.35
     anchor_phase_bias_max_rmse_pi: float = 0.35
+    anchor_phase_bias_trim_frac: float = 0.20
     anchor_slope_weight: float = 0.05
     anchor_slope_scale_pi: float = 0.45
     anchor_slope_min_anchors: int = 4
