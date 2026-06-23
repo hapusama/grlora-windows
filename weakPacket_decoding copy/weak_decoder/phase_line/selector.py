@@ -45,6 +45,7 @@ class _ViterbiCandidate:
     energy_score: float
     coherence_score: float
     rank_score: float
+    phase_local_score: float = 0.0
 
 
 def _db_ratio(numerator: float, denominator: float) -> float:
@@ -94,6 +95,58 @@ def _is_hard_anchor(ev: SymbolEvidence, config: PhasePathSelectorConfig) -> bool
         and float(ev.top1_margin_db) >= float(config.hard_anchor_margin_db)
         and float(ev.top1_peak_to_median_db) >= float(config.hard_anchor_peak_to_median_db)
         and coherence_ok
+    )
+
+
+def _confidence_blend(ev: SymbolEvidence, config: PhasePathSelectorConfig) -> float:
+    margin_low = float(getattr(config, "adaptive_local_score_margin_low_db", 0.40))
+    margin_high = max(margin_low + 1e-6, float(getattr(config, "adaptive_local_score_margin_high_db", 2.50)))
+    peak_low = float(getattr(config, "adaptive_local_score_peak_low_db", 7.0))
+    peak_high = max(peak_low + 1e-6, float(getattr(config, "adaptive_local_score_peak_high_db", 12.0)))
+    margin_blend = (float(ev.top1_margin_db) - margin_low) / (margin_high - margin_low)
+    peak_blend = (float(ev.top1_peak_to_median_db) - peak_low) / (peak_high - peak_low)
+    value = min(margin_blend, peak_blend)
+    return float(max(0.0, min(1.0, value)))
+
+
+def _local_score_weights(ev: SymbolEvidence, config: PhasePathSelectorConfig) -> tuple[float, float, float, float]:
+    high = (
+        float(config.energy_weight),
+        float(config.coherence_weight),
+        float(getattr(config, "phase_local_weight", 0.0)),
+        float(config.rank_weight),
+    )
+    if not bool(getattr(config, "adaptive_local_score_enabled", False)):
+        return high
+    low = (
+        float(getattr(config, "adaptive_low_conf_energy_weight", high[0])),
+        float(getattr(config, "adaptive_low_conf_coherence_weight", high[1])),
+        float(getattr(config, "adaptive_low_conf_phase_local_weight", high[2])),
+        float(getattr(config, "adaptive_low_conf_rank_weight", high[3])),
+    )
+    blend = _confidence_blend(ev, config)
+    return tuple(float((1.0 - blend) * low[idx] + blend * high[idx]) for idx in range(4))  # type: ignore[return-value]
+
+
+def _candidate_local_score(
+    ev: SymbolEvidence,
+    cand: _ViterbiCandidate,
+    config: PhasePathSelectorConfig,
+    *,
+    high_confidence: bool,
+    hard_anchor: bool,
+) -> float:
+    energy_w, coherence_w, phase_w, rank_w = _local_score_weights(ev, config)
+    bonus = 0.0
+    if int(cand.raw_bin) == int(ev.top1_bin) and (bool(high_confidence) or bool(hard_anchor)):
+        bonus = float(config.top1_soft_bonus)
+    return float(
+        energy_w * float(cand.energy_score)
+        + coherence_w * float(cand.coherence_score)
+        + phase_w * float(cand.phase_local_score)
+        + rank_w * float(cand.rank_score)
+        + bonus
+        - _noise_peak_penalty(ev, cand, config)
     )
 
 
@@ -405,6 +458,43 @@ def _candidate_drop_db(ev: SymbolEvidence, raw_bin: int) -> float:
     return _db_ratio(float(ev.evidence_power[b]), top)
 
 
+def _candidate_energy_gap_db(ev: SymbolEvidence, raw_bin: int) -> float:
+    b = int(raw_bin)
+    if b < 0 or b >= ev.evidence_power.size:
+        return 0.0
+    candidate_power = float(ev.evidence_power[b])
+    if candidate_power <= 0.0:
+        return 0.0
+    competitor = 0.0
+    for raw_other in ev.top_bins:
+        other = int(raw_other)
+        if other == b or other < 0 or other >= ev.evidence_power.size:
+            continue
+        competitor = max(competitor, float(ev.evidence_power[other]))
+    if competitor <= 0.0:
+        return float("inf")
+    return _db_ratio(candidate_power, competitor)
+
+
+def _noise_peak_penalty(ev: SymbolEvidence, cand: _ViterbiCandidate, config: PhasePathSelectorConfig) -> float:
+    if not bool(getattr(config, "noise_peak_penalty_enabled", False)):
+        return 0.0
+    energy = float(cand.energy_score)
+    min_energy = float(getattr(config, "noise_peak_penalty_min_energy", 0.80))
+    if energy <= min_energy:
+        return 0.0
+    energy_excess = (energy - min_energy) / max(1e-6, 1.0 - min_energy)
+    coherence_ref = float(getattr(config, "noise_peak_penalty_coherence_ref", 0.92))
+    phase_ref = float(getattr(config, "noise_peak_penalty_phase_ref", 0.55))
+    gap_ref = float(getattr(config, "noise_peak_penalty_gap_ref_db", 1.50))
+    coherence_deficit = max(0.0, coherence_ref - float(cand.coherence_score)) / max(1e-6, coherence_ref)
+    phase_deficit = max(0.0, phase_ref - float(cand.phase_local_score)) / max(1e-6, phase_ref)
+    gap_db = _candidate_energy_gap_db(ev, int(cand.raw_bin))
+    gap_deficit = max(0.0, gap_ref - gap_db) / max(1e-6, gap_ref)
+    suspicion = max(coherence_deficit, 0.5 * coherence_deficit + 0.3 * phase_deficit + 0.2 * gap_deficit)
+    return float(getattr(config, "noise_peak_penalty_weight", 0.0)) * float(energy_excess) * float(suspicion)
+
+
 def _viterbi_candidates(ev: SymbolEvidence, config: PhasePathSelectorConfig) -> tuple[_ViterbiCandidate, ...]:
     top_l = max(1, int(config.top_l))
     bins = [int(v) for v in ev.top_bins[:top_l]]
@@ -472,14 +562,16 @@ def _viterbi_candidates(ev: SymbolEvidence, config: PhasePathSelectorConfig) -> 
         energy = _energy_score(ev, b)
         coherence = _coherence_score(ev, b)
         rank_score = 1.0 - float(rank) / float(rank_den)
-        bonus = 0.0
-        if b == int(ev.top1_bin) and (_is_high_confidence(ev, config) or hard_anchor):
-            bonus = float(config.top1_soft_bonus)
+        high_confidence = _is_high_confidence(ev, config)
         local = (
             float(config.energy_weight) * energy
             + float(config.coherence_weight) * coherence
             + float(config.rank_weight) * rank_score
-            + bonus
+            + (
+                float(config.top1_soft_bonus)
+                if b == int(ev.top1_bin) and (high_confidence or hard_anchor)
+                else 0.0
+            )
         )
         out.append(
             _ViterbiCandidate(
@@ -489,6 +581,7 @@ def _viterbi_candidates(ev: SymbolEvidence, config: PhasePathSelectorConfig) -> 
                 energy_score=float(energy),
                 coherence_score=float(coherence),
                 rank_score=float(rank_score),
+                phase_local_score=0.0,
             )
         )
     if not out:
@@ -501,6 +594,7 @@ def _viterbi_candidates(ev: SymbolEvidence, config: PhasePathSelectorConfig) -> 
                 energy_score=float(_energy_score(ev, b)),
                 coherence_score=float(_coherence_score(ev, b)),
                 rank_score=1.0,
+                phase_local_score=0.0,
             )
         )
     return tuple(out)
@@ -932,14 +1026,35 @@ def _apply_anchor_phase_bias(
         for cand in row:
             residual = float(wrap_phase(float(cand.phase) - predicted))
             phase_score = float(math.exp(-((residual / phase_scale) ** 2)))
+            candidate_with_phase = _ViterbiCandidate(
+                raw_bin=int(cand.raw_bin),
+                phase=float(cand.phase),
+                local_score=float(cand.local_score),
+                energy_score=float(cand.energy_score),
+                coherence_score=float(cand.coherence_score),
+                rank_score=float(cand.rank_score),
+                phase_local_score=float(phase_score),
+            )
             adjusted.append(
                 _ViterbiCandidate(
                     raw_bin=int(cand.raw_bin),
                     phase=float(cand.phase),
-                    local_score=float(cand.local_score + weight * phase_score),
+                    local_score=float(
+                        _candidate_local_score(
+                            evidences[idx],
+                            candidate_with_phase,
+                            config,
+                            high_confidence=_is_high_confidence(evidences[idx], config),
+                            hard_anchor=idx < len(anchor_mask) and bool(anchor_mask[idx]),
+                        )
+                        if bool(getattr(config, "adaptive_local_score_enabled", False))
+                        or float(getattr(config, "phase_local_weight", 0.0)) > 0.0
+                        else cand.local_score + weight * phase_score
+                    ),
                     energy_score=float(cand.energy_score),
                     coherence_score=float(cand.coherence_score),
                     rank_score=float(cand.rank_score),
+                    phase_local_score=float(phase_score),
                 )
             )
         out.append(tuple(adjusted))
@@ -1501,6 +1616,7 @@ def select_phase_viterbi_path(
                 energy_score=0.0,
                 coherence_score=0.0,
                 rank_score=0.0,
+                phase_local_score=0.0,
             )
             curr = _ViterbiCandidate(
                 raw_bin=int(raw_bin),
@@ -1509,6 +1625,7 @@ def select_phase_viterbi_path(
                 energy_score=0.0,
                 coherence_score=0.0,
                 rank_score=0.0,
+                phase_local_score=0.0,
             )
             prevprev = None
             if idx >= 2:
@@ -1519,6 +1636,7 @@ def select_phase_viterbi_path(
                     energy_score=0.0,
                     coherence_score=0.0,
                     rank_score=0.0,
+                    phase_local_score=0.0,
                 )
             phase_penalties.append(_transition_penalty(prevprev, prev, curr, cfg))
     mean_amp = float(np.mean(amp_scores)) if amp_scores else 0.0

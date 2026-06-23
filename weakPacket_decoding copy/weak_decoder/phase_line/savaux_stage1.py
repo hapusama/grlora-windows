@@ -103,8 +103,9 @@ def default_savaux_phase_path_config(top_l: int = 16) -> PhasePathSelectorConfig
     return PhasePathSelectorConfig(
         top_l=int(top_l),
         phase_order=1,
-        energy_weight=0.70,
-        coherence_weight=0.20,
+        energy_weight=0.65,
+        coherence_weight=0.15,
+        phase_local_weight=0.15,
         rank_weight=0.0,
         first_order_weight=0.08,
         second_order_weight=0.0,
