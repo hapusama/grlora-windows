@@ -22,7 +22,13 @@ the current recommended path.
 
 2026-06-20 evening
   Savaux synchronized oversampled Stage 1 plus guarded phase takeover became
-  the active implementation.  See ../../SAVAUX_STAGE1_SELECTOR_REPORT_2026-06-20.md.
+  the active implementation.  See SAVAUX_STAGE1_SELECTOR_REPORT_2026-06-20.md.
+
+2026-06-26 to 2026-06-27
+  Stage-2 bidirectional rerank, adaptive island, and anchor-bounded island
+  variants were split into separate variant folders.
+  Result: useful fallback/arbiter evidence, but still weaker than the v1
+  one-order DP baseline on the measured weak-packet fixtures.
 ```
 
 ## Archived Files
@@ -44,6 +50,16 @@ VITERBI_DP_NOTES_2026-06-19.md
 PHASE_PROPOSAL_RESCUE_REPORT_2026-06-20.md
   Proposal rescue and adaptive Top-L experiments before switching to Savaux
   Stage 1.
+
+SAVAUX_STAGE1_SELECTOR_REPORT_2026-06-20.md
+  Final Savaux Stage-1 selector report for the guarded selector generation.
+
+STAGE2_BIDIRECTIONAL_RERANK_REPORT_2026-06-26.md
+  Bidirectional rerank fallback and arbiter experiment report.
+
+STAGE2_ADAPTIVE_ISLAND_REPORT_2026-06-27.md
+  Adaptive island experiment report before the newer island-DP reconstruction
+  branch.
 ```
 
 ## Current Entry Points
@@ -52,5 +68,6 @@ Return to:
 
 ```text
 ../../README.md
-../../SAVAUX_STAGE1_SELECTOR_REPORT_2026-06-20.md
+../README.md
+SAVAUX_STAGE1_SELECTOR_REPORT_2026-06-20.md
 ```

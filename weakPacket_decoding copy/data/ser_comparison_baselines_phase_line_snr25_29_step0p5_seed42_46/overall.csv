@@ -1,0 +1,2 @@
+dataset,packet_count,symbol_count,savaux_oversampled_err,loratrimmer_err,symfec_err,unichirp_err,phaseline_one_order_dp_err,phaseline_island_dp_err,savaux_oversampled_ser,loratrimmer_ser,symfec_ser,unichirp_ser,phaseline_one_order_dp_ser,phaseline_island_dp_ser
+0_0_0_10_14_32,315,11025,977,1069,1443,1869,958,927,0.08861678004535148,0.09696145124716553,0.1308843537414966,0.16952380952380952,0.08689342403628118,0.08408163265306122

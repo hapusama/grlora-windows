@@ -1,8 +1,18 @@
 # Phase-Line FFT-Bin Selection
 
-This directory contains the current weak-packet raw FFT-bin selector.  The
-active design is no longer a phase-only replacement for the baseline.  It is a
-guarded selector:
+This directory contains the current weak-packet raw FFT-bin selector family.
+The 2026-06-27 direction review split the code by Stage-2 variant so the
+winning baseline, older conservative paths, and new island-DP research branch
+can evolve independently.
+
+The strongest research baseline is:
+
+```text
+Savaux synchronized oversampled hard bin evidence
++ forward one-order phase Viterbi over Stage-1 candidates
+```
+
+The older production-safe path is still available as a guarded selector:
 
 ```text
 Savaux synchronized oversampled hard bin
@@ -15,7 +25,7 @@ cross-packet priors, or ground-truth bins during selection.
 
 ## Current Status
 
-Final validated configuration:
+Historical validated conservative configuration:
 
 ```text
 Stage 1: Savaux-style synchronized oversampled branch DFT evidence
@@ -24,10 +34,20 @@ Guard: accept phase correction only when it is small and self-consistent
 Fallback: Savaux hard argmax
 ```
 
-The final report is:
+The later Stage-2 handoff in `notes/handoffs/` found that the unguarded v1
+one-order DP remains the main baseline to beat. Stable/adaptive island variants
+reduced breakage, but did not beat v1 SER on the measured sets.
+
+The current island-DP / multi-origin experiment summary is:
 
 ```text
-SAVAUX_STAGE1_SELECTOR_REPORT_2026-06-20.md
+docs/孤岛DP实验总结与实现差异.md
+```
+
+The final report is archived under docs:
+
+```text
+docs/history/SAVAUX_STAGE1_SELECTOR_REPORT_2026-06-20.md
 ```
 
 Across the final 75 dataset/SNR/seed groups and 700 paired packet comparisons:
@@ -61,9 +81,39 @@ trajectory.py
   likelihood helpers.
 
 selector.py
-  Low-level phase selectors.  The important active primitive is
-  select_phase_viterbi_path(...).  Older smooth/local-anchor machinery remains
-  here for diagnostics and ablations.
+  Compatibility shim for old imports, including diagnostic scripts that import
+  private helpers. The legacy monolithic implementation now lives under
+  variants/_legacy_core/selector.py.
+
+variants/v1_one_order_dp/
+  Current best Stage-2 baseline:
+  select_phase_viterbi_path(...).
+
+variants/anchor_bounded_island/
+  Stable hard-anchor island Viterbi experiment. Safer, but weaker than v1 in
+  the 2026-06-27 handoff.
+
+variants/bidirectional_rerank/
+  Bidirectional anchor-profile reranking fallback/arbiter candidate.
+
+variants/adaptive_island/
+  Stable/aggressive/rewrite island dispatch, decisions, and profiles.
+
+variants/rewrite_island/
+  Explicit permissive island rewrite variant. Kept separate because previous
+  tests showed large break counts.
+
+variants/v1_risk_arbiter/
+  v1 trajectory-risk gate with bidirectional fallback.
+
+variants/island_dp_reconstruction/
+  New experimental anchor-locked island DP branch. It locks high-confidence
+  Stage-1 symbols, partitions low-confidence intervals, and exposes
+  compute_two_segment_score(...) for future symbol-internal coherent
+  reconstruction.
+
+docs/
+  Documentation index and current experiment summaries.
 
 savaux_stage1.py
   Current active Stage-1 and guarded selector support:
@@ -73,6 +123,11 @@ savaux_stage1.py
     default_savaux_phase_path_config(...)
     evaluate_savaux_phase_guard(...)
     select_savaux_phase_viterbi_path(...)
+    select_savaux_island_reconstruction_viterbi_path(...)
+
+  Stage-1 packet evidence now also exposes branch_spectra and optional
+  dechirped_symbols. Use SavauxStage1Config(retain_dechirped_symbols=True) when
+  the island reconstruction branch needs true two-segment coherent scoring.
 
 _eval/diagnose_savaux_stage1_selector.py
   Reproducible diagnostic runner.  It reports center argmax, multi-offset

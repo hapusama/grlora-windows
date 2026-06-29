@@ -205,8 +205,13 @@ def load_packets(symbol_csv: Path, packet_filter: int | None) -> dict[int, dict[
             packet["payload_symbols"].append(
                 {
                     "payload_symbol_index": stage_symbol_index,
+                    "frame_symbol_index": _int(row, "frame_symbol_index", stage_symbol_index + 8),
                     "start_sample": _int(row, "start_sample", 0),
                     "gt_bin": _int(row, "raw_fft_bin", -1),
+                    "sto_frac": _float(row, "sto_frac", 0.0),
+                    "sfo_hat": _float(row, "sfo_hat", 0.0),
+                    "sfo_cum_before": _float(row, "sfo_cum_before", 0.0),
+                    "sfo_sample_adjust_after": _int(row, "sfo_sample_adjust_after", 0),
                 }
             )
 

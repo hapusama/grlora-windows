@@ -1,0 +1,2 @@
+dataset,snr_db,seed,packet_count,symbol_count,hard_ser,v1_ser,island_ser,island_gain_vs_v1,island_gain_vs_hard,rescue_vs_v1,break_vs_v1,rescue_vs_hard,break_vs_hard,locked_e3_count,mean_island_locked_count,mean_island_uncertain_count,mean_island_beam_final_size
+0_0_0_10_14_16,-25.0,42,1,35,0.0,0.0,0.0,0.0,0.0,0,0,0,0,0,0.0,35.0,1120.0

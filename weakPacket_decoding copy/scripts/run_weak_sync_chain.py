@@ -386,6 +386,33 @@ def write_chain_csv(path: Path, rows: list[dict[str, object]]) -> None:
         "grlora_fine_preamble_peak_max_abs_signed_bin",
         "grlora_fine_preamble_bin0_count",
         "grlora_fine_preamble_peak_count",
+        "grlora_center_sample_phase",
+        "grlora_branch_sample_phases",
+        "grlora_branch_valid",
+        "grlora_branch_down_val_valid",
+        "grlora_branch_cfo_frac_est",
+        "grlora_branch_sto_frac_initial",
+        "grlora_branch_sto_frac_refined",
+        "grlora_branch_sto_frac_used",
+        "grlora_branch_sto_sample_correction",
+        "grlora_branch_cfo_int_est",
+        "grlora_branch_down_val_signed_bin",
+        "grlora_branch_cfo_total_est",
+        "grlora_branch_cfo_hz_est",
+        "grlora_branch_sfo_hat",
+        "grlora_branch_sfo_samples_per_symbol",
+        "grlora_branch_clk_off",
+        "grlora_branch_fs_p",
+        "grlora_branch_netid_sto_frac_est",
+        "grlora_branch_payload_sto_frac_est",
+        "grlora_branch_payload_sto_sample_correction",
+        "grlora_branch_netid1_est",
+        "grlora_branch_netid2_est",
+        "grlora_branch_netid_offset",
+        "grlora_branch_netid_valid",
+        "grlora_branch_sfo_cum_initial",
+        "grlora_branch_fine_preamble_start_sample",
+        "grlora_branch_fine_payload_start_sample",
         "grlora_spectrum_chirps",
         "grlora_spectrum_raw_peak_signed_bin",
         "grlora_spectrum_peak_signed_bin",
@@ -441,6 +468,14 @@ def write_framesync_peaks_csv(path: Path, rows: list[tuple[int, int, FrameSyncPe
                     "peak_share": peak.peak_share,
                 }
             )
+
+
+def _join_vector(values: list[object] | tuple[object, ...]) -> str:
+    return "|".join(str(item) for item in values)
+
+
+def _branch_vector(frame_sync: GrloraFrameSyncResult, attr: str) -> str:
+    return _join_vector([getattr(item, attr) for item in frame_sync.branch_sync_estimates])
 
 
 def result_to_row(
@@ -534,6 +569,33 @@ def result_to_row(
         "grlora_fine_preamble_peak_max_abs_signed_bin": frame_sync.fine_preamble_peak_max_abs_signed_bin,
         "grlora_fine_preamble_bin0_count": frame_sync.fine_preamble_bin0_count,
         "grlora_fine_preamble_peak_count": frame_sync.fine_preamble_peak_count,
+        "grlora_center_sample_phase": int(detector_config.os_factor / 2),
+        "grlora_branch_sample_phases": _branch_vector(frame_sync, "sample_phase"),
+        "grlora_branch_valid": _join_vector([int(item.valid) for item in frame_sync.branch_sync_estimates]),
+        "grlora_branch_down_val_valid": _join_vector([int(item.down_val_valid) for item in frame_sync.branch_sync_estimates]),
+        "grlora_branch_cfo_frac_est": _branch_vector(frame_sync, "cfo_frac_est"),
+        "grlora_branch_sto_frac_initial": _branch_vector(frame_sync, "sto_frac_initial"),
+        "grlora_branch_sto_frac_refined": _branch_vector(frame_sync, "sto_frac_refined"),
+        "grlora_branch_sto_frac_used": _branch_vector(frame_sync, "sto_frac_used"),
+        "grlora_branch_sto_sample_correction": _branch_vector(frame_sync, "sto_sample_correction"),
+        "grlora_branch_cfo_int_est": _branch_vector(frame_sync, "cfo_int_est"),
+        "grlora_branch_down_val_signed_bin": _branch_vector(frame_sync, "down_val_signed_bin"),
+        "grlora_branch_cfo_total_est": _branch_vector(frame_sync, "cfo_total_est"),
+        "grlora_branch_cfo_hz_est": _branch_vector(frame_sync, "cfo_hz_est"),
+        "grlora_branch_sfo_hat": _branch_vector(frame_sync, "sfo_hat"),
+        "grlora_branch_sfo_samples_per_symbol": _branch_vector(frame_sync, "sfo_samples_per_symbol"),
+        "grlora_branch_clk_off": _branch_vector(frame_sync, "clk_off"),
+        "grlora_branch_fs_p": _branch_vector(frame_sync, "fs_p"),
+        "grlora_branch_netid_sto_frac_est": _branch_vector(frame_sync, "netid_sto_frac_est"),
+        "grlora_branch_payload_sto_frac_est": _branch_vector(frame_sync, "payload_sto_frac_est"),
+        "grlora_branch_payload_sto_sample_correction": _branch_vector(frame_sync, "payload_sto_sample_correction"),
+        "grlora_branch_netid1_est": _branch_vector(frame_sync, "netid1_est"),
+        "grlora_branch_netid2_est": _branch_vector(frame_sync, "netid2_est"),
+        "grlora_branch_netid_offset": _branch_vector(frame_sync, "netid_offset"),
+        "grlora_branch_netid_valid": _join_vector([int(item.netid_valid) for item in frame_sync.branch_sync_estimates]),
+        "grlora_branch_sfo_cum_initial": _branch_vector(frame_sync, "sfo_cum_initial"),
+        "grlora_branch_fine_preamble_start_sample": _branch_vector(frame_sync, "fine_preamble_start_sample"),
+        "grlora_branch_fine_payload_start_sample": _branch_vector(frame_sync, "fine_payload_start_sample"),
     }
 
 

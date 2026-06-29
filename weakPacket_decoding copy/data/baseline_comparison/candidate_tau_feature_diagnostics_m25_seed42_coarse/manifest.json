@@ -1,0 +1,21 @@
+{
+  "dataset": "0_0_0_10_14_16",
+  "snrs": [
+    -25.0
+  ],
+  "seeds": [
+    42
+  ],
+  "packet": null,
+  "top_l": 16,
+  "stage1_top_k": 24,
+  "tau_grid_step": 0.125,
+  "phase_sign": "plus",
+  "cfo_correction_mode": "continuous",
+  "signal_reference_power": 7.296177892314805e-05,
+  "signal_power_source": "payload_reference_power",
+  "row_count": 4786,
+  "symbol_row_count": 385,
+  "input_iq": "D:\\Desktop\\proj\\gr-lora_sdr\\data\\USRP_IQ\\0_0_0_10_14_16.bin",
+  "symbol_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding copy\\data\\weak_sync_chain\\header_first\\0_0_0_10_14_16_header_first_symbols.csv"
+}

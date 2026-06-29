@@ -14,14 +14,29 @@ from typing import Literal, Sequence
 import numpy as np
 
 from ..baselines.savaux_oversampled.paper_oversampled_demod import (
+    _oversampled_downchirp,
     paper_oversampled_spectrum,
 )
 from ..candidate_pruning import top_bins
 from ..phase_guided_demod import PhaseLine
 from ..symbol_phase_two_stage import SymbolPhaseResult
 from .configs import PhasePathSelectorConfig
-from .selector import select_phase_viterbi_path
+from .selector import (
+    select_anchor_bounded_bidirectional_rerank_path,
+    select_anchor_bounded_island_viterbi_path,
+    select_phase_viterbi_path,
+)
+from .stage2_arbiter import select_v1_risk_arbiter_path
+from .stage2_variants import (
+    Stage2VariantDecision,
+    select_adaptive_aggressive_island_viterbi_path,
+    select_rewrite_island_viterbi_path,
+)
 from .trajectory import fit_selected_phase_line
+from .variants.island_dp_reconstruction import (
+    IslandReconstructionConfig,
+    select_island_reconstruction_viterbi_path,
+)
 
 
 CfoCorrectionMode = Literal["none", "symbol", "continuous"]
@@ -36,6 +51,11 @@ class SavauxStage1Config:
     top_k: int = 24
     branch_agreement_power: float = 0.0
     normalize_power: bool = False
+    residual_sto_phase_correction: bool = False
+    residual_sto_phase_sign: Literal["plus", "minus"] = "plus"
+    residual_sto_preselect_factor: int = 4
+    residual_sto_update_power: bool = False
+    retain_dechirped_symbols: bool = False
 
 
 @dataclass(frozen=True)
@@ -54,6 +74,7 @@ class SavauxSymbolEvidence:
     top1_bin: int
     top1_margin_db: float
     top1_peak_to_median_db: float
+    dechirped_oversampled: np.ndarray | None = None
 
 
 @dataclass(frozen=True)
@@ -65,6 +86,8 @@ class SavauxStage1PacketEvidence:
     evidence_powers: tuple[np.ndarray, ...]
     abs_indices: tuple[float, ...]
     branch_phase_agreements: tuple[np.ndarray, ...]
+    branch_spectra: tuple[tuple[np.ndarray, ...], ...]
+    dechirped_symbols: tuple[np.ndarray | None, ...]
 
 
 @dataclass(frozen=True)
@@ -269,6 +292,87 @@ def _validate_os_factor(os_factor: int) -> int:
     return value
 
 
+def _wrap_half(value: float) -> float:
+    return float((float(value) + 0.5) % 1.0 - 0.5)
+
+
+def _prepare_dechirped_oversampled_symbol(
+    samples: np.ndarray,
+    start_sample: int,
+    sf: int,
+    os_factor: int,
+    cfo_int: int,
+    cfo_frac: float,
+    header_start_sample: int | None,
+    cfo_correction_mode: CfoCorrectionMode,
+) -> np.ndarray:
+    n_bins = 1 << int(sf)
+    os_value = _validate_os_factor(os_factor)
+    start = int(start_sample)
+    stop = start + n_bins * os_value
+    if start < 0 or stop > np.asarray(samples).size:
+        raise ValueError(f"symbol at {start_sample} exceeds input sample range")
+
+    mode = str(cfo_correction_mode)
+    symbol = np.asarray(samples[start:stop], dtype=np.complex64)
+    use_cfo_int = int(cfo_int) if mode in {"symbol", "continuous"} else 0
+    use_cfo_frac = float(cfo_frac) if mode in {"symbol", "continuous"} else 0.0
+    if mode == "continuous":
+        if header_start_sample is None:
+            raise ValueError("header_start_sample is required for continuous CFO correction")
+        cfo_total = float(cfo_int) + float(cfo_frac)
+        relative_chip_start = float(start - int(header_start_sample)) / float(os_value)
+        cfo_common_phase_rad = float(2.0 * math.pi * cfo_total * relative_chip_start / n_bins)
+        symbol = (symbol * np.exp(-1j * cfo_common_phase_rad)).astype(np.complex64)
+
+    downchirp = _oversampled_downchirp(
+        sf=sf,
+        os_factor=os_value,
+        cfo_int=use_cfo_int,
+        cfo_frac=use_cfo_frac,
+    )
+    return (symbol * downchirp).astype(np.complex64)
+
+
+def _sto_phase_corrected_bin_value(
+    dechirped: np.ndarray,
+    raw_bin: int,
+    os_factor: int,
+    residual_sto_chips: float,
+    phase_sign: Literal["plus", "minus"],
+) -> complex:
+    os_value = _validate_os_factor(os_factor)
+    full = np.asarray(dechirped, dtype=np.complex64)
+    if full.size % os_value != 0:
+        raise ValueError("dechirped symbol length must be divisible by os_factor")
+
+    n_bins = int(full.size // os_value)
+    k = int(raw_bin) % n_bins
+    tau = _wrap_half(float(residual_sto_chips))
+    sign_value = 1.0 if str(phase_sign) == "plus" else -1.0
+    residual_phase = complex(np.exp(1j * sign_value * 2.0 * math.pi * tau))
+    p = np.arange(n_bins, dtype=np.float64)
+    kernel = np.exp(-2j * np.pi * float(k) * p / float(n_bins))
+
+    combined = 0.0j
+    for q in range(os_value):
+        branch = np.asarray(full[q::os_value], dtype=np.complex128)
+        values = branch * kernel
+        if k != 0:
+            base_tail = p >= float(n_bins - k)
+            if np.any(base_tail):
+                values[base_tail] *= np.exp(2j * np.pi * float(q) / float(os_value))
+        if abs(tau) > 1e-12:
+            cut = int(math.ceil(float(n_bins - k) + tau - float(q) / float(os_value)))
+            cut = max(0, min(n_bins, cut))
+            if cut < n_bins:
+                values[cut:] *= residual_phase
+        branch_value = complex(np.sum(values, dtype=np.complex128) / math.sqrt(float(n_bins)))
+        branch_weight = complex(np.exp(-2j * np.pi * float(q * k) / float(n_bins * os_value)))
+        combined += branch_weight * branch_value
+    return complex(combined)
+
+
 def savaux_branch_phase_agreement(
     branch_spectra: Sequence[np.ndarray],
     os_factor: int,
@@ -321,6 +425,7 @@ def build_savaux_symbol_evidence(
     cfo_int: int = 0,
     cfo_frac: float = 0.0,
     header_start_sample: int | None = None,
+    residual_sto_chips: float = 0.0,
     config: SavauxStage1Config | None = None,
 ) -> SavauxSymbolEvidence:
     """构建一个同步后的 Savaux 第一阶段 symbol 观测。"""
@@ -342,6 +447,44 @@ def build_savaux_symbol_evidence(
     )
     agreement = savaux_branch_phase_agreement(branches, os_factor=os_value)
     power = _power_from_combined(combined, agreement, cfg)
+    retained_dechirped: np.ndarray | None = None
+    if bool(cfg.residual_sto_phase_correction) or bool(cfg.retain_dechirped_symbols):
+        dechirped = _prepare_dechirped_oversampled_symbol(
+            samples=np.asarray(samples, dtype=np.complex64),
+            start_sample=paper_start,
+            sf=int(sf),
+            os_factor=os_value,
+            cfo_int=int(cfo_int),
+            cfo_frac=float(cfo_frac),
+            header_start_sample=paper_header_start,
+            cfo_correction_mode=cfg.cfo_correction_mode,
+        )
+        if bool(cfg.retain_dechirped_symbols):
+            retained_dechirped = np.asarray(dechirped, dtype=np.complex64)
+    if bool(cfg.residual_sto_phase_correction):
+        original_power = np.asarray(power, dtype=np.float64).copy()
+        preselect = min(
+            max(1, int(cfg.top_k) * max(1, int(cfg.residual_sto_preselect_factor))),
+            int(power.size),
+        )
+        candidate_bins = top_bins(power, preselect)
+        corrected = np.asarray(combined, dtype=np.complex64).copy()
+        for raw_bin in candidate_bins:
+            b = int(raw_bin)
+            corrected[b] = np.complex64(
+                _sto_phase_corrected_bin_value(
+                    dechirped=dechirped,
+                    raw_bin=b,
+                    os_factor=os_value,
+                    residual_sto_chips=float(residual_sto_chips),
+                    phase_sign=cfg.residual_sto_phase_sign,
+                )
+            )
+        combined = corrected
+        if bool(cfg.residual_sto_update_power):
+            power = _power_from_combined(combined, agreement, cfg)
+        else:
+            power = original_power
     bins = top_bins(power, min(max(1, int(cfg.top_k)), power.size))
     top1 = int(bins[0]) if bins.size else 0
     top2 = int(bins[1]) if bins.size > 1 else top1
@@ -357,6 +500,7 @@ def build_savaux_symbol_evidence(
         evidence_power=power,
         branch_phase_agreement=agreement,
         branch_spectra=tuple(np.asarray(item, dtype=np.complex64) for item in branches),
+        dechirped_oversampled=retained_dechirped,
         top_bins=tuple(int(v) for v in bins),
         top1_bin=top1,
         top1_margin_db=_db_ratio(top1_power, top2_power),
@@ -373,6 +517,7 @@ def build_savaux_stage1_packet_evidence(
     cfo_int: int = 0,
     cfo_frac: float = 0.0,
     header_start_sample: int | None = None,
+    residual_sto_chips: Sequence[float] | None = None,
     config: SavauxStage1Config | None = None,
 ) -> SavauxStage1PacketEvidence:
     """构建 ``select_phase_viterbi_path`` 需要的 payload 证据数组。"""
@@ -392,6 +537,11 @@ def build_savaux_stage1_packet_evidence(
                 cfo_int=int(cfo_int),
                 cfo_frac=float(cfo_frac),
                 header_start_sample=header_start_sample,
+                residual_sto_chips=(
+                    float(residual_sto_chips[idx])
+                    if residual_sto_chips is not None and idx < len(residual_sto_chips)
+                    else 0.0
+                ),
                 config=cfg,
             )
         )
@@ -401,6 +551,8 @@ def build_savaux_stage1_packet_evidence(
         evidence_powers=tuple(item.evidence_power for item in symbols),
         abs_indices=tuple(item.abs_symbol_index for item in symbols),
         branch_phase_agreements=tuple(item.branch_phase_agreement for item in symbols),
+        branch_spectra=tuple(item.branch_spectra for item in symbols),
+        dechirped_symbols=tuple(item.dechirped_oversampled for item in symbols),
     )
 
 
@@ -422,6 +574,7 @@ def select_savaux_phase_viterbi_path(
     cfo_int: int = 0,
     cfo_frac: float = 0.0,
     header_start_sample: int | None = None,
+    residual_sto_chips: Sequence[float] | None = None,
     stage1_config: SavauxStage1Config | None = None,
     selector_config: PhasePathSelectorConfig | None = None,
     fallback_line: PhaseLine | None = None,
@@ -437,6 +590,7 @@ def select_savaux_phase_viterbi_path(
         cfo_int=int(cfo_int),
         cfo_frac=float(cfo_frac),
         header_start_sample=header_start_sample,
+        residual_sto_chips=residual_sto_chips,
         config=stage1_config,
     )
     return select_phase_viterbi_path(
@@ -446,6 +600,248 @@ def select_savaux_phase_viterbi_path(
         config=selector_config or default_savaux_phase_path_config(),
         fallback_line=fallback_line,
         offset_coherences=stage1.branch_phase_agreements,
+    )
+
+
+def select_savaux_bidirectional_rerank_path(
+    samples: np.ndarray,
+    start_samples: Sequence[int],
+    sf: int,
+    os_factor: int,
+    abs_indices: Sequence[float],
+    cfo_int: int = 0,
+    cfo_frac: float = 0.0,
+    header_start_sample: int | None = None,
+    residual_sto_chips: Sequence[float] | None = None,
+    stage1_config: SavauxStage1Config | None = None,
+    selector_config: PhasePathSelectorConfig | None = None,
+    fallback_line: PhaseLine | None = None,
+) -> SymbolPhaseResult:
+    """Run Savaux Stage-1, then bidirectional anchor-bounded reranking."""
+
+    stage1 = build_savaux_stage1_packet_evidence(
+        samples=samples,
+        start_samples=start_samples,
+        sf=int(sf),
+        os_factor=int(os_factor),
+        abs_indices=abs_indices,
+        cfo_int=int(cfo_int),
+        cfo_frac=float(cfo_frac),
+        header_start_sample=header_start_sample,
+        residual_sto_chips=residual_sto_chips,
+        config=stage1_config,
+    )
+    return select_anchor_bounded_bidirectional_rerank_path(
+        center_spectra=stage1.center_spectra,
+        evidence_powers=stage1.evidence_powers,
+        abs_indices=stage1.abs_indices,
+        config=selector_config or default_savaux_phase_path_config(),
+        fallback_line=fallback_line,
+        offset_coherences=stage1.branch_phase_agreements,
+    )
+
+
+def select_savaux_island_viterbi_path(
+    samples: np.ndarray,
+    start_samples: Sequence[int],
+    sf: int,
+    os_factor: int,
+    abs_indices: Sequence[float],
+    cfo_int: int = 0,
+    cfo_frac: float = 0.0,
+    header_start_sample: int | None = None,
+    residual_sto_chips: Sequence[float] | None = None,
+    stage1_config: SavauxStage1Config | None = None,
+    selector_config: PhasePathSelectorConfig | None = None,
+    fallback_line: PhaseLine | None = None,
+) -> SymbolPhaseResult:
+    """Run Savaux Stage-1, then hard-anchor island-bounded Viterbi."""
+
+    stage1 = build_savaux_stage1_packet_evidence(
+        samples=samples,
+        start_samples=start_samples,
+        sf=int(sf),
+        os_factor=int(os_factor),
+        abs_indices=abs_indices,
+        cfo_int=int(cfo_int),
+        cfo_frac=float(cfo_frac),
+        header_start_sample=header_start_sample,
+        residual_sto_chips=residual_sto_chips,
+        config=stage1_config,
+    )
+    return select_anchor_bounded_island_viterbi_path(
+        center_spectra=stage1.center_spectra,
+        evidence_powers=stage1.evidence_powers,
+        abs_indices=stage1.abs_indices,
+        config=selector_config or default_savaux_phase_path_config(),
+        fallback_line=fallback_line,
+        offset_coherences=stage1.branch_phase_agreements,
+    )
+
+
+def select_savaux_adaptive_aggressive_island_viterbi_path(
+    samples: np.ndarray,
+    start_samples: Sequence[int],
+    sf: int,
+    os_factor: int,
+    abs_indices: Sequence[float],
+    cfo_int: int = 0,
+    cfo_frac: float = 0.0,
+    header_start_sample: int | None = None,
+    residual_sto_chips: Sequence[float] | None = None,
+    stage1_config: SavauxStage1Config | None = None,
+    selector_config: PhasePathSelectorConfig | None = None,
+    fallback_line: PhaseLine | None = None,
+) -> tuple[SymbolPhaseResult, Stage2VariantDecision]:
+    """Run Savaux Stage-1, then adaptive stable/aggressive island Viterbi."""
+
+    del fallback_line
+    stage1 = build_savaux_stage1_packet_evidence(
+        samples=samples,
+        start_samples=start_samples,
+        sf=int(sf),
+        os_factor=int(os_factor),
+        abs_indices=abs_indices,
+        cfo_int=int(cfo_int),
+        cfo_frac=float(cfo_frac),
+        header_start_sample=header_start_sample,
+        residual_sto_chips=residual_sto_chips,
+        config=stage1_config,
+    )
+    return select_adaptive_aggressive_island_viterbi_path(
+        center_spectra=stage1.center_spectra,
+        evidence_powers=stage1.evidence_powers,
+        abs_indices=stage1.abs_indices,
+        config=selector_config or default_savaux_phase_path_config(),
+        offset_coherences=stage1.branch_phase_agreements,
+    )
+
+
+def select_savaux_rewrite_island_viterbi_path(
+    samples: np.ndarray,
+    start_samples: Sequence[int],
+    sf: int,
+    os_factor: int,
+    abs_indices: Sequence[float],
+    cfo_int: int = 0,
+    cfo_frac: float = 0.0,
+    header_start_sample: int | None = None,
+    residual_sto_chips: Sequence[float] | None = None,
+    stage1_config: SavauxStage1Config | None = None,
+    selector_config: PhasePathSelectorConfig | None = None,
+    fallback_line: PhaseLine | None = None,
+) -> SymbolPhaseResult:
+    """Run Savaux Stage-1, then permissive rewrite island Viterbi."""
+
+    del fallback_line
+    stage1 = build_savaux_stage1_packet_evidence(
+        samples=samples,
+        start_samples=start_samples,
+        sf=int(sf),
+        os_factor=int(os_factor),
+        abs_indices=abs_indices,
+        cfo_int=int(cfo_int),
+        cfo_frac=float(cfo_frac),
+        header_start_sample=header_start_sample,
+        residual_sto_chips=residual_sto_chips,
+        config=stage1_config,
+    )
+    return select_rewrite_island_viterbi_path(
+        center_spectra=stage1.center_spectra,
+        evidence_powers=stage1.evidence_powers,
+        abs_indices=stage1.abs_indices,
+        config=selector_config or default_savaux_phase_path_config(),
+        offset_coherences=stage1.branch_phase_agreements,
+    )
+
+
+def select_savaux_v1_risk_arbiter_path(
+    samples: np.ndarray,
+    start_samples: Sequence[int],
+    sf: int,
+    os_factor: int,
+    abs_indices: Sequence[float],
+    cfo_int: int = 0,
+    cfo_frac: float = 0.0,
+    header_start_sample: int | None = None,
+    residual_sto_chips: Sequence[float] | None = None,
+    stage1_config: SavauxStage1Config | None = None,
+    selector_config: PhasePathSelectorConfig | None = None,
+    fallback_line: PhaseLine | None = None,
+) -> tuple[SymbolPhaseResult, Stage2VariantDecision]:
+    """Run Savaux Stage-1, then v1 trajectory-risk arbitration."""
+
+    del fallback_line
+    stage1 = build_savaux_stage1_packet_evidence(
+        samples=samples,
+        start_samples=start_samples,
+        sf=int(sf),
+        os_factor=int(os_factor),
+        abs_indices=abs_indices,
+        cfo_int=int(cfo_int),
+        cfo_frac=float(cfo_frac),
+        header_start_sample=header_start_sample,
+        residual_sto_chips=residual_sto_chips,
+        config=stage1_config,
+    )
+    return select_v1_risk_arbiter_path(
+        center_spectra=stage1.center_spectra,
+        evidence_powers=stage1.evidence_powers,
+        abs_indices=stage1.abs_indices,
+        config=selector_config or default_savaux_phase_path_config(),
+        offset_coherences=stage1.branch_phase_agreements,
+    )
+
+
+def select_savaux_island_reconstruction_viterbi_path(
+    samples: np.ndarray,
+    start_samples: Sequence[int],
+    sf: int,
+    os_factor: int,
+    abs_indices: Sequence[float],
+    cfo_int: int = 0,
+    cfo_frac: float = 0.0,
+    header_start_sample: int | None = None,
+    residual_sto_chips: Sequence[float] | None = None,
+    stage1_config: SavauxStage1Config | None = None,
+    selector_config: PhasePathSelectorConfig | None = None,
+    reconstruction_config: IslandReconstructionConfig | None = None,
+) -> SymbolPhaseResult:
+    """Run Savaux Stage-1, then experimental island reconstruction DP."""
+
+    cfg = stage1_config or SavauxStage1Config(retain_dechirped_symbols=True)
+    stage1 = build_savaux_stage1_packet_evidence(
+        samples=samples,
+        start_samples=start_samples,
+        sf=int(sf),
+        os_factor=int(os_factor),
+        abs_indices=abs_indices,
+        cfo_int=int(cfo_int),
+        cfo_frac=float(cfo_frac),
+        header_start_sample=header_start_sample,
+        residual_sto_chips=residual_sto_chips,
+        config=cfg,
+    )
+    path_cfg = selector_config or default_savaux_phase_path_config()
+    baseline = select_phase_viterbi_path(
+        center_spectra=stage1.center_spectra,
+        evidence_powers=stage1.evidence_powers,
+        abs_indices=stage1.abs_indices,
+        config=path_cfg,
+        offset_coherences=stage1.branch_phase_agreements,
+    )
+    return select_island_reconstruction_viterbi_path(
+        center_spectra=stage1.center_spectra,
+        evidence_powers=stage1.evidence_powers,
+        abs_indices=stage1.abs_indices,
+        config=path_cfg,
+        reconstruction_config=reconstruction_config,
+        offset_coherences=stage1.branch_phase_agreements,
+        branch_spectra=stage1.branch_spectra,
+        dechirped_symbols=stage1.dechirped_symbols,
+        os_factor=int(os_factor),
+        baseline_bins=baseline.selected_raw_bins,
+        residual_sto_chips=residual_sto_chips,
     )
 
 
@@ -461,5 +857,11 @@ __all__ = [
     "evaluate_savaux_phase_guard",
     "payload_abs_indices",
     "savaux_branch_phase_agreement",
+    "select_savaux_adaptive_aggressive_island_viterbi_path",
+    "select_savaux_bidirectional_rerank_path",
+    "select_savaux_island_viterbi_path",
+    "select_savaux_island_reconstruction_viterbi_path",
     "select_savaux_phase_viterbi_path",
+    "select_savaux_rewrite_island_viterbi_path",
+    "select_savaux_v1_risk_arbiter_path",
 ]

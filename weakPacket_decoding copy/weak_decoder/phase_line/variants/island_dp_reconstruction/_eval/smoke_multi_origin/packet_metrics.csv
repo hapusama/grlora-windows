@@ -1,0 +1,2 @@
+packet_index,symbol_count,v1_err,dual_err,multi_err,v1_ser,dual_ser,multi_ser,dual_gain_vs_v1,multi_gain_vs_v1,multi_gain_vs_dual,dual_rescue_vs_v1,dual_break_vs_v1,dual_changes_vs_v1,multi_rescue_vs_v1,multi_break_vs_v1,multi_changes_vs_v1,multi_rescue_vs_dual,multi_break_vs_dual,multi_changes_vs_dual,multi_phase_origin,multi_origin_count,dataset,snr_db,seed
+0,35,13,11,10,0.37142857142857144,0.3142857142857143,0.2857142857142857,0.05714285714285714,0.08571428571428572,0.02857142857142857,2,0,4,3,0,7,2,1,5,2,4,0_0_0_10_14_32,-25.0,42

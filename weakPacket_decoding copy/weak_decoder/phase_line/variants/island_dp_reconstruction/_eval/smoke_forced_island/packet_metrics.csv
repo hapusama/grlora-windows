@@ -1,0 +1,2 @@
+packet_index,symbol_count,hard_err,v1_err,island_err,hard_ser,v1_ser,island_ser,island_gain_vs_v1,island_gain_vs_hard,rescue_vs_v1,break_vs_v1,changes_vs_v1,rescue_vs_hard,break_vs_hard,changes_vs_hard,locked_e3_count,island_locked_count,island_uncertain_count,island_beam_final_size,island_error,dataset,snr_db,seed
+1,35,0,0,0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,0,0,0,0,35,1120,island reconstruction ran without enough locked anchors for phase/branch profiles,0_0_0_10_14_16,-25.0,42

@@ -11,6 +11,7 @@ from .frame_locator import (
 from .grlora_frame_sync import (
     FrameSyncPeak,
     GrloraFrameSyncResult,
+    GrloraBranchSyncEstimate,
     build_grlora_corrected_preamble_chirps,
     run_grlora_frame_sync_validation,
 )
@@ -27,6 +28,7 @@ __all__ = [
     "FrameLocation",
     "FrameLocatorConfig",
     "FrameSyncPeak",
+    "GrloraBranchSyncEstimate",
     "GrloraFrameSyncResult",
     "PreambleDetectorConfig",
     "SymbolPeak",

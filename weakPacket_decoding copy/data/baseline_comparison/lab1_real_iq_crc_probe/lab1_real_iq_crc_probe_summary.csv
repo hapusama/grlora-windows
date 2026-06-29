@@ -1,2 +1,0 @@
-﻿"file_name","sf","tx_power_dbm","preamble_len","detected_events","framesync_valid","header_valid_packets","traditional_fft_crc_valid","traditional_fft_crc_valid_rate","multi_offset_argmax_crc_valid","multi_offset_argmax_crc_valid_rate","current_selected_crc_valid","current_selected_crc_valid_rate","savaux_paper_crc_valid","savaux_paper_crc_valid_rate","note"
-"1_0_10_11_2_16.bin","11","2","16","12","9","9","9","1.0","","","9","1.0","9","1.0","real IQ CRC/PRR probe only; lab1 has no byte/symbol GT in weakPacket_decoding copy; multi-offset CRC not decoded by this probe runner"
