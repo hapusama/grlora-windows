@@ -522,6 +522,7 @@ def select_multi_origin_island_reconstruction_path(
     cfo_frac: float = 0.0,
     header_start_sample: int | None = None,
     residual_sto_chips: Sequence[float] | None = None,
+    branch_residual_sto_chips: Sequence[Sequence[float]] | None = None,
     stage1_config: SavauxStage1Config | None = None,
     selector_config: PhasePathSelectorConfig | None = None,
     reconstruction_config: IslandReconstructionConfig | None = None,
@@ -543,13 +544,6 @@ def select_multi_origin_island_reconstruction_path(
         fusion_config=fusion_config,
     )
     path_cfg = selector_config or default_savaux_phase_path_config()
-    baseline = select_phase_viterbi_path(
-        center_spectra=evidence.center_spectra,
-        evidence_powers=evidence.evidence_powers,
-        abs_indices=evidence.abs_indices,
-        config=path_cfg,
-        offset_coherences=evidence.branch_phase_agreements,
-    )
     auxiliary = tuple(
         tuple(np.asarray(stage1.evidence_powers[idx], dtype=np.float64) for stage1 in evidence.origin_stage1)
         for idx in range(min(len(stage1.evidence_powers) for stage1 in evidence.origin_stage1))
@@ -564,8 +558,8 @@ def select_multi_origin_island_reconstruction_path(
         branch_spectra=evidence.branch_spectra,
         dechirped_symbols=evidence.dechirped_symbols,
         os_factor=int(os_factor),
-        baseline_bins=baseline.selected_raw_bins,
         residual_sto_chips=residual_sto_chips,
+        branch_residual_sto_chips=branch_residual_sto_chips,
         auxiliary_evidence_powers=auxiliary,
     )
 

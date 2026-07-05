@@ -49,18 +49,23 @@ is scored by candidate-specific two-segment reconstruction: split at the LoRa
 wrap point, compensate the suffix with the local fractional-STO estimate, and
 use the stitched complex phase for the island transition penalty.
 
-## Current Tuned Profile And Evidence Fusion
+## Current Default Profile And Evidence Fusion
 
-The default island profile is a v1-prior rescue path:
+The default island profile is now the pure anchor-locked JTRD path:
 
 - High-confidence Stage-1 anchors are still hard locked.
-- Low-confidence islands run 2D `(bin, branch)` DP only when both left and right
-  anchors exist.
-- The v1 one-order DP path is included as a baseline prior.  A candidate island
-  path must beat the same-island v1 baseline path by `island_accept_margin`
-  before it replaces v1 bins.
+- Low-confidence islands run 2D `(bin, branch)` DP only when both left and
+  right anchors exist.
+- The v1 one-order DP path is no longer used as a runtime prior.  It remains a
+  benchmark only.
+- Per-branch framesync timing can be passed as
+  `branch_residual_sto_chips[symbol][branch]`; when present, two-segment
+  reconstruction uses the branch-specific instantaneous STO for the selected
+  state.
 
-This keeps the new branch focused on rescue rather than broad packet rewrites.
+This keeps the algorithm aligned with the physical model: locked anchors protect
+the high-confidence base, while low-confidence islands are allowed to move
+without a changed-symbol count guard.
 
 The strongest FFT-bin-only direction found so far is not the raw island DP
 alone.  It is dual Stage-1 evidence fusion:

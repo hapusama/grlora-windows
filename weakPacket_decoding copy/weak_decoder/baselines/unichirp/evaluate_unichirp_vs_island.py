@@ -68,6 +68,30 @@ def _as_float(value: str | None, default: float = 0.0) -> float:
     return float(value)
 
 
+def _as_float_vector(value: str | None) -> tuple[float, ...]:
+    text = "" if value is None else str(value).strip()
+    if not text:
+        return ()
+    out: list[float] = []
+    for part in text.replace(",", " ").replace(";", " ").split():
+        try:
+            out.append(float(part))
+        except ValueError:
+            continue
+    return tuple(out)
+
+
+def _maybe_set_branch_vectors(packet: dict[str, Any], row: dict[str, str]) -> None:
+    if not packet.get("branch_sfo_hat"):
+        values = _as_float_vector(row.get("source_grlora_branch_sfo_hat"))
+        if values:
+            packet["branch_sfo_hat"] = values
+    if not packet.get("branch_sfo_cum_initial"):
+        values = _as_float_vector(row.get("source_grlora_branch_sfo_cum_initial"))
+        if values:
+            packet["branch_sfo_cum_initial"] = values
+
+
 def _dataset_paths(dataset: str) -> tuple[Path, Path]:
     iq = GR_LORA_ROOT / "data" / "USRP_IQ" / f"{dataset}.bin"
     symbols = WEAK_ROOT / "data" / "weak_sync_chain" / "header_first" / f"{dataset}_header_first_symbols.csv"
@@ -101,8 +125,11 @@ def _load_packets(symbol_csv: Path) -> list[dict[str, Any]]:
                     "header_symbols": [],
                     "payload_symbols": [],
                     "header_start_sample": None,
+                    "branch_sfo_hat": (),
+                    "branch_sfo_cum_initial": (),
                 },
             )
+            _maybe_set_branch_vectors(packet, row)
             stage = str(row.get("stage", ""))
             symbol = {
                 "stage_symbol_index": _as_int(row.get("stage_symbol_index")),

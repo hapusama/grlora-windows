@@ -40,11 +40,11 @@ class IslandReconstructionConfig:
     anchor_peak_to_median_db: float = 7.0
     anchor_min_coherence: float = 0.88
     branch_variance_max: float = 0.16
-    energy_weight: float = 0.50
-    coherence_weight: float = 0.16
-    reconstruction_weight: float = 0.14
-    phase_profile_weight: float = 0.08
-    branch_profile_weight: float = 0.12
+    energy_weight: float = 0.24
+    coherence_weight: float = 0.06
+    reconstruction_weight: float = 0.58
+    phase_profile_weight: float = 0.04
+    branch_profile_weight: float = 0.08
     transition_weight: float = 0.45
     boundary_weight: float = 1.10
     branch_transition_weight: float = 1.20
@@ -55,10 +55,11 @@ class IslandReconstructionConfig:
     branch_top_k: int = 0
     sto_phase_sign: str = "plus"
     require_both_anchors: bool = True
-    baseline_bonus: float = 0.10
-    island_accept_margin: float = 0.06
-    third_bin_penalty: float = 0.08
-    allow_third_bin_when_baseline_differs: bool = False
+    use_baseline_prior: bool = False
+    baseline_bonus: float = 0.0
+    island_accept_margin: float = 0.0
+    third_bin_penalty: float = 0.0
+    allow_third_bin_when_baseline_differs: bool = True
     return_to_hard_min_margin_db: float = 0.80
     auxiliary_top_l: int = 0
     auxiliary_extra_k: int = 0
@@ -431,6 +432,7 @@ def _make_candidate_row(
     branch_profile: np.ndarray | None,
     baseline_bin: int | None,
     residual_sto_chip: float | None,
+    branch_residual_sto_chips: Sequence[float] | None,
     auxiliary_powers: Sequence[np.ndarray] | None,
 ) -> tuple[_IslandDpCandidate, ...]:
     predicted_phase = float(phase_profile[idx]) if phase_profile is not None and idx < phase_profile.size else None
@@ -455,6 +457,9 @@ def _make_candidate_row(
         ):
             continue
         for branch in _branch_candidates(raw_bin, os_factor, config, branch_spectra):
+            branch_residual = residual_sto_chip
+            if branch_residual_sto_chips is not None and int(branch) < len(branch_residual_sto_chips):
+                branch_residual = float(branch_residual_sto_chips[int(branch)])
             value, quality, branch_power = _branch_value_for_state(
                 ev,
                 raw_bin,
@@ -464,7 +469,7 @@ def _make_candidate_row(
                 branch_spectra,
                 dechirped_symbol,
                 expected_branch,
-                residual_sto_chip,
+                branch_residual,
             )
             pending.append((int(raw_bin), int(branch), complex(value), float(quality), float(branch_power)))
     if not pending:
@@ -740,6 +745,7 @@ def _solve_island(
     os_factor: int,
     baseline_bins: Sequence[int] | None,
     residual_sto_chips: Sequence[float] | None,
+    branch_residual_sto_chips: Sequence[Sequence[float]] | None,
     auxiliary_evidence_powers: Sequence[Sequence[np.ndarray]] | None,
 ) -> tuple[tuple[int, ...], list[float], int]:
     left = (
@@ -765,6 +771,11 @@ def _solve_island(
             if residual_sto_chips is not None and idx < len(residual_sto_chips)
             else None
         )
+        branch_residual_row = (
+            branch_residual_sto_chips[idx]
+            if branch_residual_sto_chips is not None and idx < len(branch_residual_sto_chips)
+            else None
+        )
         auxiliary_powers = (
             auxiliary_evidence_powers[idx]
             if auxiliary_evidence_powers is not None and idx < len(auxiliary_evidence_powers)
@@ -782,6 +793,7 @@ def _solve_island(
             branch_profile,
             baseline_bin,
             residual_sto_chip,
+            branch_residual_row,
             auxiliary_powers,
         )
         if not row:
@@ -864,6 +876,7 @@ def select_island_reconstruction_viterbi_path(
     os_factor: int | None = None,
     baseline_bins: Sequence[int] | None = None,
     residual_sto_chips: Sequence[float] | None = None,
+    branch_residual_sto_chips: Sequence[Sequence[float]] | None = None,
     auxiliary_evidence_powers: Sequence[Sequence[np.ndarray]] | None = None,
 ) -> SymbolPhaseResult:
     """Run anchor-locked island DP with branch-aware reconstruction scoring."""
@@ -904,9 +917,10 @@ def select_island_reconstruction_viterbi_path(
         cfg,
     )
     anchor_by_index = {int(item.index): item for item in anchor_observations}
-    if baseline_bins is not None:
+    baseline_prior = baseline_bins if bool(cfg.use_baseline_prior) else None
+    if baseline_prior is not None:
         selected = [
-            int(baseline_bins[idx]) if idx < len(baseline_bins) else int(ev.top1_bin)
+            int(baseline_prior[idx]) if idx < len(baseline_prior) else int(ev.top1_bin)
             for idx, ev in enumerate(evidences)
         ]
         for idx, locked in enumerate(locked_mask):
@@ -930,8 +944,9 @@ def select_island_reconstruction_viterbi_path(
             branch_spectra,
             dechirped_symbols,
             os_value,
-            baseline_bins,
+            baseline_prior,
             residual_sto_chips,
+            branch_residual_sto_chips,
             auxiliary_evidence_powers,
         )
         for rel, raw_bin in enumerate(path):

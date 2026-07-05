@@ -565,6 +565,61 @@ def payload_abs_indices(
     return tuple(float(preamble_len) + 12.25 + float(idx) for idx in payload_symbol_indexes)
 
 
+def branch_residual_sto_chips_from_sync_estimates(
+    branch_sync_estimates: Sequence[object],
+    payload_symbol_indexes: Sequence[int],
+    os_factor: int,
+    header_count: int = 8,
+) -> tuple[tuple[float, ...], ...]:
+    """Expand per-sampling-phase framesync offsets to payload-symbol rows.
+
+    ``grlora_frame_sync`` obtains one timing estimate per downsample phase by
+    rerunning the framesync estimation path with ``sample_phase=0..R-1``.  The
+    island JTRD selector needs the instantaneous residual STO for every payload
+    symbol and every branch, so this helper mirrors the SFO cursor update used
+    by ``header_first_demod.advance_symbol_cursor``.
+    """
+
+    os_value = _validate_os_factor(os_factor)
+    estimates = tuple(branch_sync_estimates)
+    if not estimates:
+        return ()
+    max_payload_index = max((int(v) for v in payload_symbol_indexes), default=-1)
+    if max_payload_index < 0:
+        return ()
+
+    branch_values: list[list[float]] = []
+    threshold = 1.0 / (2.0 * os_value)
+    total_symbols = int(header_count) + int(max_payload_index) + 1
+    for item in estimates:
+        sfo_cum = float(getattr(item, "sfo_cum_initial", 0.0))
+        sfo_hat = float(getattr(item, "sfo_hat", 0.0))
+        per_payload: list[float] = []
+        wanted = {int(idx): pos for pos, idx in enumerate(payload_symbol_indexes)}
+        values = [0.0 for _ in payload_symbol_indexes]
+        for frame_symbol_index in range(total_symbols):
+            payload_index = int(frame_symbol_index) - int(header_count)
+            if payload_index in wanted:
+                values[wanted[payload_index]] = float(sfo_cum)
+            if abs(float(sfo_cum)) > threshold:
+                sign = -1 if math.copysign(1.0, float(sfo_cum)) < 0.0 else 1
+                sfo_cum -= sign * (1.0 / os_value)
+            sfo_cum += sfo_hat
+        per_payload.extend(values)
+        branch_values.append(per_payload)
+
+    rows: list[tuple[float, ...]] = []
+    for symbol_pos in range(len(payload_symbol_indexes)):
+        row = [
+            float(branch_values[branch][symbol_pos])
+            for branch in range(min(os_value, len(branch_values)))
+        ]
+        if len(row) < os_value:
+            row.extend([row[-1] if row else 0.0] * (os_value - len(row)))
+        rows.append(tuple(row[:os_value]))
+    return tuple(rows)
+
+
 def select_savaux_phase_viterbi_path(
     samples: np.ndarray,
     start_samples: Sequence[int],
@@ -803,6 +858,9 @@ def select_savaux_island_reconstruction_viterbi_path(
     cfo_frac: float = 0.0,
     header_start_sample: int | None = None,
     residual_sto_chips: Sequence[float] | None = None,
+    branch_residual_sto_chips: Sequence[Sequence[float]] | None = None,
+    branch_sync_estimates: Sequence[object] | None = None,
+    payload_symbol_indexes: Sequence[int] | None = None,
     stage1_config: SavauxStage1Config | None = None,
     selector_config: PhasePathSelectorConfig | None = None,
     reconstruction_config: IslandReconstructionConfig | None = None,
@@ -823,13 +881,21 @@ def select_savaux_island_reconstruction_viterbi_path(
         config=cfg,
     )
     path_cfg = selector_config or default_savaux_phase_path_config()
-    baseline = select_phase_viterbi_path(
-        center_spectra=stage1.center_spectra,
-        evidence_powers=stage1.evidence_powers,
-        abs_indices=stage1.abs_indices,
-        config=path_cfg,
-        offset_coherences=stage1.branch_phase_agreements,
-    )
+    branch_residual = branch_residual_sto_chips
+    if branch_residual is None and branch_sync_estimates is not None:
+        indexes = tuple(
+            int(v)
+            for v in (
+                payload_symbol_indexes
+                if payload_symbol_indexes is not None
+                else range(len(stage1.abs_indices))
+            )
+        )
+        branch_residual = branch_residual_sto_chips_from_sync_estimates(
+            branch_sync_estimates,
+            indexes,
+            os_factor=int(os_factor),
+        )
     return select_island_reconstruction_viterbi_path(
         center_spectra=stage1.center_spectra,
         evidence_powers=stage1.evidence_powers,
@@ -840,8 +906,8 @@ def select_savaux_island_reconstruction_viterbi_path(
         branch_spectra=stage1.branch_spectra,
         dechirped_symbols=stage1.dechirped_symbols,
         os_factor=int(os_factor),
-        baseline_bins=baseline.selected_raw_bins,
         residual_sto_chips=residual_sto_chips,
+        branch_residual_sto_chips=branch_residual,
     )
 
 
@@ -853,6 +919,7 @@ __all__ = [
     "SavauxSymbolEvidence",
     "build_savaux_stage1_packet_evidence",
     "build_savaux_symbol_evidence",
+    "branch_residual_sto_chips_from_sync_estimates",
     "default_savaux_phase_path_config",
     "evaluate_savaux_phase_guard",
     "payload_abs_indices",

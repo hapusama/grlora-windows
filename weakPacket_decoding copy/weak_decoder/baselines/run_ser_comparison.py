@@ -4,6 +4,9 @@
 The runner compares payload raw FFT-bin SER on the same noisy IQ realization.
 It intentionally keeps every method FFT-bin/symbol-level only: no payload
 templates, cross-packet priors, or CRC-guided symbol selection are used.
+
+Synthetic AWGN is scaled to packet-active samples by default.  Using the full
+capture mean is misleading for captures with long zero/idle regions.
 """
 
 from __future__ import annotations
@@ -88,6 +91,45 @@ def _parse_snr_grid(start: float, stop: float, step: float) -> list[float]:
 
 def _payload_gt_bins(packet: dict[str, Any]) -> tuple[int, ...]:
     return tuple(int(item["gt_bin"]) for item in packet["payload_symbols"])
+
+
+def _signal_reference_power(
+    samples: np.ndarray,
+    packets: Sequence[dict[str, Any]],
+    mode: str,
+    explicit_power: float | None,
+) -> tuple[float, int, int]:
+    if explicit_power is not None:
+        return float(explicit_power), 0, len(packets)
+    if mode == "whole":
+        return float(np.mean(np.abs(samples).astype(np.float64) ** 2)), int(samples.size), len(packets)
+
+    total_power = 0.0
+    total_count = 0
+    packet_ids: set[int] = set()
+    for packet in packets:
+        sf = int(packet["sf"])
+        os_factor = int(packet["os_factor"])
+        symbol_samples = (1 << sf) * os_factor
+        symbols: list[dict[str, Any]] = []
+        if mode in {"packet", "header_payload"}:
+            symbols.extend(packet.get("header_symbols", []))
+        symbols.extend(packet.get("payload_symbols", []))
+        for symbol in symbols:
+            start = int(symbol["start_sample"])
+            stop = start + symbol_samples
+            if start < 0 or stop > int(samples.size):
+                continue
+            chunk = np.asarray(samples[start:stop], dtype=np.complex64)
+            total_power += float(np.sum(np.abs(chunk).astype(np.float64) ** 2))
+            total_count += int(chunk.size)
+            packet_ids.add(int(packet["packet_index"]))
+    if total_count <= 0:
+        raise ValueError(f"no packet-active samples found for signal reference mode {mode!r}")
+    power = total_power / float(total_count)
+    if not math.isfinite(power) or power <= 0.0:
+        raise ValueError(f"invalid signal reference power {power}")
+    return float(power), int(total_count), len(packet_ids)
 
 
 def _evaluate_loratrimmer_packet(
@@ -286,7 +328,7 @@ def _svg_line_chart(
     dataset: str,
     methods: Sequence[str],
 ) -> None:
-    snrs = sorted({float(row["snr_db"]) for row in rows if str(row["dataset"]) == str(dataset)}, reverse=True)
+    snrs = sorted({float(row["snr_db"]) for row in rows if str(row["dataset"]) == str(dataset)})
     points_by_method: dict[str, list[tuple[float, float]]] = {method: [] for method in methods}
     for method in methods:
         key = f"{method}_ser"
@@ -369,6 +411,70 @@ def _svg_line_chart(
     path.write_text("\n".join(parts), encoding="utf-8")
 
 
+def _matplotlib_line_chart(
+    path: Path,
+    rows: Sequence[dict[str, Any]],
+    dataset: str,
+    methods: Sequence[str],
+    *,
+    zoom: bool,
+) -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    snrs = sorted({float(row["snr_db"]) for row in rows if str(row["dataset"]) == str(dataset)})
+    fig, ax = plt.subplots(figsize=(11.2, 6.4), dpi=180)
+    markers = {
+        "savaux_oversampled": "o",
+        "loratrimmer": "o",
+        "symfec": "o",
+        "unichirp": "o",
+        "phaseline_one_order_dp": "o",
+        "phaseline_island_dp": "o",
+    }
+    for method in methods:
+        key = f"{method}_ser"
+        ys: list[float] = []
+        xs: list[float] = []
+        for snr in snrs:
+            match = next(
+                (row for row in rows if str(row["dataset"]) == str(dataset) and abs(float(row["snr_db"]) - snr) < 1e-9),
+                None,
+            )
+            if match is None or match.get(key, "") == "":
+                continue
+            xs.append(float(snr))
+            ys.append(float(match[key]))
+        if xs:
+            ax.plot(xs, ys, marker=markers.get(method, "o"), linewidth=2.1, markersize=5.5, label=METHOD_LABELS.get(method, method))
+    ax.set_title("SER comparison: baselines vs phase-line" + (" (zoom)" if zoom else ""))
+    ax.set_xlabel("Packet-level SNR (dB)")
+    ax.set_ylabel("Payload raw-bin SER")
+    ax.grid(True, linestyle="--", linewidth=0.7, alpha=0.42)
+    ax.set_xticks(snrs)
+    if zoom:
+        all_values = [
+            float(row[f"{method}_ser"])
+            for row in rows
+            if str(row["dataset"]) == str(dataset)
+            for method in methods
+            if row.get(f"{method}_ser", "") != ""
+        ]
+        if all_values:
+            ymin = max(0.0, min(all_values) - 0.04)
+            ymax = min(1.0, max(all_values) + 0.05)
+            ax.set_ylim(ymin, ymax)
+    else:
+        ax.set_ylim(0.0, 1.0)
+    ax.legend(loc="center left", bbox_to_anchor=(1.02, 0.5), frameon=True)
+    fig.tight_layout()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(path)
+    plt.close(fig)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--datasets", nargs="+", default=["0_0_0_10_14_32"])
@@ -379,6 +485,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-packets", type=int, default=10)
     parser.add_argument("--output-dir", type=Path, default=WEAK_ROOT / "data" / "ser_comparison_baselines_phase_line")
     parser.add_argument("--signal-reference-power", type=float, default=None)
+    parser.add_argument(
+        "--signal-reference-mode",
+        choices=("packet", "payload", "header_payload", "whole"),
+        default="packet",
+        help="Reference power for AWGN scaling. 'packet' uses header+payload active windows.",
+    )
     parser.add_argument("--skip-loratrimmer", action="store_true")
     return parser.parse_args()
 
@@ -398,9 +510,22 @@ def main() -> int:
         packets = _load_packets(symbol_path)
         if int(args.max_packets) > 0:
             packets = packets[: int(args.max_packets)]
+        reference_power, reference_samples, reference_packets = _signal_reference_power(
+            samples=clean,
+            packets=packets,
+            mode=str(args.signal_reference_mode),
+            explicit_power=args.signal_reference_power,
+        )
+        whole_power = float(np.mean(np.abs(clean).astype(np.float64) ** 2))
+        print(
+            f"{dataset}: signal_reference_mode={args.signal_reference_mode} "
+            f"power={reference_power:.6g} samples={reference_samples} packets={reference_packets} "
+            f"whole_capture_power={whole_power:.6g}",
+            flush=True,
+        )
         for seed in args.seeds:
             for snr_db in _snr_values(snrs):
-                samples = _noise_samples(clean, snr_db, int(seed), args.signal_reference_power)
+                samples = _noise_samples(clean, snr_db, int(seed), reference_power)
                 totals = _evaluate_group(
                     samples=samples,
                     packets=packets,
@@ -410,6 +535,12 @@ def main() -> int:
                     "dataset": str(dataset),
                     "snr_db": float(snr_db),
                     "seed": int(seed),
+                    "signal_reference_mode": str(args.signal_reference_mode),
+                    "signal_reference_power": float(reference_power),
+                    "signal_reference_sample_count": int(reference_samples),
+                    "signal_reference_packet_count": int(reference_packets),
+                    "whole_capture_power": float(whole_power),
+                    "reference_vs_whole_db": float(10.0 * math.log10(reference_power / whole_power)) if whole_power > 0 else "",
                     **totals,
                 }
                 for method in METHOD_ORDER:
@@ -432,12 +563,38 @@ def main() -> int:
     _write_csv(out_dir / "ser_by_snr.csv", by_snr)
     _write_csv(out_dir / "overall.csv", overall)
     (out_dir / "summary_by_seed.json").write_text(json.dumps(group_rows, indent=2), encoding="utf-8")
+    metadata = {
+        "signal_reference_mode": str(args.signal_reference_mode),
+        "signal_reference_power_arg": args.signal_reference_power,
+        "snr_start": float(args.snr_start),
+        "snr_stop": float(args.snr_stop),
+        "snr_step": float(args.snr_step),
+        "seeds": [int(seed) for seed in args.seeds],
+        "max_packets": int(args.max_packets),
+        "note": "SNR is referenced to packet-active samples unless signal_reference_mode=whole.",
+    }
+    (out_dir / "metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     for dataset in args.datasets:
+        methods = tuple(method for method in METHOD_ORDER if not (method == "loratrimmer" and bool(args.skip_loratrimmer)))
         _svg_line_chart(
             out_dir / f"{dataset}_ser_comparison.svg",
             rows=by_snr,
             dataset=str(dataset),
-            methods=tuple(method for method in METHOD_ORDER if not (method == "loratrimmer" and bool(args.skip_loratrimmer))),
+            methods=methods,
+        )
+        _matplotlib_line_chart(
+            out_dir / f"{dataset}_ser_comparison_matplotlib.png",
+            rows=by_snr,
+            dataset=str(dataset),
+            methods=methods,
+            zoom=False,
+        )
+        _matplotlib_line_chart(
+            out_dir / f"{dataset}_ser_comparison_matplotlib_zoom.png",
+            rows=by_snr,
+            dataset=str(dataset),
+            methods=methods,
+            zoom=True,
         )
     return 0
 

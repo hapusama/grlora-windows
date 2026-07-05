@@ -3,6 +3,7 @@ build*/
 *.pyo
 .vscode/
 */__pycache__/*
+**/__pycache__/
 
 # Raw IQ captures and temporary analysis artifacts.
 data/USRP_IQ/**/*.bin
@@ -17,3 +18,11 @@ weakPacket_decoding/_file_source_staging/
 weakPacket_decoding copy/data/*.bin
 weakPacket_decoding copy/data/**/*.bin
 weakPacket_decoding copy/_file_source_staging/
+
+# Reproducible weak-packet experiment outputs.
+weakPacket_decoding/**/_eval/
+weakPacket_decoding copy/**/_eval/
+weakPacket_decoding/data/ser_comparison_baselines_phase_line_*/
+weakPacket_decoding copy/data/ser_comparison_baselines_phase_line_*/
+weakPacket_decoding/data/phase_line_error_diagnostics_*/
+weakPacket_decoding copy/data/phase_line_error_diagnostics_*/

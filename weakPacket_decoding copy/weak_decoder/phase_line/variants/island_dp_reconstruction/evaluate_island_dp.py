@@ -14,6 +14,7 @@ import csv
 import json
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 from typing import Any, Sequence
 
 import numpy as np
@@ -27,6 +28,7 @@ if str(WEAK_ROOT) not in sys.path:
 
 from weak_decoder.phase_line.savaux_stage1 import (  # noqa: E402
     SavauxStage1Config,
+    branch_residual_sto_chips_from_sync_estimates,
     default_savaux_phase_path_config,
     payload_abs_indices,
 )
@@ -60,6 +62,50 @@ def _as_float(value: str | None, default: float = 0.0) -> float:
     return float(value)
 
 
+def _as_float_vector(value: str | None) -> tuple[float, ...]:
+    text = "" if value is None else str(value).strip()
+    if not text:
+        return ()
+    parts = text.replace(",", " ").replace(";", " ").split()
+    out: list[float] = []
+    for part in parts:
+        try:
+            out.append(float(part))
+        except ValueError:
+            continue
+    return tuple(out)
+
+
+def _maybe_set_branch_vectors(packet: dict[str, Any], row: dict[str, str]) -> None:
+    if not packet.get("branch_sfo_hat"):
+        values = _as_float_vector(row.get("source_grlora_branch_sfo_hat"))
+        if values:
+            packet["branch_sfo_hat"] = values
+    if not packet.get("branch_sfo_cum_initial"):
+        values = _as_float_vector(row.get("source_grlora_branch_sfo_cum_initial"))
+        if values:
+            packet["branch_sfo_cum_initial"] = values
+
+
+def _branch_residual_sto_from_packet(packet: dict[str, Any]) -> tuple[tuple[float, ...], ...] | None:
+    sfo_hat = tuple(float(v) for v in packet.get("branch_sfo_hat", ()) or ())
+    sfo_cum = tuple(float(v) for v in packet.get("branch_sfo_cum_initial", ()) or ())
+    os_factor = int(packet.get("os_factor", 1))
+    if len(sfo_hat) < os_factor or len(sfo_cum) < os_factor:
+        return None
+    payload_indexes = [int(item["payload_symbol_index"]) for item in packet.get("payload_symbols", [])]
+    estimates = tuple(
+        SimpleNamespace(sfo_hat=float(sfo_hat[idx]), sfo_cum_initial=float(sfo_cum[idx]))
+        for idx in range(os_factor)
+    )
+    rows = branch_residual_sto_chips_from_sync_estimates(
+        estimates,
+        payload_indexes,
+        os_factor=os_factor,
+    )
+    return rows or None
+
+
 def _load_packets(symbol_csv: Path) -> list[dict[str, Any]]:
     grouped: dict[int, dict[str, Any]] = {}
     with symbol_csv.open("r", newline="", encoding="utf-8") as handle:
@@ -87,8 +133,11 @@ def _load_packets(symbol_csv: Path) -> list[dict[str, Any]]:
                     "header_symbols": [],
                     "payload_symbols": [],
                     "header_start_sample": None,
+                    "branch_sfo_hat": (),
+                    "branch_sfo_cum_initial": (),
                 },
             )
+            _maybe_set_branch_vectors(packet, row)
             stage = str(row.get("stage", ""))
             if stage == "header":
                 if packet["header_start_sample"] is None:
@@ -191,6 +240,7 @@ def _evaluate_packet(
     start_samples = [int(item["start_sample"]) for item in payload]
     gt_bins = [int(item["gt_bin"]) for item in payload]
     residual_sto_chips = [float(item.get("sfo_cum_before", 0.0)) for item in payload]
+    branch_residual_sto_chips = _branch_residual_sto_from_packet(packet)
     abs_indices = payload_abs_indices(
         [int(item["payload_symbol_index"]) for item in payload],
         preamble_len=float(packet.get("preamble_len", 8.0)),
@@ -241,8 +291,8 @@ def _evaluate_packet(
         branch_spectra=stage1.branch_spectra,
         dechirped_symbols=stage1.dechirped_symbols,
         os_factor=int(packet["os_factor"]),
-        baseline_bins=v1.selected_raw_bins,
         residual_sto_chips=residual_sto_chips,
+        branch_residual_sto_chips=branch_residual_sto_chips,
     )
     fusion_island = select_island_reconstruction_viterbi_path(
         center_spectra=dual.center_spectra,
@@ -254,8 +304,8 @@ def _evaluate_packet(
         branch_spectra=dual.branch_spectra,
         dechirped_symbols=dual.dechirped_symbols,
         os_factor=int(packet["os_factor"]),
-        baseline_bins=fusion_v1.selected_raw_bins,
         residual_sto_chips=residual_sto_chips,
+        branch_residual_sto_chips=branch_residual_sto_chips,
         auxiliary_evidence_powers=(
             tuple(
                 (
@@ -456,17 +506,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--anchor-peak-to-median-db", type=float, default=7.0)
     parser.add_argument("--anchor-min-coherence", type=float, default=0.88)
     parser.add_argument("--branch-top-k", type=int, default=0)
-    parser.add_argument("--energy-weight", type=float, default=0.50)
-    parser.add_argument("--coherence-weight", type=float, default=0.16)
-    parser.add_argument("--reconstruction-weight", type=float, default=0.14)
-    parser.add_argument("--phase-profile-weight", type=float, default=0.08)
-    parser.add_argument("--branch-profile-weight", type=float, default=0.12)
+    parser.add_argument("--energy-weight", type=float, default=0.24)
+    parser.add_argument("--coherence-weight", type=float, default=0.06)
+    parser.add_argument("--reconstruction-weight", type=float, default=0.58)
+    parser.add_argument("--phase-profile-weight", type=float, default=0.04)
+    parser.add_argument("--branch-profile-weight", type=float, default=0.08)
     parser.add_argument("--transition-weight", type=float, default=0.45)
     parser.add_argument("--boundary-weight", type=float, default=1.10)
     parser.add_argument("--branch-transition-weight", type=float, default=1.20)
-    parser.add_argument("--baseline-bonus", type=float, default=0.10)
-    parser.add_argument("--island-accept-margin", type=float, default=0.06)
-    parser.add_argument("--third-bin-penalty", type=float, default=0.08)
+    parser.add_argument("--baseline-bonus", type=float, default=0.0)
+    parser.add_argument("--island-accept-margin", type=float, default=0.0)
+    parser.add_argument("--third-bin-penalty", type=float, default=0.0)
     parser.add_argument("--allow-third-bin-when-baseline-differs", action="store_true")
     parser.add_argument("--return-to-hard-min-margin-db", type=float, default=0.80)
     parser.add_argument("--auxiliary-top-l", type=int, default=0)

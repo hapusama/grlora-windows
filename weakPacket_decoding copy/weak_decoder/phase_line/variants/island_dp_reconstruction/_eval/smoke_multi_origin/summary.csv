@@ -1,2 +1,0 @@
-dataset,snr_db,seed,packet_count,symbol_count,v1_ser,dual_ser,multi_ser,dual_gain_vs_v1,multi_gain_vs_v1,multi_gain_vs_dual,dual_rescue_vs_v1,dual_break_vs_v1,multi_rescue_vs_v1,multi_break_vs_v1,multi_rescue_vs_dual,multi_break_vs_dual
-0_0_0_10_14_32,-25.0,42,1,35,0.37142857142857144,0.3142857142857143,0.2857142857142857,0.05714285714285714,0.08571428571428572,0.02857142857142857,2,0,3,0,2,1
