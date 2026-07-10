@@ -1,0 +1,7 @@
+method,pattern_count,symbol_count,errors,ser,fixes_vs_savaux,breaks_vs_savaux,elapsed_seconds,mean_milliseconds_per_symbol,triggered_symbols,trigger_rate,screened_symbols,screen_rate,accepted_proposals,rejected_proposals,dataset,training_dataset,snr_db,seed,training_seed,training_snr,training_snapshots,cg_iterations,lora_leakage_weight,runtime_lora_weight,wrap_consistency_exponent,savaux_gate_margin_db,branch_color_threshold,lora_guard_margin_db,lora_guard_segments
+savaux,0,70,0,0.0,0,0,0.2306990000033693,3.2957000000481327,0,0.0,0,0.0,0,0,0_0_0_10_14_8,0_0_0_10_14_16,-24.0,42,41,-24.0,512,4,0.0,0.0,0.5,0.5,0.107121,,8
+information_8_conditional_lora,8,70,0,0.0,0,0,0.0034890000097220764,0.049842857281743945,0,0.0,0,0.0,0,0,0_0_0_10_14_8,0_0_0_10_14_16,-24.0,42,41,-24.0,512,4,0.0,0.0,0.5,0.5,0.107121,,8
+savaux,0,70,7,0.1,0,0,0.09027040000728448,1.2895771429612068,0,0.0,0,0.0,0,0,0_0_0_10_14_8,0_0_0_10_14_16,-24.0,43,41,-24.0,512,4,0.0,0.0,0.5,0.5,0.107121,,8
+information_8_conditional_lora,8,70,7,0.1,0,0,0.03203159999611671,0.45759428565881016,4,0.05714285714285714,4,0.05714285714285714,0,0,0_0_0_10_14_8,0_0_0_10_14_16,-24.0,43,41,-24.0,512,4,0.0,0.0,0.5,0.5,0.107121,,8
+savaux,0,70,0,0.0,0,0,0.10371270000541699,1.4816100000773855,0,0.0,0,0.0,0,0,0_0_0_10_14_8,0_0_0_10_14_16,-24.0,44,41,-24.0,512,4,0.0,0.0,0.5,0.5,0.107121,,8
+information_8_conditional_lora,8,70,0,0.0,0,0,0.004415400006109849,0.06307714294442641,0,0.0,0,0.0,0,0,0_0_0_10_14_8,0_0_0_10_14_16,-24.0,44,41,-24.0,512,4,0.0,0.0,0.5,0.5,0.107121,,8

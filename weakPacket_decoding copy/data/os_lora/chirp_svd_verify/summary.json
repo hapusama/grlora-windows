@@ -1,0 +1,31 @@
+[
+  {
+    "dataset": "0_0_0_10_14_16",
+    "snr_db": -24.0,
+    "seed": 42,
+    "symbol_count": 35,
+    "mean_rank1_ratio": 0.2699176982720248,
+    "mean_rank2_ratio": 0.5256227820076421,
+    "savaux_ser": 0.11428571428571428,
+    "savaux_mean_gt_rank": 1.2571428571428571,
+    "savaux_mean_gt_margin_db": 2.1126621510249413,
+    "svd_left_ser": 0.8857142857142857,
+    "svd_left_mean_gt_rank": 142.2,
+    "svd_left_mean_gt_margin_db": -4.274543449724038,
+    "svd_left_fix_vs_savaux": 0,
+    "svd_left_break_vs_savaux": 27,
+    "svd_left_changes_vs_savaux": 31,
+    "svd_rank1_savaux_ser": 0.8,
+    "svd_rank1_savaux_mean_gt_rank": 116.17142857142858,
+    "svd_rank1_savaux_mean_gt_margin_db": -4.108100523344599,
+    "svd_rank1_savaux_fix_vs_savaux": 0,
+    "svd_rank1_savaux_break_vs_savaux": 24,
+    "svd_rank1_savaux_changes_vs_savaux": 28,
+    "svd_rank2_savaux_ser": 0.6,
+    "svd_rank2_savaux_mean_gt_rank": 39.714285714285715,
+    "svd_rank2_savaux_mean_gt_margin_db": -1.2656123194373843,
+    "svd_rank2_savaux_fix_vs_savaux": 0,
+    "svd_rank2_savaux_break_vs_savaux": 17,
+    "svd_rank2_savaux_changes_vs_savaux": 21
+  }
+]

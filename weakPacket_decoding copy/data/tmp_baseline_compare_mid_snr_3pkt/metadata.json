@@ -1,0 +1,14 @@
+{
+  "signal_reference_mode": "packet",
+  "signal_reference_power_arg": null,
+  "snr_start": -22.0,
+  "snr_stop": -24.0,
+  "snr_step": -1.0,
+  "seeds": [
+    1,
+    2,
+    42
+  ],
+  "max_packets": 3,
+  "note": "SNR is referenced to packet-active samples unless signal_reference_mode=whole."
+}

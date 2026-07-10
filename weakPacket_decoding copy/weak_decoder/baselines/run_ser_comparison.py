@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run SER comparison for local baselines and phase-line selectors.
+"""Run SER comparison for standalone local baselines.
 
 The runner compares payload raw FFT-bin SER on the same noisy IQ realization.
 It intentionally keeps every method FFT-bin/symbol-level only: no payload
@@ -12,7 +12,6 @@ capture mean is misleading for captures with long zero/idle regions.
 from __future__ import annotations
 
 import argparse
-import csv
 import html
 import json
 import math
@@ -30,28 +29,24 @@ if str(WEAK_ROOT) not in sys.path:
     sys.path.insert(0, str(WEAK_ROOT))
 
 from weak_decoder.baselines.loratrimmer import demod_loratrimmer_symbol  # noqa: E402
+from weak_decoder.baselines.common import (  # noqa: E402
+    dataset_paths as _dataset_paths,
+    err_count as _err_count,
+    load_packets as _load_packets,
+    noise_samples as _noise_samples,
+    payload_gt_bins as _payload_gt_bins,
+    snr_values as _snr_values,
+    write_csv as _write_csv,
+)
+from weak_decoder.baselines.savaux_oversampled.paper_oversampled_demod import (  # noqa: E402
+    demod_paper_oversampled_symbol,
+)
 from weak_decoder.baselines.symfec import SymFECConfig, decode_symfec_payload_from_spectra  # noqa: E402
 from weak_decoder.baselines.symfec.run_symfec_baseline import extract_multi_offset_spectrum  # noqa: E402
-from weak_decoder.baselines.unichirp.evaluate_unichirp_vs_island import (  # noqa: E402
-    _dataset_paths,
+from weak_decoder.baselines.unichirp.evaluate_unichirp import (  # noqa: E402
     _evaluate_unichirp_packet,
-    _load_packets,
 )
 from weak_decoder.baselines.unichirp.paper_unichirp_demod import UniChirpDemodConfig  # noqa: E402
-from weak_decoder.phase_line.savaux_stage1 import default_savaux_phase_path_config  # noqa: E402
-from weak_decoder.phase_line.variants.island_dp_reconstruction.dual_evidence import (  # noqa: E402
-    DualEvidenceFusionConfig,
-)
-from weak_decoder.phase_line.variants.island_dp_reconstruction.evaluate_island_dp import (  # noqa: E402
-    _evaluate_packet as _evaluate_island_packet,
-    _err_count,
-    _noise_samples,
-    _snr_values,
-    _write_csv,
-)
-from weak_decoder.phase_line.variants.island_dp_reconstruction.selector import (  # noqa: E402
-    IslandReconstructionConfig,
-)
 
 
 METHOD_ORDER = (
@@ -59,8 +54,6 @@ METHOD_ORDER = (
     "loratrimmer",
     "symfec",
     "unichirp",
-    "phaseline_one_order_dp",
-    "phaseline_island_dp",
 )
 
 METHOD_LABELS = {
@@ -68,8 +61,6 @@ METHOD_LABELS = {
     "loratrimmer": "LoRaTrimmer",
     "symfec": "Sym-FEC",
     "unichirp": "UniChirp",
-    "phaseline_one_order_dp": "Phase-line one-order DP",
-    "phaseline_island_dp": "Phase-line island DP",
 }
 
 
@@ -155,6 +146,31 @@ def _evaluate_loratrimmer_packet(
     return {"loratrimmer_err": int(errors), "symbol_count": int(compared)}
 
 
+def _evaluate_savaux_packet(
+    samples: np.ndarray,
+    packet: dict[str, Any],
+) -> dict[str, Any]:
+    """Evaluate the paper-only Savaux OSR baseline for one packet."""
+
+    selected: list[int] = []
+    origin_shift = int(packet["os_factor"]) // 2
+    for item in packet["payload_symbols"]:
+        result = demod_paper_oversampled_symbol(
+            samples=samples,
+            start_sample=int(item["start_sample"]) + origin_shift,
+            sf=int(packet["sf"]),
+            os_factor=int(packet["os_factor"]),
+            ldro=bool(packet["ldro"]),
+            cfo_int=int(packet["cfo_int"]),
+            cfo_frac=float(packet["cfo_frac"]),
+            header_start_sample=int(packet["header_start_sample"]) + origin_shift,
+            cfo_correction_mode="continuous",
+        )
+        selected.append(int(result.raw_fft_bin))
+    errors, compared = _err_count(selected, _payload_gt_bins(packet))
+    return {"savaux_oversampled_err": int(errors), "symbol_count": int(compared)}
+
+
 def _evaluate_symfec_packet(
     samples: np.ndarray,
     packet: dict[str, Any],
@@ -206,14 +222,6 @@ def _evaluate_group(
     totals["packet_count"] = 0
     totals["symfec_crc_valid_count"] = 0
 
-    path_config = default_savaux_phase_path_config(top_l=16)
-    island_config = IslandReconstructionConfig()
-    fusion_config = DualEvidenceFusionConfig(
-        mode="product_norm",
-        corrected_weight=0.5,
-        stage1_top_k=40,
-        retain_dechirped_symbols=True,
-    )
     unichirp_config = UniChirpDemodConfig()
     symfec_config = SymFECConfig()
 
@@ -222,17 +230,8 @@ def _evaluate_group(
         totals["packet_count"] += 1
         totals["symbol_count"] += int(symbol_count)
 
-        phase = _evaluate_island_packet(
-            samples=samples,
-            packet=packet,
-            path_config=path_config,
-            island_config=island_config,
-            fusion_config=fusion_config,
-            use_aux_evidence=False,
-        )
-        totals["savaux_oversampled_err"] += int(phase["hard_err"])
-        totals["phaseline_one_order_dp_err"] += int(phase["v1_err"])
-        totals["phaseline_island_dp_err"] += int(phase["fusion_island_err"])
+        savaux = _evaluate_savaux_packet(samples=samples, packet=packet)
+        totals["savaux_oversampled_err"] += int(savaux["savaux_oversampled_err"])
 
         unichirp = _evaluate_unichirp_packet(
             samples=samples,
@@ -365,8 +364,6 @@ def _svg_line_chart(
         "loratrimmer": "#F58518",
         "symfec": "#54A24B",
         "unichirp": "#E45756",
-        "phaseline_one_order_dp": "#B279A2",
-        "phaseline_island_dp": "#72B7B2",
     }
     parts: list[str] = []
     parts.append(f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">')
@@ -431,8 +428,6 @@ def _matplotlib_line_chart(
         "loratrimmer": "o",
         "symfec": "o",
         "unichirp": "o",
-        "phaseline_one_order_dp": "o",
-        "phaseline_island_dp": "o",
     }
     for method in methods:
         key = f"{method}_ser"
@@ -449,7 +444,7 @@ def _matplotlib_line_chart(
             ys.append(float(match[key]))
         if xs:
             ax.plot(xs, ys, marker=markers.get(method, "o"), linewidth=2.1, markersize=5.5, label=METHOD_LABELS.get(method, method))
-    ax.set_title("SER comparison: baselines vs phase-line" + (" (zoom)" if zoom else ""))
+    ax.set_title("SER comparison: standalone baselines" + (" (zoom)" if zoom else ""))
     ax.set_xlabel("Packet-level SNR (dB)")
     ax.set_ylabel("Payload raw-bin SER")
     ax.grid(True, linestyle="--", linewidth=0.7, alpha=0.42)
@@ -483,7 +478,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--snr-step", type=float, default=-0.5)
     parser.add_argument("--seeds", nargs="+", type=int, default=[42, 43, 44, 45, 46])
     parser.add_argument("--max-packets", type=int, default=10)
-    parser.add_argument("--output-dir", type=Path, default=WEAK_ROOT / "data" / "ser_comparison_baselines_phase_line")
+    parser.add_argument("--output-dir", type=Path, default=WEAK_ROOT / "data" / "ser_comparison_baselines")
     parser.add_argument("--signal-reference-power", type=float, default=None)
     parser.add_argument(
         "--signal-reference-mode",
