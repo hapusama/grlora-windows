@@ -1,5 +1,0 @@
-method,packet_index,symbol_index,gt_bin,savaux_bin,proposal_bin,gt_savaux_rank,proposal_savaux_rank,savaux_correct,proposal_correct,savaux_margin_db,branch_color_mismatch,backend_ran,dataset,training_dataset,noise_mode,snr_db,seed,lora_guard_segments
-information_8_conditional_lora,0,0,803,859,859,60,1,0,0,0.03244142807448129,0.6954206985991358,1,0_0_0_10_14_8,0_0_0_10_14_16,offpacket_bootstrap,-24.0,43,8
-information_8_conditional_lora,0,3,718,269,269,40,1,0,0,0.0775127761413298,0.7405722183458371,1,0_0_0_10_14_8,0_0_0_10_14_16,offpacket_bootstrap,-24.0,43,8
-information_8_conditional_lora,0,31,913,711,711,53,1,0,0,0.2712865558153269,0.5785389481972176,1,0_0_0_10_14_8,0_0_0_10_14_16,offpacket_bootstrap,-24.0,43,8
-information_8_conditional_lora,1,38,718,957,958,85,2,0,0,0.1668838819170218,0.922224419177615,1,0_0_0_10_14_8,0_0_0_10_14_16,offpacket_bootstrap,-24.0,43,8

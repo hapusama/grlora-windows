@@ -1,4 +1,11 @@
 build*/
+# Git's ignore matching is case-insensitive on Windows, so `build*/` also
+# catches the IFC source directory named `Buildings` unless it is re-included.
+!weakPacket_decoding/Buildings/
+!weakPacket_decoding/Buildings/**
+# Keep the locally supplied building model out of commits; generated scene
+# metadata records its expected path and the converter can be rerun in place.
+weakPacket_decoding/Buildings/**/*.ifc
 *.pyc
 *.pyo
 .vscode/
@@ -15,14 +22,8 @@ examples/_full_debug.log
 weakPacket_decoding/data/*.bin
 weakPacket_decoding/data/**/*.bin
 weakPacket_decoding/_file_source_staging/
-weakPacket_decoding copy/data/*.bin
-weakPacket_decoding copy/data/**/*.bin
-weakPacket_decoding copy/_file_source_staging/
 
 # Reproducible weak-packet experiment outputs.
 weakPacket_decoding/**/_eval/
-weakPacket_decoding copy/**/_eval/
 weakPacket_decoding/data/ser_comparison_baselines_phase_line_*/
-weakPacket_decoding copy/data/ser_comparison_baselines_phase_line_*/
 weakPacket_decoding/data/phase_line_error_diagnostics_*/
-weakPacket_decoding copy/data/phase_line_error_diagnostics_*/

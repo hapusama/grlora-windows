@@ -9,13 +9,12 @@ sync_chain/                 run_weak_sync_chain.py 主表
 framesync_peaks/            framesync 后前导码 peak 验证表
 header_first/               run_header_first_demod.py 的 frame / symbol 表
 payload_consistency/        payload FFT bin 内部一致性检查表
-legacy_experiments/         历史或对照实验结果
 ```
 
-图像类输出目前仍按实验名独立成目录：
+图像类输出按需生成，默认不保留在 `data/` 中：
 
 ```text
-*_stft/                     帧定界 STFT 图
+*_stft/                     帧定界 STFT 图，由 --stft-dir 生成
 *_framesync_spectrum/       framesync 前后 dechirp+FFT 对比图
 *_payload_peak_trends/      每包 payload peak 相位/幅度趋势图
 ```
@@ -24,9 +23,13 @@ legacy_experiments/         历史或对照实验结果
 
 ```text
 0_0_0_10_14_16_payload_peak_trends.png
+legacy_experiments/
+*_stft/
+*_framesync_spectrum/
+*_payload_peak_trends/
 ```
 
-这张图是旧版“所有 packet 叠在一张图”的过渡产物，当前已经改为每个 packet 单独保存一张 PNG。
+这些文件和目录都可以由 `run_weak_sync_chain.py` 或 `plot_payload_peak_trends.py` 重新生成。当前默认只保留主链 CSV，避免 `data/` 被诊断图撑大。
 
 ## 接口契约与命名注意事项
 

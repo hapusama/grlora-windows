@@ -1,0 +1,4 @@
+scenario,target_tx_dbm,trial,symbol_index,gt_bin,branch0_bin,savaux_bin,equal8_bin,gls8_direct_bin,gls8_cg_bin,gls8_cg_wrap_bin,conditional_gls_bin,savaux_margin_db,branch_color_mismatch,conditional_backend_ran
+two_interferers,-60.0,0,0,596,602,602,602,602,602,601,601,0.10165701528069593,1.2691685073879206,1
+two_interferers,-60.0,0,1,975,656,656,656,656,656,975,656,0.5986230988957735,1.2721625501244687,0
+two_interferers,-60.0,0,2,938,938,938,938,938,938,938,938,4.6979998024222995,1.2714355244445603,0

@@ -30,6 +30,36 @@ class FrameSyncPeak:
 
 
 @dataclass(frozen=True)
+class GrloraBranchSyncEstimate:
+    sample_phase: int
+    valid: bool
+    down_val_valid: bool
+    cfo_frac_est: float
+    sto_frac_initial: float
+    sto_frac_refined: float
+    sto_frac_used: float
+    sto_sample_correction: int
+    cfo_int_est: int
+    down_val_signed_bin: int
+    cfo_total_est: float
+    cfo_hz_est: float
+    sfo_hat: float
+    sfo_samples_per_symbol: float
+    clk_off: float
+    fs_p: float
+    netid_sto_frac_est: float
+    payload_sto_frac_est: float
+    payload_sto_sample_correction: int
+    netid1_est: int
+    netid2_est: int
+    netid_offset: int
+    netid_valid: bool
+    sfo_cum_initial: float
+    fine_preamble_start_sample: int
+    fine_payload_start_sample: int
+
+
+@dataclass(frozen=True)
 class GrloraFrameSyncResult:
     """gr-lora_sdr 风格同步后的帧边界、同步参数与验证结果。"""
 
@@ -83,6 +113,7 @@ class GrloraFrameSyncResult:
     fine_preamble_bin0_count: int
     fine_preamble_peak_count: int
     valid: bool
+    branch_sync_estimates: tuple[GrloraBranchSyncEstimate, ...]
     peaks: tuple[FrameSyncPeak, ...]
 
 
@@ -154,6 +185,7 @@ def _extract_chip_rate_chirps(
     detector_config: PreambleDetectorConfig,
     symbol_count: int,
     sample_correction: int = 0,
+    sample_phase: int | None = None,
 ) -> np.ndarray:
     """从过采样 IQ 里按 gr-lora_sdr 的方式抽成 BW 采样率的 chirp 矩阵。"""
 
@@ -163,7 +195,11 @@ def _extract_chip_rate_chirps(
     if total_chips <= 0:
         raise ValueError("symbol_count must be positive.")
 
-    first = int(start_sample) + int(os_factor / 2) - int(sample_correction)
+    phase = int(os_factor / 2) if sample_phase is None else int(sample_phase)
+    if phase < 0 or phase >= os_factor:
+        raise ValueError(f"sample_phase must be in [0, {os_factor}), got {sample_phase}.")
+
+    first = int(start_sample) + phase - int(sample_correction)
     chip_offsets = first + os_factor * np.arange(total_chips, dtype=np.int64)
     if int(chip_offsets[0]) < 0 or int(chip_offsets[-1]) >= samples.size:
         raise ValueError("not enough samples to extract chip-rate chirps.")
@@ -290,6 +326,7 @@ def _estimate_net_ids(
     cfo_frac: float,
     netid_sto_frac: float,
     downchirp: np.ndarray,
+    sample_phase: int | None = None,
 ) -> tuple[int, int]:
     """复刻 frame_sync 对两个 sync word 符号的 STO/CFO 校正和解调。"""
 
@@ -303,6 +340,7 @@ def _estimate_net_ids(
         detector_config,
         2,
         sample_correction=_grlora_round(float(netid_sto_frac) * os_factor),
+        sample_phase=sample_phase,
     )
     netid_chirps = _apply_flat_cfo(netid_chirps, float(cfo_int))
     n = np.arange(n_bins, dtype=np.float64)
@@ -336,6 +374,203 @@ def cfo_int_from_down_val(signed_down_val: int) -> int:
     return int(math.floor(float(signed_down_val) / 2.0))
 
 
+def _estimate_branch_sync(
+    samples: np.ndarray,
+    synced_preamble_start: int,
+    synced_sfd_start: int,
+    synced_payload_start: int,
+    detector_config: PreambleDetectorConfig,
+    preamble_symbols: int,
+    up_symbols_used: int,
+    sync1_expected: int,
+    sync2_expected: int,
+    down_ref_chip: np.ndarray,
+    up_ref_chip: np.ndarray,
+    sample_phase: int,
+    bin0_tol: int,
+    center_freq: float,
+    fallback_cfo_int: int = 0,
+    fallback_down_val_signed_bin: int = 0,
+) -> GrloraBranchSyncEstimate:
+    n_bins = int(detector_config.n_bins)
+    os_factor = int(detector_config.os_factor)
+
+    default = {
+        "sample_phase": int(sample_phase),
+        "valid": False,
+        "down_val_valid": False,
+        "cfo_frac_est": 0.0,
+        "sto_frac_initial": 0.0,
+        "sto_frac_refined": 0.0,
+        "sto_frac_used": 0.0,
+        "sto_sample_correction": 0,
+        "cfo_int_est": int(fallback_cfo_int),
+        "down_val_signed_bin": int(fallback_down_val_signed_bin),
+        "cfo_total_est": 0.0,
+        "cfo_hz_est": 0.0,
+        "sfo_hat": 0.0,
+        "sfo_samples_per_symbol": 0.0,
+        "clk_off": 0.0,
+        "fs_p": float(detector_config.bw),
+        "netid_sto_frac_est": 0.0,
+        "payload_sto_frac_est": 0.0,
+        "payload_sto_sample_correction": 0,
+        "netid1_est": -1,
+        "netid2_est": -1,
+        "netid_offset": 0,
+        "netid_valid": False,
+        "sfo_cum_initial": 0.0,
+        "fine_preamble_start_sample": int(synced_preamble_start),
+        "fine_payload_start_sample": int(synced_payload_start),
+    }
+
+    try:
+        chip_preamble = _extract_chip_rate_chirps(
+            samples,
+            synced_preamble_start,
+            detector_config,
+            up_symbols_used,
+            sample_correction=0,
+            sample_phase=sample_phase,
+        )
+        cfo_frac_est, cfo_frac_corrected, _ = _estimate_cfo_frac_bernier(chip_preamble, down_ref_chip)
+        sto_frac_initial, _, _ = _estimate_sto_frac(cfo_frac_corrected, down_ref_chip)
+        sto_initial_sample_correction = _grlora_round(sto_frac_initial * os_factor)
+
+        cfo_int_est = int(fallback_cfo_int)
+        down_val_signed_bin = int(fallback_down_val_signed_bin)
+        down_val_valid = False
+        try:
+            sfd2_chips = _extract_chip_rate_chirps(
+                samples,
+                synced_sfd_start + detector_config.chirp_samples,
+                detector_config,
+                1,
+                sample_correction=sto_initial_sample_correction,
+                sample_phase=sample_phase,
+            )[0]
+            sfd2_corr = _apply_symbol_cfo(sfd2_chips, cfo_frac_est)
+            _, down_val_signed_bin = _measure_chip_peak(sfd2_corr, up_ref_chip)
+            cfo_int_est = cfo_int_from_down_val(down_val_signed_bin)
+            down_val_valid = True
+        except ValueError:
+            pass
+
+        cfo_total_est = float(cfo_int_est + cfo_frac_est)
+        cfo_hz_est = float(cfo_total_est * float(detector_config.bw) / n_bins)
+        sfo_hat = float(cfo_total_est * float(detector_config.bw) / float(center_freq))
+        sfo_samples_per_symbol = float(sfo_hat * os_factor)
+        clk_off = float(sfo_hat / n_bins)
+        fs_p = float(detector_config.bw * (1.0 - clk_off))
+
+        refined_flat = cfo_frac_corrected.reshape(-1)
+        refined_flat = np.roll(refined_flat, -positive_mod(cfo_int_est, n_bins))
+        refined = refined_flat.reshape(up_symbols_used, n_bins)
+        refined = _apply_flat_cfo(refined, cfo_int_est)
+        sfo_corr = _sfo_correction_vector(up_symbols_used, n_bins, detector_config.bw, fs_p)
+        refined = (refined.reshape(-1) * sfo_corr).reshape(up_symbols_used, n_bins).astype(np.complex64)
+        sto_frac_refined, _, _ = _estimate_sto_frac(refined, down_ref_chip)
+        diff_sto_frac = float(sto_frac_initial - sto_frac_refined)
+        if abs(diff_sto_frac) <= float(os_factor - 1) / float(os_factor):
+            sto_frac_used = float(sto_frac_refined)
+        else:
+            sto_frac_used = float(sto_frac_initial)
+
+        sto_sample_correction = _grlora_round(sto_frac_used * os_factor)
+        netid_sto_frac_est = _wrap_half(sto_frac_used + sfo_hat * preamble_symbols)
+        payload_sto_frac_est = _wrap_half(sto_frac_used + sfo_hat * (preamble_symbols + 4.25))
+        payload_sto_sample_correction = _grlora_round(payload_sto_frac_est * os_factor)
+
+        try:
+            netid1_est, netid2_est = _estimate_net_ids(
+                samples,
+                synced_preamble_start,
+                detector_config,
+                preamble_symbols,
+                cfo_int_est,
+                cfo_frac_est,
+                netid_sto_frac_est,
+                down_ref_chip,
+                sample_phase=sample_phase,
+            )
+        except ValueError:
+            netid1_est = -1
+            netid2_est = -1
+        netid_offset = int(netid1_est - int(sync1_expected))
+        netid_valid = (
+            netid1_est >= 0
+            and netid2_est >= 0
+            and abs(netid_offset) <= 2
+            and positive_mod(netid2_est - netid_offset, n_bins) == positive_mod(int(sync2_expected), n_bins)
+        )
+        sfo_cum_initial = float(
+            (payload_sto_frac_est * os_factor - payload_sto_sample_correction)
+            / os_factor
+        )
+        fine_preamble_start = int(synced_preamble_start + int(sample_phase) - int(os_factor / 2) - sto_sample_correction)
+        fine_payload_start = int(
+            synced_payload_start
+            + int(sample_phase)
+            - int(os_factor / 2)
+            + os_factor * int(cfo_int_est)
+            - (os_factor * netid_offset if netid_valid else 0)
+            - payload_sto_sample_correction
+        )
+
+        fine_valid = False
+        try:
+            fine_chirps = _build_corrected_preamble_chirps(
+                samples,
+                synced_preamble_start,
+                detector_config,
+                up_symbols_used,
+                sto_sample_correction,
+                cfo_int_est,
+                cfo_frac_est,
+                fs_p,
+                sample_phase=sample_phase,
+            )
+            _, fine_max_abs, fine_bin0_count, fine_count = _fine_preamble_bin_stats(
+                fine_chirps,
+                down_ref_chip,
+                bin0_tol,
+            )
+            fine_valid = fine_bin0_count == fine_count and fine_max_abs <= int(bin0_tol)
+        except ValueError:
+            fine_valid = False
+
+        return GrloraBranchSyncEstimate(
+            sample_phase=int(sample_phase),
+            valid=bool(fine_valid and netid_valid),
+            down_val_valid=bool(down_val_valid),
+            cfo_frac_est=float(cfo_frac_est),
+            sto_frac_initial=float(sto_frac_initial),
+            sto_frac_refined=float(sto_frac_refined),
+            sto_frac_used=float(sto_frac_used),
+            sto_sample_correction=int(sto_sample_correction),
+            cfo_int_est=int(cfo_int_est),
+            down_val_signed_bin=int(down_val_signed_bin),
+            cfo_total_est=float(cfo_total_est),
+            cfo_hz_est=float(cfo_hz_est),
+            sfo_hat=float(sfo_hat),
+            sfo_samples_per_symbol=float(sfo_samples_per_symbol),
+            clk_off=float(clk_off),
+            fs_p=float(fs_p),
+            netid_sto_frac_est=float(netid_sto_frac_est),
+            payload_sto_frac_est=float(payload_sto_frac_est),
+            payload_sto_sample_correction=int(payload_sto_sample_correction),
+            netid1_est=int(netid1_est),
+            netid2_est=int(netid2_est),
+            netid_offset=int(netid_offset),
+            netid_valid=bool(netid_valid),
+            sfo_cum_initial=float(sfo_cum_initial),
+            fine_preamble_start_sample=int(fine_preamble_start),
+            fine_payload_start_sample=int(fine_payload_start),
+        )
+    except ValueError:
+        return GrloraBranchSyncEstimate(**default)
+
+
 def _build_corrected_preamble_chirps(
     samples: np.ndarray,
     synced_preamble_start: int,
@@ -345,6 +580,7 @@ def _build_corrected_preamble_chirps(
     cfo_int: int,
     cfo_frac: float,
     fs_p: float,
+    sample_phase: int | None = None,
 ) -> np.ndarray:
     """按给定 STO/CFO/SFO 估计量生成 gr-lora_sdr 风格校正后的 chip-rate 前导码。"""
 
@@ -356,6 +592,7 @@ def _build_corrected_preamble_chirps(
         detector_config,
         count,
         sample_correction=int(sto_sample_correction),
+        sample_phase=sample_phase,
     )
     flat = chirps.reshape(-1)
     flat = np.roll(flat, -positive_mod(int(cfo_int), n_bins))
@@ -582,6 +819,27 @@ def run_grlora_frame_sync_validation(
         down_ref_chip,
         bin0_tol,
     )
+    branch_sync_estimates = tuple(
+        _estimate_branch_sync(
+            samples=samples,
+            synced_preamble_start=synced_preamble_start,
+            synced_sfd_start=synced_sfd_start,
+            synced_payload_start=synced_payload_start,
+            detector_config=detector_config,
+            preamble_symbols=preamble_symbols,
+            up_symbols_used=up_symbols_used,
+            sync1_expected=int(sync1_expected),
+            sync2_expected=int(sync2_expected),
+            down_ref_chip=down_ref_chip,
+            up_ref_chip=up_ref_chip,
+            sample_phase=phase,
+            bin0_tol=bin0_tol,
+            center_freq=float(center_freq),
+            fallback_cfo_int=int(cfo_int_est),
+            fallback_down_val_signed_bin=int(down_val_signed_bin),
+        )
+        for phase in range(os_factor)
+    )
 
     # 最终同步有效性只要求两件事：
     # 1) 前导码经 CFO/STO/SFO 校正后全部回到 bin0；
@@ -640,5 +898,6 @@ def run_grlora_frame_sync_validation(
         fine_preamble_bin0_count=int(fine_bin0_count),
         fine_preamble_peak_count=int(fine_count),
         valid=bool(valid),
+        branch_sync_estimates=branch_sync_estimates,
         peaks=tuple(peaks),
     )

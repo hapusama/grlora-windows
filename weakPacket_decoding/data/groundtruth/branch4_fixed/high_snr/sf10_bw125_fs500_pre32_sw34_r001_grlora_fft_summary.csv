@@ -1,0 +1,11 @@
+input_file,packet_index,frame_count,total_symbols,header_symbols,payload_chirps,first_payload_frame_symbol_index,last_payload_frame_symbol_index,min_payload_confidence_db,mean_payload_confidence_db,all_payload_labels_reliable,cfo_int,cfo_frac
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\USRP_collector\data\branch4_fixed\high_snr\sf10_bw125_fs500_pre32_sw34_r001.bin,0,1,57,8,49,8,56,14.724266052246094,21.051673188501475,1,-25,0.3148110806941986
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\USRP_collector\data\branch4_fixed\high_snr\sf10_bw125_fs500_pre32_sw34_r001.bin,1,2,57,8,49,8,56,14.489830017089844,21.434730724412567,1,-25,0.2564863860607147
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\USRP_collector\data\branch4_fixed\high_snr\sf10_bw125_fs500_pre32_sw34_r001.bin,2,3,57,8,49,8,56,15.931856155395508,22.538943232322225,1,-25,0.20841415226459503
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\USRP_collector\data\branch4_fixed\high_snr\sf10_bw125_fs500_pre32_sw34_r001.bin,3,4,57,8,49,8,56,14.328218460083008,21.970361845833914,1,-26,0.18281807005405426
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\USRP_collector\data\branch4_fixed\high_snr\sf10_bw125_fs500_pre32_sw34_r001.bin,4,5,57,8,49,8,56,14.868192672729492,22.345309374283772,1,-25,0.13324439525604248
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\USRP_collector\data\branch4_fixed\high_snr\sf10_bw125_fs500_pre32_sw34_r001.bin,5,6,57,8,49,8,56,13.863940238952637,22.045979616593343,1,-25,0.09034550189971924
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\USRP_collector\data\branch4_fixed\high_snr\sf10_bw125_fs500_pre32_sw34_r001.bin,6,7,57,8,49,8,56,14.235857963562012,21.29460805776168,1,-25,0.06476865708827972
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\USRP_collector\data\branch4_fixed\high_snr\sf10_bw125_fs500_pre32_sw34_r001.bin,7,8,57,8,49,8,56,14.292387008666992,22.58892806695432,1,-25,0.04326251149177551
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\USRP_collector\data\branch4_fixed\high_snr\sf10_bw125_fs500_pre32_sw34_r001.bin,8,9,57,8,49,8,56,15.498509407043457,21.28539248875209,1,-25,0.01331576518714428
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\USRP_collector\data\branch4_fixed\high_snr\sf10_bw125_fs500_pre32_sw34_r001.bin,9,10,57,8,49,8,56,14.107179641723633,21.595330763836298,1,-25,-0.04057101532816887

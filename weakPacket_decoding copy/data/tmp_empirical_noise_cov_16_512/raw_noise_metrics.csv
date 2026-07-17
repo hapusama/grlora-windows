@@ -1,2 +1,0 @@
-dataset,window_count,window_len,guard_samples,active_interval_count,raw_noise_power,offset_var_mean,offset_var_cv,lag_corr_mean_abs,lag_corr_max_abs
-0_0_0_10_14_16,512,4096,8192,11,5.0512440206753614e-06,5.0512440206753775e-06,0.0014563285374496109,0.11024114253266691,0.6545893864756116

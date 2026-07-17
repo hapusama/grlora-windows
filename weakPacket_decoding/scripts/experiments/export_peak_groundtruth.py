@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import csv
 import os
 from pathlib import Path
@@ -70,6 +71,12 @@ def parse_args() -> argparse.Namespace:
         help="label_reliable 判定阈值，只打标不丢行，默认 6 dB。",
     )
     parser.add_argument("--summary-output", type=Path, default=None, help="可选：另存每个包的 label 摘要 CSV。")
+    parser.add_argument(
+        "--consensus-output",
+        type=Path,
+        default=None,
+        help="可选：按 symbol 位置汇总重复帧，输出可直接用于 SER 的 FFT-bin ground truth。",
+    )
     return parser.parse_args()
 
 
@@ -447,12 +454,91 @@ def write_summary_csv(path: Path, payload: dict[str, Any]) -> None:
     os.replace(tmp_path, path)
 
 
+def write_consensus_csv(path: Path, payload: dict[str, Any]) -> None:
+    """把固定帧的重复观测汇总成一行一个 symbol 的 FFT-bin 真值。"""
+
+    records = list(payload["records"])
+    symbol_indices = sorted({int(record["frame_symbol_index"]) for record in records})
+    fields = [
+        "input_file",
+        "frame_symbol_index",
+        "stage",
+        "stage_symbol_index",
+        "support_frames",
+        "groundtruth_fft_bin",
+        "groundtruth_symbol",
+        "agreement_count",
+        "agreement_ratio",
+        "unique_fft_bin_count",
+        "unique_fft_bins",
+        "min_confidence_db",
+        "mean_confidence_db",
+        "all_source_labels_reliable",
+        "consensus_reliable",
+    ]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_name(path.name + ".tmp")
+    with tmp_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for frame_symbol_index in symbol_indices:
+            items = [
+                record
+                for record in records
+                if int(record["frame_symbol_index"]) == frame_symbol_index
+            ]
+            bin_counts = Counter(int(record["label_fft_bin"]) for record in items)
+            groundtruth_bin, agreement_count = max(
+                bin_counts.items(), key=lambda item: (item[1], -item[0])
+            )
+            matching_symbols = [
+                int(record["label_symbol"])
+                for record in items
+                if int(record["label_fft_bin"]) == groundtruth_bin
+            ]
+            symbol_counts = Counter(matching_symbols)
+            groundtruth_symbol = max(
+                symbol_counts.items(), key=lambda item: (item[1], -item[0])
+            )[0]
+            confidences = [float(record["label_confidence_db"]) for record in items]
+            all_reliable = all(int(record["label_reliable"]) for record in items)
+            agreement_ratio = float(agreement_count) / float(len(items))
+            is_header = bool(items[0]["is_header"])
+            stage_symbol_index = (
+                frame_symbol_index
+                if is_header
+                else int(items[0]["payload_chirp_index"])
+            )
+            writer.writerow(
+                {
+                    "input_file": payload["input_file"],
+                    "frame_symbol_index": frame_symbol_index,
+                    "stage": "header" if is_header else "payload",
+                    "stage_symbol_index": stage_symbol_index,
+                    "support_frames": len(items),
+                    "groundtruth_fft_bin": groundtruth_bin,
+                    "groundtruth_symbol": groundtruth_symbol,
+                    "agreement_count": agreement_count,
+                    "agreement_ratio": agreement_ratio,
+                    "unique_fft_bin_count": len(bin_counts),
+                    "unique_fft_bins": " ".join(str(value) for value in sorted(bin_counts)),
+                    "min_confidence_db": min(confidences),
+                    "mean_confidence_db": sum(confidences) / len(confidences),
+                    "all_source_labels_reliable": int(all_reliable),
+                    "consensus_reliable": int(all_reliable and agreement_count == len(items)),
+                }
+            )
+    os.replace(tmp_path, path)
+
+
 def main() -> None:
     args = parse_args()
     payload = export_peak_groundtruth(args)
     stats = write_peak_csv(args.output, payload, include_header=bool(args.include_header))
     if args.summary_output is not None:
         write_summary_csv(args.summary_output, payload)
+    if args.consensus_output is not None:
+        write_consensus_csv(args.consensus_output, payload)
     print(f"raw_records={payload['record_count']}")
     print(f"payload_records={payload['payload_record_count']}")
     print(f"wrote_rows={stats['wrote_rows']}")
@@ -460,6 +546,8 @@ def main() -> None:
     print(f"wrote={args.output}")
     if args.summary_output is not None:
         print(f"wrote_summary={args.summary_output}")
+    if args.consensus_output is not None:
+        print(f"wrote_consensus={args.consensus_output}")
 
 
 if __name__ == "__main__":

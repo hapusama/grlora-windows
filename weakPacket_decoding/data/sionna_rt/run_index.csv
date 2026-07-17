@@ -1,0 +1,9 @@
+category,run,frequency_hz,symbols_per_trial,trials,target_tx_dbm,interferer_tx_dbm,scenarios,status
+final,aligned_ser_final_487p7,487700000,200,3,-63/-65/-67,-78.5,thermal_only/one_interferer/two_interferers,authoritative
+diagnostics,aligned_ser_ablation_487p7,487700000,200,3,-63/-65/-67,-78.5,one_interferer/two_interferers,companion
+diagnostics,aligned_ser_thermal_487p7,487700000,200,3,-63/-65/-67,-78.5,thermal_only,companion
+archive,aligned_ser_main,487700000,200,3,-58/-60/-62,-74,thermal_only/one_interferer/two_interferers,superseded
+archive,aligned_ser_ablation,487700000,200,3,-58/-60/-62,-74,one_interferer/two_interferers,superseded
+archive,aligned_ser_v1,487700000,50,2,-58/-60/-62/-64,-74,thermal_only/one_interferer/two_interferers,superseded
+archive,smoke,487700000,5,1,-60,-74,thermal_only/one_interferer,smoke
+archive,smoke_cg,487700000,3,1,-60,-74,two_interferers,smoke

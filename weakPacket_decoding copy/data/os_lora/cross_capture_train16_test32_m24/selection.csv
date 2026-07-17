@@ -1,9 +1,0 @@
-selection_method,pattern_count,selection_rank,candidate_index,pattern_name,marginal_information,lora_leakage_weight,training_dataset,test_dataset
-information,8,1,106,block_w32_s2_b1,119.71922425184201,0.0,0_0_0_10_14_16,0_0_0_10_14_32
-information,8,2,128,block_w64_s2_b0,111.31755390859344,0.0,0_0_0_10_14_16,0_0_0_10_14_32
-information,8,3,132,block_w64_s2_b2,81.12430197884936,0.0,0_0_0_10_14_16,0_0_0_10_14_32
-information,8,4,110,block_w32_s2_b3,63.15496289054074,0.0,0_0_0_10_14_16,0_0_0_10_14_32
-information,8,5,48,block_w8_s1_b0,16.57939759020478,0.0,0_0_0_10_14_16,0_0_0_10_14_32
-information,8,6,155,multiscale_w128_s2_b1,18.923085132324065,0.0,0_0_0_10_14_16,0_0_0_10_14_32
-information,8,7,163,multiscale_w128_s3_b1,15.640753729455524,0.0,0_0_0_10_14_16,0_0_0_10_14_32
-information,8,8,22,block_w2_s3_b3,13.664236556623711,0.0,0_0_0_10_14_16,0_0_0_10_14_32
