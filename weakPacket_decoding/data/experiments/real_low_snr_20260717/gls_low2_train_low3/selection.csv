@@ -1,0 +1,9 @@
+training_name,test_name,selection_rank,candidate_index,pattern_name,marginal_information
+low3,low2,1,1,fixed_1,6538154.727710495
+low3,low2,2,3,fixed_3,6390310.577773789
+low3,low2,3,0,fixed_0,3786481.9521688833
+low3,low2,4,2,fixed_2,3483474.593087127
+low3,low2,5,6,cyclic_s1_b2,42882.061943716464
+low3,low2,6,7,cyclic_s1_b3,43068.54877266594
+low3,low2,7,4,cyclic_s1_b0,85454.5466687172
+low3,low2,8,5,cyclic_s1_b1,249514.11351573752

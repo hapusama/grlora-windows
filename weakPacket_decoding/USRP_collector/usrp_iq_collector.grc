@@ -89,7 +89,7 @@ blocks:
   parameters:
     comment: "\u539F\u59CB complex64 \u8F93\u51FA\u6587\u4EF6\uFF1B\u5DF2\u6709\u6587\
       \u4EF6\u4F1A\u88AB\u8986\u76D6"
-    value: '"data/branch4_fixed/high_snr/sf10_bw125_fs500_pre32_sw34_r001.bin"'
+    value: '"data/branch4_fixed/low_snr/sf10_bw125_fs500_pre32_sw34_low6.bin"'
   states:
     bus_sink: false
     bus_source: false
@@ -195,10 +195,14 @@ blocks:
     affinity: ''
     alias: ''
     bw: samp_rate
-    comment: "RX2 实时监视：频谱、瀑布图和时域 IQ；不改变保存到文件的样点"
+    comment: "RX2 \u5B9E\u65F6\u76D1\u89C6\uFF1A\u9891\u8C31\u3001\u7011\u5E03\u56FE\
+      \u548C\u65F6\u57DF IQ\uFF1B\u4E0D\u6539\u53D8\u4FDD\u5B58\u5230\u6587\u4EF6\u7684\
+      \u6837\u70B9"
     fc: center_freq
     fftsize: '4096'
     gui_hint: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
     name: '"USRP RX2 LoRa IQ"'
     plotconst: 'False'
     plotfreq: 'True'

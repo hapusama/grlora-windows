@@ -1,13 +1,18 @@
-"""Oversampled LoRa demodulation experiments."""
+"""OS-LoRa 基于过采样与非均匀 pattern 的弱包解调接口。
 
-from .chirp_svd import (
+系统实现位于 :mod:`weak_decoder.os_lora.system`，离线实验入口位于
+:mod:`weak_decoder.os_lora.experiments`。本文件继续导出主要系统 API，保证
+现有 ``from weak_decoder.os_lora import ...`` 调用不受目录重构影响。
+"""
+
+from .system.chirp_svd import (
     ChirpSVDSpectra,
     chirp_matrix,
     chirp_svd_spectra,
     low_rank_chirp_matrix,
     savaux_spectrum_from_dechirped_matrix,
 )
-from .nonuniform_sampling import (
+from .system.nonuniform_sampling import (
     NonuniformPatternBank,
     NonuniformScoreResult,
     MatrixFreeGLSResult,

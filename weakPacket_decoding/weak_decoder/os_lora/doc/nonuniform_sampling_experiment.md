@@ -7,12 +7,12 @@ and no cross-packet rescue logic.
 
 ## Implementation
 
-- `weak_decoder/os_lora/nonuniform_sampling.py`
+- `weak_decoder/os_lora/system/nonuniform_sampling.py`
   - builds a deterministic bank of oversampling-offset patterns `c_b[p]`;
   - scores Savaux top-k raw FFT bins with each pattern;
   - reports best-pattern, mean-pattern, coherent-pattern, and
     covariance-whitened coherent scores.
-- `weak_decoder/os_lora/evaluate_nonuniform_sampling.py`
+- `weak_decoder/os_lora/experiments/evaluate_nonuniform_sampling.py`
   - loads the existing header-first datasets through `weak_decoder.baselines.common`;
   - compares non-uniform scores against Savaux oversampled evidence;
   - writes per-packet metrics plus CSV/JSON summaries.
@@ -22,7 +22,7 @@ and no cross-packet rescue logic.
 Command:
 
 ```powershell
-python "weakPacket_decoding\weak_decoder\os_lora\evaluate_nonuniform_sampling.py" `
+python "weakPacket_decoding\weak_decoder\os_lora\experiments\evaluate_nonuniform_sampling.py" `
   --datasets 0_0_0_10_14_16 `
   --snrs -22 -23 -24 `
   --seeds 42 `
@@ -84,7 +84,7 @@ References:
 
 ## Matrix Search Pass
 
-Added `weak_decoder/os_lora/analyze_nonuniform_matrix.py` and expanded the
+Added `weak_decoder/os_lora/experiments/analyze_nonuniform_matrix.py` and expanded the
 pattern bank builder with these families:
 
 - `fixed`: the classical OSR fixed branches.
@@ -110,7 +110,7 @@ accounted for.
 Command:
 
 ```powershell
-python "weakPacket_decoding\weak_decoder\os_lora\analyze_nonuniform_matrix.py" `
+python "weakPacket_decoding\weak_decoder\os_lora\experiments\analyze_nonuniform_matrix.py" `
   --raw-bins 1 61 301 653 900 1023 `
   --bank-kinds fixed basic periodic dither random balanced_random search `
   --random-count 64 `
@@ -195,7 +195,7 @@ accepts some non-ML behavior to trade breaks for fixes at very low SNR.
 
 ## Full-Spectrum FFT Coherent Sum Pass
 
-Added `weak_decoder/os_lora/evaluate_pattern_fft_coherence.py` to move from
+Added `weak_decoder/os_lora/experiments/evaluate_pattern_fft_coherence.py` to move from
 candidate-only scoring back to a decoder-like full-spectrum test.  For each
 payload symbol, it now computes:
 
@@ -212,7 +212,7 @@ ratio.
 Smoke command:
 
 ```powershell
-python "weakPacket_decoding\weak_decoder\os_lora\evaluate_pattern_fft_coherence.py" `
+python "weakPacket_decoding\weak_decoder\os_lora\experiments\evaluate_pattern_fft_coherence.py" `
   --datasets 0_0_0_10_14_16 `
   --snrs -24 `
   --seeds 42 `
@@ -234,7 +234,7 @@ Smoke result:
 Small sweep command:
 
 ```powershell
-python "weakPacket_decoding\weak_decoder\os_lora\evaluate_pattern_fft_coherence.py" `
+python "weakPacket_decoding\weak_decoder\os_lora\experiments\evaluate_pattern_fft_coherence.py" `
   --datasets 0_0_0_10_14_16 `
   --snrs -25 -26 `
   --seeds 42 `
@@ -304,13 +304,13 @@ view:
 Implemented code:
 
 - `pattern_coherence_weighted_power(...)` in
-  `weak_decoder/os_lora/nonuniform_sampling.py`.
+  `weak_decoder/os_lora/system/nonuniform_sampling.py`.
 - `adaptive_gls_spectrum_power(...)` in the same file.
 - `stable_pattern`, `gated_mean_pattern`, `gated_stable_pattern`, and
   `gated_consensus_pattern` in
-  `weak_decoder/os_lora/evaluate_nonuniform_sampling.py`.
+  `weak_decoder/os_lora/experiments/evaluate_nonuniform_sampling.py`.
 - `lora_stable_power` and `lora_adaptive_gls` in
-  `weak_decoder/os_lora/evaluate_pattern_fft_coherence.py`.
+  `weak_decoder/os_lora/experiments/evaluate_pattern_fft_coherence.py`.
 
 The most useful score so far is:
 
@@ -326,7 +326,7 @@ consistency penalty, not an extra-SNR combiner.
 Candidate-only command, two packets:
 
 ```powershell
-python "weakPacket_decoding\weak_decoder\os_lora\evaluate_nonuniform_sampling.py" `
+python "weakPacket_decoding\weak_decoder\os_lora\experiments\evaluate_nonuniform_sampling.py" `
   --datasets 0_0_0_10_14_16 `
   --snrs -24 -25 -26 `
   --seeds 1 2 3 42 `
@@ -353,7 +353,7 @@ Aggregate result over 840 payload symbols:
 Default-dataset smoke, one packet per dataset:
 
 ```powershell
-python "weakPacket_decoding\weak_decoder\os_lora\evaluate_nonuniform_sampling.py" `
+python "weakPacket_decoding\weak_decoder\os_lora\experiments\evaluate_nonuniform_sampling.py" `
   --datasets 0_0_0_10_14_8 0_0_0_10_14_16 0_0_0_10_14_32 `
   --snrs -25 -26 `
   --seeds 1 2 42 `
@@ -424,7 +424,7 @@ This is now implemented as `gated_hybrid_pattern` in
 Default-dataset, two-packet command:
 
 ```powershell
-python "weakPacket_decoding\weak_decoder\os_lora\evaluate_nonuniform_sampling.py" `
+python "weakPacket_decoding\weak_decoder\os_lora\experiments\evaluate_nonuniform_sampling.py" `
   --datasets 0_0_0_10_14_8 0_0_0_10_14_16 0_0_0_10_14_32 `
   --snrs -25 -26 `
   --seeds 1 2 42 `
@@ -711,7 +711,7 @@ instead be checked using the measured `C_{bb'}[m]`.
 
 Implementation:
 
-- `weak_decoder/os_lora/analyze_empirical_noise_covariance.py`
+- `weak_decoder/os_lora/experiments/analyze_empirical_noise_covariance.py`
 - off-packet windows are selected outside the header-first packet intervals;
 - each window has length `NR`, is dechirped into `z[n]`, and is projected using
   the LoRa-corrected pattern kernel already used by `pattern_bin_values`;
@@ -745,7 +745,7 @@ C_{bb'}^{\mathrm{white}}[m] .
 Command:
 
 ```powershell
-python "weakPacket_decoding\weak_decoder\os_lora\analyze_empirical_noise_covariance.py" `
+python "weakPacket_decoding\weak_decoder\os_lora\experiments\analyze_empirical_noise_covariance.py" `
   --datasets 0_0_0_10_14_8 0_0_0_10_14_16 0_0_0_10_14_32 `
   --raw-bins 61 301 653 900 `
   --bank-kinds fixed basic_only random_only balanced_random_only `

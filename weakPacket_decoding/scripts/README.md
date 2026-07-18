@@ -42,8 +42,24 @@ python -m weak_decoder.run_iq_frontend `
   --samp-rate 500000 `
   --center-freq 487700000 `
   --sync-word 0x34 `
-  --preamble-len 32
+  --preamble-len 32 `
+  --win-chirps 4
 ```
+
+这里的 `--preamble-len 32` 表示发射包中共有 32 个前导 upchirp；
+`--win-chirps 4` 表示前导码检测的每个滑动窗口包含 4 个 chirp。检测器会对这
+4 个 chirp 分别解调和 FFT，然后按 bin 做非相干功率累加：
+
+```text
+E[k] = sum_m |FFT_m[k]|^2,  m = 0, 1, 2, 3
+```
+
+在当前 `SF=10、BW=125 kHz、Fs=500 kS/s` 配置下，每个 chirp 为 4096 个采样点，
+所以检测窗口长度为 `4 × 4096 = 16384` 个采样点。滑窗默认每次前进 1 个 chirp；
+未显式指定连续窗口门限时，同步链会采用
+`preamble_len - win_chirps + 1 = 29` 个峰值 bin 稳定的连续窗口作为粗检测条件。
+`run_iq_frontend` 的 `--win-chirps` 默认值也是 4，但推荐在实验命令中显式写出，
+便于仅凭命令和记录复现实验参数。
 
 `weak_decoder.run_iq_frontend` 是一层 Branch4 参数封装，内部调用本目录的
 `run_weak_sync_chain.py`：

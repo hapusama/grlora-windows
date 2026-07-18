@@ -5,4 +5,4 @@
 20 dB，不启用 AGC。
 
 记录每轮实验的衰减、距离和目标 SNR；IQ 文件使用
-`sf10_bw125_fs500_pre32_sw34_rNNN.bin` 命名。
+`sf10_bw125_fs500_pre32_sw34_lowNNN.bin` 命名。

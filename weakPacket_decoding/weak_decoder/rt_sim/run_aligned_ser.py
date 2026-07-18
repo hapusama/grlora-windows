@@ -27,8 +27,8 @@ from weak_decoder.baselines.savaux_oversampled.paper_oversampled_demod import ( 
     paper_oversampled_spectrum,
 )
 from weak_decoder.chirp import build_upchirp  # noqa: E402
-from weak_decoder.os_lora.evaluate_pattern_fft_coherence import _background_bins  # noqa: E402
-from weak_decoder.os_lora.nonuniform_sampling import (  # noqa: E402
+from weak_decoder.os_lora.system.noise import select_background_bins as _background_bins  # noqa: E402
+from weak_decoder.os_lora.system.nonuniform_sampling import (  # noqa: E402
     NonuniformPatternBank,
     build_pattern_bank,
     conditional_lora_gls_detect,

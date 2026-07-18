@@ -151,14 +151,18 @@ python scripts\run_header_first_demod.py `
 
 ## 4. OS-LoRa / GLS
 
-当前算法与实验入口位于：
+当前实现已经按职责拆分：
 
 ```text
-weak_decoder/os_lora/nonuniform_sampling.py
-weak_decoder/os_lora/evaluate_nonuniform_sampling.py
-weak_decoder/os_lora/analyze_empirical_noise_covariance.py
-weak_decoder/os_lora/evaluate_low_complexity_gls.py
+weak_decoder/os_lora/system/       可复用的在线解码算法
+weak_decoder/os_lora/experiment_support/  实验共享基础设施
+weak_decoder/os_lora/experiments/  离线评估、诊断、标定与绘图
+weak_decoder/os_lora/doc/          算法与实验文档
 ```
+
+详细的模块职责、导入方式和实验入口见
+`weak_decoder/os_lora/README.md`。实验入口之间不得互相导入，删除任意实验脚本
+不会影响其他入口的导入。
 
 算法文档：
 

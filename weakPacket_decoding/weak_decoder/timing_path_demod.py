@@ -1,14 +1,12 @@
-"""Physically constrained non-uniform timing-path LoRa evidence.
+"""带物理约束的 LoRa 非均匀 timing-path 证据。
 
-The path family here models fractional sampling phase inside one oversampled
-LoRa symbol:
+这里的路径集合用于描述一个过采样 LoRa symbol 内部的小数采样相位：
 
     t[p] = R*p + center + tau0 + slope*(p/(N-1) - 0.5)
 
-where R is the oversampling factor.  This is much smaller and more physical
-than free q[p] enumeration: it represents residual STO / within-symbol timing
-drift.  For each candidate raw FFT bin, the evidence is a non-uniform matched
-sum over interpolated oversampled dechirped samples.
+其中 R 是过采样倍数。相比任意枚举 q[p]，该搜索空间更小，也更符合物理意义：
+它表示残余 STO 或 symbol 内部的 timing drift。对每个候选 raw FFT bin，证据由
+插值后的过采样 dechirped 样点进行非均匀匹配求和得到。
 """
 
 from __future__ import annotations
@@ -144,7 +142,7 @@ def _timing_path_value(
         drift = float(slope) * (p / float(n_bins - 1) - 0.5)
     else:
         drift = 0.0
-    # +2 accounts for the two-sample pad in _prepare_dechirped_symbol.
+    # 加 2 是为了补偿 _prepare_dechirped_symbol 在开头添加的两个 padding 样点。
     positions = 2.0 + os_value * p + (os_value // 2) + float(tau0) + drift
     picked = _interp_complex(dechirped_padded, positions)
     q_frac = (os_value // 2) + float(tau0) + drift
@@ -176,7 +174,7 @@ def score_timing_path_candidates(
     slope_penalty_power: float = 0.10,
     savaux_power: np.ndarray | None = None,
 ) -> tuple[TimingPathCandidate, ...]:
-    """Score candidate bins with linear fractional timing paths."""
+    """使用线性小数 timing path 为候选 bin 评分。"""
 
     os_value = _validate_os_factor(os_factor)
     dechirped = _prepare_dechirped_symbol(
@@ -249,12 +247,11 @@ def score_fixed_timing_path_candidates(
     slope_penalty_power: float = 0.10,
     savaux_power: np.ndarray | None = None,
 ) -> tuple[TimingPathCandidate, ...]:
-    """Score candidate bins on one shared fractional timing path.
+    """在一条共享的小数 timing path 上为候选 bin 评分。
 
-    Unlike ``score_timing_path_candidates``, this does not search a separate
-    best path per candidate.  Callers can estimate ``tau0``/``slope`` once per
-    packet and reuse that path across payload symbols, which is much less prone
-    to per-symbol noise overfit.
+    与 ``score_timing_path_candidates`` 不同，这里不会为每个候选分别搜索最优路径。
+    调用方可以为每个 packet 只估计一次 ``tau0``/``slope``，再让所有 payload
+    symbols 复用该路径，从而明显降低对逐 symbol 噪声的过拟合风险。
     """
 
     os_value = _validate_os_factor(os_factor)
@@ -323,7 +320,7 @@ def demod_timing_path_symbol(
     min_savaux_rel_db: float = -4.0,
     min_path_gain: float = 1.02,
 ) -> TimingPathDemodResult:
-    """Demodulate one symbol using Savaux Top-K plus timing-path evidence."""
+    """结合 Savaux Top-K 与 timing-path 证据解调一个 symbol。"""
 
     n_bins = 1 << int(sf)
     os_value = _validate_os_factor(os_factor)

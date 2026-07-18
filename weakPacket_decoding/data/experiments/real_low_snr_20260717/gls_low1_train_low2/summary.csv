@@ -1,0 +1,5 @@
+test_name,training_name,method,pattern_count,frame_count,frame_errors,fer,symbol_count,errors,ser,fixes_vs_savaux,breaks_vs_savaux,elapsed_seconds,mean_milliseconds_per_symbol
+low1,low2,ordinary_fft,0,11,0,0.0,539,0,0.0,0,0,0.0003054000062547857,0.000566604835352107
+low1,low2,savaux,0,11,0,0.0,539,0,0.0,0,0,0.9910775999842372,1.8387339517332786
+low1,low2,gls_crossfit,8,11,0,0.0,539,0,0.0,0,0,2.4327147000094556,4.513385343245743
+low1,low2,gls_offpacket,8,11,0,0.0,539,0,0.0,0,0,0.11741929999880085,0.21784656771577152

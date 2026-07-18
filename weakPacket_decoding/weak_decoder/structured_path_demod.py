@@ -1,15 +1,13 @@
-"""Structured non-uniform oversampling-path demodulation experiments.
+"""结构化非均匀过采样路径解调实验。
 
-This module deliberately treats non-uniform offset paths as an experimental
-extension beyond the fixed-offset branches used by the Savaux OSR baseline.
-For a path ``q[p]`` and candidate raw FFT bin ``k`` it evaluates the same
-branch phase model as the paper, but only along the selected sample path:
+本模块刻意把非均匀偏移路径作为 Savaux OSR baseline 固定偏移 branch 之外的
+实验扩展。对于路径 ``q[p]`` 和候选 raw FFT bin ``k``，这里使用与论文相同的
+branch 相位模型，但只沿选定的采样路径计算：
 
     n[p] = R * p + q[p]
 
-The path score is only used as extra evidence among a small Savaux Top-K
-candidate set.  It is not a claim that a free per-chip path creates independent
-LoRa observations.
+路径分数只作为 Savaux Top-K 小候选集中的额外证据。这并不意味着任意选择的
+逐 chip 路径能够产生相互独立的 LoRa 观测。
 """
 
 from __future__ import annotations
@@ -87,11 +85,10 @@ def _top_bins(power: np.ndarray, top_k: int) -> np.ndarray:
 
 @lru_cache(maxsize=32)
 def structured_paths(sf: int, os_factor: int) -> tuple[StructuredPath, ...]:
-    """Generate a compact family of structured offset paths.
+    """生成一组紧凑的结构化偏移路径。
 
-    The family is intentionally low complexity for OSR=4: fixed offsets,
-    modular linear paths, two short periodic paths, and two-piece constant
-    paths.  Duplicates are removed.
+    针对 OSR=4，路径集合被刻意限制为低复杂度形式：固定偏移、模线性路径、
+    两种短周期路径以及两段常值路径；重复路径会被删除。
     """
 
     n_bins = 1 << int(sf)
@@ -255,11 +252,10 @@ def score_structured_path_candidates(
     path_ratio_power: float = 0.20,
     savaux_power: np.ndarray | None = None,
 ) -> tuple[StructuredPathCandidate, ...]:
-    """Score Savaux Top-K bins with a compact structured offset-path ensemble.
+    """使用紧凑的结构化偏移路径集合为 Savaux Top-K bin 评分。
 
-    This is the soft-evidence version of the structured-path experiment.  It
-    does not choose a hard symbol by itself; it returns per-candidate evidence
-    that callers can blend into an existing likelihood/codec decoder.
+    这是 structured-path 实验的软证据版本。函数本身不选择 hard symbol，
+    而是返回每个候选的证据，供调用方融合进已有的似然或 codec 解码器。
     """
 
     os_value = _validate_os_factor(os_factor)
@@ -324,7 +320,7 @@ def demod_structured_path_symbol(
     override_margin_db: float = 0.20,
     min_savaux_rel_db: float = -4.0,
 ) -> StructuredPathDemodResult:
-    """Demodulate one symbol with structured-path evidence over Savaux Top-K."""
+    """使用 Savaux Top-K 上的结构化路径证据解调一个 symbol。"""
 
     n_bins = 1 << int(sf)
     os_value = _validate_os_factor(os_factor)
