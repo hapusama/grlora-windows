@@ -1,0 +1,7 @@
+dataset,noise_model,snr_db,seed_count,symbol_count,savaux_equal_errors,savaux_equal_ser,savaux_gls_errors,savaux_gls_ser,savaux_nus_joint_gls_errors,savaux_nus_joint_gls_ser,cfr_whitened_ml_errors,cfr_whitened_ml_ser,savaux_gls_fixes_vs_equal,savaux_gls_breaks_vs_equal,joint_fixes_vs_savaux_gls,joint_breaks_vs_savaux_gls,whitened_fixes_vs_joint,whitened_breaks_vs_joint
+0_0_0_10_14_32,ar1_rho0.8,-26.0,3,384,329,0.8567708333333334,329,0.8567708333333334,329,0.8567708333333334,237,0.6171875,0,0,0,0,99,7
+0_0_0_10_14_32,ar1_rho0.8,-24.0,3,384,261,0.6796875,261,0.6796875,261,0.6796875,135,0.3515625,0,0,0,0,133,7
+0_0_0_10_14_32,ar1_rho0.8,-22.0,3,384,157,0.4088541666666667,157,0.4088541666666667,157,0.4088541666666667,29,0.07552083333333333,0,0,0,0,130,2
+0_0_0_10_14_32,awgn,-26.0,3,384,88,0.22916666666666666,88,0.22916666666666666,88,0.22916666666666666,88,0.22916666666666666,0,0,0,0,0,0
+0_0_0_10_14_32,awgn,-24.0,3,384,9,0.0234375,9,0.0234375,9,0.0234375,9,0.0234375,0,0,0,0,0,0
+0_0_0_10_14_32,awgn,-22.0,3,384,0,0.0,0,0.0,0,0.0,0,0.0,0,0,0,0,0,0

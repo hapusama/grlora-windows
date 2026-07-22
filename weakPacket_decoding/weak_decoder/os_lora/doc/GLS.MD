@@ -947,6 +947,436 @@ P_{\mathrm{final}}[m] $
 
 所以 wrap 一致性不是重新解调，而是对 GLS 候选进行 LoRa 结构约束下的重排。
 
+# GLS pattern存在的缺陷
+$ \widehat{x}_{\mathrm{GLS}}(m)
+=
+\frac{
+\mathbf{a}_m^H
+\mathbf{C}_m^{-1}
+\mathbf{y}(m)
+}{
+\mathbf{a}_m^H
+\mathbf{C}_m^{-1}
+\mathbf{a}_m
+} $
+
+解决的是：
+
+$ \boxed{
+\text{在“候选 }m\text{ 就是真符号”的假设下，如何最优合并各个 branch 来估计它的复幅度}
+} $
+
+对应权重为：
+
+$ \mathbf{w}_m
+=
+\frac{
+\mathbf{C}_m^{-1}\mathbf{a}_m
+}{
+\mathbf{a}_m^H
+\mathbf{C}_m^{-1}
+\mathbf{a}_m
+},
+\qquad
+\mathbf{w}_m^H\mathbf{a}_m
+=
+1 $
+
+这个单位增益约束保证的是：**如果 **$ m $** 确实正确，它的目标响应不会在合并时被压掉**；同时，$ \mathbf{C}_m^{-1} $ **尽量降低该候选合并后的噪声方差**。
+
+但它确实没有直接保证：
+
+$ \left|
+\widehat{x}_{\mathrm{GLS}}(K_0)
+\right|
+>
+\left|
+\widehat{x}_{\mathrm{GLS}}(m)
+\right|,
+\qquad
+\forall m\neq K_0 $
+
+## 为什么不能保证？
+假设真实符号是 $ K_0 $。对于测试候选 $ m $，实际模型应写成：
+
+$ \mathbf{y}(m)
+=
+\mathbf{a}(m,K_0)x
++
+\boldsymbol{\eta}(m) $
+
+GLS 却按照“$ m $ 正确”时的响应：
+
+$ \mathbf{a}_m
+\equiv
+\mathbf{a}(m,m) $
+
+去估计，得到：
+
+$ \widehat{x}_{\mathrm{GLS}}(m)
+=
+\frac{
+\mathbf{a}_m^H
+\mathbf{C}_m^{-1}
+\mathbf{a}(m,K_0)
+}{
+\mathbf{a}_m^H
+\mathbf{C}_m^{-1}
+\mathbf{a}_m
+}
+x
++
+\frac{
+\mathbf{a}_m^H
+\mathbf{C}_m^{-1}
+\boldsymbol{\eta}(m)
+}{
+\mathbf{a}_m^H
+\mathbf{C}_m^{-1}
+\mathbf{a}_m
+} $
+
+当 $ m=K_0 $ 时，前面的系数为 $ 1 $，因此：
+
+$ \widehat{x}_{\mathrm{GLS}}(K_0)
+=
+x
++
+\text{残余噪声} $
+
+但当 $ m\neq K_0 $ 时，第一项未必为零：
+
+$ \frac{
+\mathbf{a}_m^H
+\mathbf{C}_m^{-1}
+\mathbf{a}(m,K_0)
+}{
+\mathbf{a}_m^H
+\mathbf{C}_m^{-1}
+\mathbf{a}_m
+}
+\neq
+0 $
+
+这就是 NUS 非正交匹配产生的**错误候选泄漏**。再加上某个错误候选可能碰巧获得很大的噪声投影，它的分数依然可能超过正确候选。
+
+所以，原 GLS 主要优化的是：
+
+$ \boxed{
+\text{固定候选列内部的 branch 合并 SNR}
+} $
+
+而不是：
+
+$ \boxed{
+\text{正确候选相对于所有错误候选的判决间隔}
+} $
+
+你现有文档中其实也已经指出：这一优化只作用于完整候选响应矩阵的一列，没有联合利用其他候选的响应，也没有显式优化正确候选与错误候选之间的间隔。
+
+真正面向解调判决的目标应该类似：
+
+$ \max_{\mathbf{w}}
+\left[
+\left|
+\mathbf{w}^H
+\mathbf{a}(K_0,K_0)
+\right|^2
+-
+\max_{m\neq K_0}
+\left|
+\mathbf{w}^H
+\mathbf{a}(m,K_0)
+\right|^2
+\right] $
+
+或者采用带旁瓣约束的形式：
+
+$ \begin{aligned}
+\min_{\mathbf{w}_m}\quad
+&
+\mathbf{w}_m^H
+\mathbf{C}_m
+\mathbf{w}_m
++
+\lambda
+\sum_{K\neq m}
+\left|
+\mathbf{w}_m^H
+\mathbf{a}(m,K)
+\right|^2
+\\
+\text{s.t.}\quad
+&
+\mathbf{w}_m^H
+\mathbf{a}(m,m)
+=
+1
+\end{aligned} $
+
+这才同时要求：
+
++ 正确候选无失真保留；
++ 加性噪声被压低；
++ 其他符号泄漏到该候选的响应也被压低。
+
+所以一句话总结：
+
+$ \boxed{
+\text{GLS 保证“假设 }m\text{ 正确时，对 }m\text{ 的估计最干净”，但不保证“}m\text{ 比其他候选更像真符号”。}
+} $
+
+## 我们真正希望GLS带来收益的来源
+**真正的解码增益来源了**：如果**错误高峰主要由噪声造成**，而这些噪声**在不同 NUS pattern 上具有可利用的相关结构，那么 GLS 确实能够压低错误高峰**，从而改善正确 bin 与错误 bin 的排序，带来解码增益。
+
+但有一个关键修正：
+
+$ \boxed{
+\text{GLS 不是直接把噪声 }\mathbf{B}\text{ 变小，而是选择一个投影，使合并后的噪声方差最小。}
+} $
+
+### 放到每个候选 bin 上看
+对于候选 $ m $，多条 pattern 的输出向量为：
+
+$ \mathbf{y}(m)
+=
+\mathbf{a}_m x_m
++
+\boldsymbol{\eta}(m) $
+
+GLS 选择：
+
+$ \mathbf{w}_m
+=
+\frac{
+\mathbf{C}_m^{-1}\mathbf{a}_m
+}{
+\mathbf{a}_m^H
+\mathbf{C}_m^{-1}
+\mathbf{a}_m
+} $
+
+使得：
+
+$ \mathbf{w}_m^H\mathbf{a}_m
+=
+1 $
+
+同时最小化：
+
+$ \mathbf{w}_m^H
+\mathbf{C}_m
+\mathbf{w}_m $
+
+所以合并输出为：
+
+$ \widehat{x}(m)
+=
+\mathbf{w}_m^H\mathbf{y}(m)
+=
+x_m
++
+\mathbf{w}_m^H\boldsymbol{\eta}(m) $
+
+正确候选的信号响应被保留，而输出噪声方差变为：
+
+$ \operatorname{Var}
+\left[
+\mathbf{w}_m^H\boldsymbol{\eta}(m)
+\right]
+=
+\frac{
+1
+}{
+\mathbf{a}_m^H
+\mathbf{C}_m^{-1}
+\mathbf{a}_m
+} $
+
+这就是 GLS 真正压制的东西。
+
+---
+
+### 错误 bin 的噪声峰当然可能被压下去
+假设真实符号是 $ K_0 $，某个错误候选 $ m\neq K_0 $ 的高峰主要来自噪声：
+
+$ \mathbf{y}(m)
+\approx
+\boldsymbol{\eta}(m) $
+
+GLS 后：
+
+$ \widehat{x}(m)
+\approx
+\mathbf{w}_m^H
+\boldsymbol{\eta}(m) $
+
+如果这个错误高峰来自某个：
+
++ 高噪声 pattern；
++ pattern 间相关的噪声方向；
++ 有色干扰方向；
++ 不同 pattern 输出不一致的偶然假峰；
+
+那么 $ \mathbf{C}_m^{-1} $ 会降低这些方向的权重，**多个 pattern 之间也可能发生噪声相消**。于是，**错误 bin 的峰值会下降**。
+
+与此同时，正确 bin 满足：
+
+$ \widehat{x}(K_0)
+\approx
+x
++
+\mathbf{w}_{K_0}^H
+\boldsymbol{\eta}(K_0) $
+
+其信号 $ x $ 被单位增益约束保留。
+
+所以最终确实可能出现：
+
+$ \boxed{
+\left|
+\widehat{x}(K_0)
+\right|
+\text{ 基本保持},
+\qquad
+\left|
+\widehat{x}(m)
+\right|
+\text{ 被压低}
+} $
+
+从而增大：
+
+$ \left|
+\widehat{x}(K_0)
+\right|^2
+-
+\max_{m\neq K_0}
+\left|
+\widehat{x}(m)
+\right|^2 $
+
+这当然就是解码增益。
+
+现有文档中“GLS 只优化固定候选列 SNR”的说法，并不表示它不会改善判决；只是表示它**没有显式保证**改善所有候选之间的间隔。
+
+---
+
+### 为什么之前还说它“不保证正确候选更高”？
+因为“有望压制”和“数学保证压制”是两回事。
+
+GLS **最小化的是错误 bin **输出的**统计方差**：
+
+$ \mathbb{E}
+\left[
+\left|
+\mathbf{w}_m^H
+\boldsymbol{\eta}(m)
+\right|^2
+\right] $
+
+而解码时面对的是某一次具体的噪声 realization：
+
+$ \left|
+\mathbf{w}_m^H
+\boldsymbol{\eta}(m)
+\right|^2 $
+
+平均方差下降以后，错误高峰出现的概率通常会下降，但不能保证每一次都下降。
+
+例如，**某个错误 bin 的噪声刚好沿着信号方向**：
+
+$ \boldsymbol{\eta}(m)
+\approx
+\gamma\mathbf{a}_m $
+
+因为 GLS 必须满足：
+
+$ \mathbf{w}_m^H\mathbf{a}_m
+=
+1 $
+
+所以：
+
+$ \mathbf{w}_m^H
+\boldsymbol{\eta}(m)
+\approx
+\gamma $
+
+**这种“长得和真实信号一样”的噪声，GLS 无法压制，否则也会把真实信号一起压掉**。
+
+因此：
+
+$ \boxed{
+\text{GLS 能压制位于信号方向之外的结构化噪声，但不能压制与信号响应完全同向的假峰。}
+} $
+
+---
+
+### “整个频谱都会得到增益”需要稍微改一下
+> GLS 面向的观测模型可以写为：
+>
+> $ \mathbf{Y}
+=
+\mathbf{H}\mathbf{X}
++
+\mathbf{B} $
+>
+> 其核心目标是在保留目标信号响应的同时，尽可能减小合并后的噪声项 $ \mathbf{B} $。因此，对每个候选符号进行 GLS 合并后，**整个候选响应谱都应获得一定程度的噪声抑制。**
+>
+> 由此产生一个问题：如果某些非均匀匹配响应 bin 的异常高峰主要由噪声造成，那么 GLS 是否也能够压低这些错误高峰，从而增大正确候选与错误候选之间的判决间隔，并最终带来实际的解码增益？
+>
+
+对每个候选 $ m $，都可以应用 GLS：
+
+$ T_{\mathrm{GLS}}[m]
+=
+\frac{
+\left|
+\mathbf{a}_m^H
+\mathbf{C}_m^{-1}
+\mathbf{y}(m)
+\right|^2
+}{
+\mathbf{a}_m^H
+\mathbf{C}_m^{-1}
+\mathbf{a}_m
+} $
+
+于是，整个候选频谱都会被重新计算。
+
+但并不是所有 bin 都乘上**同一个固定的“增益系数”。**更准确地说：
+
+$ \boxed{
+\text{整个频谱中的每个候选，都经过了针对 pattern 噪声结构的最优投影。}
+} $
+
+正确 bin 得到“信号保真 + 降噪”；错误 bin 通常只有“降噪”，因此在统计意义上，正确 bin 会更加突出。
+
+---
+
+### 为什么 AWGN 下可能没有额外解码收益？
+若原始噪声是理想白噪声，而且 Savaux 已经利用了全部 OSR 独立样本，**那么 NUS pattern 只是同一批样本的重复投影。**
+
+**正确考虑相关性后，**$ \mathbf{C} $** 会把这些重复信息扣除，GLS 最终不会创造新的噪声自由度。**在这种情况下，错误噪声峰和正确 bin 的噪声都只能被压到 Savaux 已经达到的水平，NUS 后端没有额外空间。
+
+:::info
+现有文档也强调了：AWGN 下，pattern 数量增加并不会突破 OSR 的有效自由度。
+
+但是，在有色噪声、结构化干扰或 pattern 间噪声功率不均衡时，GLS 可以利用 Savaux 等权合并没有利用的协方差结构，因此：
+
+$ \boxed{
+\text{错误噪声峰出现概率下降}
+\Rightarrow
+\text{正确候选胜出的概率提高}
+\Rightarrow
+\text{SER 获得增益}
+} $
+
+所以我的直觉没错：**GLS 虽然没有直接优化“正确峰减去次大峰”，但如果错误峰确实主要由可预测、可相关建模的噪声造成，它自然会通过压低这些噪声峰带来解码增益。**只是这个增益是统计性的，并且依赖噪声是否具有 Savaux 尚未利用的结构。
+
+:::
+
 ---
 
 # 完整数据流

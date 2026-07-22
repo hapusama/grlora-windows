@@ -1,0 +1,5 @@
+dataset,noise_model,snr_db,seed_count,symbol_count,savaux_errors,savaux_ser,cfr_nus_glrt_errors,cfr_nus_glrt_ser,cfr_whitened_ml_errors,cfr_whitened_ml_ser,fixes_vs_savaux,breaks_vs_savaux,whitened_fixes_vs_savaux,whitened_breaks_vs_savaux
+0_0_0_10_14_32,ar1_rho0.8,-26.0,2,128,112,0.875,112,0.875,78,0.609375,0,0,39,5
+0_0_0_10_14_32,ar1_rho0.8,-24.0,2,128,86,0.671875,86,0.671875,45,0.3515625,0,0,44,3
+0_0_0_10_14_32,awgn,-26.0,2,128,20,0.15625,20,0.15625,20,0.15625,0,0,0,0
+0_0_0_10_14_32,awgn,-24.0,2,128,3,0.0234375,3,0.0234375,3,0.0234375,0,0,0,0

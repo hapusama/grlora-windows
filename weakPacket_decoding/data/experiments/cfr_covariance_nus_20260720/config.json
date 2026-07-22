@@ -1,0 +1,32 @@
+{
+  "datasets": [
+    {
+      "dataset": "0_0_0_10_14_32",
+      "sf": 10,
+      "os_factor": 4,
+      "symbol_count": 64
+    }
+  ],
+  "noise_kinds": [
+    "awgn",
+    "ar1"
+  ],
+  "ar1_rho": 0.8,
+  "snr_db": [
+    -24.0,
+    -26.0
+  ],
+  "seeds": [
+    101,
+    202
+  ],
+  "max_packets": 2,
+  "max_symbols": 64,
+  "pattern_count": 8,
+  "design_draws": 32,
+  "design_seed": 20260720,
+  "pinv_rcond": 1e-10,
+  "gt_provenance": "payload raw_fft_bin sequence from header_first CSV; used only to synthesize new ideal LoRa symbols before noise injection",
+  "decision_rule": "full-bin argmax of normalized complex-amplitude GLRT",
+  "synthetic_only": true
+}

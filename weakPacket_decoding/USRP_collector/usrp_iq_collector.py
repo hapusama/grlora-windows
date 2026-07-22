@@ -68,7 +68,7 @@ class usrp_iq_collector(gr.top_block, Qt.QWidget):
         self.settle_time = settle_time = 1
         self.samp_rate = samp_rate = 500e3
         self.rf_bandwidth = rf_bandwidth = 500e3
-        self.output_file = output_file = "data/branch4_fixed/low_snr/sf10_bw125_fs500_pre32_sw34_low6.bin"
+        self.output_file = output_file = "data/branch4_fixed/low_snr/sf10_bw125_fs500_pre32_sw34_low7.bin"
         self.gain = gain = 20
         self.duration = duration = 120
         self.device_args = device_args = 'serial=2603160'

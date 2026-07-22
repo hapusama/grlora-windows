@@ -1,0 +1,52 @@
+{
+  "datasets": [
+    "0_0_0_10_14_8",
+    "0_0_0_10_14_16",
+    "0_0_0_10_14_32"
+  ],
+  "source_iq_paths": [
+    "D:\\Desktop\\proj\\gr-lora_sdr\\data\\USRP_IQ\\0_0_0_10_14_8.bin",
+    "D:\\Desktop\\proj\\gr-lora_sdr\\data\\USRP_IQ\\0_0_0_10_14_16.bin",
+    "D:\\Desktop\\proj\\gr-lora_sdr\\data\\USRP_IQ\\0_0_0_10_14_32.bin"
+  ],
+  "source_symbol_csv_paths": [
+    "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\real_iq_payload_noise_cfr_nus_20260720\\source_demod\\0_0_0_10_14_8_header_first_symbols.csv",
+    "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\real_iq_payload_noise_cfr_nus_20260720\\source_demod\\0_0_0_10_14_16_header_first_symbols.csv",
+    "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\real_iq_payload_noise_cfr_nus_20260720\\source_demod\\0_0_0_10_14_32_header_first_symbols.csv"
+  ],
+  "symbol_csv_dir_override": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\real_iq_payload_noise_cfr_nus_20260720\\source_demod",
+  "waveform_source": "real_iq",
+  "synchronization": "frozen header_first CSV start/CFO; no noisy resynchronization",
+  "gt_provenance": "clean header_first raw_fft_bin; packet CRC valid; header and deterministic payload prefix reproduce exactly after byte decode/re-encode",
+  "gt_scope": "deterministic payload prefix only; padding suffix excluded",
+  "noise_source": [
+    "added_awgn",
+    "added_ar1_rho0.8"
+  ],
+  "noise_scope": "each copied real payload symbol only",
+  "signal_reference": "dataset-wide mean power over audited real payload samples",
+  "added_snr_db": [
+    -20.0,
+    -22.0,
+    -24.0,
+    -26.0,
+    -28.0
+  ],
+  "seeds": [
+    101,
+    202,
+    303
+  ],
+  "max_packets": 0,
+  "max_symbols": 0,
+  "pattern_count": 8,
+  "segment_count": 4,
+  "design_draws": 32,
+  "design_bin_count": 16,
+  "design_seed": 20260720,
+  "pinv_rcond": 1e-10,
+  "pattern_selection": "Schur-complement conditional Fisher information initialized with all Savaux fixed branches; noise model only; no GT/SER/Top-K selection",
+  "decision": "full 2^SF-bin normalized complex-amplitude GLRT argmax",
+  "synthetic_signal": false,
+  "controlled_added_noise": true
+}

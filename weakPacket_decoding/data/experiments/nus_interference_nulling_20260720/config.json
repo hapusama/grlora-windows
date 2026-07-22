@@ -1,0 +1,31 @@
+{
+  "dataset": "0_0_0_10_14_16",
+  "snrs": [
+    -20.0,
+    -22.0,
+    -24.0
+  ],
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "echo_delays_samples": [
+    0,
+    8,
+    16,
+    32
+  ],
+  "echo_amplitude": 0.85,
+  "echo_phase_rad": 0.73,
+  "max_packets": 3,
+  "guard_bins": 1,
+  "stability_threshold": 5.0,
+  "cfo_correction_mode": "continuous",
+  "output_dir": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\nus_interference_nulling_20260720",
+  "iq_path": "D:\\Desktop\\proj\\gr-lora_sdr\\data\\USRP_IQ\\0_0_0_10_14_16.bin",
+  "symbols_path": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\weak_sync_chain\\header_first\\0_0_0_10_14_16_header_first_symbols.csv",
+  "signal_reference_power": 6.422488987071513e-05,
+  "signal_reference_samples": 528384,
+  "signal_reference_packets": 3
+}

@@ -1,0 +1,14 @@
+{
+  "waveform_source": "frozen_real_iq",
+  "gt_source": "frozen_source_demod_csv",
+  "covariance_source": "natural_offpacket_same_capture",
+  "datasets": [
+    "0_0_0_10_14_8"
+  ],
+  "max_packets": 1,
+  "max_symbols": 2,
+  "noise_windows": 16,
+  "segment_count": 4,
+  "rcond": 1e-08,
+  "nuisance_mode": "none"
+}

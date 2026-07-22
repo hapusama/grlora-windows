@@ -135,6 +135,10 @@ def build_pattern_bank(
     os_value = _validate_os_factor(os_factor)
     p = np.arange(n_bins, dtype=np.int64)
     requested_mode = str(kind).strip().lower()
+    # ``*_only`` 表示候选集中不混入 4 条经典 Savaux 固定 branch。
+    # 例如 SF=10、OSR=4 时：
+    #   multiscale_compact       -> 4 条 fixed + 96 条 multiscale = 100 条；
+    #   multiscale_compact_only  -> 只有文档 GLS.MD 所说的 96 条候选。
     include_fixed = not requested_mode.endswith("_only")
     mode = requested_mode[:-5] if requested_mode.endswith("_only") else requested_mode
     names: list[str] = []
@@ -215,19 +219,34 @@ def build_pattern_bank(
                         add(f"dither_b{base}_p{period}_d{duty}_x{delta}", motif[p % period])
 
     if mode in {"multiscale", "multiscale_compact", "super_search"}:
+        # ``width``（GLS.MD 中的 w）是 offset 切换的时间尺度，单位为 chip：
+        # 小 width 让 offset 快速变化，大 width 主要观察较慢的块间变化。
         widths = tuple(width for width in (2, 4, 8, 16, 32, 64, 128, 256) if width <= n_bins)
         for width in widths:
+            # block 是 chip 所属的块编号，within 是 chip 在当前块内的位置。
             block = p // int(width)
             within = p % int(width)
             fine_divisor = max(1, int(width) // os_value)
+            # compact bank 控制候选总量：
+            # - w=2,4（不大于 OSR=4）保留 step=1,2,3；
+            # - w>=8 只保留 step=1，避免在长尺度产生大量近似 pattern。
             steps = range(1, os_value) if mode != "multiscale_compact" or width <= os_value else (1,)
             for step in steps:
+                # start 是初始过采样 offset。OSR=4 时 start=0,1,2,3。
                 for start in range(os_value):
+                    # block pattern：同一 width-chip 块内 offset 不变，只在块间切换。
                     add(f"block_w{width}_s{step}_b{start}", start + step * block)
+                    # multiscale pattern：在 block 变化上再叠加块内变化，同时观察
+                    # 块间和块内两个时间尺度。add() 会统一对 OSR 取模。
                     add(
                         f"multiscale_w{width}_s{step}_b{start}",
                         start + step * block + within // fine_divisor,
                     )
+
+        # 对 SF=10、OSR=4 的 multiscale_compact_only：
+        #   w=2,4：每个 w 有 3 step * 4 start * 2 种结构 = 24 条，共 48 条；
+        #   w=8..256：每个 w 有 1 step * 4 start * 2 种结构 = 8 条，
+        #             6 个 w 共 48 条；最终得到 96 条候选，再由 GLS 贪心选 8 条。
 
     if mode in {"quadratic", "super_search"}:
         triangular = p * (p + 1) // 2

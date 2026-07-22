@@ -1,0 +1,46 @@
+{
+  "source_set": "collector_low4",
+  "added_snr_db": [
+    -6.0
+  ],
+  "seeds": [
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008,
+    1009,
+    1010,
+    1011,
+    1012,
+    1013,
+    1014,
+    1015,
+    1016,
+    1017,
+    1018,
+    1019,
+    1020
+  ],
+  "output_dir": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\full_colored_ml_awgn_collector_low4_confirm_20260721",
+  "psd_smoothing_bins": 17,
+  "psd_floor_fraction": 0.05,
+  "max_symbols_per_dataset": 0,
+  "noise": "in-memory independent complex AWGN on copied payload symbols",
+  "datasets": [
+    "collector_low4_train_low1"
+  ],
+  "test_iq": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\USRP_collector\\data\\branch4_fixed\\low_snr\\sf10_bw125_fs500_pre32_sw34_low4.bin",
+  "test_symbols": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\real_low_snr_20260718_low4_low6\\low4_win4\\fft_symbols.csv",
+  "training_iq": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\USRP_collector\\data\\branch4_fixed\\low_snr\\sf10_bw125_fs500_pre32_sw34_low1.bin",
+  "training_sync": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\real_low_snr_20260717\\low1_win4\\sync.csv",
+  "groundtruth": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\groundtruth\\branch4_fixed\\high_snr\\sf10_bw125_fs500_pre32_sw34_r001_fft_bin_groundtruth.csv",
+  "collector_training_windows": 256,
+  "signal_reference_power": 2.0762477987584387e-07,
+  "synchronization": "frozen low4 symbol start and packet CFO; no noisy resync",
+  "gt": "independent high-SNR fixed-frame ground truth; scoring only",
+  "full_colored_ml_covariance": "independent_low1_offpacket_circulant_plus_known_awgn_identity"
+}

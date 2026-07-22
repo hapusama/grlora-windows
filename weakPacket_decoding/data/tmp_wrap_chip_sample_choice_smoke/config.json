@@ -1,0 +1,41 @@
+{
+  "test_iq": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\USRP_collector\\data\\branch4_fixed\\low_snr\\sf10_bw125_fs500_pre32_sw34_low4.bin",
+  "test_symbols": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\real_low_snr_20260718_low4_low6\\low4_win4\\fft_symbols.csv",
+  "groundtruth": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\groundtruth\\branch4_fixed\\high_snr\\sf10_bw125_fs500_pre32_sw34_r001_fft_bin_groundtruth.csv",
+  "output_dir": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\tmp_wrap_chip_sample_choice_smoke",
+  "chip_deltas": [
+    -1,
+    0,
+    1
+  ],
+  "snrs": [],
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "max_symbols": 8,
+  "sf": 10,
+  "os_factor": 4,
+  "symbol_count": 8,
+  "signal_reference_power": 2.0762478159317263e-07,
+  "fixed_uniform_offset": 0,
+  "gt_usage": "scoring and head/tail diagnostics only"
+}

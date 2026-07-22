@@ -1,0 +1,30 @@
+{
+  "source_set": "usrp_iq",
+  "added_snr_db": [
+    -18.0,
+    -20.0,
+    -22.0,
+    -24.0,
+    -26.0,
+    -28.0
+  ],
+  "seeds": [
+    101,
+    202,
+    303
+  ],
+  "output_dir": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\full_colored_ml_awgn_20260721",
+  "psd_smoothing_bins": 17,
+  "psd_floor_fraction": 0.05,
+  "max_symbols_per_dataset": 0,
+  "noise": "in-memory independent complex AWGN on copied payload symbols",
+  "datasets": [
+    "0_0_0_10_14_8",
+    "0_0_0_10_14_16",
+    "0_0_0_10_14_32"
+  ],
+  "source_experiment": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\real_iq_payload_noise_cfr_nus_20260720",
+  "synchronization": "frozen corrected_start_sample and packet CFO; no noisy resync",
+  "gt": "frozen audited payload gt_bin; scoring only",
+  "full_colored_ml_covariance": "header_residual_circulant_plus_known_awgn_identity"
+}

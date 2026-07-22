@@ -1,0 +1,3 @@
+sf,os_factor,segment_count,noise_model,savaux_gls_mean_information,full_symbol_joint_gls_mean_information,segmented_savaux_mean_information,segmented_joint_mean_information,segmented_nus_mean_conditional_information,segmented_nus_min_conditional_information,segmented_nus_max_conditional_information,full_sample_ml_mean_information
+10,4,4,awgn,4096.000005721393,4096.000005721393,4096.000005721393,4096.000005721393,0.0,0.0,0.0,4095.9999959095394
+10,4,4,ar1_rho0.8,1228.615241201931,1228.6186577734804,2037.2478424471792,2037.4170433352137,0.1692008880346174,0.0817729039185906,0.2898229694474139,2269.797092942238

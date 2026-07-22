@@ -1,0 +1,3 @@
+dataset,snr_label,added_snr_db,decision_count,trial_seed_count,savaux_errors,savaux_ser,white_ml_errors,white_ml_ser,white_ml_decision_mismatches_vs_savaux,colored_ml_errors,colored_ml_ser,colored_ml_fixes_vs_savaux,colored_ml_breaks_vs_savaux,colored_ml_paired_sign_p,seed_wins_ties_losses,seed_level_sign_p,packet_wins_ties_losses,packet_level_sign_p
+collector_low4_train_low1,-6,-6.0,7840,20,673,0.08584183673469388,673,0.08584183673469388,0,656,0.0836734693877551,33,16,0.021294114141387155,10|4|6,0.454498291015625,5|2|1,0.21875
+collector_low4_train_low1,clean,,392,1,1,0.002551020408163265,1,0.002551020408163265,0,1,0.002551020408163265,0,0,1.0,0|1|0,1.0,0|8|0,1.0

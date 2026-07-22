@@ -1,0 +1,2 @@
+event_index,start_sample,end_sample,first_window_index,last_window_index,window_count,reference_bin,reference_signed_bin,bin_min,bin_max,mean_peak_power,mean_confidence_db,max_peak_share,sf,bw,samp_rate,os_factor,chirp_samples,win_chirps,hop_samples,min_periodic_peaks,bin_tol
+0,33533952,33665024,8187,8203,17,193,193,193,193,0.028438092925625703,0.48902983748603435,0.0006919007436691576,10,125000.0,500000.0,4,4096,16,4096,17,2

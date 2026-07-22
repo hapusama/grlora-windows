@@ -89,7 +89,7 @@ blocks:
   parameters:
     comment: "\u539F\u59CB complex64 \u8F93\u51FA\u6587\u4EF6\uFF1B\u5DF2\u6709\u6587\
       \u4EF6\u4F1A\u88AB\u8986\u76D6"
-    value: '"data/branch4_fixed/low_snr/sf10_bw125_fs500_pre32_sw34_low6.bin"'
+    value: '"data/branch4_fixed/low_snr/sf10_bw125_fs500_pre32_sw34_low7.bin"'
   states:
     bus_sink: false
     bus_source: false

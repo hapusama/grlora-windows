@@ -1,0 +1,3 @@
+noise_model,savaux_gls_mean_information,full_nus_joint_mean_information,full_nus_mean_conditional_information,full_nus_min_conditional_information,segmented_savaux_mean_information,segmented_nus_joint_mean_information,segmented_nus_mean_conditional_information,segmented_nus_min_conditional_information
+awgn,4096.000005721393,4096.000005721393,0.0,0.0,4096.000005721393,4096.000005721393,0.0,0.0
+ar1_rho0.8,1228.615241201931,1228.6186577734804,0.0034165715495533266,0.0023206592250062386,2037.2478424471792,2037.4170433352137,0.1692008880346174,0.0817729039185906
