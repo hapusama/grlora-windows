@@ -1,0 +1,9 @@
+dataset,snr_db,seed,method,errors,symbol_count,ser,fixes_vs_savaux,breaks_vs_savaux
+collector_low4_cr47,,42,ordinary_fft,27,392,0.06887755102040816,0,26
+collector_low4_cr47,,42,savaux,1,392,0.002551020408163265,0,0
+collector_low4_cr47,,42,branch_gls,1,392,0.002551020408163265,0,0
+collector_low4_cr47,,42,savaux_dual,1,392,0.002551020408163265,0,0
+collector_low4_cr47,,42,proposed,1,392,0.002551020408163265,0,0
+collector_low4_cr47,,42,unichirp,53,392,0.13520408163265307,0,0
+collector_low4_cr47,,42,symfec,3,392,0.007653061224489796,0,0
+collector_low4_cr47,,42,loratrimmer,2,392,0.00510204081632653,0,0

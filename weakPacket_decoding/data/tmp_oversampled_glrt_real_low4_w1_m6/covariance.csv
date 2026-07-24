@@ -1,0 +1,2 @@
+branch_dimension,branch_snapshots,branch_diagonal_cv,branch_mean_abs_correlation,branch_max_abs_correlation,pair_dimension,pair_snapshots,pair_diagonal_cv,pair_mean_abs_correlation,pair_max_abs_correlation,dataset,snr_db,seed,offpacket_windows
+4,2048,0.03366088639791826,0.07947400618463851,0.12980184302808437,2,2048,0.0285511319551194,0.018520221461601292,0.018520221461601292,collector_low4_cr47,,42,128

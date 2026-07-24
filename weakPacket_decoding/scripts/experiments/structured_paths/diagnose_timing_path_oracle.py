@@ -27,7 +27,7 @@ if str(SAVAUX_RUNNER_DIR) not in sys.path:
 from run_paper_oversampled_baseline import load_packets as load_savaux_packets  # noqa: E402
 from run_savaux_current_threshold_sweep import _dataset_paths, _payload_reference_power  # noqa: E402
 from weak_decoder.baselines.savaux_oversampled.paper_oversampled_demod import paper_oversampled_spectrum  # noqa: E402
-from weak_decoder.timing_path_demod import score_timing_path_candidates  # noqa: E402
+from weak_decoder.decoding.timing_path_demod import score_timing_path_candidates  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:

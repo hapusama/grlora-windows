@@ -607,7 +607,7 @@ raw complex64 IQ
 新增模块为：
 
 ```text
-weak_decoder/grlora_frame_sync.py
+weak_decoder/synchronization/grlora_frame_sync.py
 ```
 
 输出 CSV 里和 gr-lora 同步相关的关键字段包括：

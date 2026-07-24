@@ -1,0 +1,6 @@
+dataset,snr_db,seed,method,errors,symbol_count,ser,fixes_vs_savaux,breaks_vs_savaux
+0_0_0_10_14_32,,42,ordinary_fft,0,245,0.0,0,0
+0_0_0_10_14_32,,42,savaux,0,245,0.0,0,0
+0_0_0_10_14_32,,42,branch_gls,0,245,0.0,0,0
+0_0_0_10_14_32,,42,savaux_dual,0,245,0.0,0,0
+0_0_0_10_14_32,,42,proposed,0,245,0.0,0,0

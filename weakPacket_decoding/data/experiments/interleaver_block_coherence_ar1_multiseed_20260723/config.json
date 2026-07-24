@@ -1,0 +1,31 @@
+{
+  "datasets": [
+    "0_0_0_10_14_32"
+  ],
+  "input_iq": null,
+  "symbols": null,
+  "groundtruth": null,
+  "name": "explicit_capture",
+  "snrs": [
+    -18.0,
+    -20.0,
+    -22.0
+  ],
+  "seeds": [
+    50,
+    51,
+    52
+  ],
+  "noise_shape": "ar1",
+  "noise_filter_taps": 65,
+  "noise_color_magnitude": 0.85,
+  "noise_color_phase_rad": 0.7,
+  "branch_loading": 0.5,
+  "branch_covariance_mode": "per_bin",
+  "noise_windows": 128,
+  "max_packets": 7,
+  "random_valid_blocks": 64,
+  "phase_grid_points": 4097,
+  "random_seed": 7301,
+  "output_dir": "data\\experiments\\interleaver_block_coherence_ar1_multiseed_20260723"
+}

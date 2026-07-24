@@ -51,7 +51,7 @@ from run_two_stage_weak_decoder import load_packets as load_current_packets  # n
 from weak_decoder.baselines.savaux_oversampled.paper_oversampled_demod import (  # noqa: E402
     demod_paper_oversampled_symbol,
 )
-from weak_decoder.structured_path_demod import demod_structured_path_symbol  # noqa: E402
+from weak_decoder.decoding.structured_path_demod import demod_structured_path_symbol  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:

@@ -123,3 +123,16 @@ branch4_fixed/interference/   发射机和干扰源同时开启
 Python 采集脚本生成的 `.bin.json` 记录。
 
 用高 SNR 下重复发送的固定帧建立“每个符号对应 FFT bin”的真值模板。该真值只供离线评估 SER 使用，不应作为 GLS 检测器本身的输入。
+
+## XCopy 式多副本同步
+
+Branch4 固定帧数据可以直接交给
+`weakPacket_decoding/scripts/run_xcopy_sync.py`。脚本利用不同发射时刻的真实重传包做
+整帧共轭时延/CFO/相位估计和相干合并，再把帧边界映射回未合并的原始低 SNR 副本。
+它不会把 OSR 分支误当成独立副本。
+
+默认 `--detection-mode paper` 使用逐包 4-chirp 长窗检测，不需要已知发包周期。高 SNR
+数据测得的 `1,500,365`-sample 间隔只供显式 `--detection-mode periodic` 加速模式使用。
+sync word、header checksum 和 gr-lora_sdr `framesync_valid` 均不作为原始 payload 导出的
+硬门。完整命令、输出字段、实测成功/失败边界见
+[`../doc/xcopy_sync.md`](../doc/xcopy_sync.md)。

@@ -1,26 +1,35 @@
 """LoRa 弱包检测、帧同步与 OS-LoRa/GLS 解调基础模块。"""
 
 from .chirp import build_upchirp, dechirp_fft, signed_fft_bin
-from .frame_locator import (
+from .synchronization import (
+    DetectionEvent,
     FrameLocation,
     FrameLocatorConfig,
-    SymbolPeak,
-    locate_frame_from_event,
-    sync_word_to_symbols,
-)
-from .grlora_frame_sync import (
     FrameSyncPeak,
-    GrloraFrameSyncResult,
     GrloraBranchSyncEstimate,
-    build_grlora_corrected_preamble_chirps,
-    run_grlora_frame_sync_validation,
-)
-from .preamble_detector import (
-    DetectionEvent,
+    GrloraFrameSyncResult,
     PreambleDetectorConfig,
+    SymbolPeak,
     WindowPeak,
+    XCopyAlignment,
+    XCopyConfig,
+    XCopyDetection,
+    XCopyDetectionBin,
+    XCopyPacketDetection,
+    XCopySoftFrameCandidate,
+    XCopySyncResult,
+    build_grlora_corrected_preamble_chirps,
     detect_preamble_runs,
+    locate_frame_from_event,
+    locate_xcopy_soft_frame_candidates,
+    run_xcopy_paper_sync,
+    run_grlora_frame_sync_validation,
+    run_xcopy_sync,
     scan_preamble_windows,
+    scan_periodic_preamble,
+    scan_xcopy_packet_preambles,
+    sync_word_to_symbols,
+    xcopy_raw_symbol_rows,
 )
 
 
@@ -49,13 +58,26 @@ __all__ = [
     "PreambleDetectorConfig",
     "SymbolPeak",
     "WindowPeak",
+    "XCopyAlignment",
+    "XCopyConfig",
+    "XCopyDetection",
+    "XCopyDetectionBin",
+    "XCopyPacketDetection",
+    "XCopySoftFrameCandidate",
+    "XCopySyncResult",
     "build_upchirp",
     "build_grlora_corrected_preamble_chirps",
     "dechirp_fft",
     "detect_preamble_runs",
     "locate_frame_from_event",
+    "locate_xcopy_soft_frame_candidates",
+    "run_xcopy_paper_sync",
     "run_grlora_frame_sync_validation",
+    "run_xcopy_sync",
     "scan_preamble_windows",
+    "scan_periodic_preamble",
+    "scan_xcopy_packet_preambles",
     "signed_fft_bin",
     "sync_word_to_symbols",
+    "xcopy_raw_symbol_rows",
 ]

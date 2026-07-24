@@ -1,0 +1,12 @@
+datasets=0_0_0_10_14_32
+snrs=-24.0
+seeds=42
+include_clean=0
+max_packets=1
+noise_windows=32
+noise_training_bins=32
+exclude_top=8
+guard_bins=1
+diagonal_loading=0.05
+noise_shape=white
+steering=ideal_ones

@@ -1,0 +1,53 @@
+{
+  "datasets": [
+    "0_0_0_10_14_32"
+  ],
+  "input_iq": null,
+  "symbols": null,
+  "groundtruth": null,
+  "name": "explicit_capture",
+  "noise_iq": null,
+  "noise_sync": null,
+  "snrs": [
+    -22.0,
+    -23.0,
+    -24.0,
+    -25.0,
+    -26.0
+  ],
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "max_packets": 7,
+  "noise_windows": 256,
+  "noise_training_bins": 16,
+  "noise_seed": 4107,
+  "branch_loading": 0.5,
+  "branch_covariance_mode": "pooled",
+  "min_branch_correlation": 0.05,
+  "pair_loading": 0.1,
+  "top_l": 8,
+  "branch_steering": "ideal",
+  "min_steering_rank_one_fraction": 0.9,
+  "consistency_weight": 0.3,
+  "max_branch_loss_db": 3.0,
+  "phase_rmse_scale": 0.6,
+  "min_phase_observations": 4,
+  "frequency_mode": "constant",
+  "phase_slope_mode": "sfo-pi",
+  "amplitude_model": "exact",
+  "timing_slope_mode": "zero",
+  "timing_contrast_scale": 0.02,
+  "rerank_mode": "confidence_gate",
+  "min_consistency_gain": 0.12,
+  "max_override_loss_db": 0.1,
+  "min_model_reliability": 0.92,
+  "allow_white_fold_overrides": false,
+  "disable_pair_whitening": false,
+  "skip_loratrimmer": true,
+  "skip_symfec": true,
+  "skip_unichirp": true,
+  "output_dir": "data\\experiments\\oversampled_glrt_awgn_32_safe_default_20260722"
+}

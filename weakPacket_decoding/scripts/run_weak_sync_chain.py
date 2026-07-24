@@ -17,17 +17,17 @@ if str(WEAK_ROOT) not in sys.path:
     sys.path.insert(0, str(WEAK_ROOT))
 
 from weak_decoder.chirp import build_upchirp, signed_fft_bin  # noqa: E402
-from weak_decoder.frame_locator import (  # noqa: E402
+from weak_decoder.synchronization.frame_locator import (  # noqa: E402
     FrameLocation,
     FrameLocatorConfig,
     locate_frame_from_event,
 )
-from weak_decoder.grlora_frame_sync import (  # noqa: E402
+from weak_decoder.synchronization.grlora_frame_sync import (  # noqa: E402
     FrameSyncPeak,
     GrloraFrameSyncResult,
     run_grlora_frame_sync_validation,
 )
-from weak_decoder.preamble_detector import (  # noqa: E402
+from weak_decoder.synchronization.preamble_detector import (  # noqa: E402
     DetectionEvent,
     PreambleDetectorConfig,
     WindowPeak,

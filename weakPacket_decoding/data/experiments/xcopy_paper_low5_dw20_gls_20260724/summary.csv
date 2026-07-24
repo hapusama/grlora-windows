@@ -1,0 +1,5 @@
+test_name,training_name,method,pattern_count,frame_count,frame_errors,fer,symbol_count,errors,ser,fixes_vs_savaux,breaks_vs_savaux,elapsed_seconds,mean_milliseconds_per_symbol
+xcopy_paper_low5_dw20,low1_win4,ordinary_fft,0,7,7,1.0,343,342,0.9970845481049563,1,0,0.0002239999594166875,0.0006530611061711006
+xcopy_paper_low5_dw20,low1_win4,savaux,0,7,7,1.0,343,343,1.0,0,0,0.723463999969681,2.109224489707525
+xcopy_paper_low5_dw20,low1_win4,gls_crossfit,8,7,7,1.0,343,343,1.0,0,0,1.6270051999781572,4.743455393522324
+xcopy_paper_low5_dw20,low1_win4,gls_offpacket,8,7,7,1.0,343,343,1.0,0,0,0.08018190001530456,0.23376647234782671

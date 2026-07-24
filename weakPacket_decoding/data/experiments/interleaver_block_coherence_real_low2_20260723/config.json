@@ -1,0 +1,25 @@
+{
+  "datasets": [
+    "0_0_0_10_14_32"
+  ],
+  "input_iq": "USRP_collector\\data\\branch4_fixed\\low_snr\\sf10_bw125_fs500_pre32_sw34_low2.bin",
+  "symbols": "data\\experiments\\real_low_snr_20260717\\low2_win4\\fft_symbols.csv",
+  "groundtruth": "data\\groundtruth\\branch4_fixed\\high_snr\\sf10_bw125_fs500_pre32_sw34_r001_fft_bin_groundtruth.csv",
+  "name": "real_low2",
+  "snrs": [],
+  "seeds": [
+    53
+  ],
+  "noise_shape": "white",
+  "noise_filter_taps": 65,
+  "noise_color_magnitude": 0.85,
+  "noise_color_phase_rad": 0.7,
+  "branch_loading": 0.5,
+  "branch_covariance_mode": "per_bin",
+  "noise_windows": 128,
+  "max_packets": 15,
+  "random_valid_blocks": 64,
+  "phase_grid_points": 4097,
+  "random_seed": 7301,
+  "output_dir": "data\\experiments\\interleaver_block_coherence_real_low2_20260723"
+}

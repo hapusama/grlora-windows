@@ -42,7 +42,7 @@ from run_symbol_phase_threshold_sweep import (  # noqa: E402
 )
 from run_symbol_phase_two_stage import build_config  # noqa: E402
 from run_two_stage_weak_decoder import load_packets as load_current_packets  # noqa: E402
-from weak_decoder.adaptive_path_demod import demod_adaptive_path_symbol  # noqa: E402
+from weak_decoder.decoding.adaptive_path_demod import demod_adaptive_path_symbol  # noqa: E402
 from weak_decoder.baselines.savaux_oversampled.paper_oversampled_demod import (  # noqa: E402
     demod_paper_oversampled_symbol,
 )

@@ -1,0 +1,5 @@
+dataset,snr_db,method,errors,symbol_count,fixes_vs_savaux,breaks_vs_savaux,ser,net_fixes_vs_savaux
+0_0_0_10_14_32,-24.0,savaux,25,35,0,0,0.7142857142857143,0
+0_0_0_10_14_32,-24.0,gls_offpacket_fixed,26,35,0,1,0.7428571428571429,-1
+0_0_0_10_14_32,-24.0,gls_packet_null,25,35,0,0,0.7142857142857143,0
+0_0_0_10_14_32,-24.0,gls_symbol_null,25,35,0,0,0.7142857142857143,0

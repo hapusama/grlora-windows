@@ -3,10 +3,10 @@
 ## Active mainline
 
 ```text
-preamble_detector.py
-frame_locator.py
-grlora_frame_sync.py
-header_first_demod.py
+synchronization/preamble_detector.py
+synchronization/frame_locator.py
+synchronization/grlora_frame_sync.py
+decoding/header_first_demod.py
 os_lora/
 ```
 
@@ -17,7 +17,7 @@ branch 观测进入 OS-LoRa/GLS。`run_iq_frontend.py` 是标准 `.bin` 入口�
 
 ```text
 chirp.py
-payload_codec.py
+decoding/payload_codec.py
 branch4_profile.py
 ```
 
@@ -27,9 +27,9 @@ branch4_profile.py
 
 ```text
 baselines/
-adaptive_path_demod.py
-structured_path_demod.py
-timing_path_demod.py
+decoding/adaptive_path_demod.py
+decoding/structured_path_demod.py
+decoding/timing_path_demod.py
 ```
 
 这些实现只用于对照、消融或诊断，不应静默成为 GLS 主算法的一部分。

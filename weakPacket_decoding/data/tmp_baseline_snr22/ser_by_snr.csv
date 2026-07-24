@@ -1,0 +1,2 @@
+dataset,snr_db,packet_count,symbol_count,symfec_crc_valid_count,savaux_oversampled_err,loratrimmer_err,symfec_err,unichirp_err,savaux_oversampled_ser,loratrimmer_ser,symfec_ser,unichirp_ser,symfec_crc_valid_rate
+0_0_0_10_14_32,-22.0,3,105,0,29,-1,40,29,0.2761904761904762,,0.38095238095238093,0.2761904761904762,0.0

@@ -1,0 +1,9 @@
+snr_label,added_snr_db,seed,method,decisions,errors,ser,fixes_vs_savaux,breaks_vs_savaux,paired_sign_p,mean_gt_margin_db,physical_samples,sample_fraction_vs_savaux,branch_phases,downsample_phases,uses_phase_fingerprint
+clean,,0,litenap_savaux_k1,833,0,0.0,0,0,1.0,3.868134369897311,1024,0.25,0|1|2|3,0,0
+clean,,0,litenap_savaux_k1_phase,833,0,0.0,0,0,1.0,3.868134369897311,1024,0.25,0|1|2|3,0,1
+clean,,0,litenap_savaux_k2,833,0,0.0,0,0,1.0,6.8893895376978325,2048,0.5,0|1|2|3,0|1,0
+clean,,0,litenap_savaux_k2_phase,833,0,0.0,0,0,1.0,6.8893895376978325,2048,0.5,0|1|2|3,0|1,1
+clean,,0,litenap_single,833,714,0.8571428571428571,0,714,2.3206684158877236e-215,0.0,256,0.0625,0,0,0
+clean,,0,litenap_single_phase,833,341,0.40936374549819926,0,341,4.464794497196467e-103,0.0,256,0.0625,0,0,1
+clean,,0,savaux,833,0,0.0,0,0,1.0,19.2141424601912,4096,1.0,0|1|2|3,0|1|2|3,0
+clean,,0,savaux_phase,833,0,0.0,0,0,1.0,19.2141424601912,4096,1.0,0|1|2|3,0|1|2|3,1

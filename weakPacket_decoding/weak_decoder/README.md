@@ -5,16 +5,16 @@
 
 ```text
 raw complex64 IQ
-  -> preamble_detector.py       前导码检测
-  -> frame_locator.py           sync word + SFD 帧定界
-  -> grlora_frame_sync.py       CFO/STO/SFO 与多 branch 同步
-  -> header_first_demod.py      传统 FFT header/payload 参考链
+  -> synchronization/preamble_detector.py       前导码检测
+  -> synchronization/frame_locator.py           sync word + SFD 帧定界
+  -> synchronization/grlora_frame_sync.py       CFO/STO/SFO 与多 branch 同步
+  -> decoding/header_first_demod.py              传统 FFT header/payload 参考链
   -> os_lora/                   OS-LoRa、GLS 与低复杂度实现
 ```
 
-`chirp.py` 和 `payload_codec.py` 是共享基础模块。`baselines/`、
-`adaptive_path_demod.py`、`structured_path_demod.py`、`timing_path_demod.py`
-作为论文 baseline 或诊断对照保留，不属于 GLS 主线。
+`chirp.py` 是同步、解调和 baseline 共用的信号工具。`decoding/payload_codec.py`
+提供标准 LoRa PHY codec；`decoding/` 下的 path demod 模块作为论文 baseline 或
+诊断对照保留，不属于 GLS 主线。
 
 ## Branch4 固定帧配置
 

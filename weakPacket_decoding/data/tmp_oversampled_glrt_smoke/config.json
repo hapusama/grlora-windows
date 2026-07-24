@@ -1,0 +1,35 @@
+{
+  "datasets": [
+    "0_0_0_10_14_32"
+  ],
+  "input_iq": null,
+  "symbols": null,
+  "groundtruth": null,
+  "name": "explicit_capture",
+  "noise_iq": null,
+  "noise_sync": null,
+  "snrs": [
+    -22.0
+  ],
+  "seeds": [
+    42
+  ],
+  "max_packets": 1,
+  "noise_windows": 32,
+  "noise_training_bins": 8,
+  "noise_seed": 4107,
+  "branch_loading": 0.1,
+  "pair_loading": 0.1,
+  "top_l": 8,
+  "consistency_weight": 0.3,
+  "max_branch_loss_db": 3.0,
+  "phase_rmse_scale": 0.6,
+  "min_phase_observations": 4,
+  "frequency_mode": "line",
+  "amplitude_model": "fold",
+  "disable_pair_whitening": false,
+  "skip_loratrimmer": true,
+  "skip_symfec": false,
+  "skip_unichirp": false,
+  "output_dir": "data\\tmp_oversampled_glrt_smoke"
+}

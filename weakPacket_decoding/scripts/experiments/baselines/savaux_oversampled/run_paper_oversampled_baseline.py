@@ -32,7 +32,7 @@ from weak_decoder.chirp import build_downchirp, bin_to_grlora_symbol, signed_fft
 from weak_decoder.baselines.savaux_oversampled.paper_oversampled_demod import (  # noqa: E402
     demod_paper_oversampled_symbol,
 )
-from weak_decoder.payload_codec import decode_explicit_frame_symbols  # noqa: E402
+from weak_decoder.decoding.payload_codec import decode_explicit_frame_symbols  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:

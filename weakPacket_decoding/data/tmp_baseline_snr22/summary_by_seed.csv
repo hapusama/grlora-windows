@@ -1,0 +1,2 @@
+dataset,snr_db,seed,signal_reference_mode,signal_reference_power,signal_reference_sample_count,signal_reference_packet_count,whole_capture_power,reference_vs_whole_db,savaux_oversampled_err,loratrimmer_err,symfec_err,unichirp_err,symbol_count,packet_count,symfec_crc_valid_count,savaux_oversampled_ser,loratrimmer_ser,symfec_ser,unichirp_ser
+0_0_0_10_14_32,-22.0,42,packet,5.600726783406058e-05,528384,3,1.0802098314551583e-05,7.147362616172371,29,-1,40,29,105,3,0,0.2761904761904762,,0.38095238095238093,0.2761904761904762

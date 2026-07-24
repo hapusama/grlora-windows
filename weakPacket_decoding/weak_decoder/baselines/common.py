@@ -22,6 +22,41 @@ GR_LORA_ROOT = WEAK_ROOT.parent
 DEFAULT_DATASETS = ("0_0_0_10_14_8", "0_0_0_10_14_16", "0_0_0_10_14_32")
 
 
+def _fir_filter_complex(
+    samples: np.ndarray,
+    taps: np.ndarray,
+    block_samples: int = 1 << 18,
+) -> np.ndarray:
+    """Apply a causal complex FIR with bounded-memory overlap-save FFTs."""
+
+    values = np.asarray(samples, dtype=np.complex64)
+    coefficients = np.asarray(taps, dtype=np.complex128)
+    if coefficients.ndim != 1 or coefficients.size < 1:
+        raise ValueError("taps must be a non-empty vector")
+    if coefficients.size == 1:
+        return (values * coefficients[0]).astype(np.complex64)
+    block = max(1, int(block_samples))
+    overlap = int(coefficients.size - 1)
+    fft_size = 1 << int(
+        math.ceil(math.log2(float(block + 2 * overlap)))
+    )
+    frequency_response = np.fft.fft(coefficients, fft_size)
+    history = np.zeros(overlap, dtype=np.complex64)
+    output = np.empty(values.size, dtype=np.complex64)
+    for start in range(0, int(values.size), block):
+        stop = min(int(values.size), start + block)
+        current = values[start:stop]
+        extended = np.concatenate((history, current))
+        filtered = np.fft.ifft(
+            np.fft.fft(extended, fft_size) * frequency_response
+        )
+        output[start:stop] = filtered[overlap : overlap + current.size].astype(
+            np.complex64
+        )
+        history = extended[-overlap:].copy()
+    return output
+
+
 def parse_bool(value: str) -> bool:
     return str(value).strip().lower() in {"1", "true", "yes", "y"}
 
@@ -155,7 +190,14 @@ def noise_samples(
     snr_db: float | None,
     seed: int,
     signal_reference_power: float | None,
+    noise_shape: str = "white",
+    os_factor: int = 1,
+    filter_taps: int = 129,
+    color_magnitude: float = 0.85,
+    color_phase_rad: float = 0.7,
 ) -> np.ndarray:
+    """Add reproducible white or receiver-bandlimited complex Gaussian noise."""
+
     if snr_db is None:
         return np.asarray(clean, dtype=np.complex64)
     signal_power = (
@@ -165,11 +207,44 @@ def noise_samples(
     )
     noise_power = signal_power / (10.0 ** (float(snr_db) / 10.0))
     rng = np.random.default_rng(int(seed))
-    sigma = float(np.sqrt(noise_power / 2.0))
+    shape = str(noise_shape)
+    if shape not in {"white", "lowpass", "ar1"}:
+        raise ValueError(f"unknown noise shape: {noise_shape}")
     noise = (
-        rng.normal(0.0, sigma, clean.size).astype(np.float32)
-        + 1j * rng.normal(0.0, sigma, clean.size).astype(np.float32)
+        rng.normal(0.0, np.sqrt(0.5), clean.size).astype(np.float32)
+        + 1j * rng.normal(0.0, np.sqrt(0.5), clean.size).astype(np.float32)
     ).astype(np.complex64)
+    if shape in {"lowpass", "ar1"}:
+        os_value = int(os_factor)
+        if shape == "lowpass" and os_value <= 1:
+            raise ValueError("lowpass noise requires os_factor > 1")
+        count = max(9, int(filter_taps))
+        if count % 2 == 0:
+            count += 1
+        if shape == "lowpass":
+            half = (count - 1) / 2.0
+            indexes = np.arange(count, dtype=np.float64) - half
+            cutoff_cycles_per_sample = 0.5 / float(os_value)
+            taps = (
+                2.0
+                * cutoff_cycles_per_sample
+                * np.sinc(2.0 * cutoff_cycles_per_sample * indexes)
+                * np.hamming(count)
+            ).astype(np.complex128)
+        else:
+            magnitude = float(color_magnitude)
+            if not 0.0 <= magnitude < 1.0:
+                raise ValueError("color_magnitude must be in [0, 1)")
+            indexes = np.arange(count, dtype=np.float64)
+            pole = magnitude * np.exp(1j * float(color_phase_rad))
+            taps = np.power(pole, indexes).astype(np.complex128)
+        taps /= np.sqrt(float(np.sum(np.abs(taps) ** 2)))
+        noise = _fir_filter_complex(noise, taps)
+        measured = float(np.mean(np.abs(noise).astype(np.float64) ** 2))
+        if not math.isfinite(measured) or measured <= 0.0:
+            raise RuntimeError("lowpass noise shaper produced invalid power")
+        noise *= np.float32(1.0 / np.sqrt(measured))
+    noise *= np.float32(np.sqrt(noise_power))
     return (np.asarray(clean, dtype=np.complex64) + noise).astype(np.complex64)
 
 

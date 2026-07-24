@@ -1,0 +1,141 @@
+{
+  "input_iq": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\USRP_collector\\data\\branch4_fixed\\high_snr\\sf10_bw125_fs500_pre32_sw34_r001.bin",
+  "symbols": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\groundtruth\\branch4_fixed\\high_snr\\sf10_bw125_fs500_pre32_sw34_r001_fft_symbols.csv",
+  "groundtruth": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\groundtruth\\branch4_fixed\\high_snr\\sf10_bw125_fs500_pre32_sw34_r001_fft_bin_groundtruth.csv",
+  "output_dir": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\tmp\\litenap_savaux_weight_0p25",
+  "snrs": [
+    -24.0,
+    -26.0,
+    -28.0
+  ],
+  "seeds": [
+    42
+  ],
+  "downsample_factor": 4,
+  "view_counts": [
+    1,
+    2
+  ],
+  "fingerprint_weight": 0.25,
+  "fingerprint_min_segment": 8,
+  "origin_shift": 2,
+  "max_packets": 0,
+  "max_symbols": 196,
+  "batch_size": 28,
+  "verify_savaux_symbols": 0,
+  "sf": 10,
+  "os_factor": 4,
+  "symbol_count": 196,
+  "signal_reference_power": 0.011106540355684305,
+  "savaux_max_abs_error": 0.0,
+  "methods": [
+    {
+      "name": "savaux",
+      "branch_phases": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "downsample_phases": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "phase_fingerprint": false
+    },
+    {
+      "name": "litenap_single",
+      "branch_phases": [
+        0
+      ],
+      "downsample_phases": [
+        0
+      ],
+      "phase_fingerprint": false
+    },
+    {
+      "name": "savaux_phase",
+      "branch_phases": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "downsample_phases": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "phase_fingerprint": true
+    },
+    {
+      "name": "litenap_single_phase",
+      "branch_phases": [
+        0
+      ],
+      "downsample_phases": [
+        0
+      ],
+      "phase_fingerprint": true
+    },
+    {
+      "name": "litenap_savaux_k1",
+      "branch_phases": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "downsample_phases": [
+        0
+      ],
+      "phase_fingerprint": false
+    },
+    {
+      "name": "litenap_savaux_k1_phase",
+      "branch_phases": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "downsample_phases": [
+        0
+      ],
+      "phase_fingerprint": true
+    },
+    {
+      "name": "litenap_savaux_k2",
+      "branch_phases": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "downsample_phases": [
+        0,
+        1
+      ],
+      "phase_fingerprint": false
+    },
+    {
+      "name": "litenap_savaux_k2_phase",
+      "branch_phases": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "downsample_phases": [
+        0,
+        1
+      ],
+      "phase_fingerprint": true
+    }
+  ],
+  "gt_usage": "scoring only",
+  "noise_protocol": "payload-copy complex AWGN; I/Q variance = total added power / 2; noise_power_db_relative = -added_snr_db"
+}

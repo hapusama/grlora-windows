@@ -13,7 +13,7 @@ WEAK_ROOT = Path(__file__).resolve().parents[1]
 if str(WEAK_ROOT) not in sys.path:
     sys.path.insert(0, str(WEAK_ROOT))
 
-from weak_decoder.preamble_detector import (  # noqa: E402
+from weak_decoder.synchronization.preamble_detector import (  # noqa: E402
     DetectionEvent,
     PreambleDetectorConfig,
     WindowPeak,

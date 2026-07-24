@@ -1,0 +1,24 @@
+[
+  {
+    "dataset": "0_0_0_10_14_32",
+    "snr_db": -22.0,
+    "seed": 42,
+    "signal_reference_mode": "packet",
+    "signal_reference_power": 5.600726783406058e-05,
+    "signal_reference_sample_count": 528384,
+    "signal_reference_packet_count": 3,
+    "whole_capture_power": 1.0802098314551583e-05,
+    "reference_vs_whole_db": 7.147362616172371,
+    "savaux_oversampled_err": 29,
+    "loratrimmer_err": -1,
+    "symfec_err": 40,
+    "unichirp_err": 29,
+    "symbol_count": 105,
+    "packet_count": 3,
+    "symfec_crc_valid_count": 0,
+    "savaux_oversampled_ser": 0.2761904761904762,
+    "loratrimmer_ser": "",
+    "symfec_ser": 0.38095238095238093,
+    "unichirp_ser": 0.2761904761904762
+  }
+]

@@ -20,6 +20,14 @@ os_lora/
 - `nonuniform_sampling.py`：非均匀采样 pattern、频谱打分、GLS、条件检测器等核心算法。
 - `chirp_svd.py`：ChirpSVD 的配置、训练与候选打分实现。
 - `noise.py`：背景频点选择等共享噪声处理工具。
+- `litenap_savaux.py`：LiteNap 式真欠采样 polyphase 观测、Savaux 候选相位
+  合并和可选 phase-jump 指纹重排；`K=D` 时与完整 Savaux 数值等价。
+- `oversampled_glrt.py`：Savaux branch 的低维 GLS、完整采样双折返分量提取、
+  相干/非相干功率比、explicit-header 整 bin 校准和置信门控重判。主链只估计
+  `OSR x OSR` 的 branch 协方差，不构造 `RN x RN` 稠密矩阵。模块中原有的
+  `2 x 2` 双峰协方差与 pair GLRT 仅保留为 `savaux_dual` 历史消融，不参与
+  `proposed` 判决。当离包 branch 噪声近似白噪声时，默认门控使判决退化到
+  Savaux；`--allow-white-fold-overrides` 可用于对应消融。
 
 `experiments/` 中的脚本可以依赖 `system/` 和 `experiment_support/`，但不得导入
 另一个实验入口；因此删除任意一个实验脚本不会导致其他实验出现导入错误。
@@ -49,7 +57,34 @@ from weak_decoder.os_lora.system.noise import select_background_bins
 python -m weak_decoder.os_lora.experiments.evaluate_real_capture_gls --help
 python -m weak_decoder.os_lora.experiments.evaluate_low_complexity_gls --help
 python -m weak_decoder.os_lora.experiments.evaluate_nonuniform_sampling --help
+python -m weak_decoder.os_lora.experiments.evaluate_oversampled_glrt --help
+python -m weak_decoder.os_lora.experiments.evaluate_litenap_savaux --help
 ```
+
+多 SNR 的统一 baseline 对比示例：
+
+```powershell
+python -m weak_decoder.os_lora.experiments.evaluate_oversampled_glrt `
+  --datasets 0_0_0_10_14_8 0_0_0_10_14_16 0_0_0_10_14_32 `
+  --snrs -22 -23 -24 -25 -26 --seeds 42 43 44 `
+  --output-dir data\experiments\oversampled_glrt
+```
+
+输出包括逐 seed 汇总 `summary_by_seed.csv`、跨 seed 的 `summary.csv`、逐符号
+候选/fix/break 诊断 `symbols.csv`、协方差颜色统计 `covariance.csv` 和 SER 曲线。
+评估器还支持 `--noise-shape lowpass|ar1` 的可复现 ADC-rate 有色噪声压力测试；
+它只用于验证 covariance-aware 接收器，不能替代真实有色干扰 capture。
+逐符号输出中的 `savaux_header` 用于隔离 header 整 bin 校准的贡献；
+`branch_shrinkage` 是 GLS/Savaux 分数混合消融；`branch_gls` 是主链第一阶段，
+`proposed` 表示纯 GLS 加完整采样双分量相干度重判及 header 校准；`savaux_dual`
+只代表旧的 pair-GLRT 消融。当前冻结参数的结果、
+真实 CR=4/7 验证和可复现命令见
+`doc/oversampled_glrt_results_20260722.md`。
+
+LiteNap-Savaux 的 clean-GT 后加白噪声比较使用 `noisy_iq` 的复高斯噪声约定。
+冻结命令、样本预算、逐 SNR 结果和结论见
+`doc/litenap_savaux_results_20260724.md`。当前数据未显示相对完整 Savaux 的 SER
+提升；K1/K2 应解释为采样率/计算量交换，而不是增益结论。
 
 实验入口按用途大致分为：
 

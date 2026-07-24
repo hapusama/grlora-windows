@@ -67,10 +67,10 @@ E[k] = sum_m |FFT_m[k]|^2,  m = 0, 1, 2, 3
 ```text
 weak_decoder/run_iq_frontend.py
   -> scripts/run_weak_sync_chain.py
-       -> weak_decoder.preamble_detector.detect_preamble_runs()
+       -> weak_decoder.synchronization.preamble_detector.detect_preamble_runs()
        -> align_event_start()
-       -> weak_decoder.frame_locator.locate_frame_from_event()
-       -> weak_decoder.grlora_frame_sync.run_grlora_frame_sync_validation()
+       -> weak_decoder.synchronization.frame_locator.locate_frame_from_event()
+       -> weak_decoder.synchronization.grlora_frame_sync.run_grlora_frame_sync_validation()
        -> 写出 sync CSV
 ```
 
@@ -112,11 +112,11 @@ python scripts\run_header_first_demod.py `
 ```text
 scripts/run_header_first_demod.py
   -> 读取 IQ 和 sync CSV
-  -> weak_decoder.header_first_demod.demod_symbol_sequence()
+  -> weak_decoder.decoding.header_first_demod.demod_symbol_sequence()
        -> weak_decoder.chirp.build_downchirp()
        -> weak_decoder.chirp.dechirp_fft()
        -> FFT power argmax
-  -> weak_decoder.header_first_demod.decode_explicit_header()
+  -> weak_decoder.decoding.header_first_demod.decode_explicit_header()
   -> 根据 header 确定 payload symbol 数量
   -> 再解调完整 header + payload symbol 序列
   -> 写出逐 symbol、逐 frame 和一致性 CSV
@@ -159,28 +159,24 @@ header 和 LDRO symbol 还会按 LoRa 规则进一步除以 4。
 
 ## weak_decoder 根模块与脚本的关系
 
-`../weak_decoder/` 根目录中的大多数文件是可复用库，不是命令行程序：
+`../weak_decoder/` 下的实现按同步与解调职责分组：
 
 ```text
 chirp.py
-  ├─ preamble_detector.py
-  ├─ frame_locator.py
-  ├─ grlora_frame_sync.py
-  └─ header_first_demod.py
-
-preamble_detector.py
-  -> frame_locator.py
-       -> grlora_frame_sync.py
-
-header_first_demod.py
-  -> payload_codec.py
+  ├─ synchronization/
+  │    preamble_detector.py
+  │      -> frame_locator.py
+  │           -> grlora_frame_sync.py
+  └─ decoding/
+       header_first_demod.py
+         -> payload_codec.py
 ```
 
 其中 `payload_codec.py` 已实现 payload 反交织、Hamming、去白化和 CRC 等功能，
 但当前默认 `run_header_first_demod.py` 只借助显式 header 确定 payload symbol 数，
 不会自动把 payload 一直解到 bytes/CRC。当前可信主链边界是逐 symbol FFT-bin 导出。
 
-以下根模块是保留的 baseline/消融实现，不会被普通 FFT 或 GLS 主线静默调用：
+以下 `decoding/` 模块是保留的 baseline/消融实现，不会被普通 FFT 或 GLS 主线静默调用：
 
 ```text
 adaptive_path_demod.py

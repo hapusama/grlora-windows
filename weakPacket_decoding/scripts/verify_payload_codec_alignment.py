@@ -21,7 +21,7 @@ WEAK_ROOT = Path(__file__).resolve().parent.parent
 if str(WEAK_ROOT) not in sys.path:
     sys.path.insert(0, str(WEAK_ROOT))
 
-from weak_decoder.payload_codec import (
+from weak_decoder.decoding.payload_codec import (
     decode_explicit_frame_symbols,
     encode_explicit_frame_symbols,
     reencoded_payload_known_prefix_symbols,

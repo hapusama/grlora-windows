@@ -1,0 +1,585 @@
+      UniChirp: Unwrapping In-Chirp Phase
+Misalignment for Weak LoRa Signal Demodulation
+
+    Abstract—LoRa is widely adopted in low-power wide-area
+networks (LPWANs) for long-range and energy-efﬁcient IoT                                                      Distortion
+                                                                                                                             a) Phase-Blind
+                                                                                                                                Combination
+communications, yet its demodulation performance degrades            LoRa Node
+
+severely in challenging deployment scenarios with extremely
+low signal-to-noise ratios (SNRs), such as obstructed or in-                                                   Leakage
+dustrial environments. A key limiting factor is in-chirp phase
+misalignment, which prevents coherent energy aggregation in         LoRa Node                                                b) Magnitude
+                                                                                                                                Combination
+conventional FFT-based LoRa demodulation and leads to weak                         NLOS
+spectral peaks. In this paper, we present UniChirp, a practical                  Attenuation
+LoRa demodulation framework that improves robustness under                                                  Optimal Fusion
+weak-signal conditions by explicitly addressing the in-chirp
+                                                                                                                             c) Phase-Coherent
+phase misalignment. UniChirp derives a lightweight analytical       LoRa Node                                                   Combination
+model that captures chirp phase deviations induced by hardware
+offsets and modulation artifacts, enabling deterministic phase                                                Frequency
+compensation without exhaustive search. Building on this model,
+the framework incorporates a preamble-guided phase correction      Fig. 1: Illustration of dual-peak combination mechanisms in
+mechanism and a structure-aware spectral ﬁltering strategy to      LoRa demodulation with and without phase coherence
+enhance symbol-level energy aggregation. The proposed method
+is implemented entirely in software and requires no modiﬁcations   quency of an up-chirp within a ﬁxed bandwidth. Due to
+to existing LoRa end devices or protocol stacks. We deployed the   the cyclic nature of the spectrum, frequencies exceeding the
+system in real industrial production environments, addressing
+                                                                   upper bound of the band are wrapped around to the lower
+weak signal issues caused by environmental occlusions. Extensive
+evaluations using commercial LoRa hardware across controlled       edge, resulting in a discontinuity that splits each symbol into
+experiments demonstrate that UniChirp enhances symbol-level        two chirp segments, as illustrated in Fig. 1. Ideally, LoRa
+decoding robustness, achieving a 1.3 dB improvement in SNR         achieves robust demodulation by coherently aggregating signal
+sensitivity over current state-of-the-art approaches.              energy across the entire chirp duration. However, we observe a
+    Index Terms—LoRa, low-SNR demodulation, frequency-             critical impairment: the two chirp segments within a physical-
+domain compensation, phase modeling, IoT
+                                                                   layer symbol have a phase discontinuity. This discontinuity
+                                                                   disrupts the phase coherence required for energy accumulation,
+                      I. I NTRODUCTION
+                                                                   signiﬁcantly limiting demodulation performance in low SNR
+   LoRa, as a representative Low Power Wide Area Net-              conditions.
+works (LPWANs) technology, has been widely adopted in                 Existing efforts to recover symbol energy under phase dis-
+various Internet of Things (IoT) applications [1]. It supports     continuity primarily follow two strategies. The ﬁrst approach
+long-range communication with battery-powered devices and          leverages spectrum aliasing by setting the physical sampling
+requires low deployment and maintenance cost, making it            frequency equal to the chirp bandwidth [6]. This causes the
+well suited for large-scale industrial monitoring systems [1],     two chirp segments within a symbol to be aliased onto the
+where sensors are distributed over wide areas and installed at     same frequency bin after dechirping and FFT. However, in
+hard-to-access locations. In practical industrial environments,    the presence of phase discontinuity, such aliasing results in
+however, reliable LoRa communication remains challenging.          destructive interference due to misaligned phases, as illus-
+Sensors are often deployed inside pipelines or reaction ves-       trated in Fig. 1, exacerbating energy leakage and degrading
+sels, introducing signiﬁcant attenuation, multipath fading, and    demodulation performance. The second strategy attempts to
+interference, substantially resulting in extremely low signal-     compensate for the phase offset between the two chirp seg-
+to-noise ratios (SNRs) [2]–[5]. When the SNR falls below           ments prior to demodulation [6], [7]. They estimate the phase
+the threshold for the lowest data rate setting (SF12, CR=4/8),     discontinuity and adjust the signal phase to enable coherent
+LoRa fails to maintain connectivity, revealing a gap between       energy fusion. These methods, however, treat the phase offset
+its design aspirations and its actual performance in complex       as an unknown variable and perform exhaustive search across
+environments.                                                      a wide range of candidate values. This brute-force search
+   To investigate the root cause of LoRa link failures in          introduces substantial computational overhead and limits their
+low-SNR scenarios, we revisit its physical-layer modulation        applicability in real-time systems.
+mechanism. LoRa employs frequency-swept chirp signals,                To address these limitations, we introduce a novel phase
+where each symbol is encoded by varying the initial fre-           discontinuity compensation mechanism that enables reliable
+energy aggregation for robust LoRa demodulation under ex-         tremely low-SNR conditions, pushing the decoding threshold
+tremely low SNR. Our key observation is that the phase            beyond conventional capabilities.
+jump within a LoRa symbol is not random, but predictable             In summary, our contributions are as follows:
+based on the chirp modulation structure. Leveraging this            •   We present UniChirp, the ﬁrst demodulation framework
+insight, we construct a phase prediction model that infers the          that explicitly models intra-symbol phase jumps to enable
+compensation phase directly, eliminating the need for brute-            reliable LoRa decoding at ultra-low SNR. To the best of
+force search. Built on this foundation, we propose UniChirp, a          our knowledge, UniChirp is the ﬁrst to analytically char-
+lightweight demodulation framework that mitigates frequency-            acterize intra-symbol phase discontinuities as a function
+domain phase discontinuity and enables coherent energy fu-              of timing and frequency offsets, providing a closed-form
+sion, signiﬁcantly improving the identiﬁability of spectral             compensation method without exhaustive search.
+energy peaks and enhancing LoRa decoding performance in             •   We present a demodulation framework for weak-signal
+low-SNR scenarios.                                                      LoRa reception that addresses three key challenges: First,
+   Putting the idea of UniChirp into practice, however, remains         we develop a closed-form model to characterize intra-
+challenging due to the following key issues: (1) How to accu-           symbol phase jumps caused by timing and frequency off-
+rately model intra-symbol phase jumps? Phase discontinuities            sets, enabling accurate phase compensation. Second, we
+arise from symbol misalignment and frequency offsets, and               propose a preamble-guided phase extrapolation scheme
+require an analytical model that can explicitly capture their           that achieves robust phase-coherent energy aggregation
+deterministic relationship for precise compensation. (2) How to         by ﬁltering noise-induced deviations across symbols.
+reliably aggregate energy under low-SNR conditions? Severe              Third, we design a structure-aware spectral ﬁlter to
+noise leads to unpredictable phase deviations across symbols,           suppress out-of-band noise before demodulation, thereby
+making it difﬁcult to extrapolate and align dual peaks for              improving weak-signal decodability.
+coherent energy fusion. (3) How to suppress out-of-band noise       •   We implement UniChirp on commodity LoRa hardware,
+before demodulation? LoRa’s reception accumulates noise                 demonstrating reliable packet demodulation at SNRs
+beyond the chirp’s encoding band, which distorts the spectral           as low as -17.3 dB, 1.3 dB lower than state-of-the-
+proﬁle and weakens energy concentration after FFT.                      art methods, signiﬁcantly exceeding the decoding limits
+   To tackle the core challenges of UniChirp, we design a               of existing LoRa systems. Building on this capability,
+uniﬁed demodulation framework that enables precise phase                we further deploy UniChirp in real industrial systems,
+modeling, robust energy aggregation, and effective noise sup-           embedding sensor nodes inside pipelines and reaction
+pression for weak LoRa signals. First, to address the chal-             vessels, where severe signal attenuation previously pre-
+lenge of intra-symbol phase jumps, we develop a closed-form             vented connectivity, and show that it effectively enables
+analytical model that accurately captures phase discontinu-             communication in these challenging environments.
+ities, caused by symbol misalignment and carrier frequency
+offset. This model explicitly links phase evolution to timing        The remainder of this paper is organized as follows. Sec-
+and frequency parameters, allowing efﬁcient compensation          tion II presents the background and fundamentals of the LoRa
+of phase jumps without brute-force search, and facilitating       physical layer. Section III introduces our analytical model for
+consistent dual-peak alignment across symbols. Second, to         intra-symbol phase jumps. Section IV describes the overall
+enable complete energy aggregation within each chirp, we pro-     system architecture. Section V details the key components
+pose a preamble-guided extrapolation algorithm that constructs    and algorithms of the system design. Section VI presents
+a phase compensation trajectory by ﬁtting the preamble’s          the implementation details. Section VII covers the evaluation
+spectral peaks. To ensure robustness, the algorithm detects       methodology and results. Section VIII reviews related works.
+noise-induced outliers using slope continuity constraints and     Finally, Section IX concludes the paper.
+local phase deviation metrics, thereby enabling reliable com-
+pensation across payload symbols. Third, to suppress out-                               II. BACKGROUND
+of-band noise before FFT-based demodulation, we design            A. LoRa Physic Primer
+a structure-aware frequency-domain ﬁlter that adapts to the
+encoding pattern of LoRa chirps. By selectively retaining            LoRa employs Chirp Spread Spectrum (CSS) modulation
+energy within the expected spectral trajectory and attenuating    at the physical layer, where each symbol is represented by a
+non-conforming components, this ﬁlter mitigates noise folding     chirp whose frequency increases linearly over time across the
+and improves spectral concentration in the encoded bins.          entire bandwidth BW . The base up-chirp is deﬁned as:
+Together, these components form the foundation of UniChirp,
+                                                                                    C(t) = ej2π(−          2T t)t
+                                                                                                    BW
+                                                                                                         + BW
+                                                                                                     2              ,          (1)
+enabling accurate demodulation of weak LoRa signals that
+would otherwise fall below the decoding threshold.                where T is the chirp duration. To encode a symbol x ∈
+   We implement UniChirp on software-deﬁned radios and            {0, 1, ..., 2SF − 1}, LoRa applies a cyclic frequency shift to
+evaluate its performance through extensive experiments with       the base chirp by:
+weak LoRa signals. The results demonstrate that UniChirp                                       x · BW
+signiﬁcantly enhances the demodulation success rate under ex-                             fs =          ,                    (2)
+                                                                                                 2SF
+where SF denotes the spreading factor. The resulting modu-
+lated chirp is:
+                 ye (t) = C(t) · ej2πfs t .            (3)
+As frequency shifting pushes part of the chirp beyond the up-
+per edge of the bandwidth, LoRa wraps exceeding frequencies
+back to the lower bound −BW/2, forming a two-segment
+waveform. This circular frequency shift introduces a phase
+discontinuity between the two segments within a symbol. At         Fig. 2: Intra-symbol phase discontinuity caused by misalign-
+the receiver, demodulation is performed in two steps. First,       ment
+the received signal is dechirped by multiplying it with a          disrupt the coherent structure of the chirp, nor degrade the
+base down-chirp, i.e., the complex conjugate of the base up-       energy concentration in the FFT domain. At the receiver, com-
+chirp. This operation transforms the chirp into a single-tone      pensating for CFO simply involves correcting the frequency
+signal whose frequency corresponds to the symbol’s frequency       shift in the dechirped signal.
+shift. Then, a Fast Fourier Transform (FFT) is applied to             (2) Time Offset (TO). TO refers to the misalignment
+the dechirped signal, yielding a peak at the frequency bin         between the receiver’s FFT window and the actual start of
+associated with the transmitted symbol.                            the chirp symbol. It introduces a frequency-dependent phase
+B. Motivation                                                      rotation:
+   Conventional LoRa demodulation adopts a dechirp-then-                                 ϕTO (f ) = −2πf τ,                   (5)
+FFT approach, which treats each symbol as a purely                 where τ is the timing offset between the received signal and
+frequency-domain entity and relies solely on energy detection.     the FFT window. Due to the cyclic structure of LoRa chirps,
+However, this method fundamentally ignores the intra-symbol        each symbol is composed of two concatenated segments at dif-
+phase discontinuities caused by LoRa’s step-wise frequency         ferent frequencies. These segments experience distinct phase
+modulation. As a result, signal energy fails to align coherently   rotations under the same τ , resulting in a phase discontinuity
+in the FFT domain, leading to spectral leakage and energy          at the boundary between them.
+dispersion, particularly detrimental under low SNR conditions.        Following, we analyze how the time offset τ quantitatively
+This inherent limitation motivates our work: we aim to ex-         leads to intra-symbol phase discontinuity. As illustrated in
+plicitly model the phase transitions within each chirp symbol,     Fig. 2, each modulated LoRa symbol within consists of two
+enabling accurate intra-symbol phase alignment and coherent        concatenated chirp segments. The ﬁrst segment starts from the
+energy aggregation. By recovering phase continuity across the      encoded frequency, and the second wraps around to −BW/2
+entire chirp duration, we signiﬁcantly enhance demodulation        after reaching the band edge. Let C(t) denote the instanta-
+robustness in weak-signal scenarios.                               neous phase of a base chirp that starts at time t = 0. Then,
+                                                                   at t = 0, the observed phase for the ﬁrst segment corresponds
+                     III. P HASE M ODEL
+                                                                   to a base chirp that started at t = −T + τ , while the second
+   This section models the phase characteristics of LoRa           segment corresponds to a chirp that started at t = −τ . The
+chirps, revealing how hardware and synchronization errors dis-     resulting intra-symbol phase discontinuity is given by:
+tort ideal phase trajectories. The phase model enables precise
+compensation for improved decoding in noisy environments.                            ϕdiff = C(T − τ ) − C(τ )                  (6)
+   In an ideal LoRa system, the modulated signal generated by      Since C(t) is quadratic with respect to time (due to linear
+a transmitter should exhibit a continuous phase trajectory over    frequency modulation), we can simplify the expression to:
+time. In practice, however, this phase continuity is disrupted
+by imperfections in hardware and synchronization between the                         ϕdiff = −2πBW · τ + M,                     (7)
+transmitter and receiver. These factors introduce systematic       where M is a constant determined by system parameters
+phase offsets in the received signal, manifesting as intra-        including bandwidth BW , symbol duration T , and the carrier
+symbol phase discontinuities. Following, we identify three         frequency. This result provides an intuitive interpretation: the
+dominant sources of chirp phase distortions:                       phase discontinuity between the two chirp segments increases
+   (1) Carrier Frequency Offset (CFO). CFO originates from         linearly with the intra-symbol time offset τ . This predictable
+oscillator mismatches between the transmitter and receiver,        relationship enables accurate compensation in signal process-
+introducing a constant frequency offset Δf . This leads to a       ing, thereby restoring intra-symbol phase continuity crucial for
+linear phase shift over time:                                      downstream demodulation.
+                                                                      (3) Sampling Frequency Offset (SFO). SFO occurs when
+                     ϕCFO (t) = 2πΔf · t.                    (4)
+                                                                   the receiver’s sampling rate differs from the transmitter’s
+The resulting phase offset accumulates gradually across the        nominal rate Fs , introducing a gradual drift in sampling time.
+chirp duration but remains strictly continuous. That is, CFO       This causes the chirp-window timing offset τn growing across
+causes a uniform rotation of the signal’s phase without break-     chirps:
+ing the intra-symbol phase trajectory. Therefore, it does not                              τn = n · Δt + τ0 ,                   (8)
+where n is the chirp index, Δt is the timing drift per chirp
+caused by SFO, and τ0 is the initial time offset. Substituting
+this time-varying chirp-window offset (i.e., τn ) into Eq. 7, we
+can obtain the time-varying phase jump within each symbol:
+
+ ϕn = −2π ·BW ·τn +M = −2π ·BW ·(n·Δt+τ0 )+M (9)
+
+Since τ0 maps to a ﬁxed chirp-window time offset, its phase
+contribution can be absorbed into a constant, giving a linear      Fig. 3: Workﬂow of UniChirp for weak signal demodulation.
+phase evolution:
+                                                                     Together, these modules form a systematic demodulation
+                ϕn = −2π · BW · n · Δt + ϕ0                (10)    pipeline that reconstructs chirp phase misalignment, separates
+                                                                   and compensates spectral components for ideal energy con-
+This shows that SFO introduces a linear phase trend across         centration, and suppresses external interference. We detail the
+chirps, where the larger the SFO is, the faster the phase jump     implementation of each module in Section V.
+increases over time.
+   We now integrate the impacts of CFO, TO, and SFO into a                                  V. D ESIGN
+uniﬁed phase misalignment model:                                   A. Phase Model Construction
+                             SF O                                     According to the analysis in Section III, we establish a
+ ϕmis [n] = −2π · BW · n ·        − 2π · BW · T O + ϕ0 (11)
+                              Fs                                   direct relationship between the phase discontinuity and the
+                                                                   sampling frequency offset (SFO). Based on this, a phase drift
+This model serves as the analytical foundation for subsequent
+                                                                   model is constructed from the preamble symbols, enabling
+phase misalignment compensation.
+                                                                   accurate prediction and compensation of the phase evolution
+   In summary, CFO does not affect in-chirp phase alignment;
+                                                                   across received symbols. This approach effectively addresses
+TO introduces a constant in-chirp phase offset; and SFO
+                                                                   distortions caused by frequency offset and sampling mismatch,
+leads to a linearly increasing phase misalignment within each
+                                                                   improving demodulation performance even under challenging
+chirp. This phase model provides a quantitative foundation
+                                                                   conditions such as phase wrapping or abrupt jumps.
+for compensating in-chirp phase distortion in low-SNR LoRa
+                                                                      The preamble provides a sequence of identical symbols with
+demodulation.
+                                                                   stable structure, making it suitable for observing phase varia-
+                  IV. S YSTEM OVERVIEW                             tion over time. By processing the preamble symbols, we are
+                                                                   able to extract per-symbol phase measurements and construct
+   We propose UniChirp, a LoRa modulation framework that           a phase trend model that can be applied to subsequent payload
+achieves optimal chirp energy concentration by modeling            symbols.
+and compensating in-chirp phase misalignment. As shown in             Speciﬁcally, the received preamble symbols are ﬁrst
+Fig. 3, the decoding pipeline consists of three main stages: (1)   dechirped and transformed into the frequency domain. For
+Phase model construction: Our theoretical analysis shows           each preamble symbol, the dominant frequency component is
+that the in-chirp phase misalignment is determined by the          identiﬁed, and the relative phase between the corresponding
+timing offset (TO) and sampling frequency offset (SFO) of          spectral components is computed. This yields a sequence of
+the transmitter. Based on this insight, UniChirp builds a          phase observations, one per preamble symbol.
+precise phase model for each received packet. It ﬁrst estimates       These phase observations are then ﬁtted with a linear model,
+TO and SFO from the preamble symbols, and then reﬁnes              capturing the overall phase drift across the preamble. The
+the model through a ﬁtting process that aligns the predicted       resulting slope and intercept characterize the phase evolution
+phase evolution with the actual preamble phases. (2) Peak          and are used to predict the phase of subsequent payload
+alignment and fusion: While the phase model reveals the            symbols.
+phase offset between two chirp segments within the same
+symbol, these segments naturally overlap in frequency and                                 ϕ̂(i) = ŝ · i + b̂                (12)
+cannot be separated in conventional demodulation. To solve
+this, UniChirp introduces oversampling to create two distinct         where ŝ and b̂ denote the estimated slope and intercept,
+energy peaks in the frequency domain. By applying model-           respectively.
+guided phase compensation to one peak and then summing the            This preamble-based phase model allows the receiver to
+two, UniChirp achieves coherent energy fusion and maximizes        compensate phase variation in a simple and consistent manner,
+peak intensity. (3) Interference suppression: Oversampling         enabling coherent processing in later demodulation stages.
+inevitably introduces wideband noise beyond the LoRa signal           As illustrated in Fig. 4, although the raw phase measure-
+bandwidth. To mitigate this, UniChirp applies a spectrum-          ments may exhibit wrapping and ﬂuctuations under low SNR,
+aligned bandpass ﬁlter that removes out-of-band noise while        the estimated phase trend remains smooth and stable, which
+preserving in-band signal phase, ensuring clean and reliable       is sufﬁcient for the purposes of phase compensation in our
+demodulation.                                                      system.
+                                                                    where A1 and A2 are the complex amplitudes of the primary
+                                                                    and compensated secondary peaks.
+                                                                       This method not only enhances the peak energy and im-
+                                                                    proves the robustness of FFT-based symbol detection, but
+                                                                    also mitigates the impact of phase distortion under adverse
+                                                                    noise conditions, signiﬁcantly improving decoding reliability
+                                                                    in ultra-low SNR environments.
+                                                                    C. Interference Suppression
+                                                                       In practical LoRa reception, the received signal is often
+                                                                    contaminated by wideband noise whose bandwidth far exceeds
+                                                                    the actual spectral range of the signal. Since LoRa symbols
+Fig. 4: Example of phase trend estimation using preamble            have spectra strictly conﬁned within a narrow band centered at
+symbols.                                                            zero frequency, i.e., [−BW/2, BW/2], this spectral localiza-
+                                                                    tion provides theoretical basis and implementation space for
+B. Peak Alignment and Fusion
+                                                                    band-limited ﬁlter design.
+   In oversampled LoRa receivers where the sampling fre-               To enhance demodulation under low SNR, a digital low-
+quency Fs exceeds the signal bandwidth BW , a single chirp          pass ﬁlter is applied to the received baseband signal prior to
+symbol manifests as a characteristic dual-peak structure in the     FFT demodulation. The ﬁltering operation is given by:
+frequency domain after dechirping. The dechirping process
+                                                                                              M
+                                                                                              
+is performed by multiplying the received signal yr (t) with
+                                                                                     y[n] =         h[m] x[n − m],            (17)
+a time-aligned base down-chirp C −1 (t):
+                                                                                              m=0
+              ys (t) = yr (t) · C −1 (t) = ej2πfs t ,       (13)    where h[m] denotes the ﬁlter impulse response. This process
+which effectively transforms the frequency-modulated chirp          preserves the in-band signal components while effectively
+into an approximately single-tone signal. The FFT of ys (t) re-     attenuating out-of-band noise.
+veals a spectral peak corresponding to the encoded frequency.          From a theoretical perspective, the received signal can be
+   Under oversampling conditions (Fs > BW ), spectral fold-         modeled as
+ing due to FFT periodicity introduces two dominant peaks in                              x(t) = s(t) + n(t),
+the frequency domain: a primary peak at fx , and a mirrored         where the signal s(t) has spectral support strictly within
+secondary peak at                                                   [−BW/2, BW/2], and the noise n(t) is zero-mean Gaussian
+                   fx = fx + (Fs − BW ).                   (14)    white noise with power spectral density N0 /2, uniformly dis-
+                                                                    tributed over the sampling bandwidth [−Fs /2, Fs /2]. There-
+These two peaks originate from different segments of the            fore, the total noise power is
+cyclically shifted chirp in the time domain and are separated
+in frequency by Fs − BW .                                                                     Pn = N0 Fs .
+   Although negligible under high SNR, the energy split be-           After band-limited ﬁltering, the noise power is conﬁned to
+tween the two peaks becomes problematic at low SNR, where
+a failure to effectively aggregate the spectral energy can result                        Pn,ﬁltered = N0 BW,
+in diminished peak prominence and symbol misclassiﬁcation.          while the signal power remains approximately unchanged. The
+   Naively summing these two peaks without addressing their         corresponding SNRs before and after ﬁltering are
+phase difference leads to destructive interference or even                              Ps                           Ps
+energy cancellation. To address this, we propose a phase-                    SNRraw =         ,     SNRﬁltered =         ,
+                                                                                       N 0 Fs                      N0 BW
+aligned dual-peak energy aggregation mechanism. The phase
+offset Δφ between the two peaks, which arises from their            yielding an SNR gain of
+time-segment differences, has been analytically modeled in                                                Fs
+                                                                                       GSNR = 10 log10       .
+Section III using preamble-based training.                                                               BW
+   We perform complex-domain phase compensation on the                 In the frequency domain, the ﬁltered noise remains a com-
+secondary peak before aggregation:                                  plex Gaussian process with amplitude following a Rayleigh
+               Xagg = X[fx ] + X[fx ] · e−jΔφ ,            (15)    distribution [8]:
+                                                                                                         
+                                                                                             x        x2
+where X[fx ] and    X[fx ]
+                          denote the FFT amplitudes at the                       f|N | (x) = 2 exp − 2 , x ≥ 0,
+                                                                                            σk       2σk
+primary and secondary peak positions, respectively. The com-
+pensated secondary peak is coherently added to the primary,         where σk2 is proportional to the noise power. For an FFT length
+yielding a reinforced peak energy:                                  N , the maximum noise peak approximately follows
+                                                                                                    √
+                Eagg = |Xagg |2 = |A1 + A2 |2 ,             (16)                           M ≈ σk 2 ln N .
+                                                                    Fig. 6: Bird view of outdoor testbed and hardware setup.
+
+               (a) FFT spectrum without ﬁltering.
+
+
+
+
+            (b) FFT spectrum after low-pass ﬁltering.
+Fig. 5: Comparison of demodulation performance before and
+after applying low-pass ﬁltering. Filtering suppresses out-of-
+band noise, enhancing peak detectability.
+The band-limited ﬁltering reduces noise power, thereby de-
+creasing σk and lowering the maximum noise peak M , which         Fig. 7: Representative industrial deployment environments in
+signiﬁcantly reduces false detection probability and enhances     an operational factory.
+decoding robustness under low SNR conditions.
+                                                                    We compare UniChirp with several representative LoRa
+                   VI. I MPLEMENTATION                            weak signal demodulation mechanisms:
+A. Experimental Setup                                               •   Ostinato [9] uses a brute-force search to align dual peaks
+   We evaluate the proposed method using both software-                 by scanning phase compensation values.
+deﬁned radios and commercial LoRa devices to reﬂect practi-         •   Choir [10] merges dual peaks via downsampling without
+cal deployment conditions. Our testbed includes USRP N210               phase alignment.
+and B210 platforms with SBX daughterboards, connected to            •   LoRaTrimmer [7] trims noisy FFT windows and applies
+host PCs for baseband processing implemented in GNU Radio               probabilistic modeling to mitigate frequency-induced
+and MATLAB.                                                             phase discontinuities.
+   In addition to controlled experiments, we conduct ﬁeld           •   NELoRa [11] uses neural network for weak LoRa signal
+measurements using off-the-shelf SX1276-based LoRa nodes                demodulation.
+in representative real-world environments. As illustrated in      Evaluation metrics include demodulation success rate, residual
+Fig. 6, a campus-scale outdoor testbed is used to evaluate        phase error, and spectral energy gain, with each experiment
+performance under typical urban propagation conditions, in-       repeated on 200 randomized packets for statistical reliability.
+cluding line-of-sight and non-line-of-sight links around build-
+ings and vegetation. To further assess robustness under harsh                           VII. E VALUATION
+industrial impairments, we deploy LoRa nodes in an opera-
+                                                                  A. Overall Performance
+tional industrial environment, as shown in Fig. 7, where strong
+electromagnetic interference, metallic structures, and dense         In our evaluation, the reported SNR refers to the pre-
+machinery introduce severe attenuation and multipath effects.     despreading signal-to-noise ratio measured at the raw complex
+   Experiments cover spreading factors from 7 to 12 and           baseband (IQ) signal. Additive white Gaussian noise (AWGN)
+bandwidths of 125, 250, and 500,kHz, with a sampling rate of      is injected directly into the received IQ samples prior to
+1,MHz to enable dual-peak spectral fusion.All transmissions       dechirping and symbol-level processing. Unless otherwise
+operate at a center frequency of 470,MHz, and controlled low-     stated, we report uncoded symbol error rate (SER), measured
+SNR conditions are generated using programmable attenuators       before channel coding and interleaving, enabling a consistent
+and AWGN injection.                                               comparison across different demodulation methods under iden-
+            1
+                                                                           Ostinato
+
+
+
+
+                                                 Throughput (kbps)
+           0.8                                                       6     UniChirp
+                                                                           Choir
+Accuracy
+
+
+
+           0.6                                                             LoRaTrimmer
+                              Ostinato                               4     NELoRa
+           0.4                UniChirp
+                              Choir
+                                                                     2
+           0.2                LoRaTrimmer
+                              NELoRa
+            0                                                        0
+            -30   -25   -20   -15   -10     -5                           -30    -25      -20   -15
+                        SNR (dB)                                                 SNR (dB)
+
+ Fig. 8: Symbol accuracy ver-                      Fig. 9: PHY-layer through-                               (a) Impact of SF                (b) Impact of BW
+ sus SNRs.                                         put at SNR points.
+ tical raw channel conditions. For clarity, symbol accuracy (1
+ - SER) is reported in the ﬁgures.
+    To evaluate robustness under extremely low SNR condi-
+ tions, we compare the proposed method with representative
+ spectrum-based and learning-based baselines, including Osti-
+ nato, Choir, LoRaTrimmer, and NELoRa, under the conﬁg-
+ uration of SF=7 and BW=125 kHz. As shown in Fig. 8, the
+ comparison is based on the minimum SNR required to achieve                                            (c) SNR limits across SFs        (d) SNR limits across BWs
+ a decoding accuracy of 90%, which serves as a practical                                             Fig. 10: Performance comparison under different spreading
+ indicator of noise tolerance. The corresponding impact on                                           factors (SFs) and bandwidths (BWs).
+ effective throughput at representative SNR points is shown
+ in Fig. 9.                                                                                             Figure 10a shows the decoding accuracy under various
+    The results show that UniChirp consistently reaches the                                          SNRs, and Fig. 10c reports the minimum SNR required
+ target decoding accuracy at lower SNR levels than all con-                                          to achieve 90% accuracy. Across all tested SF values, the
+ sidered baselines, indicating improved robustness in weak-                                          proposed method consistently outperforms the baseline. This
+ signal regimes. This advantage primarily stems from the ex-                                         improvement is mainly attributed to the proposed analytical
+ plicit modeling and compensation of in-chirp phase distortion,                                      modeling of in-chirp phase misalignment, which remains valid
+ which enables coherent energy concentration even when noise                                         across different symbol durations induced by varying SFs. By
+ dominates. In contrast, Ostinato and similar methods rely on                                        explicitly compensating phase distortion at the symbol level,
+ phase-agnostic or search-based aggregation, whose effective-                                        UniChirp preserves coherent energy aggregation even under
+ ness rapidly degrades when noise perturbs phase estimates.                                          long-symbol conﬁgurations. In contrast, Ostinato relies on
+                                                                                                     a search-based spectral aggregation strategy, which becomes
+    Compared with learning-based approaches such as NELoRa,
+                                                                                                     more susceptible to noise under small-SF conﬁgurations where
+ UniChirp avoids dependence on training data distribution and
+                                                                                                     the inherent processing gain is limited, where the reduced
+ generalization behavior. By exploiting explicit signal structure
+                                                                                                     processing gain leaves limited margin for reliable phase search
+ and preamble-guided phase modeling, UniChirp maintains sta-
+                                                                                                     under noise.
+ ble and predictable decoding performance across the ultra-low
+ SNR regime. Similarly, while LoRaTrimmer achieves compa-                                               Similarly, the comparison under different bandwidth settings
+ rable decoding performance, it incurs higher computational                                          (Fig. 10b and Fig. 10d) further demonstrates the robustness of
+ complexity due to matrix-based operations that scale with the                                       UniChirp . Since the proposed phase modeling and compensa-
+ spreading factor, whereas UniChirp achieves robustness using                                        tion mechanism does not depend on speciﬁc bandwidth values,
+ a lightweight linear phase compensation strategy.                                                   UniChirp maintains stable decoding performance and reaches
+                                                                                                     the target accuracy at lower SNRs across a wide range of
+    Overall, these results demonstrate that the proposed design
+                                                                                                     bandwidth conﬁgurations. Overall, these results indicate that
+ achieves superior robustness under extreme noise conditions
+                                                                                                     the proposed modeling-based design generalizes well across
+ by directly addressing the fundamental phase misalignment
+                                                                                                     diverse LoRa parameter settings, offering a more scalable and
+ issue in chirp-based demodulation, rather than relying on
+                                                                                                     robust alternative to search-based aggregation approaches for
+ search heuristics or data-driven ﬁtting.
+                                                                                                     practical deployments in heterogeneous and dynamic network
+                                                                                                     environments.
+ B. Parameter Robustness
+                                                                                                     C. Computational Cost and Latency
+    To evaluate the robustness and generalization capability of
+ the proposed method under different LoRa conﬁgurations,                                               Beyond decoding robustness, we further evaluate the com-
+ we compare it with the baseline method Ostinato. In the                                             putational cost and symbol-level latency of UniChirp and
+ spreading factor (SF) comparison, the bandwidth (BW) is ﬁxed                                        compare it with representative baseline methods, including
+ at 125 kHz, while the bandwidth comparison ﬁxes the SF at                                           Ostinato, Choir, and LoRaTrimmer. All experiments in this
+ 10 for all experiments.                                                                             subsection are conducted under the conﬁguration of SF=12
+                                                                                                                          1.5
+                                                                                                                                      Ostinato
+
+
+
+
+                                                                                                      Throughput (kbps)
+                                                                                                                                      Unichirp
+                                                                                                                           1          Choir
+
+
+
+                                                                                                                          0.5
+
+
+                                                                                                                           0
+                                                                                                                                -35        -30    -25   -20
+                                                                                                                                            SNR (dB)
+
+Fig. 11: CPU processing time.    Fig. 12: Per-symbol process-       Fig. 13: Symbol-level accu-         Fig. 14: Throughput at rep-
+                                 ing latency.                       racy under industrial condi-        resentative SNRs in the in-
+and BW=125 kHz, which represents a typical long-range LoRa          tions.                              dustrial ﬁeld trial.
+setting under weak-signal conditions. These metrics are critical    industrial deployment scenarios. This performance improve-
+for practical LoRa gateways that must process concurrent            ment is attributed to the proposed model-guided phase com-
+transmissions in real time.                                         pensation, which mitigates in-chirp phase mis-alignments, as
+   Fig. 11 shows the average CPU processing time per packet         well as the structure-aware spectral ﬁltering that enhances the
+as a function of SNR. UniChirp consistently exhibits lower          prominence of valid FFT peaks under strong industrial impair-
+processing time across the evaluated SNR range. While Osti-         ments. As a result, the improved decoding reliability directly
+nato and LoRaTrimmer incur high computational overhead due          translates into higher effective throughput at representative
+to repeated spectral aggregation and matrix-based operations,       SNR points, as illustrated in Fig. 14.
+UniChirp maintains a stable and low processing cost. This              Overall, this industrial ﬁeld trial complements the con-
+efﬁciency mainly stems from its closed-form phase estimation        trolled testbed evaluation by demonstrating that the proposed
+and linear compensation, which avoid exhaustive search or           demodulation framework remains effective in representative
+high-dimensional computations. Fig. 12 further reports the          industrial environments. It further highlights the potential of
+average per-symbol processing latency over the payload, show-       UniChirp for enhancing LoRa demodulation robustness in
+ing that UniChirp also achieves lower and more stable symbol-       complex real-world deployment scenarios.
+level latency across different SNR levels, indicating consistent
+runtime behavior even in noise-dominated operating regimes.                            VIII. R ELATED W ORK
+   Although Choir exhibits relatively low processing latency        A. Enhancing LoRa Communication Range and Efﬁciency
+due to its simpliﬁed spectral aggregation pipeline, its decoding
+                                                                       To address LoRa’s limited communication range and severe
+robustness degrades rapidly under severe noise conditions at
+                                                                    signal attenuation in urban and industrial environments, recent
+this operating point. Taken together, these results indicate that
+                                                                    research has explored signal enhancement techniques at the
+UniChirp achieves a more favorable balance between decoding
+                                                                    receiver side. For example, C HOIR [10] leverages up to 36
+robustness and computational efﬁciency across different oper-
+                                                                    co-located nodes to collaboratively transmit the same data,
+ating regimes. By combining lightweight phase compensation
+                                                                    thereby enhancing signal strength at the gateway. C HARM [5]
+with efﬁcient spectral processing, UniChirp enables reliable
+                                                                    synchronizes 2–8 spatially distributed gateways to enable en-
+low-SNR demodulation without incurring excessive computa-
+                                                                    ergy joint decoding of weak signals. C HIME [12] uses periodic
+tional or latency overhead.
+                                                                    heartbeat packets to estimate channel conditions and selects
+D. Industrial Field Trial                                           frequency channels with lower interference. XCopy [13] ap-
+   To further examine the behavior of UniChirp under in-            plies coherent merging techniques to optimize retransmitted
+dustrial propagation conditions, we conduct a ﬁeld trial in         packets, while N EPHALAI [14] compresses received signals
+an operational industrial environment. Compared with the            and uploads them to the cloud, using sparse reconstruction to
+campus-scale outdoor testbed, this evaluation emphasizes de-        enable demodulation. Tong et al. [15] address link instability in
+ployment scenarios with dense metallic structures and complex       urban LoRa deployments caused by building obstructions and
+layouts, which introduce severe non-line-of-sight propagation       multipath fading. They propose link dynamics modeling and
+and strong multipath effects.                                       adaptive connection management to enhance communication
+   During the ﬁeld trial, LoRa sensor nodes periodically trans-     robustness and reliability. These methods signiﬁcantly improve
+mit packets using the same physical-layer conﬁguration as in        reliability and decoding coverage in complex environments,
+the testbed experiments. For the received signals captured at       but often rely on infrastructure-level changes or incur high
+the gateway, we analyze the decoding performance using the          computational complexity and system delays due to cloud
+uncoded SER metric deﬁned in Section VII. This evaluation           ofﬂoading. From a network and system-level perspective,
+focuses on assessing the robustness of the demodulation pro-        several studies have explored multi-gateway cooperation and
+cess under realistic industrial propagation conditions, rather      cloud-assisted architectures to further extend LoRa coverage.
+than end-to-end system-level delivery performance.                  ALOBA [16] aggregates uplink signals from multiple gate-
+   Fig. 13 shows that UniChirp consistently achieves lower          ways to enable joint decoding and improved reception diver-
+uncoded SER than the baseline method across the evaluated           sity, while cloud-based LoRa RAN designs [17] ofﬂoad signal
+processing to centralized servers for enhanced scalability and                 [3] S. Demetri, M. Zúñiga, G. P. Picco, F. Kuipers, L. Bruzzone, and
+reliability. These approaches highlight the beneﬁts of spatial                     T. Telkamp, “Automated estimation of link quality for lora: A remote
+                                                                                   sensing approach,” in Proceedings of the 18th International Conference
+and infrastructure diversity, but often introduce additional                       on Information Processing in Sensor Networks, 2019, pp. 145–156.
+backhaul overhead and processing latency.                                      [4] Y. Yao, Z. Ma, and Z. Cao, “Losee: Long-range shared bike communi-
+                                                                                   cation system based on lorawan protocol.” in EWSN, 2019, pp. 407–412.
+B. Trends and Challenges in Enhanced LoRa Demodulation                         [5] A. Dongare, R. Narayanan, A. Gadre, A. Luong, A. Balanuta, S. Kumar,
+                                                                                   B. Iannucci, and A. Rowe, “Charm: Exploiting geographical diversity
+   In addition, several recent works have aimed to im-                             through coherent combining in low-power wide-area networks,” in 2018
+prove demodulation performance under low SNR conditions.                           17th ACM/IEEE International Conference on Information Processing in
+                                                                                   Sensor Networks (IPSN). IEEE, 2018, pp. 60–71.
+N E L O R A [11] introduces a neural-enhanced demodulation                     [6] Z. Xu, S. Tong, P. Xie, and J. Wang, “From demodulation to decoding:
+framework that learns denoised representations to recognize                        Toward complete lora phy understanding and implementation,” ACM
+ultra-low SNR signals effectively. L O R AT RIMMER [7] pro-                        Transactions on Sensor Networks, vol. 18, no. 4, pp. 1–27, 2023.
+                                                                               [7] J. Du, Y. Liu, Y. Ren, L. Liu, and Z. Cao, “Loratrimmer: Optimal energy
+poses a chirp clipping technique to compress energy and                            condensation with chirp trimming for lora weak signal decoding,” in
+improve the detectability of short or attenuated chirps. Mean-                     Proceedings of the 30th Annual International Conference on Mobile
+while, O STINATO [9] presents an oversampling-based dechirp-                       Computing and Networking, 2024, pp. 1104–1118.
+                                                                               [8] D. Roy, “Discrete rayleigh distribution,” IEEE transactions on reliability,
+ing technique with phase alignment that mitigates SNR loss                         vol. 53, no. 2, pp. 255–260, 2004.
+caused by symbol frequency shifts. X U ET AL . [6] system-                     [9] Z. Xu, P. Xie, J. Wang, and Y. Liu, “Ostinato: Combating lora weak
+atically restructured the LoRa PHY layer and demonstrated                          links in real deployments,” in 2022 IEEE 30th International Conference
+                                                                                   on Network Protocols (ICNP). IEEE, 2022, pp. 1–11.
+the profound impact of hardware non-idealities on spectral                    [10] R. Eletreby, D. Zhang, S. Kumar, and O. Yağan, “Empowering low-
+features. These studies highlight the importance of modeling                       power wide area networks in urban settings,” in Proceedings of the
+and compensating for abnormal physical-layer behavior in                           Conference of the ACM Special Interest Group on Data Communication,
+                                                                                   2017, pp. 309–321.
+real-world environments and underscore the need for further                   [11] C. Li, H. Guo, S. Tong, X. Zeng, Z. Cao, M. Zhang, Q. Yan, L. Xiao,
+exploration of signal phase evolution and frequency-domain                         J. Wang, and Y. Liu, “Nelora: Towards ultra-low snr lora communication
+structure recovery. In parallel, concurrent transmission de-                       with neural-enhanced demodulation,” in Proceedings of the 19th ACM
+                                                                                   Conference on Embedded Networked Sensor Systems, 2021, pp. 56–68.
+coding has emerged as an important direction for improving                    [12] A. Gadre, R. Narayanan, A. Luong, A. Rowe, B. Iannucci, and S. Kumar,
+LoRa demodulation under high network load. CoLoRa [18]                             “Frequency conﬁguration for {Low-Power}{Wide-Area} networks in a
+and PLoRa [19] exploit frequency and timing diversity to                           heartbeat,” in 17th USENIX Symposium on Networked Systems Design
+                                                                                   and Implementation (NSDI 20), 2020, pp. 339–352.
+recover colliding packets, while subsequent studies [20], [21]                [13] X. Xia, Q. Chen, N. Hou, Y. Zheng, and M. Li, “Xcopy: Boosting
+further investigate the limits of collision resolution in practical                weak links for reliable lora communication,” in Proceedings of the 29th
+deployments. These works emphasize the critical role of pre-                       Annual International Conference on Mobile Computing and Networking,
+                                                                                   2023, pp. 1–15.
+cise frequency and phase modeling, yet often require stringent                [14] J. Liu, W. Xu, S. Jha, and W. Hu, “Nephalai: towards lpwan c-ran
+assumptions on signal separability or collision patterns.                          with physical layer compression,” in Proceedings of the 26th Annual
+                                                                                   International Conference on Mobile Computing and Networking, 2020,
+                         IX. C ONCLUSION                                           pp. 1–12.
+                                                                              [15] S. Tong, Z. Shen, Y. Liu, and J. Wang, “Combating link dynamics for
+   We present UniChirp, a practical LoRa demodulation frame-                       reliable lora connection in urban settings,” in Proceedings of the 27th
+work that signiﬁcantly improves robustness under weak-signal                       Annual International Conference on Mobile Computing and Networking,
+conditions. By explicitly modeling phase deviations caused by                      2021, pp. 642–655.
+                                                                              [16] X. Guo, L. Shangguan, Y. He, J. Zhang, H. Jiang, A. A. Siddiqi,
+hardware offsets and modulation artifacts, UniChirp derives                        and Y. Liu, “Aloba: Rethinking on-off keying modulation for ambient
+a lightweight analytical formulation enabling deterministic                        lora backscatter,” in Proceedings of the 18th conference on embedded
+phase compensation. Building on this, we develop a preamble-                       networked sensor systems, 2020, pp. 192–204.
+                                                                              [17] A. Balanuta, N. Pereira, S. Kumar, and A. Rowe, “A cloud-optimized
+guided phase extrapolation mechanism and a structure-aware                         link layer for low-power wide-area networks,” in Proceedings of the 18th
+spectral ﬁltering strategy to enhance symbol-level demodula-                       International Conference on Mobile Systems, Applications, and Services,
+tion reliability. We evaluate the framework using commercial                       2020, pp. 247–259.
+                                                                              [18] S. Tong, Z. Xu, and J. Wang, “Colora: Enabling multi-packet reception
+LoRa hardware in controlled low-SNR experiments, outdoor                           in lora,” in IEEE INFOCOM 2020-IEEE Conference on Computer
+testbeds, and real industrial production environments. Results                     Communications. IEEE, 2020, pp. 2303–2311.
+demonstrate that UniChirp provides a lightweight, deployable                  [19] Y. Peng, L. Shangguan, Y. Hu, Y. Qian, X. Lin, X. Chen, D. Fang, and
+                                                                                   K. Jamieson, “Plora: A passive long-range data network from ambient
+solution that enables robust LoRa communication in challeng-                       lora transmissions,” in Proceedings of the 2018 conference of the ACM
+ing industrial propagation environments, achieving reliable                        special interest group on data communication, 2018, pp. 147–160.
+demodulation at SNRs as low as -17.3 dB without increasing                    [20] M. O. Shahid, M. Philipose, K. Chintalapudi, S. Banerjee, and B. Krish-
+                                                                                   naswamy, “Concurrent interference cancellation: Decoding multi-packet
+system complexity.                                                                 collisions in lora,” in Proceedings of the 2021 ACM SIGCOMM 2021
+                                                                                   Conference, 2021, pp. 503–515.
+                             R EFERENCES                                      [21] X. Yang, Z. Liu, K. Tang, X. Yin, C. Zhuo, Q. Wei, and F. Qiao,
+ [1] L. Alliance, “A technical overview of lora and lorawan.(2015),”               “Breaking the energy-efﬁciency barriers for smart sensing applications
+     https://lora-alliance. org/wp-content/uploads/2020/11/what-is-lorawan.        with “sensing with computing” architectures,” Science China Informa-
+     pdf¿. Citado, vol. 2, p. 24, 2015.                                            tion Sciences, vol. 66, no. 10, p. 200409, 2023.
+ [2] L. Liu, Y. Yao, Z. Cao, and M. Zhang, “Deeplora: Learning accurate
+     path loss model for long distance links in lpwan,” in IEEE INFOCOM
+     2021-IEEE Conference on Computer Communications. IEEE, 2021,
+     pp. 1–10.
+

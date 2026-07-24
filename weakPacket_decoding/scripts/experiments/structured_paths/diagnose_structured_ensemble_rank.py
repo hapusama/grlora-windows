@@ -32,8 +32,8 @@ from run_paper_oversampled_baseline import load_packets as load_savaux_packets  
 from run_savaux_current_threshold_sweep import DEFAULT_DATASETS, _dataset_paths, _payload_reference_power  # noqa: E402
 from run_symbol_phase_threshold_sweep import _snr_values, _write_csv  # noqa: E402
 from weak_decoder.baselines.savaux_oversampled.paper_oversampled_demod import paper_oversampled_spectrum  # noqa: E402
-from weak_decoder.structured_path_demod import score_structured_path_candidates  # noqa: E402
-from weak_decoder.timing_path_demod import (  # noqa: E402
+from weak_decoder.decoding.structured_path_demod import score_structured_path_candidates  # noqa: E402
+from weak_decoder.decoding.timing_path_demod import (  # noqa: E402
     score_fixed_timing_path_candidates,
     score_timing_path_candidates,
 )

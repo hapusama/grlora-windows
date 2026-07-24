@@ -1,0 +1,2 @@
+branch_dimension,branch_covariance_count,branch_snapshots,branch_diagonal_cv,branch_mean_abs_correlation,branch_max_abs_correlation,pair_dimension,pair_snapshots,pair_diagonal_cv,pair_mean_abs_correlation,pair_max_abs_correlation,dataset,snr_db,seed,offpacket_windows,branch_gls_active,min_branch_correlation
+4,1,4096,0.013785966933490386,0.6124086469127031,0.6204813069456997,2,4096,0.1331438898456308,0.3268183390777963,0.3268183390777963,0_0_0_10_14_32,,42,256,1,0.05

@@ -1,0 +1,8 @@
+dataset,snr_db,method,errors,symbol_count,fixes_vs_savaux,breaks_vs_savaux,ser
+collector_low4_cr47,,ordinary_fft,27,392,0,26,0.06887755102040816
+collector_low4_cr47,,savaux,1,392,0,0,0.002551020408163265
+collector_low4_cr47,,savaux_header,1,392,0,0,0.002551020408163265
+collector_low4_cr47,,branch_gls,1,392,0,0,0.002551020408163265
+collector_low4_cr47,,branch_shrinkage,1,392,0,0,0.002551020408163265
+collector_low4_cr47,,savaux_dual,1,392,0,0,0.002551020408163265
+collector_low4_cr47,,proposed,1,392,0,0,0.002551020408163265

@@ -21,12 +21,18 @@ search 已退出活动代码；相关研究记录仍可在 `doc/history/`、`not
 ```text
 weak_decoder/
   branch4_profile.py       当前 STM32 固定帧实验参数与文件名生成
-  preamble_detector.py     前导码滑窗检测
-  frame_locator.py         sync word + SFD 帧边界定位
-  grlora_frame_sync.py     CFO/STO/SFO 与多 branch 同步
-  header_first_demod.py    传统 FFT header-first 参考链
-  payload_codec.py         标准 LoRa PHY codec
+  chirp.py                 同步、解调与 baseline 共用的 chirp/FFT 工具
   run_iq_frontend.py       标准 raw IQ 前端入口
+  synchronization/         检测、帧定位与 CFO/STO/SFO 同步
+    preamble_detector.py
+    frame_locator.py
+    grlora_frame_sync.py
+  decoding/                传统 codec 与诊断解调实现
+    header_first_demod.py
+    payload_codec.py
+    adaptive_path_demod.py
+    structured_path_demod.py
+    timing_path_demod.py
   os_lora/                 当前 OS-LoRa/GLS 主线
   baselines/               保留的论文 baseline
 
@@ -180,9 +186,9 @@ weak_decoder/baselines/loratrimmer/
 weak_decoder/baselines/savaux_oversampled/
 weak_decoder/baselines/symfec/
 weak_decoder/baselines/unichirp/
-weak_decoder/adaptive_path_demod.py
-weak_decoder/structured_path_demod.py
-weak_decoder/timing_path_demod.py
+weak_decoder/decoding/adaptive_path_demod.py
+weak_decoder/decoding/structured_path_demod.py
+weak_decoder/decoding/timing_path_demod.py
 ```
 
 它们用于论文对比、负结果或消融实验，不应混入 GLS 权重估计本身。

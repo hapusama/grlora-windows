@@ -1,0 +1,16 @@
+0_0_0_10_14_32 snr=clean seed=42: savaux=0.0000 gls_offpacket_fixed=0.0000 gls_packet_null=0.0000 gls_symbol_null=0.0000
+0_0_0_10_14_32 snr=-22 seed=42: savaux=0.1306 gls_offpacket_fixed=0.1306 gls_packet_null=0.1306 gls_symbol_null=0.1306
+0_0_0_10_14_32 snr=-22 seed=43: savaux=0.1184 gls_offpacket_fixed=0.1184 gls_packet_null=0.1184 gls_symbol_null=0.1184
+0_0_0_10_14_32 snr=-22 seed=44: savaux=0.1306 gls_offpacket_fixed=0.1265 gls_packet_null=0.1306 gls_symbol_null=0.1347
+0_0_0_10_14_32 snr=-23 seed=42: savaux=0.1429 gls_offpacket_fixed=0.1429 gls_packet_null=0.1429 gls_symbol_null=0.1429
+0_0_0_10_14_32 snr=-23 seed=43: savaux=0.1592 gls_offpacket_fixed=0.1592 gls_packet_null=0.1592 gls_symbol_null=0.1469
+0_0_0_10_14_32 snr=-23 seed=44: savaux=0.1510 gls_offpacket_fixed=0.1510 gls_packet_null=0.1510 gls_symbol_null=0.1551
+0_0_0_10_14_32 snr=-24 seed=42: savaux=0.1755 gls_offpacket_fixed=0.1755 gls_packet_null=0.1755 gls_symbol_null=0.1796
+0_0_0_10_14_32 snr=-24 seed=43: savaux=0.2041 gls_offpacket_fixed=0.2041 gls_packet_null=0.2041 gls_symbol_null=0.2082
+0_0_0_10_14_32 snr=-24 seed=44: savaux=0.2041 gls_offpacket_fixed=0.2122 gls_packet_null=0.2082 gls_symbol_null=0.2082
+0_0_0_10_14_32 snr=-25 seed=42: savaux=0.2816 gls_offpacket_fixed=0.2816 gls_packet_null=0.2816 gls_symbol_null=0.2898
+0_0_0_10_14_32 snr=-25 seed=43: savaux=0.2776 gls_offpacket_fixed=0.2857 gls_packet_null=0.2816 gls_symbol_null=0.2857
+0_0_0_10_14_32 snr=-25 seed=44: savaux=0.2939 gls_offpacket_fixed=0.2980 gls_packet_null=0.2939 gls_symbol_null=0.2898
+0_0_0_10_14_32 snr=-26 seed=42: savaux=0.4449 gls_offpacket_fixed=0.4327 gls_packet_null=0.4367 gls_symbol_null=0.4490
+0_0_0_10_14_32 snr=-26 seed=43: savaux=0.4408 gls_offpacket_fixed=0.4408 gls_packet_null=0.4408 gls_symbol_null=0.4367
+0_0_0_10_14_32 snr=-26 seed=44: savaux=0.4286 gls_offpacket_fixed=0.4163 gls_packet_null=0.4327 gls_symbol_null=0.4367

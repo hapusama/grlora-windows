@@ -1,0 +1,2 @@
+dataset,packet_count,symbol_count,savaux_oversampled_err,loratrimmer_err,symfec_err,unichirp_err,savaux_oversampled_ser,loratrimmer_ser,symfec_ser,unichirp_ser
+0_0_0_10_14_32,3,105,29,-1,40,29,0.2761904761904762,,0.38095238095238093,0.2761904761904762

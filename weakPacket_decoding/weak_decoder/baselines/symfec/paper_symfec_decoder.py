@@ -38,8 +38,8 @@ from typing import Literal, Sequence
 import numpy as np
 
 from ...chirp import bin_to_grlora_symbol, positive_mod, signed_fft_bin
-from ...header_first_demod import bits_to_int, int_to_bits_msb
-from ...payload_codec import (
+from ...decoding.header_first_demod import bits_to_int, int_to_bits_msb
+from ...decoding.payload_codec import (
     PayloadDecodeResult,
     decode_explicit_frame_symbols,
     decode_payload_symbols,

@@ -16,13 +16,13 @@ WEAK_ROOT = Path(__file__).resolve().parents[1]
 if str(WEAK_ROOT) not in sys.path:
     sys.path.insert(0, str(WEAK_ROOT))
 
-from weak_decoder.header_first_demod import (  # noqa: E402
+from weak_decoder.decoding.header_first_demod import (  # noqa: E402
     HeaderDecodeResult,
     SymbolDemodResult,
     decode_explicit_header,
     demod_symbol_sequence,
 )
-from weak_decoder.preamble_detector import load_complex64_file  # noqa: E402
+from weak_decoder.synchronization.preamble_detector import load_complex64_file  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
