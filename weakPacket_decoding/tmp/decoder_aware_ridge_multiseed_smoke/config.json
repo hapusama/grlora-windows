@@ -1,0 +1,21 @@
+{
+  "dataset_repo": "D:\\Desktop\\proj\\lora-rfsr-savaux",
+  "ota_root": "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db",
+  "max_packets": 1,
+  "clean_packets_admitted": 1,
+  "esn0_db": [
+    15.0
+  ],
+  "seeds": [
+    20260821
+  ],
+  "workers": 1,
+  "ridge_top_k": 4,
+  "ridge_sfd_peak_pool": 32,
+  "noise_model": "complex AWGN flat in B, added once to the complete 1 MS/s packet",
+  "signal_power_calibration_payload_symbols": 16,
+  "demod_tail_noise_samples": 256,
+  "decoder": "Savaux hard symbols -> explicit header -> FEC -> dewhitening -> PHY CRC",
+  "crc_mode": "grlora",
+  "ground_truth_usage": "post-CRC exact-delivery audit only"
+}

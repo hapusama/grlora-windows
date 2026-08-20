@@ -1,0 +1,29 @@
+{
+  "dataset_repo": "D:\\Desktop\\proj\\lora-rfsr-savaux",
+  "ota_root": "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db",
+  "max_packets": 1,
+  "symbols_per_packet": 16,
+  "esn0_db": [
+    10.0,
+    12.0,
+    14.0,
+    16.0,
+    18.0,
+    20.0
+  ],
+  "seeds": [
+    11
+  ],
+  "consistency_lambda": 1.0,
+  "sf": 12,
+  "bw_hz": 125000.0,
+  "source_rate_hz": 1000000.0,
+  "rates": [
+    8,
+    4,
+    2
+  ],
+  "fft_coordinate_offset": -1,
+  "clean_symbol_count": 16,
+  "plot_esn0_db": 12.0
+}

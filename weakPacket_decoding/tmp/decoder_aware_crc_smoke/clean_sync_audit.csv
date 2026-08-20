@@ -1,0 +1,2 @@
+packet_id,reference_id,sync_status,sync_valid,tested_payload_symbols,admitted_payload_symbols,fine_payload_start_sample,cfo_total_bins,cfo_hz,sfo_hat,sfo_cum_initial,signal_power,offpacket_power,full_decode_status,full_header_valid,full_crc_valid,full_payload_exact,full_decode_ms,full_header_symbol_errors,full_payload_symbol_errors
+exp0_000000_rxg20_0_fulltrim,0,ok,1,16,16,673552,-128.71322618720285,-3928.015935888759,-0.032989857029732124,0.025580086162754756,6.153250447488309e-08,9.926245921143361e-08,ok,1,1,1,191.26709999909508,0,8

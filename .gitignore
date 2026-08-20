@@ -8,6 +8,8 @@ build*/
 weakPacket_decoding/Buildings/**/*.ifc
 *.pyc
 *.pyo
+*.bin
+*.cfile
 .vscode/
 */__pycache__/*
 **/__pycache__/

@@ -1,0 +1,9 @@
+gate_class,gate_failure_reason,count
+strict_invalid_decodable,framesync_netid,2
+strict_invalid_decodable,framesync_preamble_all_bin0,15
+strict_invalid_nondecode,framesync_netid,8
+strict_invalid_nondecode,framesync_preamble_all_bin0,13
+strict_invalid_nondecode,locator_preamble_stability,3
+strict_invalid_nondecode,locator_sfd,6
+strict_invalid_nondecode,locator_sync1,1
+strict_invalid_nondecode,locator_sync2,1

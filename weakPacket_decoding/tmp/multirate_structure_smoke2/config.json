@@ -1,0 +1,42 @@
+{
+  "sf": 7,
+  "n_bins": 128,
+  "bandwidth_hz": 125000.0,
+  "source_os_factor": 8,
+  "source_sample_rate_hz": 1000000.0,
+  "rates": [
+    8,
+    4,
+    2,
+    1
+  ],
+  "sample_rates_hz": [
+    1000000.0,
+    500000.0,
+    250000.0,
+    125000.0
+  ],
+  "snrs_db": [
+    -22.0
+  ],
+  "trials_per_snr": 50,
+  "seed": 20260819,
+  "timing_offsets_chips": [
+    0.0
+  ],
+  "rate_weights": null,
+  "noise": "independent circular complex AWGN at the source rate",
+  "lower_rate_views": "deterministic phase-zero decimation; no filtering",
+  "information_claim": "no independent information is created by rate conversion",
+  "methods": [
+    "fft_argmax_q8",
+    "fft_argmax_q4",
+    "fft_argmax_q2",
+    "fft_argmax_q1",
+    "pair_energy_q8",
+    "fold_profile_q8",
+    "multirate_equal_sum",
+    "multirate_awgn_glrt",
+    "coherent_ml_q8"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "dataset_repo": "D:\\Desktop\\proj\\lora-rfsr-savaux",
+  "ota_root": "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db",
+  "baseline_dir": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\decoder_aware_crc_pdr_ota_awgn_20260822",
+  "esn0_db": [
+    12.0,
+    13.0,
+    14.0,
+    15.0,
+    16.0
+  ],
+  "top_k_values": [
+    1,
+    2,
+    4
+  ],
+  "sfd_peak_pool": 32,
+  "workers": 4,
+  "candidate_rule": "SFD Top-L integer CFO; payload_start += OSR * delta_CFO; candidate-specific STO/SFO refinement",
+  "arbitration": "first ranked explicit-header + payload-PHY-CRC success",
+  "decode_all_for_audit": true,
+  "operational_stop_on_crc": true,
+  "ground_truth_usage": "post-CRC exact-delivery audit only"
+}

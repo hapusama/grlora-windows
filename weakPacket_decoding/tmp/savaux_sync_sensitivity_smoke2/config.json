@@ -1,0 +1,38 @@
+{
+  "dataset_repo": "D:\\Desktop\\proj\\lora-rfsr-savaux",
+  "ota_root": "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db",
+  "max_packets": 1,
+  "symbols_per_packet": 4,
+  "esn0_db": 14.0,
+  "seeds": [
+    7
+  ],
+  "timing_errors_samples_1m": [
+    -0.5,
+    0.0,
+    0.5
+  ],
+  "cfo_errors_bins": [
+    -0.5,
+    0.0,
+    0.5
+  ],
+  "cfo_errors_hz": [
+    -15.2587890625,
+    0.0,
+    15.2587890625
+  ],
+  "wide_cfo_errors_hz": [
+    -500.0,
+    0.0,
+    500.0
+  ],
+  "clean_symbol_count": 4,
+  "noise_model": "complex AWGN flat in B, injected once at 1 MS/s",
+  "frame_sync_to_savaux_origin_offset_samples_1m": -4.0,
+  "fractional_sto_interpolator": {
+    "kind": "Kaiser-windowed sinc",
+    "radius": 16,
+    "guard_samples": 32
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "dataset_repo": "D:\\Desktop\\proj\\lora-rfsr-savaux",
+  "ota_root": "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db",
+  "max_packets": 8,
+  "clean_packets_admitted": 8,
+  "symbols_per_packet": 16,
+  "esn0_db": [
+    12.0,
+    13.0,
+    14.0,
+    15.0,
+    16.0
+  ],
+  "seeds": [
+    20260821,
+    20260822
+  ],
+  "workers": 4,
+  "noise_model": "complex AWGN flat in B, added once to the complete 1 MS/s packet",
+  "savaux_origin_offset_samples_1m": -4,
+  "bin_hz": 30.517578125,
+  "local_lock_definition": {
+    "max_abs_cfo_error_bins": 2.0,
+    "max_abs_payload_sto_error_samples_1m": 32
+  }
+}

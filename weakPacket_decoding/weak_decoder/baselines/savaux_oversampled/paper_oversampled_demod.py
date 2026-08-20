@@ -28,6 +28,23 @@ CfoCorrectionMode = Literal["none", "symbol", "continuous"]
 
 
 @dataclass(frozen=True)
+class _WrappedTailKernel:
+    """Cached chirp-convolution constants for the wrapped-tail DFT."""
+
+    forward_chirp: np.ndarray
+    reverse_chirp_fft: np.ndarray
+    fft_length: int
+
+
+@dataclass(frozen=True)
+class _SavauxKernel:
+    """Constants shared by all symbols for one SF/OSR pair."""
+
+    branch_weights: np.ndarray
+    wrap_phases: np.ndarray
+
+
+@dataclass(frozen=True)
 class PaperOversampledDemodResult:
     """单个 symbol 的论文 baseline 解调结果。
 
@@ -61,6 +78,7 @@ def _validate_os_factor(os_factor: int) -> int:
     return value
 
 
+@lru_cache(maxsize=512)
 def _oversampled_downchirp(
     sf: int,
     os_factor: int,
@@ -81,7 +99,9 @@ def _oversampled_downchirp(
     # 小数 CFO 用额外相位旋转补偿。
     reference = build_upchirp(sf=sf, symbol_id=int(cfo_int), os_factor=os_value)
     frac_cfo = np.exp(-2j * np.pi * float(cfo_frac) * n / float(n_bins * os_value))
-    return (np.conjugate(reference) * frac_cfo).astype(np.complex64)
+    result = (np.conjugate(reference) * frac_cfo).astype(np.complex64)
+    result.setflags(write=False)
+    return result
 
 
 @lru_cache(maxsize=32)
@@ -113,6 +133,70 @@ def _branch_dft_matrix(sf: int, os_factor: int, branch_index: int) -> np.ndarray
     return (kernel * phase).astype(np.complex64)
 
 
+@lru_cache(maxsize=16)
+def _branch_combination_weights(n_bins: int, os_factor: int) -> np.ndarray:
+    length = int(n_bins)
+    os_value = _validate_os_factor(os_factor)
+    bins = np.arange(length, dtype=np.float64)
+    branches = np.arange(os_value, dtype=np.float64)[:, np.newaxis]
+    weights = np.exp(
+        -2j * np.pi * branches * bins[np.newaxis, :] / float(length * os_value)
+    )
+    weights.setflags(write=False)
+    return weights
+
+
+@lru_cache(maxsize=16)
+def _savaux_kernel(sf: int, os_factor: int) -> _SavauxKernel:
+    n_bins = 1 << int(sf)
+    os_value = _validate_os_factor(os_factor)
+    wrap_phases = np.exp(
+        2j * np.pi * np.arange(os_value, dtype=np.float64) / float(os_value)
+    )
+    wrap_phases.setflags(write=False)
+    return _SavauxKernel(
+        branch_weights=_branch_combination_weights(n_bins, os_value),
+        wrap_phases=wrap_phases,
+    )
+
+
+@lru_cache(maxsize=16)
+def _wrapped_tail_kernel(n_bins: int) -> _WrappedTailKernel:
+    length = int(n_bins)
+    if length <= 0:
+        raise ValueError("n_bins must be positive")
+    indexes = np.arange(length, dtype=np.float64)
+    forward_chirp = np.exp(1j * np.pi * indexes * indexes / float(length))
+    reverse_chirp = np.exp(-1j * np.pi * indexes * indexes / float(length))
+    fft_length = 1 << int((2 * length - 1).bit_length())
+    reverse_chirp_fft = np.fft.fft(reverse_chirp, fft_length)
+    forward_chirp.setflags(write=False)
+    reverse_chirp_fft.setflags(write=False)
+    return _WrappedTailKernel(forward_chirp, reverse_chirp_fft, fft_length)
+
+
+def _wrapped_tail_dft_batch(branches: np.ndarray) -> np.ndarray:
+    """Evaluate Eq. (36)'s triangular wrapped-tail DFT by convolution."""
+
+    values = np.asarray(branches, dtype=np.complex128)
+    if values.ndim != 2:
+        raise ValueError("branches must have shape (n_bins, branch_count)")
+    n_bins, branch_count = map(int, values.shape)
+    if n_bins <= 0 or branch_count <= 0:
+        raise ValueError("branches must be non-empty")
+    kernel = _wrapped_tail_kernel(n_bins)
+    lhs = np.zeros((n_bins, branch_count), dtype=np.complex128)
+    lhs[1:] = values[:0:-1] * kernel.forward_chirp[1:, np.newaxis]
+    convolution = np.fft.ifft(
+        np.fft.fft(lhs, kernel.fft_length, axis=0)
+        * kernel.reverse_chirp_fft[:, np.newaxis],
+        axis=0,
+    )[:n_bins]
+    tail = kernel.forward_chirp[:, np.newaxis] * convolution
+    tail[0] = 0.0
+    return tail.astype(np.complex64)
+
+
 def _paper_branch_spectrum(
     dechirped_branch: np.ndarray,
     sf: int,
@@ -129,10 +213,14 @@ def _paper_branch_spectrum(
     if branch.size != n_bins:
         raise ValueError(f"branch has {branch.size} samples, expected {n_bins}")
     q = int(branch_index)
-    if q == 0:
-        spectrum = np.fft.fft(branch)
-    else:
-        spectrum = _branch_dft_matrix(sf, os_factor, q) @ branch
+    os_value = _validate_os_factor(os_factor)
+    if not (0 <= q < os_value):
+        raise ValueError(f"branch_index must be in [0, {os_value}), got {branch_index}")
+    spectrum = np.fft.fft(branch)
+    if q > 0:
+        wrap_phase = _savaux_kernel(sf, os_value).wrap_phases[q]
+        tail = _wrapped_tail_dft_batch(branch[:, np.newaxis])[:, 0]
+        spectrum = spectrum + (wrap_phase - 1.0) * tail
     return (spectrum / math.sqrt(float(n_bins))).astype(np.complex64)
 
 
@@ -152,13 +240,12 @@ def combine_paper_branch_spectra(
     if len(spectra) != os_value:
         raise ValueError(f"got {len(spectra)} branch spectra, expected {os_value}")
 
-    k = np.arange(n_bins, dtype=np.float64)
     combined = np.zeros(n_bins, dtype=np.complex128)
+    weights = _branch_combination_weights(n_bins, os_value)
     for q, spectrum in enumerate(spectra):
         # Eq. (37): 每个 branch q 的同一个候选 k 需要乘
         # exp(-j*2*pi*q*k/(N*R)) 后再相干相加。
-        weight = np.exp(-2j * np.pi * float(q) * k / float(n_bins * os_value))
-        combined += weight * spectrum.astype(np.complex128)
+        combined += weights[q] * spectrum.astype(np.complex128)
     return combined.astype(np.complex64)
 
 

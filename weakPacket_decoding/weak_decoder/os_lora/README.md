@@ -85,6 +85,9 @@ LiteNap-Savaux 的 clean-GT 后加白噪声比较使用 `noisy_iq` 的复高斯�
 冻结命令、样本预算、逐 SNR 结果和结论见
 `doc/litenap_savaux_results_20260724.md`。当前数据未显示相对完整 Savaux 的 SER
 提升；K1/K2 应解释为采样率/计算量交换，而不是增益结论。
+`-16` 到 `-28 dB` 的逐 1 dB 错误归因见
+`doc/litenap_savaux_error_modes_20260724.md`；结果显示主要瓶颈是 modulo-`N/D`
+alias bin 本身判错，而不是 alias group 判错。
 
 实验入口按用途大致分为：
 

@@ -810,3 +810,9 @@ K1、K2 和完整 Savaux 分别使用 1/4、1/2 和全部 ADC 样点；K4 与原
 无训练 phase-jump 重排也没有带来稳定修正。它只是对本文第五节设想的工程消融，
 不是 LiteNap 论文中经过前导码标定的发射机硬件指纹完整复现。详细的
 fix/break、数据协议和复现命令见上述冻结结果文档。
+
+进一步的 `1 dB` 细粒度错误归因表明，K1 的全部错误中 `95.77%`、K2 中
+`98.12%` 属于 alias bin 本身判错；group 判错仅占 `4.23%` 和 `1.88%`。
+因此即使使用完美 fingerprint 修复全部 group 错误，也只能带来很小的 oracle
+增益。完整分析见
+`weak_decoder/os_lora/doc/litenap_savaux_error_modes_20260724.md`。

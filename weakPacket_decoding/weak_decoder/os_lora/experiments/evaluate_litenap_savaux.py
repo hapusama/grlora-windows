@@ -334,6 +334,49 @@ def _score_power(power: np.ndarray, gt_bin: int) -> dict[str, float | int]:
     }
 
 
+def _alias_error_mode(
+    selected_bin: int,
+    gt_bin: int,
+    n_bins: int,
+    downsample_factor: int,
+) -> str:
+    """Classify a hard-decision error into alias-bin or alias-group failure."""
+
+    if int(n_bins) <= 0 or int(downsample_factor) <= 0:
+        raise ValueError("n_bins and downsample_factor must be positive")
+    if int(n_bins) % int(downsample_factor):
+        raise ValueError("downsample_factor must divide n_bins")
+    selected = int(selected_bin) % int(n_bins)
+    groundtruth = int(gt_bin) % int(n_bins)
+    if selected == groundtruth:
+        return "correct"
+    alias_bins = int(n_bins) // int(downsample_factor)
+    if selected % alias_bins == groundtruth % alias_bins:
+        return "wrong_group"
+    return "wrong_alias_bin"
+
+
+def _signed_alias_bin_delta(
+    selected_bin: int,
+    gt_bin: int,
+    n_bins: int,
+    downsample_factor: int,
+) -> int:
+    """Return the shortest signed offset between modulo-N/D alias bins."""
+
+    if int(n_bins) <= 0 or int(downsample_factor) <= 0:
+        raise ValueError("n_bins and downsample_factor must be positive")
+    if int(n_bins) % int(downsample_factor):
+        raise ValueError("downsample_factor must divide n_bins")
+    alias_bins = int(n_bins) // int(downsample_factor)
+    selected = int(selected_bin) % alias_bins
+    groundtruth = int(gt_bin) % alias_bins
+    delta = (selected - groundtruth) % alias_bins
+    if delta > alias_bins // 2:
+        delta -= alias_bins
+    return int(delta)
+
+
 def _two_sided_sign_p(fixes: int, breaks: int) -> float:
     discordant = int(fixes) + int(breaks)
     if discordant <= 0:
@@ -375,6 +418,27 @@ def _summaries(
     for (snr_label, seed), subset in groups.items():
         for spec in methods:
             errors = sum(1 - int(row[f"{spec.name}_correct"]) for row in subset)
+            wrong_group_errors = sum(
+                str(row[f"{spec.name}_error_mode"]) == "wrong_group"
+                for row in subset
+            )
+            wrong_alias_bin_errors = sum(
+                str(row[f"{spec.name}_error_mode"]) == "wrong_alias_bin"
+                for row in subset
+            )
+            if errors != wrong_group_errors + wrong_alias_bin_errors:
+                raise AssertionError(
+                    f"{spec.name} error-mode counts do not partition errors"
+                )
+            alias_bin_correct_decisions = (
+                len(subset) - wrong_alias_bin_errors
+            )
+            far_alias_bin_errors = sum(
+                str(row[f"{spec.name}_error_mode"])
+                == "wrong_alias_bin"
+                and abs(int(row[f"{spec.name}_alias_bin_delta"])) > 8
+                for row in subset
+            )
             fixes = sum(
                 int(row["savaux_correct"]) == 0
                 and int(row[f"{spec.name}_correct"]) == 1
@@ -403,6 +467,38 @@ def _summaries(
                     "decisions": int(len(subset)),
                     "errors": int(errors),
                     "ser": float(errors / max(1, len(subset))),
+                    "wrong_group_errors": int(wrong_group_errors),
+                    "wrong_alias_bin_errors": int(
+                        wrong_alias_bin_errors
+                    ),
+                    "wrong_group_fraction_of_errors": float(
+                        wrong_group_errors / max(1, errors)
+                    ),
+                    "wrong_alias_bin_fraction_of_errors": float(
+                        wrong_alias_bin_errors / max(1, errors)
+                    ),
+                    "oracle_group_fixed_ser": float(
+                        wrong_alias_bin_errors / max(1, len(subset))
+                    ),
+                    "maximum_group_fix_ser_gain": float(
+                        wrong_group_errors / max(1, len(subset))
+                    ),
+                    "alias_bin_accuracy": float(
+                        1.0
+                        - wrong_alias_bin_errors
+                        / max(1, len(subset))
+                    ),
+                    "group_error_rate_given_correct_alias_bin": float(
+                        wrong_group_errors
+                        / max(1, alias_bin_correct_decisions)
+                    ),
+                    "far_alias_bin_errors_abs_gt8": int(
+                        far_alias_bin_errors
+                    ),
+                    "far_fraction_of_wrong_alias_bin_errors": float(
+                        far_alias_bin_errors
+                        / max(1, wrong_alias_bin_errors)
+                    ),
                     "fixes_vs_savaux": int(fixes),
                     "breaks_vs_savaux": int(breaks),
                     "paired_sign_p": _two_sided_sign_p(fixes, breaks),
@@ -453,6 +549,9 @@ def _write_results(
         (str(row["snr_label"]), str(row["method"])): row
         for row in summary
     }
+    available_methods = {
+        str(row["method"]) for row in summary
+    }
     noisy_labels = sorted(
         {
             str(row["snr_label"])
@@ -462,11 +561,16 @@ def _write_results(
         key=float,
         reverse=True,
     )
-    headline_methods = (
-        "savaux",
-        "savaux_phase",
-        "litenap_savaux_k2",
-        "litenap_savaux_k1",
+    headline_candidates = (
+        ("savaux", "Savaux"),
+        ("savaux_phase", "Savaux + phase"),
+        ("litenap_savaux_k2", "K2 (1/2 samples)"),
+        ("litenap_savaux_k1", "K1 (1/4 samples)"),
+    )
+    headline_methods = tuple(
+        (method, label)
+        for method, label in headline_candidates
+        if method in available_methods
     )
     savaux_is_best = all(
         float(summary_by_key[(label, "savaux")]["ser"])
@@ -516,12 +620,16 @@ def _write_results(
             "preamble-calibrated hardware fingerprint."
         ),
         "",
-        "| added SNR | Savaux | Savaux + phase | K2 (1/2 samples) | K1 (1/4 samples) |",
-        "|---:|---:|---:|---:|---:|",
+        "| added SNR | "
+        + " | ".join(label for _method, label in headline_methods)
+        + " |",
+        "|---:|"
+        + "|".join("---:" for _method, _label in headline_methods)
+        + "|",
     ]
     for label in noisy_labels:
         cells = []
-        for method in headline_methods:
+        for method, _display_name in headline_methods:
             row = summary_by_key[(label, method)]
             cells.append(f"{100.0 * float(row['ser']):.2f}%")
         lines.append(f"| {label} | " + " | ".join(cells) + " |")
@@ -559,6 +667,57 @@ def _write_results(
             "- Added SNR is signal-reference power divided by added AWGN power, not the final measured capture SNR.",
         ]
     )
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _write_error_mode_results(
+    path: Path,
+    summary: Sequence[dict[str, Any]],
+) -> None:
+    selected_methods = {
+        "litenap_savaux_k1",
+        "litenap_savaux_k2",
+        "litenap_savaux_k1_phase",
+        "litenap_savaux_k2_phase",
+    }
+    rows = [
+        row
+        for row in summary
+        if str(row["snr_label"]) != "clean"
+        and str(row["method"]) in selected_methods
+    ]
+    rows.sort(
+        key=lambda row: (
+            -float(row["added_snr_db"]),
+            str(row["method"]),
+        )
+    )
+    lines = [
+        "# LiteNap-Savaux error-mode decomposition",
+        "",
+        (
+            "`wrong_group` means the aliased bin is correct modulo `N/D`, "
+            "but the full-frequency alias group is wrong."
+        ),
+        (
+            "`wrong_alias_bin` means even the modulo-`N/D` aliased bin is "
+            "wrong. The two modes partition all hard-decision errors."
+        ),
+        "",
+        "| added SNR | method | SER | oracle group floor | wrong group | wrong alias bin | group share | group error given alias | far alias share |",
+        "|---:|---|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for row in rows:
+        lines.append(
+            f"| {row['snr_label']} | {row['method']} "
+            f"| {float(row['ser']):.6f} "
+            f"| {float(row['oracle_group_fixed_ser']):.6f} "
+            f"| {row['wrong_group_errors']} "
+            f"| {row['wrong_alias_bin_errors']} "
+            f"| {float(row['wrong_group_fraction_of_errors']):.3f} "
+            f"| {float(row['group_error_rate_given_correct_alias_bin']):.3f} "
+            f"| {float(row['far_fraction_of_wrong_alias_bin_errors']):.3f} |"
+        )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -801,6 +960,26 @@ def main() -> int:
                             for value in reranked.combined_scores
                         )
 
+                    for spec in methods:
+                        mode = _alias_error_mode(
+                            int(row[f"{spec.name}_bin"]),
+                            gt_bin,
+                            n_bins,
+                            factor,
+                        )
+                        row[f"{spec.name}_error_mode"] = mode
+                        row[f"{spec.name}_alias_bin_correct"] = int(
+                            mode != "wrong_alias_bin"
+                        )
+                        row[f"{spec.name}_alias_bin_delta"] = (
+                            _signed_alias_bin_delta(
+                                int(row[f"{spec.name}_bin"]),
+                                gt_bin,
+                                n_bins,
+                                factor,
+                            )
+                        )
+
                     if verify_remaining > 0:
                         relative_header_start = (
                             int(packet["header_start_sample"])
@@ -876,6 +1055,10 @@ def main() -> int:
         ),
         reference_power=reference_power,
         savaux_max_abs_error=savaux_max_abs_error,
+    )
+    _write_error_mode_results(
+        output_dir / "ERROR_MODES.md",
+        summary,
     )
     config = {
         **{

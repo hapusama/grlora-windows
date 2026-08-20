@@ -1,0 +1,62 @@
+{
+  "datasets": [
+    "0_0_0_10_14_8",
+    "0_0_0_10_14_16",
+    "0_0_0_10_14_32"
+  ],
+  "snrs": [
+    -18.0,
+    -20.0,
+    -22.0
+  ],
+  "seeds": [
+    401,
+    502,
+    603
+  ],
+  "packet": null,
+  "max_packets": 0,
+  "max_symbols_per_dataset": 0,
+  "reference_power_mode": "payload",
+  "explicit_signal_power": null,
+  "impulse_fraction": 0.0,
+  "impulse_isr_db": 20.0,
+  "impulse_layout": "random",
+  "robust_config": {
+    "candidate_count": 16,
+    "huber_delta": 2.5,
+    "irls_iterations": 3,
+    "min_outlier_fraction": 0.02,
+    "min_robust_gain_db": 3.0
+  },
+  "synchronization": "frozen header-first CSV; payload symbols only; demodulation origin shifted by os_factor // 2",
+  "datasets_metadata": [
+    {
+      "dataset": "0_0_0_10_14_8",
+      "iq_path": "D:\\Desktop\\proj\\gr-lora_sdr\\data\\USRP_IQ\\0_0_0_10_14_8.bin",
+      "symbol_path": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\weak_sync_chain\\header_first\\0_0_0_10_14_8_header_first_symbols.csv",
+      "selected_packet_count": 10,
+      "signal_reference_power": 9.805608631442118e-05,
+      "signal_reference_sample_count": 1433600,
+      "signal_reference_packet_count": 10
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "iq_path": "D:\\Desktop\\proj\\gr-lora_sdr\\data\\USRP_IQ\\0_0_0_10_14_16.bin",
+      "symbol_path": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\weak_sync_chain\\header_first\\0_0_0_10_14_16_header_first_symbols.csv",
+      "selected_packet_count": 11,
+      "signal_reference_power": 7.296177892314805e-05,
+      "signal_reference_sample_count": 1576960,
+      "signal_reference_packet_count": 11
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "iq_path": "D:\\Desktop\\proj\\gr-lora_sdr\\data\\USRP_IQ\\0_0_0_10_14_32.bin",
+      "symbol_path": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\weak_sync_chain\\header_first\\0_0_0_10_14_32_header_first_symbols.csv",
+      "selected_packet_count": 7,
+      "signal_reference_power": 6.422588557455033e-05,
+      "signal_reference_sample_count": 1003520,
+      "signal_reference_packet_count": 7
+    }
+  ]
+}

@@ -79,6 +79,38 @@ from .system.oversampled_glrt import (
     rerank_coherent_fold_candidates,
     rerank_dual_peak_candidates,
 )
+from .system.multirate_structure import (
+    MultiRateDetectionResult,
+    MultiRateSpectra,
+    awgn_multirate_glrt_scores,
+    build_multirate_spectra,
+    coherent_ml_scores,
+    detect_multirate_structure,
+    fold_pair_components,
+    fold_pair_energy_scores,
+    fold_profile_scores,
+    fold_ratio_consistency,
+    mapped_fft_argmax_scores,
+    multirate_structure_scores,
+)
+from .system.decoder_aware_crc import (
+    DecoderAwarePacketResult,
+    DecoderAwareSymbolDecision,
+    decode_savaux_sync_candidate,
+)
+from .system.ambiguity_ridge_list import (
+    AmbiguityRidgeCandidate,
+    AmbiguityRidgeListResult,
+    CrcListArbitrationResult,
+    CrcListAttempt,
+    arbitrate_sync_list_with_crc,
+    build_ambiguity_ridge_sync_list,
+)
+from .system.soft_hamming_crc import (
+    SoftHammingBlockResult,
+    decode_soft_hamming_sync_candidate,
+    soft_repair_interleaver_block,
+)
 
 __all__ = [
     "ChirpSVDSpectra",
@@ -147,4 +179,28 @@ __all__ = [
     "observe_known_dual_peak_pair",
     "rerank_coherent_fold_candidates",
     "rerank_dual_peak_candidates",
+    "MultiRateDetectionResult",
+    "MultiRateSpectra",
+    "awgn_multirate_glrt_scores",
+    "build_multirate_spectra",
+    "coherent_ml_scores",
+    "detect_multirate_structure",
+    "fold_pair_components",
+    "fold_pair_energy_scores",
+    "fold_profile_scores",
+    "fold_ratio_consistency",
+    "mapped_fft_argmax_scores",
+    "multirate_structure_scores",
+    "DecoderAwarePacketResult",
+    "DecoderAwareSymbolDecision",
+    "decode_savaux_sync_candidate",
+    "AmbiguityRidgeCandidate",
+    "AmbiguityRidgeListResult",
+    "CrcListArbitrationResult",
+    "CrcListAttempt",
+    "arbitrate_sync_list_with_crc",
+    "build_ambiguity_ridge_sync_list",
+    "SoftHammingBlockResult",
+    "decode_soft_hamming_sync_candidate",
+    "soft_repair_interleaver_block",
 ]

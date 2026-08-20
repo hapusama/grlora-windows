@@ -1,0 +1,17 @@
+snr_db,method,trials,errors,ser,fixes_vs_source_fft,breaks_vs_source_fft,net_fixes_vs_source_fft
+-24.0,fft_argmax_q8,40,37,0.925,0,0,0
+-24.0,fft_argmax_q4,40,40,1.0,0,3,-3
+-24.0,fft_argmax_q2,40,40,1.0,0,3,-3
+-24.0,fft_argmax_q1,40,40,1.0,0,3,-3
+-24.0,pair_energy_q8,40,37,0.925,0,0,0
+-24.0,fold_profile_q8,40,35,0.875,2,0,2
+-24.0,multirate_structure,40,37,0.925,2,2,0
+-24.0,coherent_ml_q8,40,28,0.7,9,0,9
+-20.0,fft_argmax_q8,40,17,0.425,0,0,0
+-20.0,fft_argmax_q4,40,33,0.825,0,16,-16
+-20.0,fft_argmax_q2,40,39,0.975,0,22,-22
+-20.0,fft_argmax_q1,40,38,0.95,1,22,-21
+-20.0,pair_energy_q8,40,17,0.425,4,4,0
+-20.0,fold_profile_q8,40,8,0.2,9,0,9
+-20.0,multirate_structure,40,17,0.425,6,6,0
+-20.0,coherent_ml_q8,40,0,0.0,17,0,17
