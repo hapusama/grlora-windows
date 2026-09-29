@@ -29,3 +29,7 @@ weakPacket_decoding/_file_source_staging/
 weakPacket_decoding/**/_eval/
 weakPacket_decoding/data/ser_comparison_baselines_phase_line_*/
 weakPacket_decoding/data/phase_line_error_diagnostics_*/
+
+# Local security-scanner state (Mimosa hook), never commit.
+.mimosa/
+**/.mimosa/
