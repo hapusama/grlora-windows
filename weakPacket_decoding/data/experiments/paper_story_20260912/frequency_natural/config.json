@@ -1,0 +1,13 @@
+{
+  "no_added_noise": true,
+  "frequency_control": "original then CFO -1/+1, timing and SFO fixed; natural data already inspected, external validation pending",
+  "sf": 10,
+  "bw": 125000,
+  "sample_rate": 500000,
+  "preamble": 32,
+  "sync_word": "0x34",
+  "crc_mode": "grlora",
+  "reference_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\groundtruth\\branch4_fixed\\high_snr\\sf10_bw125_fs500_pre32_sw34_r001_fft_bin_groundtruth.csv",
+  "scope": "fixed received-IQ locator pool, original win4 detection; not independent arrival/PDR audit",
+  "groundtruth": "CRC-valid high-SNR fixed-payload consensus; used only after receiver decisions"
+}

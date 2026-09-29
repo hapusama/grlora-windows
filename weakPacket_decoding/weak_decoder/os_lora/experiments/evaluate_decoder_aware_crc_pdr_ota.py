@@ -57,6 +57,9 @@ from weak_decoder.os_lora.system.ambiguity_ridge_list import (  # noqa: E402
 from weak_decoder.os_lora.system.soft_hamming_crc import (  # noqa: E402
     decode_soft_hamming_sync_candidate,
 )
+from weak_decoder.os_lora.system.upstream_soft_crc import (  # noqa: E402
+    decode_upstream_soft_sync_candidate,
+)
 
 
 CRC_MODE = "grlora"
@@ -367,6 +370,7 @@ def _noisy_worker(task: dict[str, Any]) -> dict[str, Any]:
     ridge_top_k = int(task.get("ridge_top_k", 0))
     ridge_sfd_peak_pool = int(task.get("ridge_sfd_peak_pool", 32))
     ridge_soft_hamming = bool(task.get("ridge_soft_hamming", False))
+    ridge_upstream_soft = bool(task.get("ridge_upstream_soft", False))
     clean = np.fromfile(Path(str(packet["iq_path"])), dtype=np.dtype("<c8"))
     rng = np.random.default_rng(
         np.random.SeedSequence((seed, int(packet["reference_id"]), 73013))
@@ -495,6 +499,36 @@ def _noisy_worker(task: dict[str, Any]) -> dict[str, Any]:
         ridge_soft_selected is not None
         and _exact_payload(ridge_soft_selected.decode, expected)
     )
+    ridge_upstream_started = time.perf_counter()
+    ridge_upstream_arbitration = (
+        arbitrate_sync_list_with_crc(
+            decode_samples,
+            ridge_list.candidates,
+            sf=SF,
+            bw_hz=BW_HZ,
+            os_factor=OS_FACTOR,
+            ldro_mode=LDRO_MODE,
+            crc_mode=CRC_MODE,
+            require_payload_crc=True,
+            stop_on_crc=True,
+            decoder_mode="upstream_soft",
+        )
+        if ridge_list is not None and ridge_upstream_soft
+        else None
+    )
+    ridge_upstream_decode_ms = 1e3 * (
+        time.perf_counter() - ridge_upstream_started
+    )
+    ridge_upstream_selected = (
+        None
+        if ridge_upstream_arbitration is None
+        else ridge_upstream_arbitration.selected
+    )
+    ridge_upstream_crc_accept = ridge_upstream_selected is not None
+    ridge_upstream_exact = bool(
+        ridge_upstream_selected is not None
+        and _exact_payload(ridge_upstream_selected.decode, expected)
+    )
     soft_oracle_started = time.perf_counter()
     soft_oracle = (
         decode_soft_hamming_sync_candidate(
@@ -513,6 +547,25 @@ def _noisy_worker(task: dict[str, Any]) -> dict[str, Any]:
     soft_oracle_ms = 1e3 * (time.perf_counter() - soft_oracle_started)
     soft_oracle_exact = bool(
         soft_oracle is not None and _exact_payload(soft_oracle, expected)
+    )
+    upstream_oracle_started = time.perf_counter()
+    upstream_oracle = (
+        decode_upstream_soft_sync_candidate(
+            decode_samples,
+            _clean_frame_sync(packet),
+            sf=SF,
+            bw_hz=BW_HZ,
+            os_factor=OS_FACTOR,
+            ldro_mode=LDRO_MODE,
+            crc_mode=CRC_MODE,
+            allow_gate_failed_candidate=False,
+        )
+        if ridge_upstream_soft
+        else None
+    )
+    upstream_oracle_ms = 1e3 * (time.perf_counter() - upstream_oracle_started)
+    upstream_oracle_exact = bool(
+        upstream_oracle is not None and _exact_payload(upstream_oracle, expected)
     )
     strict_delivery = bool(strict_gate and current_exact)
     decoder_delivery = bool(decoder_gate and current_exact)
@@ -597,6 +650,22 @@ def _noisy_worker(task: dict[str, Any]) -> dict[str, Any]:
         if ridge_soft_arbitration is None
         or ridge_soft_arbitration.selected_index is None
         else int(ridge_soft_arbitration.selected_index),
+        "ridge_upstream_soft_enabled": int(ridge_upstream_soft),
+        "ridge_upstream_packet_delivered": int(ridge_upstream_exact),
+        "ridge_upstream_crc_accept": int(ridge_upstream_crc_accept),
+        "ridge_upstream_crc_false_delivery": int(
+            ridge_upstream_crc_accept and not ridge_upstream_exact
+        ),
+        "ridge_upstream_rescue_over_hard_ridge": int(
+            ridge_upstream_soft and ridge_upstream_exact and not ridge_exact
+        ),
+        "ridge_upstream_regression_vs_hard_ridge": int(
+            ridge_upstream_soft and ridge_exact and not ridge_upstream_exact
+        ),
+        "ridge_upstream_decoder_attempts": 0
+        if ridge_upstream_arbitration is None
+        else len(ridge_upstream_arbitration.attempts),
+        "upstream_oracle_packet_delivered": int(upstream_oracle_exact),
         "soft_oracle_packet_delivered": int(soft_oracle_exact),
         "strict_crc_false_delivery": int(strict_crc_accept and not current_exact),
         "decoder_aware_crc_false_delivery": int(
@@ -617,6 +686,8 @@ def _noisy_worker(task: dict[str, Any]) -> dict[str, Any]:
         "ridge_list_generation_ms": ridge_list_ms,
         "ridge_decode_operational_ms": ridge_decode_ms,
         "ridge_soft_decode_operational_ms": ridge_soft_decode_ms,
+        "ridge_upstream_decode_operational_ms": ridge_upstream_decode_ms,
+        "upstream_oracle_decode_ms": upstream_oracle_ms,
         "soft_oracle_decode_ms": soft_oracle_ms,
         "strict_modeled_decode_ms": current_ms if strict_gate else 0.0,
         "decoder_aware_modeled_decode_ms": current_ms if decoder_gate else 0.0,
@@ -758,6 +829,38 @@ def _summary_by_snr(
                             for row in selected
                         ]
                     )
+                ),
+                "ridge_upstream_soft_enabled": int(
+                    any(
+                        int(row.get("ridge_upstream_soft_enabled", 0))
+                        for row in selected
+                    )
+                ),
+                "ridge_upstream_crc_pdr": _rate(
+                    selected, "ridge_upstream_packet_delivered"
+                ),
+                "ridge_upstream_crc_accept_rate": _rate(
+                    selected, "ridge_upstream_crc_accept"
+                ),
+                "ridge_upstream_crc_false_deliveries": _sum(
+                    selected, "ridge_upstream_crc_false_delivery"
+                ),
+                "ridge_upstream_rescues_over_hard_ridge": _sum(
+                    selected, "ridge_upstream_rescue_over_hard_ridge"
+                ),
+                "ridge_upstream_regressions_vs_hard_ridge": _sum(
+                    selected, "ridge_upstream_regression_vs_hard_ridge"
+                ),
+                "ridge_upstream_mean_decoder_attempts": float(
+                    np.mean(
+                        [
+                            int(row.get("ridge_upstream_decoder_attempts", 0))
+                            for row in selected
+                        ]
+                    )
+                ),
+                "upstream_oracle_crc_pdr": _rate(
+                    selected, "upstream_oracle_packet_delivered"
                 ),
                 "soft_oracle_crc_pdr": _rate(
                     selected, "soft_oracle_packet_delivered"
@@ -1203,6 +1306,11 @@ def build_argument_parser() -> argparse.ArgumentParser:
         help="Also evaluate bounded soft-Hamming decoding on the same ridge list.",
     )
     parser.add_argument(
+        "--ridge-upstream-soft",
+        action="store_true",
+        help="Also evaluate the ported gr-lora_sdr native soft decoder on the same ridge list.",
+    )
+    parser.add_argument(
         "--summarize-existing",
         action="store_true",
         help="rebuild summary, plot, and report from existing packet_trials.csv",
@@ -1279,6 +1387,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     "ridge_top_k": int(args.ridge_top_k),
                     "ridge_sfd_peak_pool": int(args.ridge_sfd_peak_pool),
                     "ridge_soft_hamming": bool(args.ridge_soft_hamming),
+                    "ridge_upstream_soft": bool(args.ridge_upstream_soft),
                 }
                 for seed in seeds
                 for packet in packets
@@ -1327,6 +1436,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "ridge_top_k": int(args.ridge_top_k),
         "ridge_sfd_peak_pool": int(args.ridge_sfd_peak_pool),
         "ridge_soft_hamming": bool(args.ridge_soft_hamming),
+        "ridge_upstream_soft": bool(args.ridge_upstream_soft),
         "noise_model": "complex AWGN flat in B, added once to the complete 1 MS/s packet",
         "signal_power_calibration_payload_symbols": SIGNAL_POWER_SYMBOLS,
         "demod_tail_noise_samples": DEMOD_TAIL_SAMPLES,

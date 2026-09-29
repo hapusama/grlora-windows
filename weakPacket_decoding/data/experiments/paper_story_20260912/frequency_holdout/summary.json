@@ -1,0 +1,906 @@
+{
+  "aggregate": [
+    {
+      "esn0_db": "all",
+      "method": "chip_crc1",
+      "correct": 30,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 0.7916666666666666
+    },
+    {
+      "esn0_db": "all",
+      "method": "chip_crc1_softfec",
+      "correct": 34,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 0.7916666666666666
+    },
+    {
+      "esn0_db": "all",
+      "method": "chip_list4",
+      "correct": 33,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 1.8333333333333333
+    },
+    {
+      "esn0_db": "all",
+      "method": "chip_list4_softfec",
+      "correct": 38,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 1.6388888888888888
+    },
+    {
+      "esn0_db": "all",
+      "method": "chip_soft",
+      "correct": 28,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 0.5833333333333334
+    },
+    {
+      "esn0_db": "all",
+      "method": "chip_strict",
+      "correct": 21,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 0.3888888888888889
+    },
+    {
+      "esn0_db": "all",
+      "method": "chip_strict_softfec",
+      "correct": 22,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 0.3888888888888889
+    },
+    {
+      "esn0_db": "all",
+      "method": "full_cfo3",
+      "correct": 38,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 1.3888888888888888
+    },
+    {
+      "esn0_db": "all",
+      "method": "full_cfo3_softfec",
+      "correct": 44,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 1.2361111111111112
+    },
+    {
+      "esn0_db": "all",
+      "method": "full_crc1",
+      "correct": 33,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 0.7916666666666666
+    },
+    {
+      "esn0_db": "all",
+      "method": "full_crc1_softfec",
+      "correct": 38,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 0.7916666666666666
+    },
+    {
+      "esn0_db": "all",
+      "method": "full_list4",
+      "correct": 33,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 1.7916666666666667
+    },
+    {
+      "esn0_db": "all",
+      "method": "full_list4_softfec",
+      "correct": 38,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 1.5833333333333333
+    },
+    {
+      "esn0_db": "all",
+      "method": "full_soft",
+      "correct": 31,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 0.6666666666666666
+    },
+    {
+      "esn0_db": "all",
+      "method": "full_strict",
+      "correct": 23,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 0.4305555555555556
+    },
+    {
+      "esn0_db": "all",
+      "method": "full_strict_softfec",
+      "correct": 23,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 0.4305555555555556
+    },
+    {
+      "esn0_db": "all",
+      "method": "hybrid4",
+      "correct": 33,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 1.7916666666666667
+    },
+    {
+      "esn0_db": "all",
+      "method": "hybrid4_softfec",
+      "correct": 39,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 1.5555555555555556
+    },
+    {
+      "esn0_db": "all",
+      "method": "oracle",
+      "correct": 47,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 1.0
+    },
+    {
+      "esn0_db": "all",
+      "method": "oracle_softfec",
+      "correct": 59,
+      "trials": 72,
+      "false_delivery": 0,
+      "mean_attempts": 1.0
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "chip_crc1",
+      "correct": 5,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.6666666666666666
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "chip_crc1_softfec",
+      "correct": 7,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.6666666666666666
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "chip_list4",
+      "correct": 6,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.9583333333333333
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "chip_list4_softfec",
+      "correct": 9,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.625
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "chip_soft",
+      "correct": 3,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.2916666666666667
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "chip_strict",
+      "correct": 1,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.041666666666666664
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "chip_strict_softfec",
+      "correct": 1,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.041666666666666664
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "full_cfo3",
+      "correct": 6,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.5
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "full_cfo3_softfec",
+      "correct": 9,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.25
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "full_crc1",
+      "correct": 6,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.6666666666666666
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "full_crc1_softfec",
+      "correct": 9,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.6666666666666666
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "full_list4",
+      "correct": 6,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.9166666666666667
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "full_list4_softfec",
+      "correct": 9,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.5416666666666667
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "full_soft",
+      "correct": 4,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.4166666666666667
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "full_strict",
+      "correct": 1,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.041666666666666664
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "full_strict_softfec",
+      "correct": 1,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.041666666666666664
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "hybrid4",
+      "correct": 6,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.9166666666666667
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "hybrid4_softfec",
+      "correct": 9,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.5416666666666667
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "oracle",
+      "correct": 7,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.0
+    },
+    {
+      "esn0_db": "12.0",
+      "method": "oracle_softfec",
+      "correct": 16,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.0
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "chip_crc1",
+      "correct": 10,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.8333333333333334
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "chip_crc1_softfec",
+      "correct": 11,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.8333333333333334
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "chip_list4",
+      "correct": 12,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.9166666666666667
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "chip_list4_softfec",
+      "correct": 13,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.7916666666666667
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "chip_soft",
+      "correct": 10,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.625
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "chip_strict",
+      "correct": 7,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.375
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "chip_strict_softfec",
+      "correct": 7,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.375
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "full_cfo3",
+      "correct": 15,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.375
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "full_cfo3_softfec",
+      "correct": 16,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.2916666666666667
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "full_crc1",
+      "correct": 12,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.8333333333333334
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "full_crc1_softfec",
+      "correct": 13,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.8333333333333334
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "full_list4",
+      "correct": 12,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.8333333333333333
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "full_list4_softfec",
+      "correct": 13,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.7083333333333333
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "full_soft",
+      "correct": 12,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.75
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "full_strict",
+      "correct": 9,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.5
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "full_strict_softfec",
+      "correct": 9,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.5
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "hybrid4",
+      "correct": 12,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.8333333333333333
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "hybrid4_softfec",
+      "correct": 13,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.7083333333333333
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "oracle",
+      "correct": 19,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.0
+    },
+    {
+      "esn0_db": "13.0",
+      "method": "oracle_softfec",
+      "correct": 21,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.0
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "chip_crc1",
+      "correct": 15,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.875
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "chip_crc1_softfec",
+      "correct": 16,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.875
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "chip_list4",
+      "correct": 15,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.625
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "chip_list4_softfec",
+      "correct": 16,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.5
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "chip_soft",
+      "correct": 15,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.8333333333333334
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "chip_strict",
+      "correct": 13,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.75
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "chip_strict_softfec",
+      "correct": 14,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.75
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "full_cfo3",
+      "correct": 17,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.2916666666666667
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "full_cfo3_softfec",
+      "correct": 19,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.1666666666666667
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "full_crc1",
+      "correct": 15,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.875
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "full_crc1_softfec",
+      "correct": 16,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.875
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "full_list4",
+      "correct": 15,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.625
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "full_list4_softfec",
+      "correct": 16,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.5
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "full_soft",
+      "correct": 15,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.8333333333333334
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "full_strict",
+      "correct": 13,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.75
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "full_strict_softfec",
+      "correct": 13,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 0.75
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "hybrid4",
+      "correct": 15,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.625
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "hybrid4_softfec",
+      "correct": 17,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.4166666666666667
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "oracle",
+      "correct": 21,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.0
+    },
+    {
+      "esn0_db": "14.0",
+      "method": "oracle_softfec",
+      "correct": 22,
+      "trials": 24,
+      "false_delivery": 0,
+      "mean_attempts": 1.0
+    }
+  ],
+  "paired": [
+    {
+      "method": "chip_crc1",
+      "baseline": "full_crc1_softfec",
+      "wins": 0,
+      "losses": 8,
+      "difference": -0.11111111111111112,
+      "cluster_bootstrap_95ci": [
+        -0.16666666666666666,
+        -0.05555555555555555
+      ],
+      "descriptive_mcnemar_p": 0.0078125,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "chip_crc1_softfec",
+      "baseline": "full_crc1_softfec",
+      "wins": 1,
+      "losses": 5,
+      "difference": -0.05555555555555555,
+      "cluster_bootstrap_95ci": [
+        -0.11111111111111112,
+        0.0
+      ],
+      "descriptive_mcnemar_p": 0.21875,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "chip_list4",
+      "baseline": "full_crc1_softfec",
+      "wins": 0,
+      "losses": 5,
+      "difference": -0.06944444444444443,
+      "cluster_bootstrap_95ci": [
+        -0.13888888888888887,
+        -0.013888888888888888
+      ],
+      "descriptive_mcnemar_p": 0.0625,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "chip_list4_softfec",
+      "baseline": "full_crc1_softfec",
+      "wins": 1,
+      "losses": 1,
+      "difference": 0.0,
+      "cluster_bootstrap_95ci": [
+        -0.041666666666666664,
+        0.041666666666666664
+      ],
+      "descriptive_mcnemar_p": 1.0,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "chip_soft",
+      "baseline": "full_crc1_softfec",
+      "wins": 0,
+      "losses": 10,
+      "difference": -0.1388888888888889,
+      "cluster_bootstrap_95ci": [
+        -0.19444444444444442,
+        -0.08333333333333333
+      ],
+      "descriptive_mcnemar_p": 0.001953125,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "chip_strict",
+      "baseline": "full_crc1_softfec",
+      "wins": 0,
+      "losses": 17,
+      "difference": -0.23611111111111113,
+      "cluster_bootstrap_95ci": [
+        -0.3333333333333333,
+        -0.13888888888888887
+      ],
+      "descriptive_mcnemar_p": 1.52587890625e-05,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "chip_strict_softfec",
+      "baseline": "full_crc1_softfec",
+      "wins": 1,
+      "losses": 17,
+      "difference": -0.2222222222222222,
+      "cluster_bootstrap_95ci": [
+        -0.3333333333333333,
+        -0.1111111111111111
+      ],
+      "descriptive_mcnemar_p": 0.00014495849609375,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "full_cfo3",
+      "baseline": "full_crc1_softfec",
+      "wins": 5,
+      "losses": 5,
+      "difference": 0.0,
+      "cluster_bootstrap_95ci": [
+        -0.09722222222222222,
+        0.09722222222222222
+      ],
+      "descriptive_mcnemar_p": 1.0,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "full_cfo3_softfec",
+      "baseline": "full_crc1_softfec",
+      "wins": 6,
+      "losses": 0,
+      "difference": 0.08333333333333333,
+      "cluster_bootstrap_95ci": [
+        0.013888888888888888,
+        0.16666666666666666
+      ],
+      "descriptive_mcnemar_p": 0.03125,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "full_crc1",
+      "baseline": "full_crc1_softfec",
+      "wins": 0,
+      "losses": 5,
+      "difference": -0.06944444444444443,
+      "cluster_bootstrap_95ci": [
+        -0.13888888888888887,
+        -0.013888888888888888
+      ],
+      "descriptive_mcnemar_p": 0.0625,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "full_crc1_softfec",
+      "baseline": "full_crc1_softfec",
+      "wins": 0,
+      "losses": 0,
+      "difference": 0.0,
+      "cluster_bootstrap_95ci": [
+        0.0,
+        0.0
+      ],
+      "descriptive_mcnemar_p": 1,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "full_list4",
+      "baseline": "full_crc1_softfec",
+      "wins": 0,
+      "losses": 5,
+      "difference": -0.06944444444444443,
+      "cluster_bootstrap_95ci": [
+        -0.13888888888888887,
+        -0.013888888888888888
+      ],
+      "descriptive_mcnemar_p": 0.0625,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "full_list4_softfec",
+      "baseline": "full_crc1_softfec",
+      "wins": 0,
+      "losses": 0,
+      "difference": 0.0,
+      "cluster_bootstrap_95ci": [
+        0.0,
+        0.0
+      ],
+      "descriptive_mcnemar_p": 1,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "full_soft",
+      "baseline": "full_crc1_softfec",
+      "wins": 0,
+      "losses": 7,
+      "difference": -0.09722222222222221,
+      "cluster_bootstrap_95ci": [
+        -0.1527777777777778,
+        -0.041666666666666664
+      ],
+      "descriptive_mcnemar_p": 0.015625,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "full_strict",
+      "baseline": "full_crc1_softfec",
+      "wins": 0,
+      "losses": 15,
+      "difference": -0.20833333333333334,
+      "cluster_bootstrap_95ci": [
+        -0.3194444444444445,
+        -0.09722222222222221
+      ],
+      "descriptive_mcnemar_p": 6.103515625e-05,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "full_strict_softfec",
+      "baseline": "full_crc1_softfec",
+      "wins": 0,
+      "losses": 15,
+      "difference": -0.20833333333333334,
+      "cluster_bootstrap_95ci": [
+        -0.3194444444444445,
+        -0.09722222222222221
+      ],
+      "descriptive_mcnemar_p": 6.103515625e-05,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "hybrid4",
+      "baseline": "full_crc1_softfec",
+      "wins": 0,
+      "losses": 5,
+      "difference": -0.06944444444444443,
+      "cluster_bootstrap_95ci": [
+        -0.13888888888888887,
+        -0.013888888888888888
+      ],
+      "descriptive_mcnemar_p": 0.0625,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "hybrid4_softfec",
+      "baseline": "full_crc1_softfec",
+      "wins": 1,
+      "losses": 0,
+      "difference": 0.013888888888888888,
+      "cluster_bootstrap_95ci": [
+        0.0,
+        0.041666666666666664
+      ],
+      "descriptive_mcnemar_p": 1.0,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "oracle",
+      "baseline": "full_crc1_softfec",
+      "wins": 13,
+      "losses": 4,
+      "difference": 0.125,
+      "cluster_bootstrap_95ci": [
+        0.0,
+        0.24999999999999997
+      ],
+      "descriptive_mcnemar_p": 0.049041748046875,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    },
+    {
+      "method": "oracle_softfec",
+      "baseline": "full_crc1_softfec",
+      "wins": 21,
+      "losses": 0,
+      "difference": 0.2916666666666667,
+      "cluster_bootstrap_95ci": [
+        0.16666666666666666,
+        0.4166666666666666
+      ],
+      "descriptive_mcnemar_p": 9.5367431640625e-07,
+      "note": "McNemar ignores within-packet dependence; bootstrap resamples physical packets. Exploratory multiple comparisons."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+split,rgr_db,method,trials,exact,header_valid,top2_payload_coverage,intra_syndrome_clean_packets,false_accept
+replay,-10,top2,84,81,84,81,81,0
+replay,-10,trellis,84,81,84,81,81,0
+replay,-12,top2,84,80,84,80,81,0
+replay,-12,trellis,84,81,84,80,81,0
+replay,-14,top2,84,46,76,49,71,0
+replay,-14,trellis,84,66,76,49,71,0
+replay,-16,top2,84,2,40,5,34,0
+replay,-16,trellis,84,5,40,5,34,0
+new_noise,-10,top2,84,82,84,83,82,0
+new_noise,-10,trellis,84,82,84,83,82,0
+new_noise,-12,top2,84,81,83,81,82,0
+new_noise,-12,trellis,84,81,83,81,82,0
+new_noise,-14,top2,84,48,75,54,75,0
+new_noise,-14,trellis,84,66,75,54,75,0
+new_noise,-16,top2,84,2,33,2,32,0
+new_noise,-16,trellis,84,5,33,2,32,0

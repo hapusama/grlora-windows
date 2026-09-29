@@ -1,0 +1,20 @@
+{
+  "offset": 64,
+  "requested_packets": 3,
+  "metadata": [
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000065_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000066_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000067_rxg20_0_fulltrim.json"
+  ],
+  "snrs": [
+    13.0
+  ],
+  "seeds": [
+    91601
+  ],
+  "prefix": "uniform 0..32767 extra samples; noise added once to whole padded IQ",
+  "scope": "held-out packets from same lab session; clean CRC eligibility audited separately",
+  "selection": "first valid-header, CRC-enabled, CRC-pass candidate; expected bytes only score afterwards",
+  "policies": "chip/full strict, soft, unrestricted single CRC; chip/full ridge4; frozen union hybrid4; oracle",
+  "list_note": "existing chip-phase SFD alternative generator for both lists; only initial sync point differs"
+}

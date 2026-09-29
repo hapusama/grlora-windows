@@ -1,0 +1,44 @@
+{
+  "offset": 96,
+  "requested_packets": 24,
+  "metadata": [
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000097_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000098_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000099_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000100_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000101_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000102_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000103_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000104_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000105_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000106_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000107_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000108_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000109_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000110_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000111_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000112_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000113_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000114_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000115_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000116_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000117_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000118_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000119_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000120_rxg20_0_fulltrim.json"
+  ],
+  "snrs": [
+    12.0,
+    13.0,
+    14.0
+  ],
+  "seeds": [
+    91601,
+    91602
+  ],
+  "prefix": "uniform 0..32767 extra samples; noise added once to whole padded IQ",
+  "scope": "held-out packets from same lab session; clean CRC eligibility audited separately",
+  "selection": "first valid-header, CRC-enabled, CRC-pass candidate; expected bytes only score afterwards",
+  "policies": "chip/full strict, soft admission, unrestricted single CRC; chip/full ridge4; frozen union hybrid4; oracle; matched soft-FEC ablations",
+  "list_note": "existing chip-phase SFD alternative generator for both lists; only initial sync point differs"
+}

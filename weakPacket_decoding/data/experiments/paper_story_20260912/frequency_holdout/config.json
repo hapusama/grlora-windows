@@ -1,0 +1,32 @@
+{
+  "offset": 80,
+  "requested_packets": 12,
+  "metadata": [
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000081_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000082_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000083_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000084_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000085_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000086_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000087_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000088_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000089_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000090_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000091_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000092_rxg20_0_fulltrim.json"
+  ],
+  "snrs": [
+    12.0,
+    13.0,
+    14.0
+  ],
+  "seeds": [
+    91611,
+    91612
+  ],
+  "prefix": "uniform 0..32767 extra samples; noise added once to whole padded IQ",
+  "scope": "held-out packets from same lab session; clean CRC eligibility audited separately",
+  "selection": "first valid-header, CRC-enabled, CRC-pass candidate; expected bytes only score afterwards",
+  "policies": "chip/full strict, soft admission, unrestricted single CRC; chip/full ridge4; frozen union hybrid4; oracle; matched soft-FEC ablations; full_cfo3 original then CFO minus/plus one, fixed timing/SFO",
+  "list_note": "existing chip-phase SFD alternative generator for both lists; only initial sync point differs"
+}

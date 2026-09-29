@@ -1,0 +1,77 @@
+[
+  {
+    "method": "fixed_cfo3_soft",
+    "correct": 48,
+    "trials": 72,
+    "false_delivery": 0,
+    "mean_attempts": 1.2777777777777777,
+    "wins": 2,
+    "losses": 0,
+    "physical_packets": 12,
+    "difference": 0.027777777777777776,
+    "exploratory_cluster_bootstrap_95ci": [
+      0.0,
+      0.06944444444444443
+    ]
+  },
+  {
+    "method": "oracle_soft",
+    "correct": 62,
+    "trials": 72,
+    "false_delivery": 0,
+    "mean_attempts": 1.0,
+    "wins": 17,
+    "losses": 1,
+    "physical_packets": 12,
+    "difference": 0.2222222222222222,
+    "exploratory_cluster_bootstrap_95ci": [
+      0.08333333333333333,
+      0.38888888888888884
+    ]
+  },
+  {
+    "method": "preamble_cfo3_soft",
+    "correct": 48,
+    "trials": 72,
+    "false_delivery": 0,
+    "mean_attempts": 1.2916666666666667,
+    "wins": 2,
+    "losses": 0,
+    "physical_packets": 12,
+    "difference": 0.027777777777777776,
+    "exploratory_cluster_bootstrap_95ci": [
+      0.0,
+      0.06944444444444443
+    ]
+  },
+  {
+    "method": "preamble_single_soft",
+    "correct": 46,
+    "trials": 72,
+    "false_delivery": 0,
+    "mean_attempts": 0.8611111111111112,
+    "wins": 1,
+    "losses": 1,
+    "physical_packets": 12,
+    "difference": 0.0,
+    "exploratory_cluster_bootstrap_95ci": [
+      -0.041666666666666664,
+      0.041666666666666664
+    ]
+  },
+  {
+    "method": "single_soft",
+    "correct": 46,
+    "trials": 72,
+    "false_delivery": 0,
+    "mean_attempts": 0.8611111111111112,
+    "wins": 0,
+    "losses": 0,
+    "physical_packets": 12,
+    "difference": 0.0,
+    "exploratory_cluster_bootstrap_95ci": [
+      0.0,
+      0.0
+    ]
+  }
+]

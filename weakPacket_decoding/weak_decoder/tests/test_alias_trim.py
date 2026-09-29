@@ -7,7 +7,7 @@ import unittest
 import numpy as np
 
 from weak_decoder.chirp import build_upchirp
-from weak_decoder.decoding.alias_trim import (
+from weak_decoder.decoding.legacy.alias_trim import (
     AliasTrimConfig,
     demod_alias_trim_symbol,
 )

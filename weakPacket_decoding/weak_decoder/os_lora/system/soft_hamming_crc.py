@@ -287,8 +287,20 @@ def decode_soft_hamming_sync_candidate(
     crc_mode: str = "grlora",
     allow_gate_failed_candidate: bool = False,
     max_payload_symbols: int = 512,
+    repair_block: Any = None,
 ) -> DecoderAwarePacketResult:
-    """Decode one sync coordinate with Savaux likelihoods and soft Hamming."""
+    """Decode one sync coordinate with Savaux likelihoods and soft Hamming.
+
+    ``repair_block`` overrides the per-block soft repair (same contract as
+    :func:`soft_repair_interleaver_block`); the upstream gr-lora metric plugs
+    in there without touching the surrounding header/FEC/CRC chain.
+    """
+
+    repair = (
+        soft_repair_interleaver_block
+        if repair_block is None
+        else repair_block
+    )
 
     if frame_sync is None:
         return _empty_result("sync_missing", candidate_used=False)
@@ -350,7 +362,7 @@ def decode_soft_hamming_sync_candidate(
             error=str(exc),
         )
 
-    repaired_header = soft_repair_interleaver_block(
+    repaired_header = repair(
         [item.power for item in header_evidence],
         sf=int(sf),
         is_header=True,
@@ -443,7 +455,7 @@ def decode_soft_hamming_sync_candidate(
                 symbols=tuple(decisions)
                 + tuple(item.decision for item in payload_evidence),
             )
-        repaired = soft_repair_interleaver_block(
+        repaired = repair(
             [item.power for item in block],
             sf=int(sf),
             is_header=False,

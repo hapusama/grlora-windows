@@ -1,0 +1,34 @@
+{
+  "sf": 7,
+  "bw": 125000,
+  "fs": 250000,
+  "L": 8,
+  "K": 2,
+  "design": "all 28 patterns; mean sidelobe/peak divided by min/max retained energy",
+  "train_delays": [
+    32,
+    64,
+    96
+  ],
+  "train_cfo_bins": [
+    -32,
+    0,
+    32
+  ],
+  "delay_grid": "0:2:128 samples",
+  "cfo_grid": "-64:1:64 LoRa bins",
+  "test_delays": "uniform integers 0..128",
+  "test_cfo": "uniform integer -48..48 plus Uniform(-.04,.04)",
+  "test_seed": 91501,
+  "pattern_baseline_seeds": [
+    91500,
+    91501,
+    91502,
+    91503
+  ],
+  "trials_per_snr": 256,
+  "noise": "ADC-white proper complex Gaussian; true noise variance supplied for CFAR statistic",
+  "negative_controls": "128 calibration plus 128 holdout noise-only trials per waveform; paired across patterns",
+  "scope": "synthetic single path; broad CFO stress; no OTA/PDR claim; block acquisition with known pilot count",
+  "source": "https://arxiv.org/html/2605.18189v1"
+}

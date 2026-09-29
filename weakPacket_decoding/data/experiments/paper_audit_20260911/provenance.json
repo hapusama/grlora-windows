@@ -1,0 +1,1033 @@
+{
+  "python": "3.12.3 | packaged by conda-forge | (main, Apr 15 2024, 18:20:11) [MSC v.1938 64 bit (AMD64)]",
+  "numpy": "1.26.4",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "note": "Source hashes include existing uncommitted workspace state; no hardware or remote writes performed.",
+  "files": [
+    {
+      "path": "gr-lora_sdr\\data\\USRP_IQ\\0_0_0_10_14_16.bin",
+      "bytes": 225999360,
+      "sha256": "eab09ff148a229b77996db802085cf96d7ed44c0e4679686b5eb47136b13194f"
+    },
+    {
+      "path": "gr-lora_sdr\\data\\USRP_IQ\\0_0_0_10_14_32.bin",
+      "bytes": 244408320,
+      "sha256": "24b58221d668d8dce6708d59f9e5260d431f4b862a3f3270257fef48e1fabe8c"
+    },
+    {
+      "path": "gr-lora_sdr\\data\\USRP_IQ\\0_0_0_10_14_8.bin",
+      "bytes": 235883288,
+      "sha256": "42b5ee571f16ea2ff7fe86171642ee7e639e1e340ba98ba4d7d805bbba2b4851"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\noisy_framesync_headroom_ota_awgn_20260821\\clean_sync_audit.csv",
+      "bytes": 1610,
+      "sha256": "c2478ab3718499a34d491b6ae71fa9d48915e42fcc9d16c474e3b18c473c0dc6"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\acquisition\\gated_summary.csv",
+      "bytes": 1482,
+      "sha256": "97ca8effb752d720d1aec488ab1e20455a7a406caad43f4284754b68d9734567"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\acquisition\\summary.csv",
+      "bytes": 1173,
+      "sha256": "8a727494cbec2f25712ad4216dad83ab22982de514dea05b4352e2c348e468cb"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\acquisition\\trials.csv",
+      "bytes": 258484,
+      "sha256": "32377a473b1bff676142919c36ec07b4e615684bcfad91da952e9bfc6fa4156c"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\coset_sync\\joint_known_design.csv",
+      "bytes": 1495,
+      "sha256": "3fe518d9985e40cce43b99529389bc41e34dc7d167901c9aaf70415454c8734f"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\coset_sync\\joint_known_noise.csv",
+      "bytes": 144428,
+      "sha256": "67b78cda0af7ec339f8ebb497bd6110cc2ee27fd728be85fe50fde434e4ca3ef"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\coset_sync\\joint_known_trials.csv",
+      "bytes": 550684,
+      "sha256": "7dc91ba42b887590e24c4888ebe4ebe4231033930275cde8a3b9bc132bcb6299"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\coset_sync\\preamble_equal_energy_design.csv",
+      "bytes": 1951,
+      "sha256": "934f9d19389f3e49f0282225fc4eef345f40427226f2ffaac468bc0decc17f42"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\coset_sync\\preamble_equal_energy_noise.csv",
+      "bytes": 164867,
+      "sha256": "98436a71dd9ce78ab93bee53df6eef2905d9c06a3972e134693792a02ff3296a"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\coset_sync\\preamble_equal_energy_trials.csv",
+      "bytes": 611763,
+      "sha256": "faee2cb79528e918639fdacc3f5dbe26bf09d2965fb1e7deb550eaf341466af8"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\coset_sync\\preamble_only_design.csv",
+      "bytes": 1924,
+      "sha256": "0871e380d429861ee4f5d2d870b9359ed32341e6acf7708aa2eef60c3feddd70"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\coset_sync\\preamble_only_noise.csv",
+      "bytes": 148361,
+      "sha256": "a4510266a199f0d956bba914d937578cd138c0d1f423cb17672d11dfaa080ecf"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\coset_sync\\preamble_only_trials.csv",
+      "bytes": 563042,
+      "sha256": "9cffd07f0e91f8fe2ae1778df799cf073ee99908f4db8eca702edad3c7e150bc"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\coset_sync\\summary.csv",
+      "bytes": 8400,
+      "sha256": "b3bcb659d712f03a6373c9d984d1e44054e12d626826bb83e2760c84241761a5"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\impulse_summary.csv",
+      "bytes": 705,
+      "sha256": "839342183187740a922bcb5a4fcee37abc56f01caf6b7904cc4b5176d615a03d"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\pilot\\summary.csv",
+      "bytes": 362,
+      "sha256": "ce33de4d86972aca6301f1467b306498dc652cb76a5ceeb6bb3d78cec302cd35"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\pilot\\trials.csv",
+      "bytes": 624,
+      "sha256": "b6a57773cc94065e26c11034c28b2925b7711e0ef33662e6042e97b263d62da4"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\robust_awgn\\simple_controls.csv",
+      "bytes": 524081,
+      "sha256": "26c8889b01dbd0b7e6784e5e81ee304a08e9e5ab7da867114c63d31b63f71f94"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\robust_awgn\\summary.csv",
+      "bytes": 4177,
+      "sha256": "5c0ef3517ce226e8ce14934f60e6e682d01725e6fa7834134fed28e52f57d1b1"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\robust_awgn\\symbols.csv",
+      "bytes": 1533427,
+      "sha256": "22a6ce4997fec5d066db1464d52d28c29053b849641dc1b0a5348a0fc5c8df92"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\robust_impulse\\simple_controls.csv",
+      "bytes": 259579,
+      "sha256": "d4098ae8cd093ad87e0953682349d528553d37c1979ec95099af651171d3213a"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\robust_impulse\\summary.csv",
+      "bytes": 2755,
+      "sha256": "973e782b3bc71e48b3ebd279671bb61343a8184b5b26e37b895a6dab68dca030"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\robust_impulse\\symbols.csv",
+      "bytes": 827175,
+      "sha256": "93f0a892dece0fb3c03ff8164394628f04fa39d805fcf765fb419345e56f78c5"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\sfd\\clean_sync_audit.csv",
+      "bytes": 4436,
+      "sha256": "aea17e19946fd45df9cf9d35e3de7d3808d14b95cf34eec0b0be1f5505aad19b"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\sfd\\packet_trials.csv",
+      "bytes": 16028,
+      "sha256": "831c7ea55c9aa7bc4060346a4e937db97155d3e7cdf5d68bba263b61d1da0aee"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\sfd\\summary.csv",
+      "bytes": 827,
+      "sha256": "4a5a00798799adafe3eb2146fdbb4df4c97e2a32f996636890b48daf5d3ceae9"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\sfd\\symbol_trials.csv",
+      "bytes": 149100,
+      "sha256": "1cd7aa488aec362d1f6f25c796dd879f906d8fc5bd33da4d17c02e9dbafa4ac5"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\sparse_sampling\\packet_summary.csv",
+      "bytes": 885,
+      "sha256": "bcacdd2d25c9c68d81d87d8be5f999db61515efe8e913321f1129e3a6a70bfd2"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\sparse_sampling\\packet_trials.csv",
+      "bytes": 92754,
+      "sha256": "07111c01d3afc8420c876dbc891cf98a11e425162f922dcce871e0c3925e12b0"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\sparse_sampling\\summary.csv",
+      "bytes": 1253,
+      "sha256": "30b55ff39931fb4733f27dab8d1970cb1267c6c4ab5b46669d53a10ac80dfe8e"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\paper_audit_20260911\\sparse_sampling\\trials.csv",
+      "bytes": 740100,
+      "sha256": "fa34ef491be7f9dd9593fc3fc8b7642cabf07778550688da8850a208b039553a"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\weak_sync_chain\\header_first\\0_0_0_10_14_16_header_first_symbols.csv",
+      "bytes": 135408,
+      "sha256": "6b3402f6bb9b1c34ed0d5115193e9ee51cb308ab1a06b0d95e4b53536427aa34"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\weak_sync_chain\\header_first\\0_0_0_10_14_32_header_first_symbols.csv",
+      "bytes": 100846,
+      "sha256": "4cf150ad78ca33fe211d51fa4abbcb10debf300df6648cc150152ba00f665d96"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\data\\weak_sync_chain\\header_first\\0_0_0_10_14_8_header_first_symbols.csv",
+      "bytes": 144472,
+      "sha256": "3bdff8ce9ed555a21161893e77a4e98f15ee62bbd421962217efe6ece9a602a8"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\scripts\\paper_acquisition_audit.py",
+      "bytes": 6818,
+      "sha256": "60879864172e92a5d55abe77900eda1e7aefd4748d2d08f73801bc353c5ec3a0"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\scripts\\paper_audit_provenance.py",
+      "bytes": 1950,
+      "sha256": "466db6c6d28de9bca1dbb5d66ae28bfa324c4bcea67a9054799ea32ecff74621"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\scripts\\paper_audit_summary.py",
+      "bytes": 5829,
+      "sha256": "7e57011fda72be09f7575135d2fac9b320436e13e5210ddb159875dd09245238"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\scripts\\paper_coset_summary.py",
+      "bytes": 2163,
+      "sha256": "a99e0fd282a15066a602f1f53e70edd561bda8ef1c671f8aba1ec2e48d6dbf3c"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\scripts\\paper_coset_sync.py",
+      "bytes": 7248,
+      "sha256": "43dd84a80ade1a61c35cb4c95492be66aa2cc62083db6bb7ebf18d72ea160de0"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\scripts\\paper_impulse_controls.py",
+      "bytes": 3674,
+      "sha256": "c584a29af8331fafae248447b0a0ae3bdb93c0b72d966e67570b6c6be4d8b015"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\scripts\\paper_sfd_audit.py",
+      "bytes": 4479,
+      "sha256": "7522ebe721562967d4d6d034371e3a19849816fe5e7254af206a4be3f4ea4601"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\scripts\\paper_sparse_sampling.py",
+      "bytes": 6520,
+      "sha256": "5e0410669c415f73b7640094b4d3b4436fd1a66b46692faa2b5bc2aa17b708c9"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\__init__.py",
+      "bytes": 2698,
+      "sha256": "7df492a466793996ed774878090a67963e9f5f51f8c78dcd52e989cbdf825ff9"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\baselines\\__init__.py",
+      "bytes": 352,
+      "sha256": "c4a0cb5ad53864d83898abeda5890402a8b7e7cfd8c5aaa46e3a5e397ea5faff"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\baselines\\common.py",
+      "bytes": 12650,
+      "sha256": "92dfb69d9e6d497a3c87555fafb02db2809220d7052a23db4750a47e0b7e1252"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\baselines\\loratrimmer\\__init__.py",
+      "bytes": 532,
+      "sha256": "af4c190563af008780f5d7d25497b7dfd9da3b7882ae53e940b86553ee32e6ea"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\baselines\\loratrimmer\\paper_loratrimmer_demod.py",
+      "bytes": 10724,
+      "sha256": "e2b676780f170b36389f981aa30995085920c62ca8c78c86ef65fb679395b31e"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\baselines\\run_ser_comparison.py",
+      "bytes": 24115,
+      "sha256": "7bb702accdbf3bcc070041c27b8a3e44afcf9698016c00172220ec6595e0d0fe"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\baselines\\savaux_oversampled\\__init__.py",
+      "bytes": 54,
+      "sha256": "1bffded78a026900458c4ab730dfaea4a95f93ec8c7d3dda06722353819f4dc2"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\baselines\\savaux_oversampled\\paper_oversampled_demod.py",
+      "bytes": 14935,
+      "sha256": "d841205cd3c0adf8d7e2cf43e3ce5483a08c519125ee11908d168278ac7f6a28"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\baselines\\symfec\\__init__.py",
+      "bytes": 841,
+      "sha256": "c75e25fd27f8dd85b1cc6c27fd63e6ff75640f0a7b80c60abf683d2b2d088c68"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\baselines\\symfec\\paper_symfec_decoder.py",
+      "bytes": 25123,
+      "sha256": "83f4a7e7065e1fff1396ae3ce37cacf74dc995da4593a8b0ba7d06d64dd9bcd2"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\baselines\\symfec\\run_symfec_baseline.py",
+      "bytes": 22666,
+      "sha256": "6766ba8a7ac8304790fa2d135cb66550f4e923030c69ec32861588763e8f1ba6"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\baselines\\unichirp\\__init__.py",
+      "bytes": 544,
+      "sha256": "b65c02ebb60da81020559f9c812692cc3f34834851d728ebb69f3e0d05d06290"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\baselines\\unichirp\\evaluate_unichirp.py",
+      "bytes": 9753,
+      "sha256": "cccc48502b11cd42ed8f3e94d57a4c1e27b5528f00f198690d00e53b1f884013"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\baselines\\unichirp\\evaluate_unichirp_vs_island.py",
+      "bytes": 688,
+      "sha256": "057dcf6857d1e5dbcb2c127b012fcf8eabc2f3b51c6e22c518bdb5612c5e3b87"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\baselines\\unichirp\\paper_unichirp_demod.py",
+      "bytes": 17277,
+      "sha256": "2348cf0dc2ded39eecc0fce07e34e36d45c5482527375dfc88bd4eaa455d735f"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\branch4_profile.py",
+      "bytes": 3677,
+      "sha256": "424303236e90ba5fa10200adf5db8cbe9ea4d18331221ba5a6a4eb30ebb05938"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\chirp.py",
+      "bytes": 2888,
+      "sha256": "babb5b704a7c88f64efde9748cd60bcc9c4daf7d35c22e13875d7b9c018f2afa"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\decoding\\__init__.py",
+      "bytes": 608,
+      "sha256": "0049050cb6456362a5121f9ca2d7477505369d598d06d80d6ef6fa668077f8db"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\decoding\\adaptive_path_demod.py",
+      "bytes": 14628,
+      "sha256": "638b087fd27da87db6be5732f483cb772d1d2b5394839141b681460bff39b560"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\decoding\\alias_trim.py",
+      "bytes": 11649,
+      "sha256": "d9d399e8a570a69facc153d4f032ef89ea2764e668c14d51ee1210cb1e7244a0"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\decoding\\header_first_demod.py",
+      "bytes": 13767,
+      "sha256": "40b5c2b49dd5ce1d63e6ada726a638a8e36e97373f5edf705388d912fb8c85d3"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\decoding\\payload_codec.py",
+      "bytes": 20941,
+      "sha256": "104847bc48be6f7d8cb251d0307a024069d78d39af21fffe72aec7178e78bf84"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\decoding\\phase_templates.py",
+      "bytes": 1196,
+      "sha256": "1aa38c620d337b51ff12f1a959d96456c6245e7b395632b704180cbd9515fa41"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\decoding\\robust_sparse_demod.py",
+      "bytes": 10193,
+      "sha256": "95a1b960aca402693452018290e689aa7cdf6a29257d5983f38fcca6b16eb286"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\decoding\\structured_path_demod.py",
+      "bytes": 14401,
+      "sha256": "6424222d7f0dac7b0d6cb6702280c49443b3bb518d17b1e9aaca4f997ffabc6e"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\decoding\\timing_path_demod.py",
+      "bytes": 14726,
+      "sha256": "698ed3613f6a9da5f5811321bb32715e41a1faf5e705d223bd13f0511555652c"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\__init__.py",
+      "bytes": 6185,
+      "sha256": "10e995a8b14f26d72494946f8b55da1121cb7fbc0d625b82850847bbbd50d390"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiment_support\\__init__.py",
+      "bytes": 247,
+      "sha256": "6b55ef656df150371b9668114d0ebd9f8266ceef36e1985a25cf9ca5777b5251"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiment_support\\conditional_gls.py",
+      "bytes": 12395,
+      "sha256": "e357c231daef32cf788961ad67a6e206a3b5557f70dddc2b93432716bc558be7"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiment_support\\noise_windows.py",
+      "bytes": 6959,
+      "sha256": "67e51953baa5bb3e05466f1bc82f632782ffc7d1173ccaf7fd25b9922be27e07"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiment_support\\noisy_framesync_ota.py",
+      "bytes": 5666,
+      "sha256": "4834ee535c841ac1dab58acc373b8622063f36cdc807c7a8fd32ec88e44e7b2c"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiment_support\\pattern_training.py",
+      "bytes": 6439,
+      "sha256": "88dbe3ed9d535386def5b620c1dd256f9fe6d60efd1c855d194121c45d6cdfa8"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\__init__.py",
+      "bytes": 189,
+      "sha256": "f4d81e279fbbed98700c849fcd26661d28de751d94392b9db44fd3da7dcb21b0"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\analyze_empirical_effective_replicas.py",
+      "bytes": 13446,
+      "sha256": "f5d02c558bbd0868358846ea8816cb61b7b408fef2ff68993e7b49f5c3d0d324"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\analyze_empirical_noise_covariance.py",
+      "bytes": 10062,
+      "sha256": "59a22628c0472d009d5a819b8626d0b04f4d0cbd64a9c56a384ae65b098d4b5f"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\analyze_framesync_gate_audit.py",
+      "bytes": 12447,
+      "sha256": "08054d84d47de8218a05fbfcc05169a70c85b584cc32fa31d0d3601c5591071a"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\analyze_interleaver_block_coherence.py",
+      "bytes": 21075,
+      "sha256": "7ba053f0fb69a615f5eb78f59aaf18e09ede0fc1d6fc51ecc1ad9523d9414b97"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\analyze_noisy_framesync_headroom_ota.py",
+      "bytes": 43950,
+      "sha256": "8d3419c046b2c32beeb35dd2351c2745979156ea216b9fefb038ae11b21f5082"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\analyze_nonuniform_matrix.py",
+      "bytes": 7543,
+      "sha256": "3ed5170ba695a19888a00af8681d67b521f10a39db685353bc2720ee3d3d4d00"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\analyze_savaux_sync_sensitivity_ota.py",
+      "bytes": 30939,
+      "sha256": "d9efe2051dc0717d85eff91802bd3d3f71f87155a973a799ccc0d576c43ffe4e"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\analyze_topk_oracle.py",
+      "bytes": 4788,
+      "sha256": "1182f65d793a532d8dc45adf790b962af16414d1b6d5c10de7878ec422a712ee"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\archive\\__init__.py",
+      "bytes": 81,
+      "sha256": "6baa6db81c3d7401d48a7c3fe9bd6ac3cd810b7722366a434b16cd60b70758e7"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\archive\\analyze_multirate_error_bins_ota.py",
+      "bytes": 31454,
+      "sha256": "d5674a4038c77d6bca52d36b72a4e2fecf57776abb237b1078136090ff85c24d"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\archive\\evaluate_alias_trim.py",
+      "bytes": 20659,
+      "sha256": "ce41cf850592afefc3fbe2d28e0543c9221801f62f654a646b6c09b8c3c8e0f4"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\archive\\evaluate_multirate_structure_awgn.py",
+      "bytes": 19862,
+      "sha256": "b07cdbcf1cea7333cb5d95a7d6cfc12eec33b215f85daf0aef31ae870ca0c274"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\archive\\evaluate_robust_sparse_demod.py",
+      "bytes": 18966,
+      "sha256": "609a1b51a20e9e1c0ab556ebf254c999db848f3d5863a0590dcc1c74cb65ebb7"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\archive\\probe_rfsr_savaux.py",
+      "bytes": 14993,
+      "sha256": "18aab7acfa215e6f099cbb857e4e159eb8f2119b32336d67aeec1ca8a9e6195a"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\calibrate_branch_color_threshold.py",
+      "bytes": 3900,
+      "sha256": "cb21a5c85ccd7368e926de98ae32d38017ac27441bd421cee0d8493f1fa34d38"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\compare_branch_covariance_scopes.py",
+      "bytes": 20163,
+      "sha256": "13db07e8edbc21b76883d546715b5b2a28f9c310314c9e4511dc4ee49f231513"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\compare_conditional_baselines.py",
+      "bytes": 9302,
+      "sha256": "55a8c5f6502fc3768c71eadd066f8df4c0b51031406f3c412c55b40193f682ac"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\diagnose_nonuniform_candidates.py",
+      "bytes": 11288,
+      "sha256": "fa924db42fd66716e2ccd4eb3bf623c7a574f4a9a6a362fe9a2a7f8af1294e12"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\evaluate_ambiguity_ridge_list_sync_ota.py",
+      "bytes": 24672,
+      "sha256": "83cffc18f67eef0fb6b3e3b8456093d007b189a49c2f59c14deeb42c512fa8ac"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\evaluate_decoder_aware_crc_pdr_ota.py",
+      "bytes": 51495,
+      "sha256": "4baa52ed8f8c6742d5ef765005e7b46392b6d97578ddd6357b2541b8a6104721"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\evaluate_full_colored_ml_awgn.py",
+      "bytes": 61181,
+      "sha256": "b96a40648821310a7543f4b264eec36c949bb192b2e1e5a3cbb36024b8175a72"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\evaluate_litenap_savaux.py",
+      "bytes": 40358,
+      "sha256": "b4730d688f247a6b878c84b31b3607607579cb4b6a189c9b4e325e4929f2e802"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\evaluate_low_complexity_gls.py",
+      "bytes": 28747,
+      "sha256": "d1a5249a7e553c1aebe2a65aaca0da847b316ba0ae57b6c0d380a932ebec71e7"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\evaluate_nonuniform_sampling.py",
+      "bytes": 21881,
+      "sha256": "c205172be72dfae6b807464feee971d832f1d08f352750cc41aa8683cea05122"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\evaluate_oversampled_glrt.py",
+      "bytes": 49726,
+      "sha256": "bfd023055252d6e411da52bb3b817347e19eddb95471c1584a13827d01394f52"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\evaluate_pattern_fft_coherence.py",
+      "bytes": 20006,
+      "sha256": "50edb50d9dbf5be0df97ecb98094d32bc210ba6cc8b423584370544d49e96344"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\evaluate_phase_compensated_nus_fft.py",
+      "bytes": 17543,
+      "sha256": "189ffff71a4c2323de70ab1d95e4718fde630d852055c5c373e4a155a86b7a37"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\evaluate_real_capture_gls.py",
+      "bytes": 40353,
+      "sha256": "4110ea23293ef2732dec9e644b0444910549d928382ef1f8e850025a8bf8f389"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\evaluate_soft_hamming_oracle_ota.py",
+      "bytes": 11217,
+      "sha256": "7ebd2c0118a896613c04557a81c413f2d5af5f17a75b7848c9756f42765639b9"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\evaluate_virtual_phase_sfd_sync_ota.py",
+      "bytes": 19668,
+      "sha256": "b1e668a40772ac71051adde2037a52f7c466888afcdb48adc793425efe04b5af"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\evaluate_virtual_simo_preamble_acquisition_ota.py",
+      "bytes": 11839,
+      "sha256": "559deef614d47f04be97a9fc769dbcdef9af1f613c5e1a71d050c25c86c8d1b7"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\evaluate_wrap_chip_sample_choice.py",
+      "bytes": 21080,
+      "sha256": "d6bef4408f77388b423029938e3022b4a23e603ceb2bf11986507f6720209569"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\experiments\\plot_matched_filter_spectrum.py",
+      "bytes": 12818,
+      "sha256": "f79fa336aba0e3ae180556728aab1f33ad53c912afe8090f930620e38d9f3318"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\system\\__init__.py",
+      "bytes": 6085,
+      "sha256": "4a725447467abb7676ac2d3f7ccb8f1d1455b815319b9ff15016b4a97cbf98ed"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\system\\ambiguity_ridge_list.py",
+      "bytes": 19036,
+      "sha256": "e6680de3fc5e16bac6d194c7d0df8c26c6f8d8c36b6f0b5564d18bb2cee17263"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\system\\chirp_svd.py",
+      "bytes": 4927,
+      "sha256": "a89ff7779fd9af012cb69012709e492049b2bd2d05d394d0d1d762314d5c6287"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\system\\decoder_aware_crc.py",
+      "bytes": 10029,
+      "sha256": "c0a8441f97e73d20e7b10daadc574c5d9cca561a7199e3d79d15bf580ddc223b"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\system\\litenap_savaux.py",
+      "bytes": 15970,
+      "sha256": "d0ccb20d2232c99e1267bfbe6aabb735e5357fa5c67e1d26ee2e6f55f842186d"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\system\\multirate_structure.py",
+      "bytes": 14270,
+      "sha256": "9a4642cd9d95aaf924ff0bd6a5b4bf9a6695d709effe11aa7f5980857281827d"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\system\\noise.py",
+      "bytes": 1044,
+      "sha256": "281dbdbbf7ba98cd6f5844db91b0633e4c72b08874d0a88ee66e053ca649efc5"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\system\\nonuniform_sampling.py",
+      "bytes": 61366,
+      "sha256": "6c8c7531d2d6927f68019436e7fe37ab0b72ebf485e85a65e54fdfd06a7367ea"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\system\\oversampled_glrt.py",
+      "bytes": 46196,
+      "sha256": "98c18d3a253c23a18fd86cda4ba10d6da5a3dcceae5ea52ccf864be7cf16de61"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\system\\soft_hamming_crc.py",
+      "bytes": 16079,
+      "sha256": "64e8aaa010ca00c6c41d1b4d9aa9ea619ca7cd6a8b8e2e5e9fd5780e69ccba40"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\__init__.py",
+      "bytes": 40,
+      "sha256": "b9f95cd57fec7ac2a412aa16b832225f8df1336d6bb558b4173d9a0b83461271"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_ambiguity_ridge_list.py",
+      "bytes": 6439,
+      "sha256": "3d4ce3ff466b0648aec9089fc199c3b7e444ef68ab76ca1fbc56eb2fa404d546"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_architecture.py",
+      "bytes": 4586,
+      "sha256": "5a8fc4fc4b932b708ca2f806e4d045e4633e9b07acea6c28dd7e2bac4c75150c"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_capture_summary.py",
+      "bytes": 5236,
+      "sha256": "38c8ec2012d74572a566c611dfe8e2a08a9ad0e02a2c6af720316fed3abe963b"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_decoder_aware_crc.py",
+      "bytes": 2907,
+      "sha256": "c5ca0f78c7b458aa44adf7e96b710e6300c0d1878dab997594e01ed10e5a00cc"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_framesync_gate_audit.py",
+      "bytes": 2091,
+      "sha256": "4fe9bcce26e6da688234f9947b592001670319686e6fd55c652f7a338a5575ae"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_full_observation_energy.py",
+      "bytes": 1114,
+      "sha256": "d167f6009cc27171036c5339a9b501149343036e9eec26f759908233115c22b6"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_litenap_error_modes.py",
+      "bytes": 1314,
+      "sha256": "aa28b165cacbd1630f7fe79e48808ac4ee4616c122d3524c83972f432eeb3b6b"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_litenap_savaux.py",
+      "bytes": 4865,
+      "sha256": "2a9cf6289776a78a6a0266cf146f7e8eff781f98ed0db6f11f938b506031ad4f"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_multirate_error_forensics.py",
+      "bytes": 2025,
+      "sha256": "c2910c8dc544b699120c5d3932cf96b8a06688340dfd24b6d92e8b8f815035d0"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_multirate_structure.py",
+      "bytes": 9488,
+      "sha256": "d8701b6a38c5a8ac45f67968c58670b2e10dafbd75c5b6d163a973c3f186590f"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_noisy_framesync_headroom.py",
+      "bytes": 3749,
+      "sha256": "579bab7f33bd074020eacb2f46c844b8c28c4f77d58df8c81d9cdd0d5a84a446"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_oversampled_glrt.py",
+      "bytes": 16437,
+      "sha256": "5bc17af4562caa120195c46236163fd30321e6433341a7ad886132e1e0b2bdb4"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_phase_compensated_nus_fft.py",
+      "bytes": 2592,
+      "sha256": "344016dfaea1b92e09fccf13983be4ebe13b9f351e77c90c6a0bc915f559776c"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_rf_super_resolution_frontend.py",
+      "bytes": 1606,
+      "sha256": "9e7b5019f5b6241ef3f8abcf71a37927ee47f77e3d50e7e3c2dd70d93ba0a5fd"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_savaux_sync_sensitivity.py",
+      "bytes": 6235,
+      "sha256": "e48bc64ae289231477fda2d659a0a8c681460ae7028cf17c347a0438d32ef0f6"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_soft_hamming_crc.py",
+      "bytes": 6291,
+      "sha256": "811b98d10a9f2139a05dc9d8b4779752c4e6fbf32110615f2c06a4413db3559e"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\os_lora\\tests\\test_wrap_chip_sample_choice.py",
+      "bytes": 2834,
+      "sha256": "e8aba2938a217a1e868d4c9654402e9d38757766c5ef50ed1a0a089f7a131899"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\rf_super_resolution\\__init__.py",
+      "bytes": 396,
+      "sha256": "3143669accf7ce93caff2aa89115b0dbb0bec49f7a66ea9d3b5fb5d4ca17778d"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\rf_super_resolution\\frontend.py",
+      "bytes": 9871,
+      "sha256": "a7f224c56de8e94ee43e790227133a92512f0509b2e673d2609871b79cf1803e"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\run_iq_frontend.py",
+      "bytes": 4893,
+      "sha256": "010ed9f7a2beb8218a4f4dbfb68b30523c335b16b04f3b38a2d92933ddee54fa"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\synchronization\\__init__.py",
+      "bytes": 2137,
+      "sha256": "708577ab9acc90024b8ae4dc957ee6ac5b89063b0f57da70f1584951d5e79ee8"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\synchronization\\frame_locator.py",
+      "bytes": 12440,
+      "sha256": "7694fb2441e22da0e40d4c5409ead5e4246812d705919d07afd1323c97ef4dc3"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\synchronization\\grlora_frame_sync.py",
+      "bytes": 39442,
+      "sha256": "df13b9a5032d380fecbe5e212cbd92eb3c4e057631cb9f9aed14362de5edcf0d"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\synchronization\\preamble_detector.py",
+      "bytes": 17671,
+      "sha256": "905e4a15081a4d7b2cca78f4a78043d8e6dcf21d1397e404e7b23a80e086a1ef"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\synchronization\\xcopy_sync.py",
+      "bytes": 63067,
+      "sha256": "21f693a92e9705d4b408ec718238d414aec4a72d30235669e7c0135ff0f8680f"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\tests\\__init__.py",
+      "bytes": 41,
+      "sha256": "71dbb1540c571b43747e0bf2fd42b04427408935be9bc7c2349d7ab0113d9f74"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\tests\\test_alias_trim.py",
+      "bytes": 3158,
+      "sha256": "a9ff2f6f248990107d580ee29f209e6755ac0be662846f431b09d080404d04dc"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\tests\\test_robust_sparse_demod.py",
+      "bytes": 3167,
+      "sha256": "f75e908e7647c2e5cb6d274735d846dcb8c1893c6d93991dce7b1ea31550e815"
+    },
+    {
+      "path": "gr-lora_sdr\\weakPacket_decoding\\weak_decoder\\tests\\test_xcopy_sync.py",
+      "bytes": 7408,
+      "sha256": "a7e7580b96086eacc536fb0898d5ecb597328fa0b476b77ba953153b2154614d"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000000_rxg20_0_fulltrim.json",
+      "bytes": 3519,
+      "sha256": "62f14a853e11a8c4a8d29fca15f7f71a5899b6d7dab2f70abbf6d15dc3788c52"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000002_rxg20_0_fulltrim.json",
+      "bytes": 3519,
+      "sha256": "b1a6f5c5db283356cb1982b55deff8378b3250668efd189e1e63cf8baba59525"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000003_rxg20_0_fulltrim.json",
+      "bytes": 3521,
+      "sha256": "9f610e89fc0edea9d8267984c185a80132f2779fc7c4a69d3cf504a0ae880a64"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000004_rxg20_0_fulltrim.json",
+      "bytes": 3516,
+      "sha256": "a819ee4aef112ba2a2c371a8e079db4a31415ad13944463ae5a7d5cd5487d92a"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000005_rxg20_0_fulltrim.json",
+      "bytes": 3522,
+      "sha256": "331db83f4754fba67b3e15783b2c198adcda07082f00ef33aa8425d24aa7762d"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000006_rxg20_0_fulltrim.json",
+      "bytes": 3518,
+      "sha256": "9d0597e727724eaec13c81ed2e5676acd6eead3fb600a83bb73695ad60320e26"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000007_rxg20_0_fulltrim.json",
+      "bytes": 3519,
+      "sha256": "da5839c9a183f2d3edc37805e57ee92763aaff8d55f06983df04c0c1e756c0ae"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000008_rxg20_0_fulltrim.json",
+      "bytes": 3524,
+      "sha256": "6491e962297eaa8f9de37dd207437cabfb6ecb7c383e761965c7fd7d2946721f"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000009_rxg20_0_fulltrim.json",
+      "bytes": 3522,
+      "sha256": "6b16c0aa9a20684bed39980f902a305ca1f818d26996ec280dd477579fe6d1cc"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000010_rxg20_0_fulltrim.json",
+      "bytes": 3526,
+      "sha256": "3bef70cd0b153eae3bb0f4bced75b4021c5ab71a8665d8bc16facce1362c16b8"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000011_rxg20_0_fulltrim.json",
+      "bytes": 3527,
+      "sha256": "d265857951abf3b6a3eee6adbf54d170e967655b97603dece9c260eb409b7a39"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000012_rxg20_0_fulltrim.json",
+      "bytes": 3527,
+      "sha256": "b1166e03377282ce724b47a2d74417760d9e20c1e6a25b381205d1f3d25f0a08"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000013_rxg20_0_fulltrim.json",
+      "bytes": 3529,
+      "sha256": "da544cf98ca83c56d99a6ef03de4bf1d35a1b961b9c019d11f35250c83a03b3b"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000014_rxg20_0_fulltrim.json",
+      "bytes": 3528,
+      "sha256": "992ececf7ba0e13738524926f2687ae4b0426b0bcffd4271312e3ab47cd57f19"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000015_rxg20_0_fulltrim.json",
+      "bytes": 3528,
+      "sha256": "ddcff1646d84e41822e6ec0afa951e86d7874ea6e8722499cc58152874c22c70"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000016_rxg20_0_fulltrim.json",
+      "bytes": 3526,
+      "sha256": "d37f5e7bd69d63e17fb15651a6f6d9923bafb1ec4d920f3c2eb355419aa1a321"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000017_rxg20_0_fulltrim.json",
+      "bytes": 3529,
+      "sha256": "9345a77150f3921b5a0abb2f240115acc2b4e04092a05be6de4fecb5a5ada12f"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000018_rxg20_0_fulltrim.json",
+      "bytes": 3531,
+      "sha256": "2b9a49003b9d7d44e50cfaaeed2fb13884242b7ee2d7ad28896673edeaa2fd6d"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000019_rxg20_0_fulltrim.json",
+      "bytes": 3530,
+      "sha256": "979e004f5df2e8ef4b14b57f30bb0ba81fd49cebd306484006d3d29e1a439794"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000020_rxg20_0_fulltrim.json",
+      "bytes": 3526,
+      "sha256": "9982e0ae62db400bca4114713b88fc05ac393623fb04947a024398893e212050"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000021_rxg20_0_fulltrim.json",
+      "bytes": 3528,
+      "sha256": "00ee6af4fb58d18668dfdfc6b814d299efe5579b30c1dc16afd365dabf1dab4b"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000022_rxg20_0_fulltrim.json",
+      "bytes": 3523,
+      "sha256": "befb28aa1aeed5360c8d32c4182f5270527fa21b1e52b9624a3ecfecb0f6ca6f"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000023_rxg20_0_fulltrim.json",
+      "bytes": 3528,
+      "sha256": "4d4ded828a3e7ab1f55d56de24e3fbb599c31b1da3423afaa2398eb02c10f582"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000024_rxg20_0_fulltrim.json",
+      "bytes": 3527,
+      "sha256": "ab58c5078b16b20136e5a88eb791a19c61457956741ee218e6c4bb9594cb2b93"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000000_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "da525ef37a9665d7889887c21b9e1c56be72e7843d33fd9392bde0c11a3f2f5f"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000002_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "e6e8472fd5715cb0e5398b44222492824895dc1c5cd085b8e6d8ff6b14212786"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000003_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "5ecf2c5355e3a2c286ec6d07b67837383ae3c38939da317ee3190902c097ef88"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000004_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "cb8c98de0c46b00782ca79beb134a7485f1711b08d1251b143e30ca6045894bc"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000005_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "61f9dd169b5dcd0791a39ccf4ba4ca674b51b7b09c21dc8ba1ab1ce531e8a9a0"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000006_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "d95e270fe3af013a584c63666b7326d436bf5f9e732df62050cd3a905568c0fd"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000007_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "df2b4ce10d5d733d7e4f40f80eb797b9c99ca412fff011710336f603702d0e03"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000008_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "90e665ebf5d4a940b58f9012877197a1463e0b32ea5654bb20ed6e22a58101c9"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000009_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "1962178ce57950bea96bad94bbff43adfcd321ecdcb2f752c47e04d901bc255c"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000010_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "79f0946f39adff3da6b013fe254db5a17a947c2e992528c4d32f44f43d3aeae6"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000011_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "83e2261f713eb2c7aceee797922301ebd45fe54854cdf473c81315dd1707fd32"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000012_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "57380b4b2e8fb4acad844b1917c28c86fa3148feaf183ce78a8308ccf0e37127"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000013_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "898708e40ddc9196f494abdbeb01b610361d0a855d27af3b337dca8e7f2811be"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000014_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "455210911a9a0933d9934921b9ec99c9c00dabe817fa55c246eacf2332472a9d"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000015_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "75213f9c203913646c07c6f9ebe4a133f1d1d25383eb4d2f96039f40010a3d1a"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000016_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "9070420803106163fbc97a32b0dcbd04c0021bd48394c64b72ff773eeaa32575"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000017_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "7c8afc36a71e23785693e2a5f7e3095a935e9df4db3d3f9c10eb0359b022a695"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000018_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "a153b96ee388711de29ef52cf108e7a0da9cbe83975e98bb50f7a5814b4ee827"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000019_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "6ccf20ad9a6786222dc9d1f723ce354ef2e42fe8a6f946a9e61b1245ee82b8cb"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000020_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "522f2230929e8dbd1ae2d76e71fe50451e97d6aeaf9943ce4fb2fe28283c120c"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000021_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "7084c5ef8506489c750a9c5b377de4c33794172a349a81189a605302cda540be"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000022_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "99987eafdad652b3456aad5c1cfb38a94166e3a6ccafdf351e24e6a13c1496ea"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000023_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "b8e1faeacc677c694bdfc98bac0db03087ad59ffa2b4d2f9c4a478757347dbf3"
+    },
+    {
+      "path": "lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\ota\\exp0_000024_rxg20_0_fulltrim.cfile",
+      "bytes": 22165632,
+      "sha256": "501a599ad911a1448445c4c52fc67428f1226226b4ada8956d6ffb50ea751ccc"
+    },
+    {
+      "path": "lora-rfsr-savaux\\weak_decoder\\synchronization\\__init__.py",
+      "bytes": 2024,
+      "sha256": "da1f9c4cda579860bbf936c4e6837929f25d777cb0f5c536ec21918433004831"
+    },
+    {
+      "path": "lora-rfsr-savaux\\weak_decoder\\synchronization\\frame_locator.py",
+      "bytes": 12440,
+      "sha256": "7694fb2441e22da0e40d4c5409ead5e4246812d705919d07afd1323c97ef4dc3"
+    },
+    {
+      "path": "lora-rfsr-savaux\\weak_decoder\\synchronization\\grlora_frame_sync.py",
+      "bytes": 34283,
+      "sha256": "5241a4567f436e56575c397cff5af1bdb612f3fb91bb880450735185198b8033"
+    },
+    {
+      "path": "lora-rfsr-savaux\\weak_decoder\\synchronization\\preamble_detector.py",
+      "bytes": 9121,
+      "sha256": "25c6b54875cc5c7f267a9720e7098c0a43e6954bfb02fbc7db9f5ff959c7156b"
+    },
+    {
+      "path": "lora-rfsr-savaux\\weak_decoder\\synchronization\\single_packet.py",
+      "bytes": 15007,
+      "sha256": "de602c661f6e38d02596bb68fdfa95e1f3642231a7984f2fbf8350eb483bf48b"
+    },
+    {
+      "path": "lora-rfsr-savaux\\weak_decoder\\synchronization\\xcopy_sync.py",
+      "bytes": 63067,
+      "sha256": "21f693a92e9705d4b408ec718238d414aec4a72d30235669e7c0135ff0f8680f"
+    }
+  ]
+}

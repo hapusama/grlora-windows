@@ -1,0 +1,27 @@
+{
+  "events": 18,
+  "crc_accepted": 15,
+  "decode_attempts": 26,
+  "event_errors": 0,
+  "policy": "fixed",
+  "output": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\residual_cfo_revival_20260913\\natural_low2_fixed.jsonl",
+  "note": "CRC acceptance only; unknown transmitted count, no claim of exact delivery or PDR",
+  "config": {
+    "input": "gr-lora_sdr\\weakPacket_decoding\\USRP_collector\\data\\branch4_fixed\\low_snr\\sf10_bw125_fs500_pre32_sw34_low2.bin",
+    "sync_csv": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\real_low_snr_20260717\\low2_win4\\sync.csv",
+    "output": "gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\residual_cfo_revival_20260913\\natural_low2_fixed.jsonl",
+    "sf": 10,
+    "bw": 125000,
+    "samp_rate": 500000.0,
+    "preamble_len": 32,
+    "sync_word": 52,
+    "center_freq": 487700000.0,
+    "ldro_mode": 2,
+    "crc_mode": "grlora",
+    "policy": "fixed",
+    "max_attempts": 3,
+    "sfd_cfo_mode": "virtual_phase",
+    "allow_gate_failed": true,
+    "max_events": null
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "sf": 12,
+  "bw_hz": 125000.0,
+  "os_factor": 8,
+  "esn0_db": [
+    11.0
+  ],
+  "seeds": [
+    20260821
+  ],
+  "noise_protocol": "identical to evaluate_decoder_aware_crc_pdr_ota",
+  "hint": "clean capture payload start (coarse detection given)",
+  "decoder_hard": "savaux hard via decode_savaux_sync_candidate",
+  "decoder_soft": "soft_hamming arbitration",
+  "rows": 8
+}

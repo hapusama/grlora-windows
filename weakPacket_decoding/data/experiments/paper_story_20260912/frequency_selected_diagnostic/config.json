@@ -1,0 +1,17 @@
+{
+  "metadata": [
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000097_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000101_rxg20_0_fulltrim.json",
+    "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db\\metadata\\exp0_000105_rxg20_0_fulltrim.json"
+  ],
+  "selection": "Selected after inspecting failures: IDs 97,101,105; mechanism diagnostic ONLY, no generalization claim",
+  "snrs": [
+    12,
+    13,
+    14
+  ],
+  "seeds": [
+    91601,
+    91602
+  ]
+}

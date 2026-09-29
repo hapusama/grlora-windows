@@ -1,0 +1,16 @@
+{
+  "dataset_repo": "D:\\Desktop\\proj\\lora-rfsr-savaux",
+  "clean_audit": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\noisy_framesync_headroom_ota_awgn_20260821\\clean_sync_audit.csv",
+  "channel_snr_db": [
+    -30.0
+  ],
+  "esn0_db": [
+    6.123599479677743
+  ],
+  "seeds": [
+    91001
+  ],
+  "max_packets": 1,
+  "noise_model": "complex AWGN flat in the 125 kHz LoRa channel",
+  "truth_usage": "post-hoc acquisition-basin labelling only"
+}

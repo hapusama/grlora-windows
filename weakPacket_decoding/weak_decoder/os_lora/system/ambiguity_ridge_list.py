@@ -26,6 +26,7 @@ from .decoder_aware_crc import (
     decode_savaux_sync_candidate,
 )
 from .soft_hamming_crc import decode_soft_hamming_sync_candidate
+from .upstream_soft_crc import decode_upstream_soft_sync_candidate
 
 
 def _grlora_round(value: float) -> int:
@@ -512,6 +513,8 @@ def arbitrate_sync_list_with_crc(
         decoder = decode_savaux_sync_candidate
     elif mode == "soft_hamming":
         decoder = decode_soft_hamming_sync_candidate
+    elif mode == "upstream_soft":
+        decoder = decode_upstream_soft_sync_candidate
     else:
         raise ValueError(f"unknown list decoder mode: {decoder_mode}")
 

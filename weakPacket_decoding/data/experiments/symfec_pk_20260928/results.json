@@ -1,0 +1,320 @@
+{
+ "k25": {
+  "-26": {
+   "OLD-A": {
+    "pdr": 0.0,
+    "hard_ser": 0.95
+   },
+   "SAVAUX": {
+    "pdr": 0.0,
+    "hard_ser": 0.6953125
+   },
+   "TRIMMER": {
+    "pdr": 0.0,
+    "hard_ser": 0.6125
+   },
+   "UNICHIRP": {
+    "pdr": 0.0,
+    "hard_ser": 0.7
+   },
+   "NEW-0": {
+    "pdr": 0.15,
+    "hard_ser": 0.4078125
+   },
+   "TREL-N": {
+    "pdr": 0.5,
+    "hard_ser": 0.275
+   }
+  },
+  "-24": {
+   "OLD-A": {
+    "pdr": 0.0,
+    "hard_ser": 0.8515625
+   },
+   "SAVAUX": {
+    "pdr": 0.35,
+    "hard_ser": 0.39375
+   },
+   "TRIMMER": {
+    "pdr": 0.6,
+    "hard_ser": 0.290625
+   },
+   "UNICHIRP": {
+    "pdr": 0.175,
+    "hard_ser": 0.4265625
+   },
+   "NEW-0": {
+    "pdr": 1.0,
+    "hard_ser": 0.096875
+   },
+   "TREL-N": {
+    "pdr": 1.0,
+    "hard_ser": 0.0578125
+   }
+  },
+  "-22": {
+   "OLD-A": {
+    "pdr": 0.025,
+    "hard_ser": 0.66875
+   },
+   "SAVAUX": {
+    "pdr": 1.0,
+    "hard_ser": 0.1765625
+   },
+   "TRIMMER": {
+    "pdr": 1.0,
+    "hard_ser": 0.0859375
+   },
+   "UNICHIRP": {
+    "pdr": 0.975,
+    "hard_ser": 0.1828125
+   },
+   "NEW-0": {
+    "pdr": 1.0,
+    "hard_ser": 0.00625
+   },
+   "TREL-N": {
+    "pdr": 1.0,
+    "hard_ser": 0.0
+   }
+  },
+  "-20": {
+   "OLD-A": {
+    "pdr": 0.275,
+    "hard_ser": 0.3640625
+   },
+   "SAVAUX": {
+    "pdr": 1.0,
+    "hard_ser": 0.08125
+   },
+   "TRIMMER": {
+    "pdr": 1.0,
+    "hard_ser": 0.009375
+   },
+   "UNICHIRP": {
+    "pdr": 1.0,
+    "hard_ser": 0.0546875
+   },
+   "NEW-0": {
+    "pdr": 1.0,
+    "hard_ser": 0.0
+   },
+   "TREL-N": {
+    "pdr": 1.0,
+    "hard_ser": 0.0
+   }
+  }
+ },
+ "k50": {
+  "-26": {
+   "OLD-A": {
+    "pdr": 0.0,
+    "hard_ser": 0.98125
+   },
+   "SAVAUX": {
+    "pdr": 0.0,
+    "hard_ser": 0.859375
+   },
+   "TRIMMER": {
+    "pdr": 0.0,
+    "hard_ser": 0.85
+   },
+   "UNICHIRP": {
+    "pdr": 0.0,
+    "hard_ser": 0.640625
+   },
+   "NEW-0": {
+    "pdr": 0.0,
+    "hard_ser": 0.8203125
+   },
+   "TREL-N": {
+    "pdr": 0.375,
+    "hard_ser": 0.5140625
+   }
+  },
+  "-24": {
+   "OLD-A": {
+    "pdr": 0.0,
+    "hard_ser": 0.953125
+   },
+   "SAVAUX": {
+    "pdr": 0.05,
+    "hard_ser": 0.7109375
+   },
+   "TRIMMER": {
+    "pdr": 0.125,
+    "hard_ser": 0.6671875
+   },
+   "UNICHIRP": {
+    "pdr": 0.275,
+    "hard_ser": 0.3625
+   },
+   "NEW-0": {
+    "pdr": 0.225,
+    "hard_ser": 0.6140625
+   },
+   "TREL-N": {
+    "pdr": 0.625,
+    "hard_ser": 0.396875
+   }
+  },
+  "-22": {
+   "OLD-A": {
+    "pdr": 0.0,
+    "hard_ser": 0.925
+   },
+   "SAVAUX": {
+    "pdr": 0.625,
+    "hard_ser": 0.58125
+   },
+   "TRIMMER": {
+    "pdr": 0.95,
+    "hard_ser": 0.553125
+   },
+   "UNICHIRP": {
+    "pdr": 0.95,
+    "hard_ser": 0.125
+   },
+   "NEW-0": {
+    "pdr": 0.975,
+    "hard_ser": 0.5546875
+   },
+   "TREL-N": {
+    "pdr": 0.675,
+    "hard_ser": 0.328125
+   }
+  },
+  "-20": {
+   "OLD-A": {
+    "pdr": 0.0,
+    "hard_ser": 0.8296875
+   },
+   "SAVAUX": {
+    "pdr": 0.9,
+    "hard_ser": 0.5515625
+   },
+   "TRIMMER": {
+    "pdr": 1.0,
+    "hard_ser": 0.5296875
+   },
+   "UNICHIRP": {
+    "pdr": 1.0,
+    "hard_ser": 0.034375
+   },
+   "NEW-0": {
+    "pdr": 1.0,
+    "hard_ser": 0.5140625
+   },
+   "TREL-N": {
+    "pdr": 0.75,
+    "hard_ser": 0.25
+   }
+  }
+ },
+ "drift": {
+  "-26": {
+   "OLD-A": {
+    "pdr": 0.0,
+    "hard_ser": 0.9109375
+   },
+   "SAVAUX": {
+    "pdr": 0.0,
+    "hard_ser": 0.6546875
+   },
+   "TRIMMER": {
+    "pdr": 0.025,
+    "hard_ser": 0.559375
+   },
+   "UNICHIRP": {
+    "pdr": 0.0,
+    "hard_ser": 0.703125
+   },
+   "NEW-0": {
+    "pdr": 0.4,
+    "hard_ser": 0.328125
+   },
+   "TREL-N": {
+    "pdr": 0.5,
+    "hard_ser": 0.2640625
+   }
+  },
+  "-24": {
+   "OLD-A": {
+    "pdr": 0.0,
+    "hard_ser": 0.8421875
+   },
+   "SAVAUX": {
+    "pdr": 0.45,
+    "hard_ser": 0.371875
+   },
+   "TRIMMER": {
+    "pdr": 0.625,
+    "hard_ser": 0.290625
+   },
+   "UNICHIRP": {
+    "pdr": 0.3,
+    "hard_ser": 0.4671875
+   },
+   "NEW-0": {
+    "pdr": 1.0,
+    "hard_ser": 0.05625
+   },
+   "TREL-N": {
+    "pdr": 1.0,
+    "hard_ser": 0.040625
+   }
+  },
+  "-22": {
+   "OLD-A": {
+    "pdr": 0.0,
+    "hard_ser": 0.6359375
+   },
+   "SAVAUX": {
+    "pdr": 1.0,
+    "hard_ser": 0.1484375
+   },
+   "TRIMMER": {
+    "pdr": 0.975,
+    "hard_ser": 0.0640625
+   },
+   "UNICHIRP": {
+    "pdr": 0.95,
+    "hard_ser": 0.2109375
+   },
+   "NEW-0": {
+    "pdr": 1.0,
+    "hard_ser": 0.003125
+   },
+   "TREL-N": {
+    "pdr": 1.0,
+    "hard_ser": 0.0015625
+   }
+  },
+  "-20": {
+   "OLD-A": {
+    "pdr": 0.525,
+    "hard_ser": 0.2984375
+   },
+   "SAVAUX": {
+    "pdr": 1.0,
+    "hard_ser": 0.0578125
+   },
+   "TRIMMER": {
+    "pdr": 1.0,
+    "hard_ser": 0.0125
+   },
+   "UNICHIRP": {
+    "pdr": 1.0,
+    "hard_ser": 0.14375
+   },
+   "NEW-0": {
+    "pdr": 1.0,
+    "hard_ser": 0.0
+   },
+   "TREL-N": {
+    "pdr": 1.0,
+    "hard_ser": 0.0
+   }
+  }
+ }
+}

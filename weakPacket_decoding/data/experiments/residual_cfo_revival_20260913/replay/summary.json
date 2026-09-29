@@ -1,0 +1,77 @@
+[
+  {
+    "method": "fixed_cfo3_soft",
+    "correct": 44,
+    "trials": 72,
+    "false_delivery": 0,
+    "mean_attempts": 1.2361111111111112,
+    "wins": 6,
+    "losses": 0,
+    "physical_packets": 12,
+    "difference": 0.08333333333333333,
+    "exploratory_cluster_bootstrap_95ci": [
+      0.013888888888888888,
+      0.16666666666666666
+    ]
+  },
+  {
+    "method": "oracle_soft",
+    "correct": 59,
+    "trials": 72,
+    "false_delivery": 0,
+    "mean_attempts": 1.0,
+    "wins": 21,
+    "losses": 0,
+    "physical_packets": 12,
+    "difference": 0.2916666666666667,
+    "exploratory_cluster_bootstrap_95ci": [
+      0.16666666666666666,
+      0.4166666666666666
+    ]
+  },
+  {
+    "method": "preamble_cfo3_soft",
+    "correct": 44,
+    "trials": 72,
+    "false_delivery": 0,
+    "mean_attempts": 1.1666666666666667,
+    "wins": 6,
+    "losses": 0,
+    "physical_packets": 12,
+    "difference": 0.08333333333333333,
+    "exploratory_cluster_bootstrap_95ci": [
+      0.013888888888888888,
+      0.16666666666666666
+    ]
+  },
+  {
+    "method": "preamble_single_soft",
+    "correct": 43,
+    "trials": 72,
+    "false_delivery": 0,
+    "mean_attempts": 0.7916666666666666,
+    "wins": 6,
+    "losses": 1,
+    "physical_packets": 12,
+    "difference": 0.06944444444444443,
+    "exploratory_cluster_bootstrap_95ci": [
+      -0.013888888888888883,
+      0.15277777777777776
+    ]
+  },
+  {
+    "method": "single_soft",
+    "correct": 38,
+    "trials": 72,
+    "false_delivery": 0,
+    "mean_attempts": 0.7916666666666666,
+    "wins": 0,
+    "losses": 0,
+    "physical_packets": 12,
+    "difference": 0.0,
+    "exploratory_cluster_bootstrap_95ci": [
+      0.0,
+      0.0
+    ]
+  }
+]

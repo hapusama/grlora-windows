@@ -1,0 +1,34 @@
+[
+  {
+    "sf": 10,
+    "payload_length": 33,
+    "downclock": 4,
+    "crc_mode": "grlora",
+    "payload_a_hex": "000000000000000000000000000000000000000000000000000000000000000000",
+    "payload_b_hex": "006000000000a60c000030a50c000030a584000000060000000000000000000000",
+    "unknown_padding": false,
+    "padding_a": null,
+    "padding_b": null,
+    "statement": "different payloads reencoded with valid CRC have identical observed residues"
+  },
+  {
+    "sf": 10,
+    "payload_length": 33,
+    "downclock": 4,
+    "crc_mode": "grlora",
+    "payload_a_hex": "000000000000000000000000000000000000000000000000000000000000000000",
+    "payload_b_hex": "006000000000a60c000030a50c000030a584000000060000000000000000000000",
+    "unknown_padding": true,
+    "padding_a": [
+      0,
+      0,
+      0
+    ],
+    "padding_b": [
+      0,
+      0,
+      0
+    ],
+    "statement": "different payloads reencoded with valid CRC have identical observed residues"
+  }
+]

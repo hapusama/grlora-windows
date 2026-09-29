@@ -1,0 +1,19 @@
+{
+  "sf": 12,
+  "esn0_db": [
+    8.0
+  ],
+  "seeds": [
+    20260821
+  ],
+  "copies": [
+    1,
+    8
+  ],
+  "per_sample_snr_db": [
+    -28.1
+  ],
+  "combining": "noncoherent power averaging of Savaux spectra",
+  "sync": "PC-Ridge candidate 0 per copy",
+  "note": "independent-noise replay is optimistic vs real retransmissions"
+}

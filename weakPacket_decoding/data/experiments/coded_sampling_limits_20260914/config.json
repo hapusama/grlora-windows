@@ -1,0 +1,22 @@
+{
+  "scope": "Separate candidate truncation, metric errors and induced-code distance.\n\nOnly existing complete SF10/CR1 33-byte OTA packets are used. Clean symbol\nwindows and CFO remain supplied. Earlier noise seeds are replay diagnostics;\nfresh seeds are noise validation, not independent capture validation.\n",
+  "checks": {
+    "exhaustive_optimality_checks": 24,
+    "codebook_size": 4096,
+    "noiseless_sf10_checks": 64,
+    "half_rate_states": 32
+  },
+  "seeds": [
+    914111,
+    914112,
+    914113,
+    914211,
+    914212,
+    914213
+  ],
+  "decoder": "exact maximum sum of symbol FFT powers for identifiable half-rate payload code; header remains Top-2",
+  "diagnostics": "truth only used to score and attribute errors; does not participate in either decoder",
+  "distance": "exact minimum number of differing residue symbols in the induced linear code; zero denotes noninjective input mapping",
+  "noise": "paired B-grid iid complex Gaussian; original captured noise remains; RGR not RF SNR",
+  "timing": "includes half-rate FFT and payload block solver, excludes header/CRC/IO and acquisition"
+}

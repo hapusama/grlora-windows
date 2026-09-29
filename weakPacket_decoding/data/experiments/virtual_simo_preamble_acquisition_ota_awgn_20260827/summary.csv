@@ -1,0 +1,5 @@
+channel_snr_db,esn0_db,detector,trials,true_basin_hits,true_basin_detection_rate,false_events,trials_with_false_event,mean_true_run_length
+-30.0,6.123599479677743,legacy_m4,16,0,0.0,0,0,nan
+-30.0,6.123599479677743,noncoherent_m12,16,12,0.75,6,5,7.75
+-30.0,6.123599479677743,chip_phase_m12,16,10,0.625,0,0,8.3
+-30.0,6.123599479677743,virtual_simo_m12,16,15,0.9375,1,1,8.266666666666667

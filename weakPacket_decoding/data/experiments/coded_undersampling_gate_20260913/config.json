@@ -1,0 +1,12 @@
+{
+  "scope": "oracle timing/CFO and known clean frame extents; header and payload decoded from retained samples; no added noise",
+  "sampling": "q=0 uniform every R*D samples; complex ADC average rate B/D; analogue bandwidth must still pass LoRa band",
+  "decoder": "joint GF(2) Hamming/interleaver/inverse-Gray constraints; rejects inconsistent or rank-deficient blocks",
+  "datasets": [
+    "0_0_0_10_14_8",
+    "0_0_0_10_14_16",
+    "0_0_0_10_14_32"
+  ],
+  "source_sha256": "4b51a6e04605c7fbc2c243f4d65d74455ce0ad806e33e65a06be16643a38cc40",
+  "synthetic_independent_codec_checks": 384
+}

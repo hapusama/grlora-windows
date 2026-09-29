@@ -1,53 +1,65 @@
 # weakPacket_decoding
 
-这个目录用于真实 LoRa 弱包的离线检测、同步和过采样解调。当前主线是：
+真实 LoRa 弱包的离线检测、同步与过采样解调研究目录。**本 README 是结构总入口**；
+逐项导览见 `doc/PROJECT_MAP_20260928.md`，最新交接见 `HANDOFF_20260928.md`。
+
+当前两条主线（2026-09-28）：
+
+1. **弱包接收主链**（`weak_decoder/os_lora/system/`）：ambiguity-ridge 候选列表
+   → Savaux 似然 → bounded soft-Hamming → CRC 仲裁（decode-to-finish）。
+2. **细网格 GLRT 解调线**（2026-09-28 新，见 `doc/paper_method_fine_grid_demod_20260928.md`
+   与 `data/experiments/ablation_battle_20260928/`、`symfec_pk_20260928/`）：
+   OS 去斜 + 补零细网格 + 跨符号 κ-格 Viterti，已与 baselines 全家四件套对比全胜。
+
+## 目录一图流（✅活跃 / 🗄退役收纳 / 📜历史台账）
 
 ```text
-raw complex64 IQ
-  -> 弱前导码检测
-  -> sync word + SFD 帧定界
-  -> gr-lora 风格 CFO/STO/SFO frame sync
-  -> 多个过采样 branch 的符号观测
-  -> os_lora 非均匀采样 / GLS 合并
-  -> 标准 LoRa PHY hard decision 与 SER/CRC 评估
+weakPacket_decoding/
+├── weak_decoder/                 代码包（python 用 conda envs/gr-lora，系统 3.6 不行）
+│   ├── chirp.py                ✅ 全仓 chirp/FFT/bin 约定（单一事实源）
+│   ├── branch4_profile.py      ✅ STM32 固定帧实验参数（Branch4，见下）
+│   ├── run_iq_frontend.py      ✅ raw IQ 前端入口
+│   ├── synchronization/        ✅ 检测/帧定位/CFO-STO-SFO 同步
+│   ├── decoding/               ✅ LoRa 帧编解码
+│   │   ├── payload_codec.py      白化/Hamming/交织/Gray/CRC 编解码
+│   │   ├── header_first_demod.py header 先行解调
+│   │   └── legacy/             🗄 退役解调探索（adaptive_path/structured_path/
+│   │       timing_path/alias_trim/robust_sparse/phase_templates；
+│   │       顶层 __init__ 保留再导出，旧 import 兼容）
+│   ├── os_lora/                ✅ 主系统（system/ 算法、experiments/ 评估、doc/ 文档）
+│   ├── baselines/              ✅ 发表方法忠实复现（对比方法库；四件套已全 PK，
+│   │                              集成约定见 PROJECT_MAP §1）
+│   ├── rf_super_resolution/    🗄 实验性 RF 前端超分辨（仅单测引用，未接主链）
+│   └── tests/                  ✅ 单元测试
+├── data/
+│   ├── experiments/            📜 实验台账（一实验一目录；近期关键：
+│   │                              multicopy_*、ambiguity_ridge_*、
+│   │                              oversampling_accounting / enhanced_demod_chain /
+│   │                              ablation_battle / symfec_pk _20260928）
+│   ├── frontend/               前端 sync CSV 输出
+│   └── smoke_tmp/              🗄 冒烟测试输出（原根目录 tmp/）
+├── scripts/                    实验脚本（含 experiments/ 历史 runner）
+├── doc/                        PROJECT_MAP、论文方法稿、phase_map、history/
+├── notes/                      个人笔记与论文 PDF（design/plans/handoffs）
+├── noisy_iq/                   加噪 IQ 数据
+├── USRP_collector/             USRP 采集 GRC/脚本（含 collect_usrp_iq.py）
+└── HANDOFF_*.md                交接时间线（最新 20260928）
 ```
 
-当前重点是把 FFT demod 之前的前端同步做稳定。早期 phase-guided、
-phase-consistency、candidate-pruning、symbol-phase two-stage 和 codec/CRC beam
-search 已退出活动代码；相关研究记录仍可在 `doc/history/`、`notes/` 和 Git 历史中查看。
+## 速查：我想 X，去哪 / 放哪
 
-## 目录结构
+- **跑主链解码**：`weak_decoder/os_lora/system/`（入口 `decode_savaux_sync_candidate`
+  / `arbitrate_sync_list_with_crc`；模块职责见 `weak_decoder/os_lora/README.md`）
+- **复现 09-28 解调线与 battle**：`data/experiments/*_20260928/`（先读各 RESULTS.md）
+- **加新实验**：`data/experiments/<name>_YYYYMMDD/` 一目录（脚本+results+RESULTS.md），
+  独立分层、可整目录删除、不污染 system/
+- **找/加对比基线**：`weak_decoder/baselines/`（bin→值映射常数 512、UniChirp 需
+  none 模式 + guard 符号，坑清单见 PROJECT_MAP §1）
+- **历史方法考据**：`weak_decoder/decoding/legacy/`（代码）、`doc/history/`、`notes/`
 
-```text
-weak_decoder/
-  branch4_profile.py       当前 STM32 固定帧实验参数与文件名生成
-  chirp.py                 同步、解调与 baseline 共用的 chirp/FFT 工具
-  run_iq_frontend.py       标准 raw IQ 前端入口
-  synchronization/         检测、帧定位与 CFO/STO/SFO 同步
-    preamble_detector.py
-    frame_locator.py
-    grlora_frame_sync.py
-  decoding/                传统 codec 与诊断解调实现
-    header_first_demod.py
-    payload_codec.py
-    adaptive_path_demod.py
-    structured_path_demod.py
-    timing_path_demod.py
-  os_lora/                 当前 OS-LoRa/GLS 主线
-  baselines/               保留的论文 baseline
+---
 
-scripts/
-  run_weak_sync_chain.py   完整同步链实现与详细诊断输出
-  run_header_first_demod.py
-  detect_weak_preamble.py
-
-USRP_collector/
-  collect_usrp_iq.py
-  usrp_iq_collector.grc
-  data/
-```
-
-## Branch4 固定帧参数
+## Branch4 固定帧参数（硬件台账，勿删）
 
 参数来自：
 
@@ -82,22 +94,11 @@ python -m weak_decoder.branch4_profile --condition high_snr --run 1
 high_snr/sf10_bw125_fs500_pre32_sw34_r001.bin
 ```
 
-采集条件建议使用：
+采集条件建议：`high_snr`（建 FFT-bin ground truth）/ `low_snr` / `noise_only`
+（估计有色噪声协方差）/ `interference`。频率、CR、payload、TX power、RX gain 等
+记录在 `USRP_collector/data/branch4_fixed/README.md` 与 `.bin.json`，勿只依赖文件名。
 
-```text
-high_snr      高 SNR 固定帧，用于建立 FFT-bin ground truth
-low_snr       低 SNR 固定帧
-noise_only    发射机关闭，估计真实有色噪声协方差
-interference  发射机与干扰源同时开启
-```
-
-文件名只保留解码前端需要的 SF、带宽、采样率、前导码长度和 sync word；
-频率、CR、payload、FCnt、TX power、RX gain 等实验条件记录在
-`USRP_collector/data/branch4_fixed/README.md` 和采集脚本生成的 `.bin.json` 中。
-
-## 1. 采集 IQ
-
-在 RadioConda 中运行：
+## 采集 IQ（RadioConda）
 
 ```powershell
 Set-Location "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding"
@@ -109,42 +110,20 @@ python USRP_collector\collect_usrp_iq.py `
   --device-args "serial=2603160"
 ```
 
-脚本同时生成 `.bin.json`，保存实际 UHD 参数。正式实验中不要只依赖文件名。
-
-## 2. 前导码检测与 frame sync
-
-在 `gr-lora` 环境中运行：
+## 前导码检测与 frame sync（gr-lora 环境）
 
 ```powershell
-Set-Location "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding"
-
 python -m weak_decoder.run_iq_frontend `
   --input "USRP_collector\data\branch4_fixed\high_snr\sf10_bw125_fs500_pre32_sw34_r001.bin" `
   --max-packets 20
 ```
 
-Branch4 参数已经内置，不再从文件名位置猜 SF 和 preamble。默认输出：
+默认输出 `data/frontend/<capture>_sync.csv`，关键字段：
+`grlora_fine_payload_start_sample`、`grlora_cfo_int_est / grlora_cfo_frac_est`、
+`grlora_payload_sto_frac_est`、`grlora_sfo_hat`、`grlora_branch_sample_phases`、
+`grlora_branch_valid`——它们定义 demod 的输入边界与各 branch 同步状态。
 
-```text
-data/frontend/<capture>_sync.csv
-```
-
-关键字段包括：
-
-```text
-grlora_fine_payload_start_sample
-grlora_cfo_int_est / grlora_cfo_frac_est
-grlora_payload_sto_frac_est
-grlora_sfo_hat
-grlora_branch_sample_phases
-grlora_branch_valid
-```
-
-这些字段定义了 FFT/OS-LoRa demod 的输入边界和各 branch 同步状态。
-
-## 3. 传统 FFT 参考链
-
-在接入 GLS 前，可以先验证传统 header-first FFT：
+## 传统 FFT 参考链
 
 ```powershell
 python scripts\run_header_first_demod.py `
@@ -155,40 +134,14 @@ python scripts\run_header_first_demod.py `
   --sf 10 --bw 125000 --samp-rate 500000
 ```
 
-## 4. OS-LoRa / GLS
+## Baselines 说明
 
-当前实现已经按职责拆分：
+`weak_decoder/baselines/`（savaux_oversampled / loratrimmer / symfec / unichirp）
+保留用于论文对比、负结果与消融，不混入 GLS 权重估计本身。退役自研探索在
+`weak_decoder/decoding/legacy/`（2026-09-28 迁入，顶层再导出保持旧 import 兼容）。
 
-```text
-weak_decoder/os_lora/system/       可复用的在线解码算法
-weak_decoder/os_lora/experiment_support/  实验共享基础设施
-weak_decoder/os_lora/experiments/  离线评估、诊断、标定与绘图
-weak_decoder/os_lora/doc/          算法与实验文档
-```
+## 约定
 
-详细的模块职责、导入方式和实验入口见
-`weak_decoder/os_lora/README.md`。实验入口之间不得互相导入，删除任意实验脚本
-不会影响其他入口的导入。
-
-算法文档：
-
-```text
-weak_decoder/os_lora/doc/非均匀采样.md
-weak_decoder/os_lora/doc/GLS.MD
-```
-
-## Baselines
-
-以下内容保留，不属于清理范围：
-
-```text
-weak_decoder/baselines/loratrimmer/
-weak_decoder/baselines/savaux_oversampled/
-weak_decoder/baselines/symfec/
-weak_decoder/baselines/unichirp/
-weak_decoder/decoding/adaptive_path_demod.py
-weak_decoder/decoding/structured_path_demod.py
-weak_decoder/decoding/timing_path_demod.py
-```
-
-它们用于论文对比、负结果或消融实验，不应混入 GLS 权重估计本身。
+- 实验目录即台账：可复现、可整目录删除；结果与勘误写回目录内 RESULTS.md。
+- `chirp.py` 是 bin/值/符号约定的单一事实源，新解调先对齐它。
+- 结构改动以 单测 + `symfec_pk_20260928` selftest 全绿为准（2026-09-28 重构已验证）。

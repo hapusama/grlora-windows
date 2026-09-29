@@ -1,0 +1,128 @@
+[
+  {
+    "capture": 1,
+    "policy": "fixed",
+    "events": 15,
+    "correct": 11,
+    "crc_accepted": 11,
+    "false_delivery": 0,
+    "attempts": 23
+  },
+  {
+    "capture": 1,
+    "policy": "preamble_single",
+    "events": 15,
+    "correct": 11,
+    "crc_accepted": 11,
+    "false_delivery": 0,
+    "attempts": 15
+  },
+  {
+    "capture": 2,
+    "policy": "fixed",
+    "events": 18,
+    "correct": 15,
+    "crc_accepted": 15,
+    "false_delivery": 0,
+    "attempts": 26
+  },
+  {
+    "capture": 2,
+    "policy": "preamble_single",
+    "events": 18,
+    "correct": 15,
+    "crc_accepted": 15,
+    "false_delivery": 0,
+    "attempts": 18
+  },
+  {
+    "capture": 3,
+    "policy": "fixed",
+    "events": 16,
+    "correct": 10,
+    "crc_accepted": 10,
+    "false_delivery": 0,
+    "attempts": 28
+  },
+  {
+    "capture": 3,
+    "policy": "preamble_single",
+    "events": 16,
+    "correct": 10,
+    "crc_accepted": 10,
+    "false_delivery": 0,
+    "attempts": 16
+  },
+  {
+    "capture": 4,
+    "policy": "fixed",
+    "events": 19,
+    "correct": 8,
+    "crc_accepted": 8,
+    "false_delivery": 0,
+    "attempts": 44
+  },
+  {
+    "capture": 4,
+    "policy": "preamble_single",
+    "events": 19,
+    "correct": 8,
+    "crc_accepted": 8,
+    "false_delivery": 0,
+    "attempts": 19
+  },
+  {
+    "capture": 5,
+    "policy": "fixed",
+    "events": 0,
+    "correct": 0,
+    "crc_accepted": 0,
+    "false_delivery": 0,
+    "attempts": 0
+  },
+  {
+    "capture": 5,
+    "policy": "preamble_single",
+    "events": 0,
+    "correct": 0,
+    "crc_accepted": 0,
+    "false_delivery": 0,
+    "attempts": 0
+  },
+  {
+    "capture": 6,
+    "policy": "fixed",
+    "events": 0,
+    "correct": 0,
+    "crc_accepted": 0,
+    "false_delivery": 0,
+    "attempts": 0
+  },
+  {
+    "capture": 6,
+    "policy": "preamble_single",
+    "events": 0,
+    "correct": 0,
+    "crc_accepted": 0,
+    "false_delivery": 0,
+    "attempts": 0
+  },
+  {
+    "capture": 7,
+    "policy": "fixed",
+    "events": 0,
+    "correct": 0,
+    "crc_accepted": 0,
+    "false_delivery": 0,
+    "attempts": 0
+  },
+  {
+    "capture": 7,
+    "policy": "preamble_single",
+    "events": 0,
+    "correct": 0,
+    "crc_accepted": 0,
+    "false_delivery": 0,
+    "attempts": 0
+  }
+]

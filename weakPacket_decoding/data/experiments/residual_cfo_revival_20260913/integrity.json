@@ -1,0 +1,26 @@
+{
+  "full_trial_grids": true,
+  "physical_packets_disjoint": true,
+  "noise_seeds_disjoint": true,
+  "frozen_receiver_hash": "353a8fd14b1701f6e7c6321c01d98a54c7ac935dc733a00e8e903ee4f47d53c1",
+  "historical_decisions_match": true,
+  "source_manifest_matches": true,
+  "external_wrapper_post_run_sha256": "de602c661f6e38d02596bb68fdfa95e1f3642231a7984f2fbf8350eb483bf48b",
+  "utility_post_run_sha256": {
+    "summarize_residual_cfo_recovery.py": "89d5c20a9ece5c8fed94bd56c9da8920e8cbb9d45ae1e8f5951fdef1226cb5f3",
+    "recover_weak_packets.py": "27fea3a384701aaa4435061ce34e16ceefa658f26fd29a1df62ccc59ed2f8c6e"
+  },
+  "natural_scoring_reference_sha256": "2bec7e4e58bc3abb87adcc3ab64f87020febd1db39b08fd9320da1911071f078",
+  "natural": {
+    "fixed": {
+      "correct": 44,
+      "attempts": 121,
+      "events": 68
+    },
+    "preamble_single": {
+      "correct": 44,
+      "attempts": 68,
+      "events": 68
+    }
+  }
+}

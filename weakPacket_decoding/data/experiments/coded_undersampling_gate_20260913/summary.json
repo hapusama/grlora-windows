@@ -1,0 +1,22 @@
+[
+  {
+    "downclock": 1,
+    "trials": 28,
+    "exact": 28
+  },
+  {
+    "downclock": 2,
+    "trials": 28,
+    "exact": 28
+  },
+  {
+    "downclock": 4,
+    "trials": 28,
+    "exact": 0
+  },
+  {
+    "downclock": 8,
+    "trials": 28,
+    "exact": 0
+  }
+]

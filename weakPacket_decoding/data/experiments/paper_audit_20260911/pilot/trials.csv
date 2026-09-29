@@ -1,0 +1,5 @@
+packet_id,reference_id,seed,channel_snr_db,esn0_db,detector,window_chirps,mode,event_count,true_basin_detected,true_event_count,false_event_count,max_true_run_length,clean_preamble_start_sample
+exp0_000000_rxg20_0_fulltrim,0,91001,-30.0,6.123599479677743,legacy_m4,4,noncoherent,0,0,0,0,0,10000
+exp0_000000_rxg20_0_fulltrim,0,91001,-30.0,6.123599479677743,noncoherent_m12,12,noncoherent,1,0,0,1,0,10000
+exp0_000000_rxg20_0_fulltrim,0,91001,-30.0,6.123599479677743,chip_phase_m12,12,chip_phase,0,0,0,0,0,10000
+exp0_000000_rxg20_0_fulltrim,0,91001,-30.0,6.123599479677743,virtual_simo_m12,12,virtual_simo,0,0,0,0,0,10000

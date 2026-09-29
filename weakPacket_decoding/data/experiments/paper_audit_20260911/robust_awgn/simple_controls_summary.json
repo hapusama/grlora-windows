@@ -1,0 +1,9 @@
+{
+  "savaux": 169,
+  "robust": 169,
+  "clip": 169,
+  "blank": 177,
+  "symbols": 5880,
+  "threshold_scale": 2.5,
+  "all_paired_savaux_decisions_verified": true
+}

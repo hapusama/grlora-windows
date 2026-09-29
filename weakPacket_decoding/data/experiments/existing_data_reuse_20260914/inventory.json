@@ -1,0 +1,41 @@
+{
+  "own_verified_captures": [
+    {
+      "dataset": "0_0_0_10_14_8",
+      "iq_exists": true,
+      "packets": 10,
+      "phy_payload_lengths": {
+        "33": 10
+      },
+      "unique_payloads": 10
+    },
+    {
+      "dataset": "0_0_0_10_14_16",
+      "iq_exists": true,
+      "packets": 11,
+      "phy_payload_lengths": {
+        "33": 11
+      },
+      "unique_payloads": 11
+    },
+    {
+      "dataset": "0_0_0_10_14_32",
+      "iq_exists": true,
+      "packets": 7,
+      "phy_payload_lengths": {
+        "33": 7
+      },
+      "unique_payloads": 7
+    }
+  ],
+  "total_distinct_payloads": 24,
+  "public_short_packet_metadata": {
+    "path": "lora-rfsr-savaux/data/rfsr_ota_official",
+    "metadata_records": 100,
+    "payload_length": 16,
+    "sf": 12,
+    "local_cfile_count": 0,
+    "cr_status": "metadata cr=4; dataset description says 4/5; requires verification"
+  },
+  "scope": "inventory of the already-verified 28-packet cohort and public metadata; not an exhaustive inventory of all workspace captures"
+}

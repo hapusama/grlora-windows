@@ -1,0 +1,50 @@
+[
+  {
+    "dataset": "0_0_0_10_14_8",
+    "packet_index": "0",
+    "seed": "914112",
+    "rgr_db": "-12",
+    "pattern": "random256",
+    "decoder": "soft",
+    "true_phy_length": 33,
+    "decoded_phy_length": 33,
+    "decoded_cr": 1,
+    "crc_valid": true
+  },
+  {
+    "dataset": "0_0_0_10_14_8",
+    "packet_index": "9",
+    "seed": "914111",
+    "rgr_db": "-16",
+    "pattern": "random512",
+    "decoder": "soft",
+    "true_phy_length": 33,
+    "decoded_phy_length": 33,
+    "decoded_cr": 1,
+    "crc_valid": true
+  },
+  {
+    "dataset": "0_0_0_10_14_16",
+    "packet_index": "6",
+    "seed": "914112",
+    "rgr_db": "-14",
+    "pattern": "random512",
+    "decoder": "hard",
+    "true_phy_length": 33,
+    "decoded_phy_length": 33,
+    "decoded_cr": 1,
+    "crc_valid": true
+  },
+  {
+    "dataset": "0_0_0_10_14_16",
+    "packet_index": "6",
+    "seed": "914112",
+    "rgr_db": "-14",
+    "pattern": "random512",
+    "decoder": "joint",
+    "true_phy_length": 33,
+    "decoded_phy_length": 33,
+    "decoded_cr": 1,
+    "crc_valid": true
+  }
+]

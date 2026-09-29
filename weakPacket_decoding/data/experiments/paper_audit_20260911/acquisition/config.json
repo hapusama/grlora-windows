@@ -1,0 +1,26 @@
+{
+  "seeds": [
+    91001,
+    91002,
+    91003,
+    91004,
+    91005,
+    91006,
+    91007,
+    91008
+  ],
+  "channel_snr_db": [
+    -32.0,
+    -30.0,
+    -28.0,
+    -26.0
+  ],
+  "ota_packets": 8,
+  "noise_trials": 128,
+  "noise_scan_seconds": 1.048576,
+  "fft_equivalence_relative_error": 0.0,
+  "clean_audit_sha256": "c2478ab3718499a34d491b6ae71fa9d48915e42fcc9d16c474e3b18c473c0dc6",
+  "source_sha256": "60879864172e92a5d55abe77900eda1e7aefd4748d2d08f73801bc353c5ec3a0",
+  "truth_usage": "post-hoc basin labelling; no payload or boundary enters detector",
+  "scope": "OTA plus injected channel-bandlimited noise; conditional on eight clean-admitted captures"
+}

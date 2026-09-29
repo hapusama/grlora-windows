@@ -7,7 +7,7 @@ import unittest
 import numpy as np
 
 from weak_decoder.chirp import build_upchirp
-from weak_decoder.decoding.robust_sparse_demod import (
+from weak_decoder.decoding.legacy.robust_sparse_demod import (
     RobustSparseConfig,
     demod_robust_sparse_symbol,
 )

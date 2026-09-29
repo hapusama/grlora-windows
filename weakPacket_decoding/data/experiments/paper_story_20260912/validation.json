@@ -1,0 +1,10 @@
+{
+  "main_physical_packets": 24,
+  "main_paired_trials": 144,
+  "holdout_physical_packets": 12,
+  "holdout_paired_trials": 72,
+  "packet_sets_disjoint": true,
+  "duplicate_rows": false,
+  "all_natural_baseline_starts_match": true,
+  "excluded_selected_diagnostic_trials": 18
+}

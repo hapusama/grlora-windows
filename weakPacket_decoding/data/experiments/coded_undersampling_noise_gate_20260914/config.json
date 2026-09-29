@@ -1,0 +1,24 @@
+{
+  "scope": "clean timing/CFO, frame extents and LDRO supplied; actual header/CR and payload decoded",
+  "noise": "iid circular Gaussian at B-rate complex grid; D=2 sees exact subset of D=1 observations",
+  "rgr": "mean measured packet-active raw IQ power / added noise variance; includes original noise",
+  "seeds": [
+    913441,
+    913442,
+    913443
+  ],
+  "rgr_db": [
+    null,
+    -7,
+    -10,
+    -13,
+    -16
+  ],
+  "list_budget": "top 2 residues per symbol; 256 header / 32 CR1 payload candidates",
+  "selection": "block-valid maximum sum spectral power; CRC only final check; ground truth only scoring",
+  "limitations": "no detection, no independent capture sessions, no RF front-end or ADC power measurement; finite candidate list is not ML",
+  "source_sha256": {
+    "probe_coded_undersampling_noise.py": "7a9f1a52404898d5b8f31e82bc11a2fc5b166ffdfed51ae469d83e369d241a4c",
+    "probe_coded_undersampling.py": "4b51a6e04605c7fbc2c243f4d65d74455ce0ad806e33e65a06be16643a38cc40"
+  }
+}

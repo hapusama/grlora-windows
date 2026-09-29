@@ -1,0 +1,15 @@
+{
+  "dataset_repo": "D:\\Desktop\\proj\\lora-rfsr-savaux",
+  "ota_root": "D:\\Desktop\\proj\\lora-rfsr-savaux\\data\\reference_phy\\rfsr_db",
+  "max_packets_requested": 8,
+  "clean_packets_admitted": 8,
+  "symbols_per_packet": 16,
+  "esn0_db": [
+    13.0
+  ],
+  "seeds": [
+    20260822
+  ],
+  "noise_model": "complex AWGN flat in B, added once to the full packet",
+  "paired_variable": "second-SFD integer CFO: chip versus virtual_phase"
+}

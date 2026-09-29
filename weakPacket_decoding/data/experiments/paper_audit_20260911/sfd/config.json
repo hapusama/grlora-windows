@@ -1,0 +1,12 @@
+{
+  "max_packets": 24,
+  "seeds": [
+    91301,
+    91302
+  ],
+  "esn0_db": 13,
+  "symbols_per_packet": 32,
+  "noise": "whole-packet bandlimited AWGN",
+  "memoization": "identical-input alignment and locator only",
+  "scope": "conditional on clean-admitted packets and clean-correct symbols; not CRC PDR"
+}

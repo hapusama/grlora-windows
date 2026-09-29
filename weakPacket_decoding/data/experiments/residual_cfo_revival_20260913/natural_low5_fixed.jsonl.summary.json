@@ -1,0 +1,27 @@
+{
+  "events": 0,
+  "crc_accepted": 0,
+  "decode_attempts": 0,
+  "event_errors": 0,
+  "policy": "fixed",
+  "output": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\residual_cfo_revival_20260913\\natural_low5_fixed.jsonl",
+  "note": "CRC acceptance only; unknown transmitted count, no claim of exact delivery or PDR",
+  "config": {
+    "input": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\USRP_collector\\data\\branch4_fixed\\low_snr\\sf10_bw125_fs500_pre32_sw34_low5.bin",
+    "sync_csv": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\real_low_snr_20260719_low5_low7\\low5_win4\\sync.csv",
+    "output": "D:\\Desktop\\proj\\gr-lora_sdr\\weakPacket_decoding\\data\\experiments\\residual_cfo_revival_20260913\\natural_low5_fixed.jsonl",
+    "sf": 10,
+    "bw": 125000,
+    "samp_rate": 500000.0,
+    "preamble_len": 32,
+    "sync_word": 52,
+    "center_freq": 487700000.0,
+    "ldro_mode": 2,
+    "crc_mode": "grlora",
+    "policy": "fixed",
+    "max_attempts": 3,
+    "sfd_cfo_mode": "virtual_phase",
+    "allow_gate_failed": true,
+    "max_events": null
+  }
+}
