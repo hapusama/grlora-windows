@@ -1,0 +1,296 @@
+{
+ "0_0_0_10_14_16": {
+  "n": 11,
+  "crc_valid": {
+   "BCJR": 6,
+   "NEW-0": 6,
+   "OLD-A+F": 6,
+   "SAVAUX": 6,
+   "TRIMMER": 6,
+   "UNICHIRP": 6
+  },
+  "mean_snr_db": 6.7,
+  "frames": [
+   {
+    "snr_db": 6.8,
+    "BCJR": null,
+    "NEW-0": null,
+    "OLD-A+F": null,
+    "SAVAUX": null,
+    "TRIMMER": null,
+    "UNICHIRP": null
+   },
+   {
+    "snr_db": 7.4,
+    "BCJR": "0a7b7e334a22d2cc45ead5d8",
+    "NEW-0": "0a6b7e310aa2f2fc4feab7d0",
+    "OLD-A+F": "0a7b1f228262a4c40f6477dc",
+    "SAVAUX": "0a1b19e2e6acbe458e447fdd",
+    "TRIMMER": "0a7b7e91e3aafbcc4fcab5d8",
+    "UNICHIRP": "0a5b7ba2ac224d8cb80857d2"
+   },
+   {
+    "snr_db": 7.2,
+    "BCJR": null,
+    "NEW-0": null,
+    "OLD-A+F": null,
+    "SAVAUX": null,
+    "TRIMMER": null,
+    "UNICHIRP": null
+   },
+   {
+    "snr_db": 7.0,
+    "BCJR": null,
+    "NEW-0": null,
+    "OLD-A+F": null,
+    "SAVAUX": null,
+    "TRIMMER": null,
+    "UNICHIRP": null
+   },
+   {
+    "snr_db": 5.2,
+    "BCJR": "74350e65ef22cbccb8621f5a",
+    "NEW-0": "74151e65ef224b6c08621f50",
+    "OLD-A+F": "741579408024ceac2c8b175a",
+    "SAVAUX": "74150b41b524ce6ca4881d5a",
+    "TRIMMER": "74750d51ee224b4cb0e02758",
+    "UNICHIRP": "74650d27836296b79b631f5a"
+   },
+   {
+    "snr_db": 7.4,
+    "BCJR": null,
+    "NEW-0": null,
+    "OLD-A+F": null,
+    "SAVAUX": null,
+    "TRIMMER": null,
+    "UNICHIRP": null
+   },
+   {
+    "snr_db": 5.8,
+    "BCJR": "32500ea3e4aadac4262e1950",
+    "NEW-0": "32700fe324aeeb47262ebb50",
+    "OLD-A+F": "32307a2ee622ceee2da71250",
+    "SAVAUX": "32704490f6fa5e76bd379252",
+    "TRIMMER": "32601d84e6aae864062dbb50",
+    "UNICHIRP": "32601488c6a04be4460a1758"
+   },
+   {
+    "snr_db": 5.6,
+    "BCJR": "344c6443361913bee36768d9",
+    "NEW-0": "346c64403e1153bea3a769c9",
+    "OLD-A+F": "344c702057501cfd43276c55",
+    "SAVAUX": "34dc722bee299fde4d29e455",
+    "TRIMMER": "344c0ce336891bbea3ca64c9",
+    "UNICHIRP": "345c63ed37341697aeb06e59"
+   },
+   {
+    "snr_db": 7.3,
+    "BCJR": "497b2dc4e4a80a15076c2751",
+    "NEW-0": "497b2d84a8a80215076c4151",
+    "OLD-A+F": "495b1894fdb81614265e2551",
+    "SAVAUX": "491b1dc1fdb81635276e1552",
+    "TRIMMER": "494b2ea49d280a15256e2511",
+    "UNICHIRP": "497b4ef24e224626765e2514"
+   },
+   {
+    "snr_db": 6.5,
+    "BCJR": "16326c333eaa1ece7a1aa059",
+    "NEW-0": "167264a30a6a186d781a9059",
+    "OLD-A+F": "1632643062385acddef73859",
+    "SAVAUX": "1652724022001a691ef77854",
+    "TRIMMER": "16526c9827be1bc9a367a459",
+    "UNICHIRP": "165207208a7046fd9367ad69"
+   },
+   {
+    "snr_db": 7.2,
+    "BCJR": null,
+    "NEW-0": null,
+    "OLD-A+F": null,
+    "SAVAUX": null,
+    "TRIMMER": null,
+    "UNICHIRP": null
+   }
+  ]
+ },
+ "0_0_0_10_14_8": {
+  "n": 10,
+  "crc_valid": {
+   "BCJR": 6,
+   "NEW-0": 6,
+   "OLD-A+F": 6,
+   "SAVAUX": 6,
+   "TRIMMER": 6,
+   "UNICHIRP": 6
+  },
+  "mean_snr_db": -120.0,
+  "frames": [
+   {
+    "snr_db": -120.0,
+    "BCJR": null,
+    "NEW-0": null,
+    "OLD-A+F": null,
+    "SAVAUX": null,
+    "TRIMMER": null,
+    "UNICHIRP": null
+   },
+   {
+    "snr_db": -120.0,
+    "BCJR": null,
+    "NEW-0": null,
+    "OLD-A+F": null,
+    "SAVAUX": null,
+    "TRIMMER": null,
+    "UNICHIRP": null
+   },
+   {
+    "snr_db": -120.0,
+    "BCJR": "83647da806002afe64a97056",
+    "NEW-0": "83541dc85600baae61a97956",
+    "OLD-A+F": "83544ded87032ac45103d916",
+    "SAVAUX": "83447fe7170032c4e1a3d91e",
+    "TRIMMER": "83647de806002aae25a97956",
+    "UNICHIRP": "83647d6bf62aba6dd030da04"
+   },
+   {
+    "snr_db": -120.0,
+    "BCJR": "1e577dce74229ad81d899cb2",
+    "NEW-0": "1e677d6244829ac91dc99c32",
+    "OLD-A+F": "1e2778e2ea66cefb34cb9a12",
+    "SAVAUX": "1e274ee28a609efbf443828a",
+    "TRIMMER": "1ec7776824828ac8bdc094a2",
+    "UNICHIRP": "1ed7474ebeaad29b38eeda06"
+   },
+   {
+    "snr_db": -120.0,
+    "BCJR": "d60105c32e220bb7aa79e05d",
+    "NEW-0": "d66115c32e224a87a13afc5d",
+    "OLD-A+F": "d671165b5d3a0acbc5a72657",
+    "SAVAUX": "d6d102531e82021bada7ed51",
+    "TRIMMER": "d60105c32e228a87ab71e05d",
+    "UNICHIRP": "d601022887a80bcb2d97735f"
+   },
+   {
+    "snr_db": -120.0,
+    "BCJR": null,
+    "NEW-0": null,
+    "OLD-A+F": null,
+    "SAVAUX": null,
+    "TRIMMER": null,
+    "UNICHIRP": null
+   },
+   {
+    "snr_db": -120.0,
+    "BCJR": null,
+    "NEW-0": null,
+    "OLD-A+F": null,
+    "SAVAUX": null,
+    "TRIMMER": null,
+    "UNICHIRP": null
+   },
+   {
+    "snr_db": -120.0,
+    "BCJR": "dc757cbe26232add6d89b046",
+    "NEW-0": "dc757cbe26237ad83149e946",
+    "OLD-A+F": "dc25702261e5369ce1087066",
+    "SAVAUX": "dc857282e9e5aecc6101b96e",
+    "TRIMMER": "dc557e1db42aaa8ca1857946",
+    "UNICHIRP": "dc551ded26203aa5fba8e06e"
+   },
+   {
+    "snr_db": -120.0,
+    "BCJR": "d4550fd17e208207ab245d5a",
+    "NEW-0": "d4457fc07e30b237ab225d5a",
+    "OLD-A+F": "d4d527307e6c8e45c33ed55e",
+    "SAVAUX": "d4152bd57e608c474b325d5c",
+    "TRIMMER": "d4457fc07e208237cb225d5a",
+    "UNICHIRP": "d4354fbb7668ccffc4681759"
+   },
+   {
+    "snr_db": -120.0,
+    "BCJR": "f4444d826d293ad4dba1d27e",
+    "NEW-0": "f4444d826d292ae6cb93e07e",
+    "OLD-A+F": "f4d4111ea8a53a9e65ca4876",
+    "SAVAUX": "f444114268a06aae05c9712c",
+    "TRIMMER": "f444458265a132f7ffa3812e",
+    "UNICHIRP": "f444778ddea0329d06f9e876"
+   }
+  ]
+ },
+ "0_0_0_10_14_32": {
+  "n": 7,
+  "crc_valid": {
+   "BCJR": 4,
+   "NEW-0": 4,
+   "OLD-A+F": 4,
+   "SAVAUX": 4,
+   "TRIMMER": 4,
+   "UNICHIRP": 4
+  },
+  "mean_snr_db": 6.9,
+  "frames": [
+   {
+    "snr_db": 8.1,
+    "BCJR": "944119d219652ef6953f404e",
+    "NEW-0": "944128e21ac52fc6853f434e",
+    "OLD-A+F": "94711462e02e3495b43f404e",
+    "SAVAUX": "94711462e02e2494b43f404e",
+    "TRIMMER": "94512be229c42ec7b53f434c",
+    "UNICHIRP": "9471217738762c5c3d35da6e"
+   },
+   {
+    "snr_db": 6.5,
+    "BCJR": null,
+    "NEW-0": null,
+    "OLD-A+F": null,
+    "SAVAUX": null,
+    "TRIMMER": null,
+    "UNICHIRP": null
+   },
+   {
+    "snr_db": 6.6,
+    "BCJR": null,
+    "NEW-0": null,
+    "OLD-A+F": null,
+    "SAVAUX": null,
+    "TRIMMER": null,
+    "UNICHIRP": null
+   },
+   {
+    "snr_db": 6.5,
+    "BCJR": "da447f522e23dad8d206dc80",
+    "NEW-0": "da444f4b1e33dbf8d20eec80",
+    "OLD-A+F": "da441a820aa286bbd1c68c20",
+    "SAVAUX": "da441a8ec2e656c8cb45c0a4",
+    "TRIMMER": "da647e088222cadbd207cca0",
+    "UNICHIRP": "da744242af68cedb5889cc2a"
+   },
+   {
+    "snr_db": 5.4,
+    "BCJR": null,
+    "NEW-0": null,
+    "OLD-A+F": null,
+    "SAVAUX": null,
+    "TRIMMER": null,
+    "UNICHIRP": null
+   },
+   {
+    "snr_db": 7.4,
+    "BCJR": "874f055b0e284bce7c747e65",
+    "NEW-0": "874f055b0e284bce7c747e65",
+    "OLD-A+F": "873f054d02af0cd80c713924",
+    "SAVAUX": "874f024d02ec1fdd0c747835",
+    "TRIMMER": "874f065b0aa89bc8dc74ae65",
+    "UNICHIRP": "877f505d6e3b1bf66b63f469"
+   },
+   {
+    "snr_db": 7.6,
+    "BCJR": "327c1eb41fa2a8eedfcc2916",
+    "NEW-0": "327c1d812ca1aaaadfcc2906",
+    "OLD-A+F": "321c424bda6eaeaf86a57a06",
+    "SAVAUX": "322c714bda6eae9fb5a64a06",
+    "TRIMMER": "324c1eb41ca13ba6d3cc2926",
+    "UNICHIRP": "321c4ee8e9f83ea553cfd21e"
+   }
+  ]
+ }
+}

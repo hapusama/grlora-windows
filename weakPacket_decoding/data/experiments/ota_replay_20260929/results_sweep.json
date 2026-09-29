@@ -1,0 +1,76 @@
+{
+ "n_gt": 0,
+ "n_total": 28,
+ "table": {
+  "native": {
+   "PLAIN": 0,
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 0,
+   "NEW-0": 0,
+   "BCJR": 0
+  },
+  "+3dB": {
+   "PLAIN": 0,
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 0,
+   "NEW-0": 0,
+   "BCJR": 0
+  },
+  "+6dB": {
+   "PLAIN": 0,
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 0,
+   "NEW-0": 0,
+   "BCJR": 0
+  },
+  "+9dB": {
+   "PLAIN": 0,
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 0,
+   "NEW-0": 0,
+   "BCJR": 0
+  },
+  "+12dB": {
+   "PLAIN": 0,
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 0,
+   "NEW-0": 0,
+   "BCJR": 0
+  },
+  "+15dB": {
+   "PLAIN": 0,
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 0,
+   "NEW-0": 0,
+   "BCJR": 0
+  },
+  "+18dB": {
+   "PLAIN": 0,
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 0,
+   "NEW-0": 0,
+   "BCJR": 0
+  }
+ }
+}

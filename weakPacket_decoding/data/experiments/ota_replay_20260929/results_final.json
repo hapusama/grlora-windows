@@ -1,0 +1,87 @@
+{
+ "n_gt": 28,
+ "n_total": 28,
+ "table": {
+  "native": {
+   "PLAIN": 28,
+   "OLD-A": 28,
+   "OLD-A+F": 28,
+   "SAVAUX": 28,
+   "TRIMMER": 28,
+   "UNICHIRP": 28,
+   "NEW-0": 28,
+   "BCJR": 28
+  },
+  "+18dB": {
+   "PLAIN": 28,
+   "OLD-A": 28,
+   "OLD-A+F": 28,
+   "SAVAUX": 28,
+   "TRIMMER": 28,
+   "UNICHIRP": 28,
+   "NEW-0": 28,
+   "BCJR": 28
+  },
+  "+21dB": {
+   "PLAIN": 28,
+   "OLD-A": 28,
+   "OLD-A+F": 28,
+   "SAVAUX": 28,
+   "TRIMMER": 28,
+   "UNICHIRP": 28,
+   "NEW-0": 28,
+   "BCJR": 28
+  },
+  "+24dB": {
+   "PLAIN": 24,
+   "OLD-A": 24,
+   "OLD-A+F": 24,
+   "SAVAUX": 24,
+   "TRIMMER": 24,
+   "UNICHIRP": 24,
+   "NEW-0": 24,
+   "BCJR": 24
+  },
+  "+27dB": {
+   "PLAIN": 14,
+   "OLD-A": 14,
+   "OLD-A+F": 14,
+   "SAVAUX": 14,
+   "TRIMMER": 14,
+   "UNICHIRP": 14,
+   "NEW-0": 14,
+   "BCJR": 14
+  },
+  "+30dB": {
+   "PLAIN": 9,
+   "OLD-A": 9,
+   "OLD-A+F": 9,
+   "SAVAUX": 9,
+   "TRIMMER": 9,
+   "UNICHIRP": 9,
+   "NEW-0": 9,
+   "BCJR": 9
+  },
+  "+33dB": {
+   "PLAIN": 12,
+   "OLD-A": 12,
+   "OLD-A+F": 12,
+   "SAVAUX": 12,
+   "TRIMMER": 12,
+   "UNICHIRP": 12,
+   "NEW-0": 12,
+   "BCJR": 12
+  },
+  "+36dB": {
+   "PLAIN": 18,
+   "OLD-A": 18,
+   "OLD-A+F": 18,
+   "SAVAUX": 18,
+   "TRIMMER": 18,
+   "UNICHIRP": 18,
+   "NEW-0": 18,
+   "BCJR": 18
+  }
+ },
+ "note": "os=4 correct, selftest-gated"
+}

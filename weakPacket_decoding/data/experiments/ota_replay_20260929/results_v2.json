@@ -1,0 +1,188 @@
+{
+ "0_0_0_10_14_16": {
+  "native": {
+   "n": 11,
+   "crc_valid": {
+    "BCJR": 10,
+    "NEW-0": 10,
+    "OLD-A+F": 10,
+    "SAVAUX": 10,
+    "TRIMMER": 10,
+    "UNICHIRP": 10
+   },
+   "mean_snr_est": 6.3
+  },
+  "0dB": {
+   "n": 11,
+   "crc_valid": {
+    "BCJR": 5,
+    "NEW-0": 5,
+    "OLD-A+F": 5,
+    "SAVAUX": 5,
+    "TRIMMER": 5,
+    "UNICHIRP": 5
+   },
+   "mean_snr_est": 8.4
+  },
+  "6dB": {
+   "n": 11,
+   "crc_valid": {
+    "BCJR": 6,
+    "NEW-0": 6,
+    "OLD-A+F": 6,
+    "SAVAUX": 6,
+    "TRIMMER": 6,
+    "UNICHIRP": 6
+   },
+   "mean_snr_est": 8.6
+  },
+  "12dB": {
+   "n": 11,
+   "crc_valid": {
+    "BCJR": 8,
+    "NEW-0": 8,
+    "OLD-A+F": 8,
+    "SAVAUX": 8,
+    "TRIMMER": 8,
+    "UNICHIRP": 8
+   },
+   "mean_snr_est": 8.8
+  },
+  "18dB": {
+   "n": 11,
+   "crc_valid": {
+    "BCJR": 6,
+    "NEW-0": 6,
+    "OLD-A+F": 6,
+    "SAVAUX": 6,
+    "TRIMMER": 6,
+    "UNICHIRP": 6
+   },
+   "mean_snr_est": 8.8
+  }
+ },
+ "0_0_0_10_14_8": {
+  "native": {
+   "n": 10,
+   "crc_valid": {
+    "BCJR": 3,
+    "NEW-0": 3,
+    "OLD-A+F": 3,
+    "SAVAUX": 3,
+    "TRIMMER": 3,
+    "UNICHIRP": 3
+   },
+   "mean_snr_est": -120.0
+  },
+  "0dB": {
+   "n": 10,
+   "crc_valid": {
+    "BCJR": 1,
+    "NEW-0": 1,
+    "OLD-A+F": 1,
+    "SAVAUX": 1,
+    "TRIMMER": 1,
+    "UNICHIRP": 1
+   },
+   "mean_snr_est": 8.5
+  },
+  "6dB": {
+   "n": 10,
+   "crc_valid": {
+    "BCJR": 2,
+    "NEW-0": 2,
+    "OLD-A+F": 2,
+    "SAVAUX": 2,
+    "TRIMMER": 2,
+    "UNICHIRP": 2
+   },
+   "mean_snr_est": 8.7
+  },
+  "12dB": {
+   "n": 10,
+   "crc_valid": {
+    "BCJR": 5,
+    "NEW-0": 5,
+    "OLD-A+F": 5,
+    "SAVAUX": 5,
+    "TRIMMER": 5,
+    "UNICHIRP": 5
+   },
+   "mean_snr_est": 8.9
+  },
+  "18dB": {
+   "n": 10,
+   "crc_valid": {
+    "BCJR": 1,
+    "NEW-0": 1,
+    "OLD-A+F": 1,
+    "SAVAUX": 1,
+    "TRIMMER": 1,
+    "UNICHIRP": 1
+   },
+   "mean_snr_est": 8.8
+  }
+ },
+ "0_0_0_10_14_32": {
+  "native": {
+   "n": 7,
+   "crc_valid": {
+    "BCJR": 3,
+    "NEW-0": 3,
+    "OLD-A+F": 3,
+    "SAVAUX": 3,
+    "TRIMMER": 3,
+    "UNICHIRP": 3
+   },
+   "mean_snr_est": 6.6
+  },
+  "0dB": {
+   "n": 7,
+   "crc_valid": {
+    "BCJR": 6,
+    "NEW-0": 6,
+    "OLD-A+F": 6,
+    "SAVAUX": 6,
+    "TRIMMER": 6,
+    "UNICHIRP": 6
+   },
+   "mean_snr_est": 8.5
+  },
+  "6dB": {
+   "n": 7,
+   "crc_valid": {
+    "BCJR": 2,
+    "NEW-0": 2,
+    "OLD-A+F": 2,
+    "SAVAUX": 2,
+    "TRIMMER": 2,
+    "UNICHIRP": 2
+   },
+   "mean_snr_est": 8.6
+  },
+  "12dB": {
+   "n": 7,
+   "crc_valid": {
+    "BCJR": 3,
+    "NEW-0": 3,
+    "OLD-A+F": 3,
+    "SAVAUX": 3,
+    "TRIMMER": 3,
+    "UNICHIRP": 3
+   },
+   "mean_snr_est": 8.6
+  },
+  "18dB": {
+   "n": 7,
+   "crc_valid": {
+    "BCJR": 3,
+    "NEW-0": 3,
+    "OLD-A+F": 3,
+    "SAVAUX": 3,
+    "TRIMMER": 3,
+    "UNICHIRP": 3
+   },
+   "mean_snr_est": 8.8
+  }
+ }
+}

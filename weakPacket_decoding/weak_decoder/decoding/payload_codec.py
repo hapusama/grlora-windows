@@ -558,9 +558,15 @@ def decode_explicit_frame_symbols(
 
     crc_value = 0
     crc_received = 0
-    crc_valid = not bool(header.has_crc)
+    # 2026-09-29 修复：crc_valid 必须以 header 校验通过为前提。此前初始化为
+    # `not has_crc`，header 被噪声打坏、has_crc 位解成 0 时 crc_valid 无条件
+    # 为 True（payload 完全未被校验），OTA 重放判据因此整体失效；同时
+    # header_valid（PHY header checksum）此前从未被检查。见
+    # data/experiments/ota_replay_20260929/RESULTS.md 的勘误记录。
+    crc_valid = bool(header.header_valid) and not bool(header.has_crc)
     if (
-        bool(header.has_crc)
+        bool(header.header_valid)
+        and bool(header.has_crc)
         and len(crc_part) >= 2
         and len(payload_bytes) >= int(header.payload_len)
     ):

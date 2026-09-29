@@ -1,0 +1,116 @@
+{
+ "n_frames": 28,
+ "table": {
+  "native": {
+   "PLAIN": 3,
+   "OLD-A": 5,
+   "OLD-A+F": 5,
+   "SAVAUX": 5,
+   "TRIMMER": 22,
+   "UNICHIRP": 9,
+   "NEW-0": 22,
+   "BCJR": 23
+  },
+  "+18dB": {
+   "PLAIN": 0,
+   "OLD-A": 0,
+   "OLD-A+F": 5,
+   "SAVAUX": 4,
+   "TRIMMER": 22,
+   "UNICHIRP": 0,
+   "NEW-0": 22,
+   "BCJR": 21
+  },
+  "+21dB": {
+   "PLAIN": 0,
+   "OLD-A": 0,
+   "OLD-A+F": 1,
+   "SAVAUX": 1,
+   "TRIMMER": 22,
+   "UNICHIRP": 1,
+   "NEW-0": 22,
+   "BCJR": 22
+  },
+  "+24dB": {
+   "PLAIN": 0,
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 0,
+   "NEW-0": 1,
+   "BCJR": 1
+  },
+  "+27dB": {
+   "PLAIN": 0,
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 0,
+   "NEW-0": 0,
+   "BCJR": 0
+  },
+  "+30dB": {
+   "PLAIN": 0,
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 0,
+   "NEW-0": 0,
+   "BCJR": 0
+  },
+  "+33dB": {
+   "PLAIN": 0,
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 0,
+   "NEW-0": 0,
+   "BCJR": 0
+  },
+  "+36dB": {
+   "PLAIN": 0,
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 0,
+   "NEW-0": 0,
+   "BCJR": 0
+  }
+ },
+ "deltas": {
+  "0_0_0_10_14_8": {
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 1,
+   "NEW-0": 0,
+   "BCJR": 0
+  },
+  "0_0_0_10_14_16": {
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 0,
+   "NEW-0": 0,
+   "BCJR": 0
+  },
+  "0_0_0_10_14_32": {
+   "OLD-A": 0,
+   "OLD-A+F": 0,
+   "SAVAUX": 0,
+   "TRIMMER": 0,
+   "UNICHIRP": 1,
+   "NEW-0": 0,
+   "BCJR": 0
+  }
+ },
+ "judge": "bytes==GT AND crc_valid(header_valid enforced); GT header shared by all chains",
+ "note": "v6 fixed judge; v5 numbers void"
+}
