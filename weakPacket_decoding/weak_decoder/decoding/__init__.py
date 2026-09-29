@@ -18,6 +18,12 @@ from .legacy.robust_sparse_demod import (
     demod_robust_sparse_symbol,
     robust_sparse_rerank,
 )
+from .kappa_trellis import (
+    FineGrid,
+    KappaTrellisDemodulator,
+    forward_backward,
+    viterbi,
+)
 
 __all__ = [
     "AliasBlocker",
@@ -29,4 +35,8 @@ __all__ = [
     "demod_alias_trim_symbol",
     "demod_robust_sparse_symbol",
     "robust_sparse_rerank",
+    "FineGrid",
+    "KappaTrellisDemodulator",
+    "forward_backward",
+    "viterbi",
 ]
