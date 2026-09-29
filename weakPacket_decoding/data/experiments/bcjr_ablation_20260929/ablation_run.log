@@ -1,0 +1,386 @@
+GT 就绪 28 帧（δ 与实验一 BCJR 链同法冻结）
+
+[native] 整包SNR中位 8.0 dB | NEW-0 SER 0.032 PER 0.143 | TREL-5 SER 0.000 PER 0.000 | BCJR-5 SER 0.033 PER 0.143 | BCJR-9 SER 0.032 PER 0.143 | BCJR-5-ind SER 0.032 PER 0.143 | BCJR-5-max SER 0.033 PER 0.143
+[SNR -16dB] NEW-0 SER 0.051 PER 0.167 | TREL-5 SER 0.012 PER 0.012 | BCJR-5 SER 0.039 PER 0.143 | BCJR-9 SER 0.037 PER 0.143 | BCJR-5-ind SER 0.049 PER 0.190 | BCJR-5-max SER 0.039 PER 0.143
+[SNR -17dB] NEW-0 SER 0.057 PER 0.167 | TREL-5 SER 0.000 PER 0.000 | BCJR-5 SER 0.041 PER 0.155 | BCJR-9 SER 0.042 PER 0.131 | BCJR-5-ind SER 0.055 PER 0.179 | BCJR-5-max SER 0.041 PER 0.155
+[SNR -18dB] NEW-0 SER 0.059 PER 0.190 | TREL-5 SER 0.000 PER 0.000 | BCJR-5 SER 0.045 PER 0.131 | BCJR-9 SER 0.043 PER 0.131 | BCJR-5-ind SER 0.061 PER 0.167 | BCJR-5-max SER 0.045 PER 0.131
+[SNR -19dB] NEW-0 SER 0.064 PER 0.167 | TREL-5 SER 0.003 PER 0.012 | BCJR-5 SER 0.045 PER 0.179 | BCJR-9 SER 0.044 PER 0.179 | BCJR-5-ind SER 0.063 PER 0.179 | BCJR-5-max SER 0.046 PER 0.179
+[SNR -20dB] NEW-0 SER 0.074 PER 0.226 | TREL-5 SER 0.002 PER 0.012 | BCJR-5 SER 0.051 PER 0.190 | BCJR-9 SER 0.049 PER 0.179 | BCJR-5-ind SER 0.072 PER 0.226 | BCJR-5-max SER 0.052 PER 0.190
+[SNR -21dB] NEW-0 SER 0.081 PER 0.274 | TREL-5 SER 0.014 PER 0.060 | BCJR-5 SER 0.053 PER 0.226 | BCJR-9 SER 0.053 PER 0.226 | BCJR-5-ind SER 0.079 PER 0.250 | BCJR-5-max SER 0.054 PER 0.226
+[SNR -22dB] NEW-0 SER 0.120 PER 0.405 | TREL-5 SER 0.048 PER 0.167 | BCJR-5 SER 0.092 PER 0.298 | BCJR-9 SER 0.093 PER 0.321 | BCJR-5-ind SER 0.114 PER 0.369 | BCJR-5-max SER 0.093 PER 0.298
+[SNR -23dB] NEW-0 SER 0.162 PER 0.571 | TREL-5 SER 0.105 PER 0.440 | BCJR-5 SER 0.124 PER 0.440 | BCJR-9 SER 0.127 PER 0.452 | BCJR-5-ind SER 0.136 PER 0.429 | BCJR-5-max SER 0.126 PER 0.440
+[SNR -24dB] NEW-0 SER 0.268 PER 0.929 | TREL-5 SER 0.221 PER 0.905 | BCJR-5 SER 0.220 PER 0.905 | BCJR-9 SER 0.223 PER 0.905 | BCJR-5-ind SER 0.228 PER 0.893 | BCJR-5-max SER 0.219 PER 0.905
+[SNR -25dB] NEW-0 SER 0.403 PER 1.000 | TREL-5 SER 0.385 PER 1.000 | BCJR-5 SER 0.341 PER 0.988 | BCJR-9 SER 0.348 PER 0.988 | BCJR-5-ind SER 0.340 PER 1.000 | BCJR-5-max SER 0.341 PER 0.988
+[SNR -26dB] NEW-0 SER 0.548 PER 1.000 | TREL-5 SER 0.544 PER 1.000 | BCJR-5 SER 0.488 PER 1.000 | BCJR-9 SER 0.494 PER 1.000 | BCJR-5-ind SER 0.493 PER 1.000 | BCJR-5-max SER 0.488 PER 1.000
+
+RESULT_JSON_BEGIN
+{
+ "native_snr_db_med": 7.998761495697311,
+ "levels": {
+  "-16": {
+   "n_packets": 84,
+   "NEW-0": {
+    "sym_err": 149,
+    "sym_tot": 2940,
+    "crc_fail": 14
+   },
+   "TREL-5": {
+    "sym_err": 35,
+    "sym_tot": 2940,
+    "crc_fail": 1
+   },
+   "BCJR-5": {
+    "sym_err": 115,
+    "sym_tot": 2940,
+    "crc_fail": 12
+   },
+   "BCJR-9": {
+    "sym_err": 110,
+    "sym_tot": 2940,
+    "crc_fail": 12
+   },
+   "BCJR-5-ind": {
+    "sym_err": 145,
+    "sym_tot": 2940,
+    "crc_fail": 16
+   },
+   "BCJR-5-max": {
+    "sym_err": 116,
+    "sym_tot": 2940,
+    "crc_fail": 12
+   }
+  },
+  "-17": {
+   "n_packets": 84,
+   "NEW-0": {
+    "sym_err": 168,
+    "sym_tot": 2940,
+    "crc_fail": 14
+   },
+   "TREL-5": {
+    "sym_err": 0,
+    "sym_tot": 2940,
+    "crc_fail": 0
+   },
+   "BCJR-5": {
+    "sym_err": 122,
+    "sym_tot": 2940,
+    "crc_fail": 13
+   },
+   "BCJR-9": {
+    "sym_err": 123,
+    "sym_tot": 2940,
+    "crc_fail": 11
+   },
+   "BCJR-5-ind": {
+    "sym_err": 162,
+    "sym_tot": 2940,
+    "crc_fail": 15
+   },
+   "BCJR-5-max": {
+    "sym_err": 122,
+    "sym_tot": 2940,
+    "crc_fail": 13
+   }
+  },
+  "-18": {
+   "n_packets": 84,
+   "NEW-0": {
+    "sym_err": 174,
+    "sym_tot": 2940,
+    "crc_fail": 16
+   },
+   "TREL-5": {
+    "sym_err": 0,
+    "sym_tot": 2940,
+    "crc_fail": 0
+   },
+   "BCJR-5": {
+    "sym_err": 132,
+    "sym_tot": 2940,
+    "crc_fail": 11
+   },
+   "BCJR-9": {
+    "sym_err": 126,
+    "sym_tot": 2940,
+    "crc_fail": 11
+   },
+   "BCJR-5-ind": {
+    "sym_err": 180,
+    "sym_tot": 2940,
+    "crc_fail": 14
+   },
+   "BCJR-5-max": {
+    "sym_err": 132,
+    "sym_tot": 2940,
+    "crc_fail": 11
+   }
+  },
+  "-19": {
+   "n_packets": 84,
+   "NEW-0": {
+    "sym_err": 188,
+    "sym_tot": 2940,
+    "crc_fail": 14
+   },
+   "TREL-5": {
+    "sym_err": 9,
+    "sym_tot": 2940,
+    "crc_fail": 1
+   },
+   "BCJR-5": {
+    "sym_err": 132,
+    "sym_tot": 2940,
+    "crc_fail": 15
+   },
+   "BCJR-9": {
+    "sym_err": 128,
+    "sym_tot": 2940,
+    "crc_fail": 15
+   },
+   "BCJR-5-ind": {
+    "sym_err": 186,
+    "sym_tot": 2940,
+    "crc_fail": 15
+   },
+   "BCJR-5-max": {
+    "sym_err": 135,
+    "sym_tot": 2940,
+    "crc_fail": 15
+   }
+  },
+  "-20": {
+   "n_packets": 84,
+   "NEW-0": {
+    "sym_err": 218,
+    "sym_tot": 2940,
+    "crc_fail": 19
+   },
+   "TREL-5": {
+    "sym_err": 6,
+    "sym_tot": 2940,
+    "crc_fail": 1
+   },
+   "BCJR-5": {
+    "sym_err": 149,
+    "sym_tot": 2940,
+    "crc_fail": 16
+   },
+   "BCJR-9": {
+    "sym_err": 144,
+    "sym_tot": 2940,
+    "crc_fail": 15
+   },
+   "BCJR-5-ind": {
+    "sym_err": 212,
+    "sym_tot": 2940,
+    "crc_fail": 19
+   },
+   "BCJR-5-max": {
+    "sym_err": 152,
+    "sym_tot": 2940,
+    "crc_fail": 16
+   }
+  },
+  "-21": {
+   "n_packets": 84,
+   "NEW-0": {
+    "sym_err": 238,
+    "sym_tot": 2940,
+    "crc_fail": 23
+   },
+   "TREL-5": {
+    "sym_err": 42,
+    "sym_tot": 2940,
+    "crc_fail": 5
+   },
+   "BCJR-5": {
+    "sym_err": 157,
+    "sym_tot": 2940,
+    "crc_fail": 19
+   },
+   "BCJR-9": {
+    "sym_err": 156,
+    "sym_tot": 2940,
+    "crc_fail": 19
+   },
+   "BCJR-5-ind": {
+    "sym_err": 232,
+    "sym_tot": 2940,
+    "crc_fail": 21
+   },
+   "BCJR-5-max": {
+    "sym_err": 158,
+    "sym_tot": 2940,
+    "crc_fail": 19
+   }
+  },
+  "-22": {
+   "n_packets": 84,
+   "NEW-0": {
+    "sym_err": 352,
+    "sym_tot": 2940,
+    "crc_fail": 34
+   },
+   "TREL-5": {
+    "sym_err": 142,
+    "sym_tot": 2940,
+    "crc_fail": 14
+   },
+   "BCJR-5": {
+    "sym_err": 271,
+    "sym_tot": 2940,
+    "crc_fail": 25
+   },
+   "BCJR-9": {
+    "sym_err": 274,
+    "sym_tot": 2940,
+    "crc_fail": 27
+   },
+   "BCJR-5-ind": {
+    "sym_err": 335,
+    "sym_tot": 2940,
+    "crc_fail": 31
+   },
+   "BCJR-5-max": {
+    "sym_err": 273,
+    "sym_tot": 2940,
+    "crc_fail": 25
+   }
+  },
+  "-23": {
+   "n_packets": 84,
+   "NEW-0": {
+    "sym_err": 477,
+    "sym_tot": 2940,
+    "crc_fail": 48
+   },
+   "TREL-5": {
+    "sym_err": 310,
+    "sym_tot": 2940,
+    "crc_fail": 37
+   },
+   "BCJR-5": {
+    "sym_err": 366,
+    "sym_tot": 2940,
+    "crc_fail": 37
+   },
+   "BCJR-9": {
+    "sym_err": 373,
+    "sym_tot": 2940,
+    "crc_fail": 38
+   },
+   "BCJR-5-ind": {
+    "sym_err": 400,
+    "sym_tot": 2940,
+    "crc_fail": 36
+   },
+   "BCJR-5-max": {
+    "sym_err": 371,
+    "sym_tot": 2940,
+    "crc_fail": 37
+   }
+  },
+  "-24": {
+   "n_packets": 84,
+   "NEW-0": {
+    "sym_err": 788,
+    "sym_tot": 2940,
+    "crc_fail": 78
+   },
+   "TREL-5": {
+    "sym_err": 649,
+    "sym_tot": 2940,
+    "crc_fail": 76
+   },
+   "BCJR-5": {
+    "sym_err": 646,
+    "sym_tot": 2940,
+    "crc_fail": 76
+   },
+   "BCJR-9": {
+    "sym_err": 657,
+    "sym_tot": 2940,
+    "crc_fail": 76
+   },
+   "BCJR-5-ind": {
+    "sym_err": 670,
+    "sym_tot": 2940,
+    "crc_fail": 75
+   },
+   "BCJR-5-max": {
+    "sym_err": 645,
+    "sym_tot": 2940,
+    "crc_fail": 76
+   }
+  },
+  "-25": {
+   "n_packets": 84,
+   "NEW-0": {
+    "sym_err": 1186,
+    "sym_tot": 2940,
+    "crc_fail": 84
+   },
+   "TREL-5": {
+    "sym_err": 1133,
+    "sym_tot": 2940,
+    "crc_fail": 84
+   },
+   "BCJR-5": {
+    "sym_err": 1004,
+    "sym_tot": 2940,
+    "crc_fail": 83
+   },
+   "BCJR-9": {
+    "sym_err": 1022,
+    "sym_tot": 2940,
+    "crc_fail": 83
+   },
+   "BCJR-5-ind": {
+    "sym_err": 1001,
+    "sym_tot": 2940,
+    "crc_fail": 84
+   },
+   "BCJR-5-max": {
+    "sym_err": 1003,
+    "sym_tot": 2940,
+    "crc_fail": 83
+   }
+  },
+  "-26": {
+   "n_packets": 84,
+   "NEW-0": {
+    "sym_err": 1611,
+    "sym_tot": 2940,
+    "crc_fail": 84
+   },
+   "TREL-5": {
+    "sym_err": 1599,
+    "sym_tot": 2940,
+    "crc_fail": 84
+   },
+   "BCJR-5": {
+    "sym_err": 1434,
+    "sym_tot": 2940,
+    "crc_fail": 84
+   },
+   "BCJR-9": {
+    "sym_err": 1452,
+    "sym_tot": 2940,
+    "crc_fail": 84
+   },
+   "BCJR-5-ind": {
+    "sym_err": 1449,
+    "sym_tot": 2940,
+    "crc_fail": 84
+   },
+   "BCJR-5-max": {
+    "sym_err": 1435,
+    "sym_tot": 2940,
+    "crc_fail": 84
+   }
+  }
+ }
+}
+RESULT_JSON_END
+1193s elapsed（参考：SAVAUX/TRIMMER 同档数字见 results_exp1.json，同种子配对）
