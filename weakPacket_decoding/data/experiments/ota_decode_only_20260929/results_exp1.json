@@ -1,0 +1,1475 @@
+{
+ "native_snr_db_med": 7.998761495697311,
+ "delta_frozen": {
+  "OLD-A": {
+   "0": 0,
+   "1": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 1,
+   "8": 1,
+   "9": 1,
+   "10": 0,
+   "11": 0,
+   "12": 0,
+   "13": 0,
+   "14": 0,
+   "15": 0,
+   "16": 0,
+   "17": 0,
+   "18": 1,
+   "19": 1,
+   "20": 0,
+   "21": 1,
+   "22": 0,
+   "23": 0,
+   "24": 0,
+   "25": 0,
+   "26": 0,
+   "27": 0
+  },
+  "SAVAUX": {
+   "0": 0,
+   "1": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 1,
+   "8": 1,
+   "9": 1,
+   "10": 0,
+   "11": 0,
+   "12": 0,
+   "13": 0,
+   "14": 0,
+   "15": 0,
+   "16": 0,
+   "17": 0,
+   "18": 1,
+   "19": 1,
+   "20": 0,
+   "21": 1,
+   "22": 0,
+   "23": 0,
+   "24": 0,
+   "25": 0,
+   "26": 0,
+   "27": 0
+  },
+  "TRIMMER": {
+   "0": 0,
+   "1": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 1,
+   "8": 0,
+   "9": 1,
+   "10": 0,
+   "11": 0,
+   "12": 0,
+   "13": 0,
+   "14": 0,
+   "15": 0,
+   "16": 0,
+   "17": 0,
+   "18": 1,
+   "19": 1,
+   "20": 0,
+   "21": 1,
+   "22": 0,
+   "23": 0,
+   "24": 0,
+   "25": 0,
+   "26": 0,
+   "27": 0
+  },
+  "UNICHIRP": {
+   "0": 1,
+   "1": 0,
+   "2": 1,
+   "3": 0,
+   "4": 1,
+   "5": 1,
+   "6": 1,
+   "7": 1,
+   "8": 1,
+   "9": 1,
+   "10": 1,
+   "11": 1,
+   "12": 0,
+   "13": 0,
+   "14": 0,
+   "15": 1,
+   "16": 0,
+   "17": 1,
+   "18": 2,
+   "19": 2,
+   "20": 1,
+   "21": 1,
+   "22": 0,
+   "23": 0,
+   "24": 1,
+   "25": 1,
+   "26": 1,
+   "27": 1
+  },
+  "NEW-0": {
+   "0": 0,
+   "1": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 1,
+   "8": 0,
+   "9": 1,
+   "10": 0,
+   "11": 0,
+   "12": 0,
+   "13": 0,
+   "14": 0,
+   "15": 0,
+   "16": 0,
+   "17": 0,
+   "18": 1,
+   "19": 1,
+   "20": 0,
+   "21": 1,
+   "22": 0,
+   "23": 0,
+   "24": 0,
+   "25": 0,
+   "26": 0,
+   "27": 0
+  },
+  "BCJR": {
+   "0": 0,
+   "1": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 1,
+   "8": 0,
+   "9": 1,
+   "10": 0,
+   "11": 0,
+   "12": 0,
+   "13": 0,
+   "14": 0,
+   "15": 0,
+   "16": 0,
+   "17": 0,
+   "18": 1,
+   "19": 1,
+   "20": 0,
+   "21": 1,
+   "22": 0,
+   "23": 0,
+   "24": 0,
+   "25": 0,
+   "26": 0,
+   "27": 0
+  }
+ },
+ "levels": {
+  "+1": {
+   "meas_snr_db": 0.9414833302716709,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 127,
+    "sym_tot": 2940,
+    "crc_fail": 15,
+    "bytes_ok": 69
+   },
+   "OLD-A": {
+    "sym_err": 127,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "SAVAUX": {
+    "sym_err": 115,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "TRIMMER": {
+    "sym_err": 100,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "UNICHIRP": {
+    "sym_err": 579,
+    "sym_tot": 2940,
+    "crc_fail": 41,
+    "bytes_ok": 47
+   },
+   "NEW-0": {
+    "sym_err": 101,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "BCJR": {
+    "sym_err": 83,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   }
+  },
+  "+0": {
+   "meas_snr_db": -0.0331394897490189,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 119,
+    "sym_tot": 2940,
+    "crc_fail": 15,
+    "bytes_ok": 69
+   },
+   "OLD-A": {
+    "sym_err": 119,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "SAVAUX": {
+    "sym_err": 111,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "TRIMMER": {
+    "sym_err": 98,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "UNICHIRP": {
+    "sym_err": 630,
+    "sym_tot": 2940,
+    "crc_fail": 39,
+    "bytes_ok": 51
+   },
+   "NEW-0": {
+    "sym_err": 99,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "BCJR": {
+    "sym_err": 78,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   }
+  },
+  "-1": {
+   "meas_snr_db": -1.0014009293438366,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 111,
+    "sym_tot": 2940,
+    "crc_fail": 15,
+    "bytes_ok": 69
+   },
+   "OLD-A": {
+    "sym_err": 111,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "SAVAUX": {
+    "sym_err": 115,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "TRIMMER": {
+    "sym_err": 99,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "UNICHIRP": {
+    "sym_err": 774,
+    "sym_tot": 2940,
+    "crc_fail": 45,
+    "bytes_ok": 42
+   },
+   "NEW-0": {
+    "sym_err": 95,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "BCJR": {
+    "sym_err": 80,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   }
+  },
+  "-2": {
+   "meas_snr_db": -1.9999999999999993,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 124,
+    "sym_tot": 2940,
+    "crc_fail": 15,
+    "bytes_ok": 69
+   },
+   "OLD-A": {
+    "sym_err": 124,
+    "sym_tot": 2940,
+    "crc_fail": 10,
+    "bytes_ok": 74
+   },
+   "SAVAUX": {
+    "sym_err": 108,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "TRIMMER": {
+    "sym_err": 101,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "UNICHIRP": {
+    "sym_err": 747,
+    "sym_tot": 2940,
+    "crc_fail": 46,
+    "bytes_ok": 43
+   },
+   "NEW-0": {
+    "sym_err": 98,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "BCJR": {
+    "sym_err": 82,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   }
+  },
+  "-3": {
+   "meas_snr_db": -3.0000000000000004,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 121,
+    "sym_tot": 2940,
+    "crc_fail": 15,
+    "bytes_ok": 69
+   },
+   "OLD-A": {
+    "sym_err": 121,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "SAVAUX": {
+    "sym_err": 114,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "TRIMMER": {
+    "sym_err": 99,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "UNICHIRP": {
+    "sym_err": 721,
+    "sym_tot": 2940,
+    "crc_fail": 46,
+    "bytes_ok": 46
+   },
+   "NEW-0": {
+    "sym_err": 106,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "BCJR": {
+    "sym_err": 83,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   }
+  },
+  "-4": {
+   "meas_snr_db": -3.9999999999999987,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 120,
+    "sym_tot": 2940,
+    "crc_fail": 16,
+    "bytes_ok": 68
+   },
+   "OLD-A": {
+    "sym_err": 120,
+    "sym_tot": 2940,
+    "crc_fail": 11,
+    "bytes_ok": 73
+   },
+   "SAVAUX": {
+    "sym_err": 108,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "TRIMMER": {
+    "sym_err": 102,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "UNICHIRP": {
+    "sym_err": 830,
+    "sym_tot": 2940,
+    "crc_fail": 53,
+    "bytes_ok": 35
+   },
+   "NEW-0": {
+    "sym_err": 106,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "BCJR": {
+    "sym_err": 83,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   }
+  },
+  "-5": {
+   "meas_snr_db": -5.000000000000001,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 117,
+    "sym_tot": 2940,
+    "crc_fail": 14,
+    "bytes_ok": 70
+   },
+   "OLD-A": {
+    "sym_err": 117,
+    "sym_tot": 2940,
+    "crc_fail": 11,
+    "bytes_ok": 73
+   },
+   "SAVAUX": {
+    "sym_err": 120,
+    "sym_tot": 2940,
+    "crc_fail": 11,
+    "bytes_ok": 73
+   },
+   "TRIMMER": {
+    "sym_err": 105,
+    "sym_tot": 2940,
+    "crc_fail": 11,
+    "bytes_ok": 73
+   },
+   "UNICHIRP": {
+    "sym_err": 881,
+    "sym_tot": 2940,
+    "crc_fail": 47,
+    "bytes_ok": 42
+   },
+   "NEW-0": {
+    "sym_err": 105,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "BCJR": {
+    "sym_err": 85,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   }
+  },
+  "-6": {
+   "meas_snr_db": -5.999999999999997,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 126,
+    "sym_tot": 2940,
+    "crc_fail": 15,
+    "bytes_ok": 69
+   },
+   "OLD-A": {
+    "sym_err": 126,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "SAVAUX": {
+    "sym_err": 116,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "TRIMMER": {
+    "sym_err": 105,
+    "sym_tot": 2940,
+    "crc_fail": 11,
+    "bytes_ok": 73
+   },
+   "UNICHIRP": {
+    "sym_err": 766,
+    "sym_tot": 2940,
+    "crc_fail": 54,
+    "bytes_ok": 37
+   },
+   "NEW-0": {
+    "sym_err": 102,
+    "sym_tot": 2940,
+    "crc_fail": 10,
+    "bytes_ok": 74
+   },
+   "BCJR": {
+    "sym_err": 79,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   }
+  },
+  "-7": {
+   "meas_snr_db": -7.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 122,
+    "sym_tot": 2940,
+    "crc_fail": 15,
+    "bytes_ok": 69
+   },
+   "OLD-A": {
+    "sym_err": 122,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "SAVAUX": {
+    "sym_err": 117,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "TRIMMER": {
+    "sym_err": 108,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "UNICHIRP": {
+    "sym_err": 1062,
+    "sym_tot": 2940,
+    "crc_fail": 60,
+    "bytes_ok": 28
+   },
+   "NEW-0": {
+    "sym_err": 106,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "BCJR": {
+    "sym_err": 84,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   }
+  },
+  "-8": {
+   "meas_snr_db": -7.999999999999999,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 134,
+    "sym_tot": 2940,
+    "crc_fail": 15,
+    "bytes_ok": 69
+   },
+   "OLD-A": {
+    "sym_err": 134,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "SAVAUX": {
+    "sym_err": 112,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "TRIMMER": {
+    "sym_err": 105,
+    "sym_tot": 2940,
+    "crc_fail": 11,
+    "bytes_ok": 73
+   },
+   "UNICHIRP": {
+    "sym_err": 1068,
+    "sym_tot": 2940,
+    "crc_fail": 59,
+    "bytes_ok": 27
+   },
+   "NEW-0": {
+    "sym_err": 111,
+    "sym_tot": 2940,
+    "crc_fail": 11,
+    "bytes_ok": 73
+   },
+   "BCJR": {
+    "sym_err": 81,
+    "sym_tot": 2940,
+    "crc_fail": 8,
+    "bytes_ok": 76
+   }
+  },
+  "-9": {
+   "meas_snr_db": -9.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 128,
+    "sym_tot": 2940,
+    "crc_fail": 19,
+    "bytes_ok": 65
+   },
+   "OLD-A": {
+    "sym_err": 128,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "SAVAUX": {
+    "sym_err": 118,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "TRIMMER": {
+    "sym_err": 120,
+    "sym_tot": 2940,
+    "crc_fail": 11,
+    "bytes_ok": 73
+   },
+   "UNICHIRP": {
+    "sym_err": 1069,
+    "sym_tot": 2940,
+    "crc_fail": 62,
+    "bytes_ok": 25
+   },
+   "NEW-0": {
+    "sym_err": 117,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "BCJR": {
+    "sym_err": 90,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   }
+  },
+  "-10": {
+   "meas_snr_db": -9.999999999999998,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 134,
+    "sym_tot": 2940,
+    "crc_fail": 19,
+    "bytes_ok": 65
+   },
+   "OLD-A": {
+    "sym_err": 134,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "SAVAUX": {
+    "sym_err": 111,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "TRIMMER": {
+    "sym_err": 117,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "UNICHIRP": {
+    "sym_err": 1061,
+    "sym_tot": 2940,
+    "crc_fail": 67,
+    "bytes_ok": 19
+   },
+   "NEW-0": {
+    "sym_err": 124,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "BCJR": {
+    "sym_err": 97,
+    "sym_tot": 2940,
+    "crc_fail": 11,
+    "bytes_ok": 73
+   }
+  },
+  "-11": {
+   "meas_snr_db": -11.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 124,
+    "sym_tot": 2940,
+    "crc_fail": 21,
+    "bytes_ok": 63
+   },
+   "OLD-A": {
+    "sym_err": 124,
+    "sym_tot": 2940,
+    "crc_fail": 11,
+    "bytes_ok": 73
+   },
+   "SAVAUX": {
+    "sym_err": 113,
+    "sym_tot": 2940,
+    "crc_fail": 10,
+    "bytes_ok": 74
+   },
+   "TRIMMER": {
+    "sym_err": 117,
+    "sym_tot": 2940,
+    "crc_fail": 13,
+    "bytes_ok": 71
+   },
+   "UNICHIRP": {
+    "sym_err": 1001,
+    "sym_tot": 2940,
+    "crc_fail": 64,
+    "bytes_ok": 22
+   },
+   "NEW-0": {
+    "sym_err": 120,
+    "sym_tot": 2940,
+    "crc_fail": 13,
+    "bytes_ok": 71
+   },
+   "BCJR": {
+    "sym_err": 97,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   }
+  },
+  "-12": {
+   "meas_snr_db": -12.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 142,
+    "sym_tot": 2940,
+    "crc_fail": 24,
+    "bytes_ok": 60
+   },
+   "OLD-A": {
+    "sym_err": 142,
+    "sym_tot": 2940,
+    "crc_fail": 13,
+    "bytes_ok": 71
+   },
+   "SAVAUX": {
+    "sym_err": 127,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   },
+   "TRIMMER": {
+    "sym_err": 113,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "UNICHIRP": {
+    "sym_err": 1171,
+    "sym_tot": 2940,
+    "crc_fail": 72,
+    "bytes_ok": 12
+   },
+   "NEW-0": {
+    "sym_err": 114,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "BCJR": {
+    "sym_err": 91,
+    "sym_tot": 2940,
+    "crc_fail": 10,
+    "bytes_ok": 74
+   }
+  },
+  "-13": {
+   "meas_snr_db": -13.000000000000005,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 162,
+    "sym_tot": 2940,
+    "crc_fail": 27,
+    "bytes_ok": 59
+   },
+   "OLD-A": {
+    "sym_err": 162,
+    "sym_tot": 2940,
+    "crc_fail": 15,
+    "bytes_ok": 69
+   },
+   "SAVAUX": {
+    "sym_err": 115,
+    "sym_tot": 2940,
+    "crc_fail": 11,
+    "bytes_ok": 73
+   },
+   "TRIMMER": {
+    "sym_err": 119,
+    "sym_tot": 2940,
+    "crc_fail": 11,
+    "bytes_ok": 73
+   },
+   "UNICHIRP": {
+    "sym_err": 1158,
+    "sym_tot": 2940,
+    "crc_fail": 70,
+    "bytes_ok": 15
+   },
+   "NEW-0": {
+    "sym_err": 121,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "BCJR": {
+    "sym_err": 92,
+    "sym_tot": 2940,
+    "crc_fail": 7,
+    "bytes_ok": 77
+   }
+  },
+  "-14": {
+   "meas_snr_db": -14.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 175,
+    "sym_tot": 2940,
+    "crc_fail": 30,
+    "bytes_ok": 54
+   },
+   "OLD-A": {
+    "sym_err": 175,
+    "sym_tot": 2940,
+    "crc_fail": 14,
+    "bytes_ok": 70
+   },
+   "SAVAUX": {
+    "sym_err": 124,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "TRIMMER": {
+    "sym_err": 131,
+    "sym_tot": 2940,
+    "crc_fail": 10,
+    "bytes_ok": 74
+   },
+   "UNICHIRP": {
+    "sym_err": 1141,
+    "sym_tot": 2940,
+    "crc_fail": 73,
+    "bytes_ok": 13
+   },
+   "NEW-0": {
+    "sym_err": 142,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "BCJR": {
+    "sym_err": 91,
+    "sym_tot": 2940,
+    "crc_fail": 7,
+    "bytes_ok": 77
+   }
+  },
+  "-15": {
+   "meas_snr_db": -15.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 211,
+    "sym_tot": 2940,
+    "crc_fail": 33,
+    "bytes_ok": 51
+   },
+   "OLD-A": {
+    "sym_err": 211,
+    "sym_tot": 2940,
+    "crc_fail": 18,
+    "bytes_ok": 66
+   },
+   "SAVAUX": {
+    "sym_err": 134,
+    "sym_tot": 2940,
+    "crc_fail": 10,
+    "bytes_ok": 74
+   },
+   "TRIMMER": {
+    "sym_err": 125,
+    "sym_tot": 2940,
+    "crc_fail": 14,
+    "bytes_ok": 70
+   },
+   "UNICHIRP": {
+    "sym_err": 1206,
+    "sym_tot": 2940,
+    "crc_fail": 81,
+    "bytes_ok": 4
+   },
+   "NEW-0": {
+    "sym_err": 139,
+    "sym_tot": 2940,
+    "crc_fail": 15,
+    "bytes_ok": 69
+   },
+   "BCJR": {
+    "sym_err": 106,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   }
+  },
+  "-16": {
+   "meas_snr_db": -16.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 227,
+    "sym_tot": 2940,
+    "crc_fail": 38,
+    "bytes_ok": 46
+   },
+   "OLD-A": {
+    "sym_err": 227,
+    "sym_tot": 2940,
+    "crc_fail": 27,
+    "bytes_ok": 58
+   },
+   "SAVAUX": {
+    "sym_err": 123,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "TRIMMER": {
+    "sym_err": 135,
+    "sym_tot": 2940,
+    "crc_fail": 15,
+    "bytes_ok": 69
+   },
+   "UNICHIRP": {
+    "sym_err": 1155,
+    "sym_tot": 2940,
+    "crc_fail": 76,
+    "bytes_ok": 9
+   },
+   "NEW-0": {
+    "sym_err": 149,
+    "sym_tot": 2940,
+    "crc_fail": 14,
+    "bytes_ok": 70
+   },
+   "BCJR": {
+    "sym_err": 100,
+    "sym_tot": 2940,
+    "crc_fail": 9,
+    "bytes_ok": 75
+   }
+  },
+  "-17": {
+   "meas_snr_db": -17.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 374,
+    "sym_tot": 2940,
+    "crc_fail": 58,
+    "bytes_ok": 26
+   },
+   "OLD-A": {
+    "sym_err": 374,
+    "sym_tot": 2940,
+    "crc_fail": 39,
+    "bytes_ok": 45
+   },
+   "SAVAUX": {
+    "sym_err": 134,
+    "sym_tot": 2940,
+    "crc_fail": 13,
+    "bytes_ok": 71
+   },
+   "TRIMMER": {
+    "sym_err": 158,
+    "sym_tot": 2940,
+    "crc_fail": 15,
+    "bytes_ok": 69
+   },
+   "UNICHIRP": {
+    "sym_err": 1225,
+    "sym_tot": 2940,
+    "crc_fail": 77,
+    "bytes_ok": 7
+   },
+   "NEW-0": {
+    "sym_err": 168,
+    "sym_tot": 2940,
+    "crc_fail": 14,
+    "bytes_ok": 70
+   },
+   "BCJR": {
+    "sym_err": 108,
+    "sym_tot": 2940,
+    "crc_fail": 10,
+    "bytes_ok": 74
+   }
+  },
+  "-18": {
+   "meas_snr_db": -18.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 590,
+    "sym_tot": 2940,
+    "crc_fail": 78,
+    "bytes_ok": 5
+   },
+   "OLD-A": {
+    "sym_err": 590,
+    "sym_tot": 2940,
+    "crc_fail": 56,
+    "bytes_ok": 28
+   },
+   "SAVAUX": {
+    "sym_err": 144,
+    "sym_tot": 2940,
+    "crc_fail": 12,
+    "bytes_ok": 72
+   },
+   "TRIMMER": {
+    "sym_err": 173,
+    "sym_tot": 2940,
+    "crc_fail": 18,
+    "bytes_ok": 66
+   },
+   "UNICHIRP": {
+    "sym_err": 1182,
+    "sym_tot": 2940,
+    "crc_fail": 76,
+    "bytes_ok": 9
+   },
+   "NEW-0": {
+    "sym_err": 174,
+    "sym_tot": 2940,
+    "crc_fail": 16,
+    "bytes_ok": 68
+   },
+   "BCJR": {
+    "sym_err": 117,
+    "sym_tot": 2940,
+    "crc_fail": 10,
+    "bytes_ok": 74
+   }
+  },
+  "-19": {
+   "meas_snr_db": -19.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 852,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "OLD-A": {
+    "sym_err": 852,
+    "sym_tot": 2940,
+    "crc_fail": 74,
+    "bytes_ok": 10
+   },
+   "SAVAUX": {
+    "sym_err": 170,
+    "sym_tot": 2940,
+    "crc_fail": 14,
+    "bytes_ok": 71
+   },
+   "TRIMMER": {
+    "sym_err": 189,
+    "sym_tot": 2940,
+    "crc_fail": 16,
+    "bytes_ok": 68
+   },
+   "UNICHIRP": {
+    "sym_err": 1183,
+    "sym_tot": 2940,
+    "crc_fail": 75,
+    "bytes_ok": 9
+   },
+   "NEW-0": {
+    "sym_err": 188,
+    "sym_tot": 2940,
+    "crc_fail": 14,
+    "bytes_ok": 70
+   },
+   "BCJR": {
+    "sym_err": 118,
+    "sym_tot": 2940,
+    "crc_fail": 13,
+    "bytes_ok": 72
+   }
+  },
+  "-20": {
+   "meas_snr_db": -20.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 1323,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "OLD-A": {
+    "sym_err": 1323,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "SAVAUX": {
+    "sym_err": 157,
+    "sym_tot": 2940,
+    "crc_fail": 14,
+    "bytes_ok": 69
+   },
+   "TRIMMER": {
+    "sym_err": 196,
+    "sym_tot": 2940,
+    "crc_fail": 20,
+    "bytes_ok": 64
+   },
+   "UNICHIRP": {
+    "sym_err": 1247,
+    "sym_tot": 2940,
+    "crc_fail": 79,
+    "bytes_ok": 5
+   },
+   "NEW-0": {
+    "sym_err": 218,
+    "sym_tot": 2940,
+    "crc_fail": 19,
+    "bytes_ok": 66
+   },
+   "BCJR": {
+    "sym_err": 113,
+    "sym_tot": 2940,
+    "crc_fail": 13,
+    "bytes_ok": 71
+   }
+  },
+  "-21": {
+   "meas_snr_db": -21.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 1715,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "OLD-A": {
+    "sym_err": 1715,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "SAVAUX": {
+    "sym_err": 206,
+    "sym_tot": 2940,
+    "crc_fail": 17,
+    "bytes_ok": 70
+   },
+   "TRIMMER": {
+    "sym_err": 235,
+    "sym_tot": 2940,
+    "crc_fail": 20,
+    "bytes_ok": 65
+   },
+   "UNICHIRP": {
+    "sym_err": 1259,
+    "sym_tot": 2940,
+    "crc_fail": 83,
+    "bytes_ok": 1
+   },
+   "NEW-0": {
+    "sym_err": 238,
+    "sym_tot": 2940,
+    "crc_fail": 23,
+    "bytes_ok": 61
+   },
+   "BCJR": {
+    "sym_err": 147,
+    "sym_tot": 2940,
+    "crc_fail": 19,
+    "bytes_ok": 65
+   }
+  },
+  "-22": {
+   "meas_snr_db": -22.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 2064,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "OLD-A": {
+    "sym_err": 2064,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "SAVAUX": {
+    "sym_err": 231,
+    "sym_tot": 2940,
+    "crc_fail": 24,
+    "bytes_ok": 60
+   },
+   "TRIMMER": {
+    "sym_err": 330,
+    "sym_tot": 2940,
+    "crc_fail": 29,
+    "bytes_ok": 56
+   },
+   "UNICHIRP": {
+    "sym_err": 1347,
+    "sym_tot": 2940,
+    "crc_fail": 83,
+    "bytes_ok": 1
+   },
+   "NEW-0": {
+    "sym_err": 352,
+    "sym_tot": 2940,
+    "crc_fail": 34,
+    "bytes_ok": 51
+   },
+   "BCJR": {
+    "sym_err": 240,
+    "sym_tot": 2940,
+    "crc_fail": 23,
+    "bytes_ok": 61
+   }
+  },
+  "-23": {
+   "meas_snr_db": -23.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 2347,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "OLD-A": {
+    "sym_err": 2347,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "SAVAUX": {
+    "sym_err": 357,
+    "sym_tot": 2940,
+    "crc_fail": 38,
+    "bytes_ok": 48
+   },
+   "TRIMMER": {
+    "sym_err": 424,
+    "sym_tot": 2940,
+    "crc_fail": 44,
+    "bytes_ok": 40
+   },
+   "UNICHIRP": {
+    "sym_err": 1396,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "NEW-0": {
+    "sym_err": 477,
+    "sym_tot": 2940,
+    "crc_fail": 48,
+    "bytes_ok": 36
+   },
+   "BCJR": {
+    "sym_err": 331,
+    "sym_tot": 2940,
+    "crc_fail": 35,
+    "bytes_ok": 49
+   }
+  },
+  "-24": {
+   "meas_snr_db": -24.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 2566,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "OLD-A": {
+    "sym_err": 2566,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "SAVAUX": {
+    "sym_err": 542,
+    "sym_tot": 2940,
+    "crc_fail": 64,
+    "bytes_ok": 20
+   },
+   "TRIMMER": {
+    "sym_err": 716,
+    "sym_tot": 2940,
+    "crc_fail": 75,
+    "bytes_ok": 9
+   },
+   "UNICHIRP": {
+    "sym_err": 1550,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "NEW-0": {
+    "sym_err": 788,
+    "sym_tot": 2940,
+    "crc_fail": 78,
+    "bytes_ok": 6
+   },
+   "BCJR": {
+    "sym_err": 626,
+    "sym_tot": 2940,
+    "crc_fail": 75,
+    "bytes_ok": 9
+   }
+  },
+  "-25": {
+   "meas_snr_db": -25.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 2678,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "OLD-A": {
+    "sym_err": 2678,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "SAVAUX": {
+    "sym_err": 865,
+    "sym_tot": 2940,
+    "crc_fail": 75,
+    "bytes_ok": 9
+   },
+   "TRIMMER": {
+    "sym_err": 1102,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "UNICHIRP": {
+    "sym_err": 1775,
+    "sym_tot": 2940,
+    "crc_fail": 83,
+    "bytes_ok": 1
+   },
+   "NEW-0": {
+    "sym_err": 1186,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "BCJR": {
+    "sym_err": 999,
+    "sym_tot": 2940,
+    "crc_fail": 83,
+    "bytes_ok": 1
+   }
+  },
+  "-26": {
+   "meas_snr_db": -26.0,
+   "n_packets": 84,
+   "PLAIN": {
+    "sym_err": 2763,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "OLD-A": {
+    "sym_err": 2763,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "SAVAUX": {
+    "sym_err": 1300,
+    "sym_tot": 2940,
+    "crc_fail": 83,
+    "bytes_ok": 1
+   },
+   "TRIMMER": {
+    "sym_err": 1534,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "UNICHIRP": {
+    "sym_err": 2066,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "NEW-0": {
+    "sym_err": 1611,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   },
+   "BCJR": {
+    "sym_err": 1437,
+    "sym_tot": 2940,
+    "crc_fail": 84,
+    "bytes_ok": 0
+   }
+  }
+ }
+}
