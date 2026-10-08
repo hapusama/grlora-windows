@@ -1,0 +1,51 @@
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  70 (11.6min)
+  140 (23.0min)
+  210 (35.7min)
+  280 (48.3min)
+  350 (63.1min)
+  420 (78.6min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  490 (93.8min)
+  560 (108.3min)
+  630 (120.6min)
+  700 (131.5min)
+完成 728 单元，135.9min
+
+δ=0.02 PER（fast 冻结参数，n/档见括号；A=e_bl A 列对拍）
+SNR     | A(coh φ̂0) | P(ramp)   | N(noncoh)
+None    | PER 0.000 | PER 0.000 | PER 0.000  (n=140)
+-24     | PER 0.086 | PER 0.093 | PER 0.550  (n=140)
+-22     | PER 0.029 | PER 0.029 | PER 0.036  (n=140)
+-20     | PER 0.014 | PER 0.007 | PER 0.014  (n=140)
+-18     | PER 0.000 | PER 0.000 | PER 0.000  (n=140)
+
+dc0.02: P−A gain_med med +0.005 dB | 盲斜率差 med 2.75 mrad（≤3mrad 13/22，fit_ok 22/28） | coh−noncoh med 2.24 dB
+
+dc0.01: P−A gain_med med +0.021 dB | 盲斜率差 med 1.52 mrad（≤3mrad 18/28，fit_ok 28/28） | coh−noncoh med 2.13 dB

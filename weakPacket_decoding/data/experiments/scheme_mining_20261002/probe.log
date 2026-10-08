@@ -1,0 +1,60 @@
+=== Part 1: 三检测器 frontier（Pd=0.9）===
+    [T1] gamma=-25.00 dB  thr=46.38  Pd=0.668
+    [T1] gamma=-22.50 dB  thr=45.62  Pd=0.947
+    [T1] gamma=-23.75 dB  thr=45.21  Pd=0.847
+    [T1] gamma=-23.12 dB  thr=44.99  Pd=0.912
+    [T1] gamma=-23.44 dB  thr=47.33  Pd=0.865
+    [T1] gamma=-23.28 dB  thr=45.75  Pd=0.893
+    [T1] gamma=-23.20 dB  thr=48.68  Pd=0.867
+    [T1] gamma=-23.16 dB  thr=44.69  Pd=0.915
+    [T2] gamma=-31.00 dB  thr=131.5  Pd=0.737
+    [T2] gamma=-28.50 dB  thr=135.8  Pd=0.962
+    [T2] gamma=-29.75 dB  thr=134.5  Pd=0.885
+    [T2] gamma=-29.12 dB  thr=139.2  Pd=0.917
+    [T2] gamma=-29.44 dB  thr=135.7  Pd=0.907
+    [T2] gamma=-29.59 dB  thr=135.1  Pd=0.905
+    [T2] gamma=-29.67 dB  thr=133.6  Pd=0.903
+    [T2] gamma=-29.71 dB  thr=128.6  Pd=0.900
+    [T3] gamma=-17.00 dB  thr=2.077  Pd=0.960
+    [T3] gamma=-20.50 dB  thr=2.771  Pd=0.120
+    [T3] gamma=-18.75 dB  thr=3.833  Pd=0.495
+    [T3] gamma=-17.88 dB  thr=3.875  Pd=0.743
+    [T3] gamma=-17.44 dB  thr=3.183  Pd=0.905
+    [T3] gamma=-17.66 dB  thr=3.135  Pd=0.885
+    [T3] gamma=-17.55 dB  thr=3.451  Pd=0.880
+ FAR=1e-02  T1=-23.18  T2=-29.73  T3=-17.49 dB | T2-T1=-6.55 (th. 5.75)  T3-T1=+5.69
+    [T1] gamma=-25.00 dB  thr=61.69  Pd=0.432
+    [T1] gamma=-22.50 dB  thr=58.59  Pd=0.878
+    [T1] gamma=-21.25 dB  thr=59.5  Pd=0.962
+    [T1] gamma=-21.88 dB  thr=60.95  Pd=0.923
+    [T1] gamma=-22.19 dB  thr=69.85  Pd=0.838
+    [T1] gamma=-22.03 dB  thr=71.4  Pd=0.852
+    [T1] gamma=-21.95 dB  thr=69.93  Pd=0.858
+    [T1] gamma=-21.91 dB  thr=56.26  Pd=0.952
+    [T2] gamma=-31.00 dB  thr=180.1  Pd=0.552
+    [T2] gamma=-28.50 dB  thr=203.2  Pd=0.872
+    [T2] gamma=-27.25 dB  thr=185.3  Pd=0.982
+    [T2] gamma=-27.88 dB  thr=192.6  Pd=0.940
+    [T2] gamma=-28.19 dB  thr=227.4  Pd=0.850
+    [T2] gamma=-28.03 dB  thr=199.4  Pd=0.935
+    [T2] gamma=-28.11 dB  thr=210.1  Pd=0.912
+    [T2] gamma=-28.15 dB  thr=220.1  Pd=0.883
+    [T3] gamma=-17.00 dB  thr=5.365  Pd=0.880
+    [T3] gamma=-13.50 dB  thr=-30.12  Pd=1.000
+    [T3] gamma=-15.25 dB  thr=-2.221  Pd=1.000
+    [T3] gamma=-16.12 dB  thr=3.47  Pd=0.990
+    [T3] gamma=-16.56 dB  thr=2.972  Pd=0.980
+    [T3] gamma=-16.78 dB  thr=2.789  Pd=0.993
+    [T3] gamma=-16.89 dB  thr=3.998  Pd=0.960
+ FAR=1e-03  T1=-21.93  T2=-28.13  T3=-16.95 dB | T2-T1=-6.20 (th. 5.75)  T3-T1=+4.99
+=== Part 2: T1 FAR 曲线（两段式 FAR 再分配预算）===
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\scheme_mining_20261002\coding_as_detection_probe.py", line 211, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\scheme_mining_20261002\coding_as_detection_probe.py", line 157, in main
+    b = run_light_T1_only(-30.0, 100000, 0, 777)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\scheme_mining_20261002\coding_as_detection_probe.py", line 123, in run_light_T1_only
+    res[tag] = np.concatenate(acc)
+               ^^^^^^^^^^^^^^^^^^^
+ValueError: need at least one array to concatenate

@@ -1,0 +1,19 @@
+validate cr48L: V2 ref-RX=True  V3 my-RX=True
+
+== cr48L 门深（P(CRC)=0.9，per-sample dB，n=800/gamma）==
+ g=-23.00  B=0.000  B+=0.001
+ g=-22.00  B=0.000  B+=0.001
+ g=-21.00  B=0.000  B+=0.000
+ g=-20.00  B=0.000  B+=0.003
+ g=-19.00  B=0.000  B+=0.001
+ Pd.9 门深: B=None  B+=None | Pd.5: B+=None
+
+== H0 q_gate（纯噪声，lam0 按 −21dB 假设，n=3000）==
+ q_B = 1/3000 = 3.33e-04
+ q_Blist = 3/3000 = 1.00e-03
+
+ q_B+=1.00e-03 -> f_cell=1.00e-06 -> 检测 frontier=-19.543 dB（rt3a N=32 版为 -19.53）
+
+== 裁决：门深 B+=None  检测 frontier=-19.54  基线=-18.21
+   系统 frontier（被较浅者钳）=None  净 dB=None
+saved rt3a_long_results.json (642.2 s)

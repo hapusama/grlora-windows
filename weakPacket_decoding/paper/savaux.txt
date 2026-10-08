@@ -1,0 +1,701 @@
+23 September 2021
+
+A Low-Complexity Demodulation for
+Oversampled LoRa Signal
+
+Vincent Savaux1
+1. b<>com
+
+Abstract
+This paper deals with a method of demodulation for oversampled LoRa signal. The usual
+maximum likelihood (ML) based demodulation method for LoRa chirp spread spectrum (CSS)
+waveform is dedicated to signals sampled at Nyquist rate, whereas considering oversampled
+signals may improve the performance of the LoRa demodulation process. In this respect, when
+an oversampling rate (OSR) 2 is assumed, the method suggested in this paper consists in applying
+two demodulation processes to the even and odd samples of the oversampled LoRa signal,
+and then combining the results. This principle is then generalized to any OSR, and we show
+that the complexity of the method is low since it only involves discrete Fourier transforms
+(DFT). Moreover, a performance analysis in terms of symbol and bit error rate (SER and BER) is
+presented considering both additive white Gaussian noise (AWGN) and Rayleigh channel models.
+Simulations show the relevance of the method and the performance analysis as a gain of 3 dB is
+achieved by the demodulation at OSR 2 compared with OSR 1.
+Keywords
+communication, networking and broadcast technologies, demodulation, lora, low-complexity,
+maximum likelihood methods
+
+Posted on 23 September 2021 -- CC-BY 4.0 -- This is a preprint and has not been peer reviewed. Data may be preliminary. --
+https://doi.org/10.36227/techrxiv.16657063.v1
+A Low-Complexity Demodulation for Oversampled
+
+                        LoRa Signal
+
+                                                            Vincent Savaux
+
+                                                                        Abstract
+
+           This paper deals with a method of demodulation for oversampled LoRa signal. The usual maximum likelihood
+      (ML) based demodulation method for LoRa chirp spread spectrum (CSS) waveform is dedicated to signals sampled
+      at Nyquist rate, whereas considering oversampled signals may improve the performance of the LoRa demodulation
+      process. In this respect, when an oversampling rate (OSR) 2 is assumed, the method suggested in this paper consists
+      in applying two demodulation processes to the even and odd samples of the oversampled LoRa signal, and then
+      combining the results. This principle is then generalized to any OSR, and we show that the complexity of the
+      method is low since it only involves discrete Fourier transforms (DFT). Moreover, a performance analysis in terms
+      of symbol and bit error rate (SER and BER) is presented considering both additive white Gaussian noise (AWGN)
+      and Rayleigh channel models. Simulations show the relevance of the method and the performance analysis as a gain
+      of 3 dB is achieved by the demodulation at OSR 2 compared with OSR 1.
+
+   Keywords ­ LoRa, Demodulation, Maximum Likelihood, Low-complexity
+
+                                                           I. INTRODUCTION
+   In the recent years, the Internet of things (IoT) technologies, among which the low power wide area network
+(LPWA) solutions, have enabled the connectivity of a constantly growing number of devices, offering digital
+transformation across industry verticals [1]. Among the LPWA technologies, LoRa is one of the most deployed and
+studied by both academic and industrial researchers, mainly because it offers the advantage of an easy deployment.
+The LoRa waveform is originally based on the chirp spread spectrum (CSS) modulation, described by Winkler in
+[2]. More generally, the physical layer (PHY) of LoRa is developed by Semtech, and the system has been promoted
+by the LoRa Alliance, that specifies the LoRaWAN open protocol.
+   The PHY layer of LoRa as well as related signal processing algorithms and performance analyzes have been
+extensively studied in the literature. Thus, the LoRa waveform and its main properties are described by the authors
+of [3], [4]. In [5]­[9], theoretical symbol and bit error rate (SER and BER) expressions and approximations are
+provided for different channel models. However, these performance analyzes are limited to LoRa signals sampled
+at Nyquist rate, because the LoRa demodulation is inherently designed to process signals sampled at oversampling
+rate (OSR) 1 (i.e. Nyquist rate). For this reason, only few papers like [10] deal with demodulation of oversampled
+
+   Manuscript submitted
+   Vincent Savaux is with IRT b<>com, Rennes, France (corresponding author: e-mail: vincent.savaux@b-com.com)
+                                                                   1
+
+LoRa signals, whereas it is a straightforward strategy for performance improvement. In [10] a discrete Fourier
+transform (DFT) of the size of the oversampled signal is applied, and the resulting spectrum is processed to take
+advantage of the gain of energy brought by the oversampling. Despite this method requires a low computational
+cost, the processing in the frequency domain leads to an increase of the observed noise level, making the technique
+relevant only for OSR strictly larger than 2.
+
+   In this paper, we suggest a new demodulation method for oversampled LoRa signals combining both good per-
+formance and low complexity. The principle of the method considering OSR 2, consists in splitting the oversampled
+signal into two signals sampled at Nyquist rate, one containing the even samples, and the other one containing
+the odd samples of the oversampled LoRa signal. Then, dedicated DFT are applied to each of the signals, and the
+resulting responses are combined to apply the usual LoRa demodulation process. It is shown that such principle
+can be extended to any OSR as well. The complexity of the suggested technique is limited as it only involves to
+apply a number of DFT equal to the OSR. Furthermore, the theoretical achievable SER and BER performance is
+derived considering both additive white Gaussian noise (AWGN) and Rayleigh channel models, and it is validated
+through simulations. Thus, a gain of 3 dB is achieved by the suggested demodulation at OSR 2 compared with the
+usual demodulation at Nyquist rate.
+
+   The rest of the paper is organized as follows: Section II presents a background on LoRa modulation and
+demodulation. In Section III we introduce the new demodulation method for oversampled LoRa signal, as well as
+the corresponding performance analysis. Simulations results show the relevance of the technique in Section IV, and
+Section V concludes this paper.
+
+   Notations: The normal font x is used for scalars, and the boldface x for vectors and matrices. The lower-case
+and the upper-case x and X indicates samples in time and frequency domains, respectively. The probability of an
+event E is denoted by P(E), and E{.} is the mathematical expectation.
+
+                                                     II. LORA SYSTEM MODEL
+
+   In this section, we describe the LoRa signal model and the corresponding demodulation et the receiver side.
+Based on CSS, the modulation of LoRa signal consists in mapping a binary packet of size N = 2SF , where SF is
+the spreading factor, onto a LoRa symbol noted s(m), where m = 0, 1, .., N -1 indicates the index of the modulated
+chirp. Each symbol has a duration Ts and a bandwidth Bw such that BwTs = N . We denote by ro the OSR of the
+signal (r = 1 means Nyquist rate), then for any n = 0, 1, .., N  - 1 where N  = rN , and for any SF value, the
+modulated LoRa symbol s(m) can be expressed by generalizing [4]-(13) as
+
+s(m)[n] = exp  2j n      n   -  1  +  m  -  u( n   -  N  +  m)  ,  (1)
+                    ro  2N      2     N        ro
+
+where u(.) indicates the Heaviside step function. We assume a synchronized reception (see [11]­[14] for synchro-
+
+nization in LoRa), and we consider that the propagation channel can be modeled as a one-tap block fading channel
+h, therefore, for any n = 0, 1, ..N  - 1, the received signal r[n] is given by
+                                                                                                          2
+
+                                                       r[n] = hs(m)[n] + w[n],                            (2)
+
+where w[n], n = 0, 1, .., N  -1, are the independent and identically distributed (iid) samples of the complex additive
+white Gaussian noise (AWGN) such that w[n]  CN (0, 2), where 2 = E{|w[n]|2}. In the following, we assume
+that channel h is either an AWGN channel (i.e. h = 1) or a Rayleigh channel (i.e. h = CN (0, h2)). In any case,
+we define the signal-to-noise ratio as
+
+                                                SNR    =     E{|hs(m)[n]|2}  =     E{|h|2}                (3)
+                                                               E{|w[n]|2}             2 .
+
+    The basic principle of the LoRa demodulation process consists in estimating the symbol index m from the obser-
+
+vation r[n], by means of the maximum likelihood (ML) estimator since it is optimal in condition of synchronized
+
+reception [5], [12], [13]. For OSR ro = 1, the LoRa demodulation process is based on three mains steps: the
+
+"dechirp" operation, consisting in removing the quadratic component from the received LoRa symbol:
+
+                                                y[n] = r[n] exp     -2jn(     n    -       1  )  .        (4)
+                                                                             2N            2
+
+Then, a discrete Fourier transform (DFT) is applied:
+
+                                                    Y [k] = 1       N -1           -2jnk
+                                                                                        N
+                                                                          y  [n]e          ,              (5)
+                                                             N n=0
+                                                                          
+where k = 0, 1, .., N - 1. It should be noticed that Y [k] = N (k - m) + W [k] when k = m, and Y [k] = W [k]
+
+when k = m, where (k) is the Dirac impulse and W [k] are the noise samples in frequency domain. Moreover,
+by property of the DFT, the noise samples W [k] are all iid and W [k]  CN (0, 2). Finally, the ML estimator of
+
+m yields
+
+                                                       m^ = arg max |Y [k]|2,                             (6)
+
+                                                             k[[0,N ]]
+
+where |Y [k]|2 is called the periodogram of y[n]. The symbol error rate (SER) performance corresponding to the
+
+LoRa demodulation has been largely studied in from [6]­[8]. Thus, given the channel gain h, it can be expressed
+
+as
+
+                                        Ps|h = P(m^ = m|h)                                                (7)
+
+                                                       N -1  (-1)k  N -1               kN        |h|2
+                                                                      k               (k +       1)2
+                                           =        -                        exp   -                   .  (8)
+                                                             k+1
+                                                       k=1
+
+From (8), the SER performance of the LoRa signal in AWGN channel is simply obtained through Psawgn = Ps|h=1,
+
+and the SER of the LoRa signal over Rayleigh channel, denoted by Psray, is given by averaging Ps|h weighted by
+                                                 x
+the  Rayleigh  distribution  f|h|2 (x)  =    -  h2  such as follows
+
+                                           e
+
+                                           h2
+                                                                                                                                           3
+
+                                               Psray =        +
+
+                                                                  f|h|2 (x)Ps|hdx                                                          (9)
+
+                                                           0
+
+                                                       =   -  N -1    (-1)k       N -1  2        .                                         (10)
+                                                              k=1   kN h2 +         k   1)2
+
+                                                                                  (k +
+
+The  BER  Pb  is,  in  turn,  obtained   from  the  SER    through  Pb    =  P . 2SF -1     Besides    the     performance  analysis,  we  also
+
+                                                                             2SF -1 s
+
+gives the complexity of the LoRa demodulation in terms of complex multiplications: we deduce from (4), (5), and
+
+(6) that these operations require N , N log(N ), and N operations, respectively.
+
+    In [10], the demodulation of LoRa has been extended to any OSR ro > 1. Similar to the case OSR ro = 1, the
+
+"dechirp" operation becomes
+
+                                               y[n] = r[n] exp      -2j n      (   n    -  1  )     ,                                      (11)
+                                                                           ro     2N       2
+
+where n = 0, 1, .., N  - 1. A DFT of size N  is then applied to y[n] in (11). The resulting spectrum Y [k],
+
+k = 0, 1, .., N  - 1, highlights two peaks at the positions k = m and k = m - N + N , and with amplitudes
+
+Y [k = m] = ro(N-m) (k - m) + W [m] and Y [k = m - N + N ] = rom (k - m + N - N ) + W [m - N + N ].
+                   N                                                                       N
+
+As a consequence, it is suggested in [10] to sum these peaks through
+
+                                                  Y~ [k] = Y [k] + Y [(ro - 1)N + k].                                                      (12)
+
+It  must  be  noticed  that   Y~ [k]  =             -  m)  +  W~ [k]  when     k  =     m,    and      Y~ [k]  =  W~ [k]  when  k  =  m,  where
+                                           N (k
+
+W~ [k] = W [k] + W [(ro - 1)N + k] are the combined noise samples in frequency domain. Finally, the ML estimators
+
+of the index m then leads to
+
+                                                       m^ = arg max |Y~ [k]|2.                                                             (13)
+
+                                                              k[[0,N ]]
+
+    The SER performance of the LoRa demodulation proposed in [10], for any OSR r > 1 is given by
+
+                                         Ps|h  =     N -1  (-1)k    N -1  exp     -    kN |h|2         ,                                   (14)
+                                                                      k               2(k + 1)2
+                                                  -
+                                                              k+1
+                                                    k=1
+
+where the term 22 in the denominator within the exponential comes from E{|W [k]+W [(ro -1)N +k]|2} = 22. It
+
+can be deduced from (14) that an OSR ro = 2 leads to the same SER as in (8) using ro = 1, and then a performance
+
+improvement of the method in [10] is only effective for ro > 2 compared with the usual LoRa demodulation at
+OSR ro = 1. More generally, the larger N  (through the OSR ro), the lower the SER, but to the cost of increase
+
+of complexity. In the following, we introduce a new low-complex LoRa demodulation method that outperforms the
+
+usual demodulation for any OSR ro  2.
+                                                                                                            4
+
+   z-1            2               processing
+                                  (odd)
+
+   OSR2                   OSR1                                                               LoRa
+                                                                                             demod.
+
+                  2               processing
+
+                                  (even)
+
+Fig. 1. Principle of the suggested demodulation for LoRa signal at OSR r = 2.
+
+                               III. NEW DEMODULATION OF OVERSAMPLED LORA SIGNAL
+
+A. OSR ro = 2
+   We first present the proposed LoRa demodulation method for OSR ro = 2 before generalizing to any OSR. The
+
+principle is illustrated in Fig. 1: the received signal r[n] sampled at OSR ro = 2 is split into two downsampled
+signals, one consisting in the even samples and the other one consisting in the odd samples (illustrated by the
+delay z-1 in Fig. 1) of the received oversampled signal. Then, specific "dechirp" and DFT processes are applied,
+and the resulting signals are combined to apply the usual LoRa demodulation (i.e. the ML estimator of m). In the
+following, the steps of the suggested LoRa demodulation are detailed.
+
+   1) OSR ro = 2, n Even: For n even, we note n = 2p, with p = 0, 1, .., N - 1. In that case, the ML estimator
+of m applied to the observations r[2p] reduces to the aforementioned case corresponding to OSR 1, such as shown
+as follows:
+
+m^ = arg max   1  N -1                2                                                                     (15)
+
+                       r[2p]s(k)[2p]
+               N p=0
+   k[[0,N ]]
+
+=  arg max     1  N -1            -2jp    p  -                                 1  +  k  - u(p - N + k)  2   (16)
+                                         N                                     2     N
+    k[[0,N ]]          r[2p] exp                                                                         ,
+               N p=0
+
+and since exp(2jpu(p - N + k)) = 1 for any p and k values, we obtain:
+
+   m^ = arg max 1         N -1                                                       -2j pk  2              (17)
+
+                               r[2p]s(0)[2p] exp                                        N
+                          N p=0
+               k[[0,N ]]
+
+                          2
+               = arg max Y [k] .                                                                            (18)
+
+               k[[0,N ]]
+                                                                                                                                                                                                 5
+
+   2) OSR ro = 2, n Odd: For n odd, we note n = 2p + 1, with p = 0, 1, .., N - 1. In that case, the ML estimator
+of m applied to the observation r[2p + 1] yields:
+
+       m^ = arg max          1     N -1                                      2                                                                                 (19)
+
+                                        r[2p + 1]s(k)[2p + 1]
+                               N p=0
+                 k[[0,N ]]
+
+           =     arg max     1     N -1                        -2j        2p  +  1       2p + 1       -  1  +   k  -       u(  2p  +   1  -N  + k)        2    (20)
+                                                                              2           2N             2      N                  2
+                  k[[0,N ]]             r[2p + 1] exp                                                                                                      .
+                               N p=0
+
+Then,  since     exp(2jpu(    2p+1  -  N    +    k))  =  1  for  any      p  and      k  values,      and    exp        -j     k       = 1 we obtain:
+                                2                                                                                              N
+
+  m^ = arg max        1      N -1                                            -j k            exp      ju(    2p  +      1  -   N   +   k)  exp  -2j       pk   2
+                                                                                                                 2                                        N
+                                  r[2p + 1]s(0)[2p + 1] exp                           N                                                                        (21)
+                            N p=0
+           k[[0,N ]]
+
+                      exp    -j     k       N -1                                                      2p  +  1                             -2j pk         2
+                                    N                                                                     2                                       N
+     =  arg max                                  r[2p + 1]s(0)[2p + 1] exp                   j  u(              -  N       +   k)   exp                        (22)
+                               N
+           k[[0,N ]]                        p=0
+
+     =  arg max       Y  [k]  2                                                                                                                                (23)
+
+                               ,
+
+           k[[0,N ]]
+
+where Y [k] is the DFT of r[2p + 1]s(0)[2p + 1] exp                       j  u(  2p+1        -   N    +  k)  . Alternatively, we can rewrite Y [k] in
+                                                                                   2
+
+(23) by noticing that
+
+                                                                                 
+
+                                            2p   +    1                      1,          if  2p+1     -N     +k < 0
+                                                 2                        =                    2
+                              exp   ju(                  -  N  +      k)                                                            .                          (24)
+
+                                                                                 -1,         if  2p+1    -N     +k         0
+                                                                                                   2
+
+Then Y [k] in (23) can be expressed in a matrix notation as
+
+                                                                 1               ···             1                          
+                                      11                                                                           1
+
+                                                                                                                                  
+
+                                    1                          2                 · · · N-2                   -N -1                
+                                                                                                                                  
+
+                                                                                                                                  
+
+                                                                                                                                  
+                             Y = 1 2                           4                         -2(N -2)            -2(N -1)
+                                                                                 ···                                                y                          (25)
+                                                                                                                                  
+
+                                       ...       ...             ...                             ...               ...            
+
+                                                                                 ...                                              
+                                                                                                                                  
+                                                                                                                                  
+
+                                                                                                                                  
+
+                                       1 -N-1 -2(N-1) · · ·                                                  -(N -1)2
+
+                                                                                 F'
+
+where Y and y are the N × 1 vectors containing the samples Y [k] and r[2p + 1]s(0)[2p + 1], respectively, and
+
+  =  e-2j     .  Furthermore,  it  must     be  emphasized     that   F'     is  similar     to  the  DFT      matrix,      as  it  only   differs  from  the  usual
+           N
+
+DFT matrix by signs. Thus (25) can be computed with the same complexity (in terms of complex multiplications)
+
+as the usual DFT, namely N log(N ).
+                                                                                                                                                             6
+
+   3) OSR ro = 2, Combining Even and Odd n: Once both Y [k] and Y [k] have been obtain from the oversampled
+signal y[n], it is possible to combine these results to improve the LoRa demodulation. To this end, the ML estimation
+of m becomes:
+
+                                            m^ = arg max Y [k] + exp -j k                             Y  [k]  2                                              (26)
+                                                                                               N
+                                                                                                               .
+
+                                                        k[[0,N ]]
+
+                                                                                      Y~ [k]
+
+Thus,  it  results  that  Y~  [k]  =              -  m)  +   W [k]    +     e-j    k  W [k]   when    k   =   m,     and  Y~ [k]  =  W [k]  +  e-j    k  W [k]
+                                      2 N (k                                       N                                                                  N
+
+when   k   =  m.  Since   E{|W [k]      +  e-j    k  W [k]|2}      =  22,      the    SER  of    the  suggested      demodulation    leads     to
+                                                  N
+
+                                            Ps|h   =     N -1  (-1)k        N -1      exp     -  2kN |h|2         .                                          (27)
+                                                                              k                  (k + 1)2
+                                                      -
+                                                                      k+1
+                                                         k=1
+
+From   (27)   we    notice    that  the  ratio    2kN |2|2  within    the      exponential       is   twice   larger  than  the      ratio   kN |2|2     in  (8).
+                                                  (k+1)2                                                                                    (k+1)2
+
+Since the larger the ratio, the lower the SER, we deduce that the suggested method at OSR ro = 2 actually
+
+outperforms the usual LoRa demodulation at OSR ro = 1. Note that the SER in AWGN and Rayleigh channel can
+be straightforwardly obtained as previously, i.e. Psawgn = Ps|h=1, and
+
+                                                     Psray =          +
+
+                                                                         f|h|2 (x)Ps|hdx                                                                     (28)
+
+                                                                   0
+
+                                                            =  -      N -1     (-1)k     N -1    2        .                                                  (29)
+                                                                      k=1                  k
+
+                                                                            2kN h2 + (k + 1)2
+
+Moreover the complexity of the suggested demodulation is only twice that of OSR ro = 1, since the processes
+
+for even and odd n samples are similar.
+
+B. Generalizing for any OSR
+
+   We can generalizing the principle of the demodulation described in Fig. 1 to any OSR. For any ro  1, the
+oversampled LoRa signal is split into ro branches, such that we denote n = rop + q the indexes of the samples
+of the downsampled signal in the q-th branch, where p = 0, 1, .., N - 1, q = 0, 1, ro - 1. In that case, the ML
+estimator of m applied to the observation r[rop + q] yields:
+
+       m^ =   arg max         1     N -1                                    2                                                                            (30)
+          =                     N
+               k[[0,N ]]                 r[rop + q]s(k)[rop + q]                                                                                      2
+
+              arg max               p=0                                                                                                                . (31)
+
+               k[[0,N ]]      1     N -1        +    q] exp    -2j rop + q            rop + q     -   1   +   k   - u( rop + q       -N     + k)
+                                N                                        ro             2N            2       N            ro
+                                         r[rop
+
+                                    p=0
+
+Then,  since  exp(2j        pu(  rop+1   -  N   +  k))  =   1  for    any   p  and    k  values,     and     exp     -2j     qk      = 1 we obtain:
+                                   ro                                                                                       ro N
+                                                                                                                                                       7
+
+m^ =  arg max     1    N -1                                             -2j rop + q             k - u( rop + q - N + k)                  2             (32)
+                    N                                                             ro
+       k[[0,N ]]            r[rop + q]s(0)[rop + q] exp                                         N               ro
+
+                       p=0
+
+                  exp  -2j              q  k       N -1                                     2j q u( rop + q - N + k)                               pk      2
+                                       N   ro
+=     arg max                                           r[rop + q]s(0)[rop + q] exp                                                   exp   -2j        (33)
+                              N                                                                 ro         ro                                      N
+      k[[0,N ]]                                    p=0
+
+=     arg max     Y  (ro)[k]       2                                                                                                                   (34)
+
+                                    ,
+
+      k[[0,N ]]
+
+where Y (q,ro)[k] is the DFT of r[rop + q]s(0)[rop + q] exp                    2j    q   u(  rop+q   -  N       +  k)  . Once again, we can rewrite
+                                                                                     ro        ro
+
+(34) by noticing that
+
+                                                                             
+
+                       exp 2j q u( rop + q - N + k)                        1,      if  rop+q    -N      +k < 0
+                                                                        =                ro
+                                                                                                                                .                      (35)
+                                           ro         ro
+                                                                             e2j      q  ,  if  rop+q   -N +k0
+                                                                                     ro           ro
+
+Then Y (q,ro)[k] in (34) can be expressed in a matrix notation as
+
+                                                                                                                                       
+                                                                                                                           1
+                         1                     1                   1         ···                1
+
+                                                                                                                                      
+
+                       1                                           2         ···            N -2                   e2j   q  N   -1    
+                                                                                                                        ro            
+
+                                                                                                                                      
+
+                                                                                     e2j     q                  e2j     q             
+      Y(q,ro) = 1                              2                   4                        ro  2(N  -2)               ro  2(N  -1)
+                                                                             ···                                                         y,            (36)
+                                                                                                                                      
+
+                              ...              ...                 ...                          ...                        ...        
+
+                                                                             ...                                                      
+                                                                                                                                      
+                                                                                                                                      
+
+                                                                                                                                      
+
+                         1             e2j      q  N  -1  e2j   q  2(N  -1)  ···                                e2j     q  (N   -1)2
+                                               ro              ro                                                      ro
+
+                                                                                                       F(q,ro )
+
+where the complexity of the matrix multiplication straightforwardly reduces to that of the DFT if ro  {1, 2, 4}.
+For other values of ro, dedicated algorithms for matrix multiplication may be necessary, which limits the ease of
+implementation. Then, similarly to (26) we can combine the results from the ro branches to apply the ML estimator
+as follows:
+
+                                               m^ =   arg max      ro-1      -2j       qk       Y    (q,ro)[k]  2                                      (37)
+
+                                                                        exp          N ro                        .
+
+                                                      k[[0,N ]] q=0
+
+                                                          IV. SIMULATIONS RESULTS
+
+   The simulation results have been obtained using Matlab for the Monte-Carlo results, and using Python 3 with
+the libraries numpy and gmpy for the computation of the theoretical results (27) and (29) since it requires a high
+computation precision due to the binomial coefficient. In all simulations, the bandwidth of the LoRa signal is set
+to Bw = 125 kHz, the OSR for the new method is ro = 2, and compared with the usual method at OSR ro = 11.
+Moreover, when a Rayleigh channel is considered, the channel gain is set to h2 = 1.
+
+   1The code corresponding the theoretical achievable SER at OSR 1 can be found at https://github.com/b-com/ber_LoRa
+                                                                                                                                     8
+
+    Fig. 2 shows the SER performance versus SNR (dB) of the LoRa demodulation at OSR 1 for both the even and
+
+the odd samples (corresponding to (18) and (23), respectively), compared with the suggested demodulation at OSR
+
+2 (26). In Fig. 2-(a), the AWGN channel is considered, and the SNR varies in the range [-15, -5] dB, and in Fig.
+
+2-(b), the Rayleigh channel is considered, and the SNR varies in the range [-23, 10] dB. We observe in both Figs.
+
+2-(a) and (b) that the SER performance of the LoRa demodulation at OSR 1 is the same for both the even and
+
+the odd samples. Moreover, a gain of 3 dB is achieved by the suggested method at OSR 2 compared with OSR
+
+1.  This  is  consistent  with  the  analysis,  as  we  noticed  that  the  ratio  2kN |2|2  within  the  exponential  in  (27)  is  twice
+                                                                                   (k+1)2
+
+larger  than  the  ratio   kN |2|2  in  (8),  corresponding  to  a  3  dB  gain.
+                          (k+1)2
+
+    Fig. 3 compares the SER performance results versus SNR (dB) of the suggested demodulation obtained through
+
+analysis ((27) and (29)) and through simulations for SF 7, 8, and 9, and considering AWGN (a), and Rayleigh (b)
+
+channel models. In any configuration, we observe that the theoretical results match the simulations ones, therefore
+
+validating the suggested performance analysis. Furthermore, a gain of about 3dB is achieve between the performance
+
+of "SF N" compared with "SF N-1", which is consistent with the usual demodulation at OSR 1.
+
+                                                            V. CONCLUSION
+
+   In this paper, we have introduced a new demodulation method for oversampled LoRa signal. The principle consists
+in splitting the received signal into downsampled signals, processing them using dedicated DFT, then combining
+them and finally applying a usual LoRa demodulation to the combined signals. The advantages of the suggested
+method lie in the improvement of the demodulation performance compared with the usual one performed at OSR
+1, while keeping a low computational cost. Furthermore, a performance analysis in term of SER is developed,
+which is validated through simulations. Future works will investigate the impact of non-ideal reception including
+synchronization mismatch on the performance of the demodulation.
+
+                                                             REFERENCES
+
+[1] G. A. Akpakwu, B. J. Silva, G. P. Hancke, and A. M. Abu-Mahfouz, "A Survey on 5G Networks for the Internet of Things:
+     Communication Technologies and Challenges," IEEE Access, vol. 6, no. 12, pp. 3619 ­ 3647, December 2017.
+
+[2] M. Winkler, "Chirp signals for communications," IEEE WESCON Convention Record, p. 7, 1962.
+[3] L. Vangelista, "Frequency Shift Chirp Modulation: The LoRa Modulation," IEEE Signal Processing Letters, vol. 24, no. 12, pp. 1818
+
+     ­ 1821, December 2017.
+[4] M. Chiani and A. Elzanaty, "On the LoRa Modulation for IoT: Waveform Properties and Spectral Analysis," IEEE Internet of Things
+
+     Journal, vol. 6, no. 5, pp. 8463­8470, October 2019.
+[5] G. Ferré and A. Giremus, "LoRa Physical Layer Principle and Performance Analysis," proc. of IEEE International Conference on
+
+     Electronics, Circuits and Systems 2018 (ICECS'18). Bordeaux, France: IEEE, 12 2018, pp. 1 ­ 4.
+[6] T. Elshabrawy and J. Robert, "Closed-Form Approximation of LoRa Modulation BER Performance," IEEE Communications Letters,
+
+     vol. 22, no. 9, pp. 1778 ­ 1781, September 2018.
+[7] J. Proakis and M. Salehi, Digital Communications. McGraw-Hill, 2008.
+[8] C. F. Dias, E. R. de Lima, and G. Fraidenraich, "Bit Error Rate Closed-Form Expressions for LoRa Systems under Nakagami and Rice
+
+     Fading Channels," Sensors, vol. 19, no. 20, pp. 1 ­ 11, October 2019.
+                                                                                                                                                                 9
+
+     100
+
+                                                                                                                                      OSR 1, n even
+
+     10-1                                                                                                                             OSR 1, n odd
+
+                                                                                                                                      OSR 2, new demod.
+
+SER  10-2
+
+                                                                                                                        3 dB
+
+     10-3
+
+     10-4  -14  -13                                                                                                                   -7                     -5
+     -15                  -12  -11  -10                                                                                       -9  -8                     -6
+
+                                    SNR (dB)
+
+                                                           (a) AWGN channel.
+
+     100
+
+                                                                                                                                 OSR 1, n even
+                                                                                                                                 OSR 1, n odd
+                                                                                                                                 OSR 2
+
+SER                                                                                                                   3 dB
+
+     10-1
+
+     10-2
+
+           -20       -15       -10            -5                                                                                  0             5            10
+
+                                    SNR (dB)
+
+                                                                         (b) Rayleigh channel.
+Fig. 2. SER versus SNR (dB) of the usual LoRa demodulation at OSR1, compared with the suggested new demodulation at OSR2.
+     100                                                                                                                                                                              10
+
+     10-1                                                                                                                                       SF 7
+                                                                                                                                    SF 8
+SER
+
+     10-2       Simulation
+
+                Analysis
+
+                                               SF 9
+
+     10-3
+
+     -28   -26  -24            -22        -20            -18                      -16                                               -14          -12  -10
+
+                                               SNR (dB)
+
+                                                           (a) AWGN channel.
+
+     100
+
+                                                                                                                                 Simulations
+                                                                                                                                 Analysis
+
+                                                         SF 7
+
+SER                                                                                                                        SF 8
+
+     10-1
+
+                               SF 9
+
+     10-2
+
+     -30   -25            -20        -15       -10                            -5                                                 0            5       10
+
+                                               SNR (dB)
+
+                                                                         (b) Rayleigh channel.
+Fig. 3. SER versus SNR (dB) of new demodulation at OSR2. Comparison between simulations and analytical results for SF 7, 8, and 9.
+
+ [9] V. Savaux and G. Ferré, "Simple Asymptotic BER Expressions for LoRa System over Rice and Rayleigh Channels." San Fransisco,
+      CA, USA: proc. of WTS'21, April 2021, pp. 1 ­ 5.
+
+[10] V. Savaux, "An Improved Demodulation for LoRa Through a Threshold-Based Detection of Error," TechRxiv, 8 2021.
+      [Online]. Available: https://www.techrxiv.org/articles/preprint/An_Improved_Demodulation_for_LoRa_Through_a_Threshold-Based_
+      Detection_of_Error/14877078
+
+[11] M. Xhonneux, D. Bol, and J. Louveaux, "A Low-complexity Synchronization Scheme for LoRa End Nodes," ArXiv, no.
+      arXiv:1912.11344, pp. 1 ­ 10, December 2019.
+
+[12] R. Ghanaatian, O. Afisiadis, M. Cotting, and A. Burg, "Lora Digital Receiver Analysis and Implementation." Brighton, United
+      Kingdom: proc. of ICASSP'19, May 2019, pp. 1498­1502.
+                                                                                                                                                                                                11
+
+[13] C. Bernier, F. Dehmas, and N. Deparis, "Low Complexity LoRa Frame Synchronization for Ultra-Low Power Software-Defined Radios,"
+      IEEE Transactions on Communications, vol. 68, no. 5, pp. 3140­3152, May 2020.
+
+[14] A. Marquet and N. Montavont, "Carrier and Symbol Synchronisation for LoRa Receivers." Lyon, France: proc. of EWSN'20, February
+      2020, pp. 1 ­ 6.
+

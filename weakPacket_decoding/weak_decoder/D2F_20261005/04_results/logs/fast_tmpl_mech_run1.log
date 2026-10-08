@@ -1,0 +1,62 @@
+待跑 700 单元（总 700）
+  35/700 (2.6min)
+  70/700 (5.3min)
+  105/700 (8.8min)
+  140/700 (11.8min)
+  175/700 (14.8min)
+  210/700 (18.5min)
+  245/700 (22.4min)
+  280/700 (27.6min)
+  315/700 (31.7min)
+  350/700 (36.1min)
+  385/700 (39.8min)
+  420/700 (43.7min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  455/700 (47.7min)
+  490/700 (50.2min)
+  525/700 (53.3min)
+  560/700 (57.6min)
+  595/700 (60.4min)
+  630/700 (63.8min)
+  665/700 (66.8min)
+  700/700 (69.5min)
+本批完成 700 单元，69.5min
+
+δ=0.02  PER（n=140/档，seeds 0-4，统一 demap_judge 仲裁）
+SNR     | E_fast_oracle | E_fast_blind  | E_fast_blind_ab | A_full        | D_ladder_A
+None    | PER 0.000         | PER 0.000         | PER 0.000         | PER 0.036         | PER 0.393        
+-24     | PER 0.350         | PER 0.086         | PER 0.086         | PER 0.221         | PER 0.979        
+-22     | PER 0.064         | PER 0.029         | PER 0.029         | PER 0.086         | PER 0.736        
+-20     | PER 0.014         | PER 0.014         | PER 0.007         | PER 0.064         | PER 0.671        
+-18     | PER 0.014         | PER 0.000         | PER 0.000         | PER 0.043         | PER 0.543        
+
+−22 档逐符号错误位置（bin=10 符号，前 40）：
+  e_bl     [1400, 1400, 1400, 700]
+  a_full   [1400, 1400, 1400, 700]

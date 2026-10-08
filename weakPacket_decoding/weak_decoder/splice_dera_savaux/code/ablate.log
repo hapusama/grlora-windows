@@ -1,0 +1,8 @@
+== native 28 帧（零回归门：GRID-IND 应全对或接近）==
+native GRID-IND 坏帧: 11/28
+
+== −22/−24 × 3 种子（对照 SAVT2 v4-b 同单元数字）==
+[-22] n=83 GRID-IND PER=0.795 SER=0.1769 med=0.114
+[-24] n=69 GRID-IND PER=0.942 SER=0.2265 med=0.171
+
+对照（v4-b 战役同口径）：−22 SAVT2 .006/.048；−24 SAVT2 .044/.262

@@ -1,0 +1,26 @@
+待跑 448 单元
+  28/448 (46s, 1.6s/u, ETA 11min)
+  56/448 (88s, 1.6s/u, ETA 10min)
+  84/448 (131s, 1.6s/u, ETA 9min)
+  112/448 (173s, 1.5s/u, ETA 9min)
+  140/448 (215s, 1.5s/u, ETA 8min)
+  168/448 (259s, 1.5s/u, ETA 7min)
+  196/448 (299s, 1.5s/u, ETA 6min)
+  224/448 (344s, 1.5s/u, ETA 6min)
+  252/448 (388s, 1.5s/u, ETA 5min)
+  280/448 (439s, 1.6s/u, ETA 4min)
+  308/448 (494s, 1.6s/u, ETA 4min)
+  336/448 (554s, 1.7s/u, ETA 3min)
+  364/448 (611s, 1.7s/u, ETA 2min)
+  392/448 (693s, 1.8s/u, ETA 2min)
+  420/448 (770s, 1.8s/u, ETA 1min)
+  448/448 (863s, 1.9s/u, ETA 0min)
+
+v4-b 战表（SER=同步成功单元内 / PER=含同步失败）
+[ native] sync DERA=1.00 | DERA×SAVT 0.000/0.000 | DERA×SAVT2 0.000/0.000 | DERA×DERA 0.000/0.000 (n=28)
+[    -17] sync DERA=1.00 | DERA×SAVT 0.000/0.000 | DERA×SAVT2 0.000/0.000 | DERA×DERA 0.003/0.000 (n=84)
+[    -20] sync DERA=1.00 | DERA×SAVT 0.001/0.000 | DERA×SAVT2 0.001/0.000 | DERA×DERA 0.014/0.024 (n=84)
+[    -22] sync DERA=0.99 | DERA×SAVT 0.006/0.048 | DERA×SAVT2 0.006/0.048 | DERA×DERA 0.033/0.107 (n=84)
+[    -24] sync DERA=0.82 | DERA×SAVT 0.101/0.310 | DERA×SAVT2 0.044/0.262 | DERA×DERA 0.150/0.619 (n=84)
+[    -26] sync DERA=0.19 | DERA×SAVT 0.441/0.988 | DERA×SAVT2 0.379/0.976 | DERA×DERA 0.521/1.000 (n=84)
+863s elapsed

@@ -1,0 +1,22 @@
+H0 sqrt-thr @FAR 3e-2/1e-2/3e-3  T3c: 64.98/65.69/66.34  T3cod: 60.93/61.44/61.97
+Gumbel 斜率 s: full=-0.591 cod=-0.453 sqrt-nat ; Δ_thr(1e-2)=4.250
+有效自由度: ln(1/r_eff)=-7.20 (名义 48 bit) -> 塌缩因子 η=-0.150
+H1 γ=-17.50: E√T3c=70.94 E√T3cod=65.94 σ=2.86/2.41 ρ=1.000/0.863 E[(√T−√S)+]=9.78/4.96
+H1 γ=-18.00: E√T3c=69.02 E√T3cod=64.27 σ=2.52/2.16 ρ=1.000/0.970 E[(√T−√S)+]=12.66/7.94
+H1 γ=-18.50: E√T3c=67.19 E√T3cod=62.81 σ=2.45/2.11 ρ=1.000/0.993 E[(√T−√S)+]=16.24/11.86
+
+预测 frontier: T3c=-17.99  T3cod=-18.00 -> recovery ε=0.01 dB (实测 rt_d: 0.21 dB)
+闭式 ε = −20log10(1−Δ_eff/marg*): Δ_overlap=4.64 Δ_eff=-0.39 marg*=32.57 -> ε=-0.10 dB
+检验: Δ_overlap/Δ_thr = 1.09 (SF8 CR4/5 frontier 区)
+
+== 实例化外推（η 线性塌缩上界；亚线性真实值更小）==
+  CR4/8 (32 sym, sf_app=8 x (8,4))   名义 128 bit -> ln(1/r_eff)=-19.19 Δ_thr=11.33 ε≈-0.27 dB
+  SF12 CR4/5 (30 sym)                名义  72 bit -> ln(1/r_eff)=-10.80 Δ_thr= 6.38 ε≈-0.15 dB
+  SF8 CR4/5 (30 sym, 实测锚)            名义  48 bit -> ln(1/r_eff)=-7.20 Δ_thr= 4.25 ε≈-0.10 dB
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\scheme_mining_20261002\rt3b_h0lemma.py", line 253, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\scheme_mining_20261002\rt3b_h0lemma.py", line 238, in main
+    rep = dict(thr_sqrt={str(k): v.tolist() for k, v in thr.items()},
+                                 ^^^^^^^^
+AttributeError: 'list' object has no attribute 'tolist'

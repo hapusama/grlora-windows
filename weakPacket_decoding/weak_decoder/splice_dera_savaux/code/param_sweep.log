@@ -1,0 +1,6 @@
+平台扫描（−22/−24 合并，n=102 单元）：
+  base  s=.125 c=.75   SER=0.0605  PER=0.088
+  fine  s=.0625 c=.75  SER=0.0611  PER=0.088
+  coarse s=.25 c=.75   SER=0.0501  PER=0.078
+  dense s=.125 c=.5    SER=0.0605  PER=0.069
+  sparse s=.125 c=1.0  SER=0.0796  PER=0.098

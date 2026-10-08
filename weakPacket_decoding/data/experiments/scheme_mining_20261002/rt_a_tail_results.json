@@ -1,0 +1,12 @@
+{
+ "thr6_exp": 122.23482235755917,
+ "thr6_pow": 140.14083628011628,
+ "frontier_1e2": -23.10546875,
+ "frontier_1e4": -20.94140625,
+ "frontier_1e6_exp": -19.63671875,
+ "frontier_1e6_pow": -19.12890625,
+ "budget_exp": 3.46875,
+ "budget_pow": 3.9765625,
+ "budget_1e4_to_1e2": 2.1640625,
+ "divergence": 0.5078125
+}

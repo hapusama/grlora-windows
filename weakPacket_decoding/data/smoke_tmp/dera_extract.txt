@@ -1,0 +1,1436 @@
+DeRa: Deep-Range Low-Power Wide Area IoT via
+            Ultra-sensitive Signal Detection
+
+       Jialuo Du                   Jingkai Lin                                Zhichao Cao
+
+ Michigan State University    Michigan State University                   Michigan State University
+East Lansing, Michigan, USA  East Lansing, Michigan, USA                 East Lansing, Michigan, USA
+
+      dujialuo@msu.edu             linjingk@msu.edu                             caozc@msu.edu
+
+Abstract                                                                 ACM Reference Format:
+                                                                         Jialuo Du, Jingkai Lin, and Zhichao Cao. 2026. DeRa: Deep-Range
+LoRa extends communication range by operating well below                 Low-Power Wide Area IoT via Ultra-sensitive Signal Detection.
+the noise floor, yet this capability hinges on reliable packet           In The 32nd Annual International Conference on Mobile Computing
+detection--an overlooked bottleneck. Carrier frequency off-              and Networking (MobiCom '26), October 26­30, 2026, Austin, TX,
+set (CFO) introduces deterministic inter-chirp phase shifts              USA. ACM, New York, NY, USA, 21 pages. https://doi.org/10.1145/
+that prevent coherent preamble accumulation; because all                 3795866.3844157
+existing detectors fall back on non-coherent, magnitude-only
+addition, they forfeit substantial signal power. We present              1 Introduction
+DeRa, a phase-coherent LoRa detection and decoding frame-
+work built on three contributions: (1) a phase-coherent detec-           LoRa (short for Long Range) [33] is designed for long-range
+tion method that exploits the relationship between CFO and               Internet of Things (IoT) communication at low signal-to-
+inter-chirp phase evolution to detect weak packets; (2) an-              noise ratios (SNRs) [3, 4, 9, 18, 20, 27, 30, 32, 36, 37, 39, 53].
+alytical compensation of compound CFO-induced scaling                    Consequently, improving receiver sensitivity to weak LoRa
+distortions--timing drift, frequency migration, and energy               signals is a central research problem.
+leakage--so that coherent accumulation remains effective
+even under 40 kHz CFO, eliminating the need for expensive                   Research on this problem, however, has focused heav-
+oscillator hardware; and (3) a CRC-guided, phase-compensated             ily on weak-signal decoding [11, 12, 28, 40]. In contrast,
+iterative decoder that coherently recombines split symbol                weak-signal detection, the crucial initial step of identifying
+energy and closes the detection-to-decoding feedback loop.               a packet's presence, remains a largely overlooked bottleneck
+On COTS LoRa devices across SF 7­12, DeRa lowers the de-                 (Figure 1). This oversight is critical because detection acts as
+tection threshold by 4.3­4.8 dB and the decoding threshold               the absolute gatekeeper. Regardless of how sophisticated a
+by 3.3­3.9 dB over state-of-the-art baselines, while maintain-           decoder might be, it cannot recover a packet if the receiver
+ing  ( log  ) per-symbol complexity and consistent gains                 fails to detect it initially. In fact, some studies view packet
+in real-world field experiments.                                         detection as the primary performance bottleneck in prac-
+                                                                         tice [35].
+CCS Concepts
+                                                                            LoRa detection relies on the principle of energy condensa-
+· Networks  Network protocols; Network architec-                         tion [11, 28]. The process begins by spreading signal energy
+tures.                                                                   across a long preamble composed of multiple chirps; during
+                                                                         detection, the receiver dechirps these preamble chirps, col-
+Keywords                                                                 lapsing the distributed energy into a single, high-magnitude
+                                                                         spectral peak. This concentration is what allows the signal
+Internet of Things, low-power wide-area networks, LoRa,                  to be pulled from beneath the noise floor. Ideally, a signal
+weak-signal detection                                                    without phase shifts allows for coherent detection, where
+                                                                         energy accumulates into a high-power peak, as illustrated
+This work is licensed under a Creative Commons Attribution 4.0 Interna-  in Figure 1(a). In this scenario, the alignment of the phase
+tional License.                                                          across symbols ensures that the integration of the signal
+MobiCom '26, Austin, TX, USA                                             significantly outweighs the stochastic noise.
+© 2026 Copyright held by the owner/author(s).
+ACM ISBN 979-8-4007-2505-0/26/10                                            However, real-world detection remains fragile because
+https://doi.org/10.1145/3795866.3844157                                  CFO induces a deterministic inter-chirp phase rotation be-
+                                                                         tween consecutive dechirped preamble chirps. As shown in
+                                                                         Figure 1(b), where red triangles mark abrupt phase shifts,
+                                                                         these distortions prevent the coherent energy accumulation
+                                                                         needed for reliable detection. Because the phases do not align,
+MobiCom '26, October 26­30, 2026, Austin, TX, USA                                                                                                                             Du et al.
+
+                                                               Phase Shift Location           precise CFO estimate, and a precise CFO estimate requires
+                                                                                              coherent energy accumulation, which in turn requires ac-
+      w/o Phase Shift                    w/ Phase Shift                                       curate phase alignment. Worse still, at the low SNRs where
+                                                                                              coherent gain is most needed, per-symbol phase measure-
+      Energy    Coherent           Energy  Non-Coherent                                       ments are heavily corrupted by noise and direct frequency
+                Detection                     Detection                                       estimation loses resolution, rendering both the CFO and the
+                                                                                              resulting phase trajectory practically unobservable through
+               High                             Low                                           conventional means.
+              Power                           Power
+                                                                                              Challenge 2: Compound Scaling Distortions under Ex-
+                      FFT bin                 FFT bin                                         treme CFO. CFO does not merely shift the carrier frequency;
+                                                                                              it simultaneously scales the symbol duration, bandwidth, and
+                ()                         ()                                                 chirp rate of every transmitted chirp. These compound scal-
+                                                                                              ing effects cause cumulative timing drift and progressive fre-
+Amplitude                                                                                     quency migration across symbol windows, pulling spectral
+                                                                                              peaks out of their expected FFT bins and destroying the align-
+                                               Noise                                          ment that detection relies upon. Low-cost on-chip oscillators
+                                           LoRa Signal                                        can generate CFOs of up to 40 kHz, a regime in which all
+                                                                                              existing detectors fail entirely [12, 46]. While high-precision
+      Energy                       Packet Detection Time                                      Temperature Compensated Crystal Oscillators (TCXOs) can
+                                                                                              suppress CFO to 50 Hz, they impose prohibitive cost and
+                Detected           Detected                                            LoRa   power penalties on end nodes, negating the economic and
+                                                      Noise                          Gateway  energy advantages that define LPWANs. A practical detector
+                                                                                              must therefore embrace--not avoid--the full range of realis-
+LoRa  Detected                    NOT                        Time                             tic CFOs and analytically compensate for their compound
+Node                           Detected                                                       effects.
+
+                               ()                                                             Challenge 3: End-to-End Phase Contamination in Pay-
+                                                                                              load Decoding. The same CFO that disrupts preamble accu-
+              Figure 1: Packet Detection.                                                     mulation contaminates every payload symbol: it introduces
+                                                                                              intra-symbol phase discontinuities at chirp wrap points and
+the peaks "cancel out" or fail to stack effectively, leaving the                              inter-symbol phase rotations across the entire packet. These
+signal buried beneath the noise floor and leading to detec-                                   distortions split dechirped energy across multiple FFT bins
+tion failure (Figure 1(c)). Despite various attempts to improve                               and misalign phase across symbols, destroying the tight
+detection--multi-gateway combining in CloudLoRa [46], en-                                     spectral concentration that LoRa decoding depends on. Ex-
+ergy condensation via chirp trimming in LoRaTrimmer [12],                                     isting decoders either resort to magnitude-only process-
+and parabolic phase modeling in NELoRa [28]--all existing                                     ing [12, 46, 68] or rely on noise-sensitive features [11, 28, 40],
+detectors ultimately fall back on non-coherent, magnitude-                                    both of which forfeit the 3 dB coherent gain available from
+based preamble accumulation that discards phase informa-                                      correct phase combination--a critical margin at low SNR.
+tion entirely, losing significant signal energy in the process.
+                                                                                                 DeRa addresses all three challenges through a unified,
+   To address this gap, we exploit the deterministic relation-                                CFO-centric framework.
+ship between CFO and inter-chirp phase evolution to enable
+phase-coherent preamble accumulation. We present DeRa,                                           Breaking the chicken-and-egg loop via coherent ac-
+a phase-coherent LoRa detection and decoding framework                                        cumulation. DeRa detects packets using a two-stage FFT.
+that exploits this CFO-phase structure. By modeling the re-                                   It first applies an FFT to condense signal power in each
+lationship between the CFO and the resulting inter-chirp                                      chirp, and then performs a column-wise FFT across chirps
+phase pattern, DeRa performs joint detection and CFO es-                                      to coherently accumulate power while compensating for the
+timation. This dual capability simultaneously locates the                                     CFO-induced inter-chirp phase rotation. In this way, we side-
+packet and compensates for the CFO, which restores coher-                                     step the circular dependency altogether: only the correct CFO
+ent energy accumulation and improves detection sensitivity                                    candidate produces constructive phase alignment across all
+at low SNRs. The model also extends to the payload to en-                                     preamble symbols, generating a sharp power peak that rises
+able phase-compensated decoding, effectively closing the                                      decisively above the noise floor. All other candidates yield de-
+feedback loop between detection and decoding through CRC                                      structive or random phase combinations that remain buried
+verification. However, translating this approach into a prac-                                 in noise. This transforms CFO estimation from a fragile fre-
+tical system requires addressing three key challenges.                                        quency measurement into a robust coherent-power peak
+
+Challenge 1: The CFO­Phase Chicken-and-Egg Prob-
+lem. Coherent preamble accumulation demands that phase
+shifts be compensated before summation, yet these shifts are
+entirely governed by the unknown CFO--a dynamic value
+the detector seeks to estimate. This creates a fundamental
+circular dependency: accurate phase alignment requires a
+DeRa: Deep-Range Low-Power Wide Area IoT via Ultra-sensitive Signal Detection  MobiCom '26, October 26­30, 2026, Austin, TX, USA
+
+detection problem, simultaneously resolving both packet               · We analytically model and compensate all compound
+detection and CFO estimation in a single, noise-resilient op-            CFO-induced distortions--including timing drift, fre-
+eration.                                                                 quency migration, and energy leakage--enabling co-
+                                                                         herent energy accumulation for robust detection even
+Searching, compensating, and accumulating under ex-                      under 40 kHz CFO without expensive oscillator hard-
+treme CFO. Beyond the phase rotation addressed above,                    ware. For decoding, DeRa employs a CRC-guided, phase-
+CFO induces a cascade of additional distortions--timing drift,           compensated iterative strategy that coherently recom-
+frequency migration, and energy leakage--that destroy the                bines split symbol energy discarded by magnitude-
+spectral alignment detection depends on. Based on the CFO                based decoders, closing the detection-to-decoding feed-
+estimate and spectrogram produced by the two-stage FFT,                  back loop.
+DeRa uses the closed-form model (Section 3) to predict the
+resulting phase rotations and align the corresponding spec-           · We evaluate DeRa on COTS LoRa devices across SF 7­
+tral components coherently. These compensations remain                   12. Results show 4.3­4.8 dB and 3.3­3.9 dB reductions
+effective at CFOs of up to 40 kHz, eliminating the need for              in the detection and decoding thresholds, respectively,
+high-precision oscillator hardware.                                      over state-of-the-art baselines, with robust operation
+                                                                         under up to 40 kHz CFO confirmed in real-world field
+CRC-guided, phase-compensated iterative payload de-                      experiments.
+coding. Leveraging the preamble-derived CFO estimate,
+DeRa analytically predicts and compensates the intra-symbol       2 Background and Motivation
+phase discontinuities using the closed-form model, coher-
+ently recombining split energy of payload symbols that            2.1 LoRa Detection via Energy
+magnitude-based decoders discard. When the initial decode
+fails CRC verification--signaling residual CFO estimation               Condensation
+error--DeRa does not simply discard the packet. Instead, it
+performs a small, fixed number of retry trials, reusing the pre-  LoRa employs Chirp Spread Spectrum (CSS) modulation [8,
+vious FFT results to evaluate the next-best CFO candidate,        54], where each symbol is a frequency chirp sweeping lin-
+re-align the per-symbol phases, and re-decode until CRC           early across bandwidth  over symbol duration = 2 / ,
+passes or the retry budget is exhausted. This strategy cou-       with  denoting the spreading factor. At the receiver, dechirp-
+ples detection and decoding by using payload CRC feedback         ing--multiplying by a conjugate reference chirp--condenses
+to guide CFO refinement, thereby closing the loop between         the spread energy into a single sharp FFT peak, enabling
+the two stages.                                                   signal recovery well below the noise floor.
+
+   We implement and evaluate DeRa on commercial off-the-             A LoRa packet begins with a preamble of  identical
+shelf (COTS) LoRa devices across spreading factors SF 7­          upchirps (typically 8), followed by sync-word, SFD, and pay-
+12. Compared to state-of-the-art baselines including Cloud-       load symbols. Because preamble chirps are identical, their
+LoRa [46] and LoRaTrimmer [12], DeRa lowers the detec-            dechirped FFT outputs ideally produce peaks at the same
+tion threshold by 4.3­4.8 dB and the decoding threshold by        bin with consistent phase. The receiver accumulates these
+3.3­3.9 dB, while remaining robust under arbitrarily large        outputs across all preamble windows, further concentrat-
+CFO, tested up to 40 kHz on Semtech SX1280 nodes [43].            ing energy. This two-level condensation--within each chirp
+Based on a prior LoRa measurement study [39], these sensi-        (dechirp­FFT) and across chirps (accumulation)--is the mech-
+tivity improvements translate into estimated gains of 40.7% in    anism that enables LoRa to detect signals at SNRs as low as
+node battery life and 47.4% in coverage area. DeRa maintains      -20 dB.
+ ( log  ) complexity--the same asymptotic complexity as
+standard FFT-based detection--and operates end-to-end in          2.2 CFO Disrupts Coherent Accumulation
+real time on a Raspberry Pi. The main contributions of this
+paper are as follows:                                             In practice, transmitter and receiver oscillators are not per-
+                                                                  fectly matched, introducing a carrier frequency offset (CFO).
+    · We design a phase-coherent detection method that            CFO causes two intertwined effects on the dechirped pre-
+       exploits the deterministic relationship between CFO        amble outputs: (1) a progressive frequency drift that shifts
+       and inter-chirp phase evolution at low SNR. A two-         the FFT peak across bins from symbol to symbol, and (2) a
+       stage FFT first condenses signal power within each         progressive phase rotation that destroys phase consistency
+       chirp and then coherently accumulates power across         across symbols. Because CFO is relatively stable over the du-
+       chirps, producing a noise-resilient peak at the correct    ration of a packet, DeRa models it as approximately constant.
+       CFO and thereby jointly performing packet detection        Under this assumption, both effects grow linearly with sym-
+       and CFO estimation.                                        bol index, as CFO slightly scales the true symbol duration
+                                                                  and causes cumulative timing misalignment (formalized in
+                                                                  Section 3).
+MobiCom '26, October 26­30, 2026, Austin, TX, USA                                                                                                                 Du et al.
+
+FFT                                             Amplitude                                Frequency Alignment       3.1 Three Scaling Effects of CFO
+bin                                                                          FFT
+                                                                       Time  bin                                   Let  denote the nominal carrier frequency and  =   /
+                                 ...             Weak LoRa Signal                                                  the relative frequency offset between transmitter and re-
+                                                                                                              ...  ceiver oscillators. Apart from a uniform frequency shift of
+                                                           ()                                                        across the whole signal, CFO also scales the transmitted
+                                      Symbol                                 Amplitude          Symbol             waveform in three intertwined ways:
+                                      window                                                    window
+Amplitude Energy                                                             Amplitude  Energy                         · Duration scaling: The actual symbol duration be-
+                  Peak                  Noise                                            Peak      Noise                  comes   =  (1 - ).
+                                         Floor                                                     Floor
+                       ...                                                                                             · Bandwidth scaling: The chirp sweep range becomes
+                                                                                                                            =  (1 + ).
+                                      FFT bin                                                   FFT bin
+                                                                                                                       · Chirp-rate scaling: The nominal chirp rate  =  /
+Packet Detection                                                             Packet Detection                             changes to  =  /  =  (1+)/(1-)   (1+2).
+
+     ()                                                                                     ()
+Prior Work                                                                   Optimal Accumulation
+
+Figure 2: Weak LoRa packet detection: prior work vs.
+the optimal accumulation method.
+
+   Real-life experiments at SF = 12 and BW = 125 kHz quan-                                                         3.2 From Scaling to Phase: The Dechirped
+tify the severity. Even a CFO of just ±4 Hz produces 10 rad
+of unwrapped phase across 8 preamble symbols, which is                                                             Residual
+enough to destroy coherent addition. In practice, CFOs can
+reach 40 kHz (as observed on Semtech SX1280 [43]), render-                                                         Figure 3 traces how the three scaling effects propagate through
+ing phase-aligned accumulation entirely hopeless without                                                           the receiver's dechirp­FFT pipeline.
+compensation.
+                                                                                                                      (a) Ideal case (Figure 3(a)). When  = 0, the received
+2.3 Motivation                                                                                                     upchirp is perfectly matched by the local downchirp refer-
+                                                                                                                   ence. Dechirping yields a flat frequency at  = 0, all energy
+Because CFO destroys inter-symbol phase consistency, ex-                                                           concentrates in FFT bin 0, and the dechirped phase remains
+isting detectors abandon phase information and fall back to                                                        identically zero.
+non-coherent accumulation--summing magnitudes or powers
+(Figure 2(a)) [12, 46, 68]. While this sidesteps the phase prob-                                                      (b) Under CFO (Figure 3(b)). The received chirp sweeps
+lem, noise accumulates alongside the signal, yielding only                                                         at rate  over bandwidth  , while the receiver's reference
+5 log10 ( ) dB of SNR improvement versus 10 log10 ( ) dB                                                           uses the nominal  and  . Dechirping--multiplying the
+for coherent addition--a 4.5 dB sensitivity gap at  = 8                                                            received signal by the conjugate reference--leaves a residual
+(see Appendix A.6 for a formal derivation). The situation                                                          with instantaneous frequency dc (), where  is local time
+worsens under large CFO: beyond phase rotation, compound                                                           within the symbol:
+scaling distortions--timing drift and progressive frequency
+migration--pull spectral peaks out of their expected FFT bins                                                      dc ( )    =       -       +     ( - )       ·  (1)
+from symbol to symbol (Figure 2(b)), so even magnitude-                                                                                   2
+based summation can no longer align power across symbols,
+causing prior detectors to degrade severely or fail entirely.                                                                   start freq      rate mismatch
+
+   The inefficiency motivates us to analytically compensate                                                        The start frequency is dominated by   ; the rate mismatch
+both the inter-symbol phase trajectory and these compound                                                           -   2 introduces a slow linear drift. Because the FFT
+frequency distortions, ensuring that energy accumulates co-                                                        coherently sums this evolving phase across the entire symbol,
+herently and accurately into sharp, high-power peaks that                                                          the peak carries a net phase offset reflecting the cumulative
+rise decisively above the noise floor, as shown in Figure 2(c).                                                    distortion.
+
+                                                                                                                      Meanwhile, duration scaling produces the accumulated
+                                                                                                                   TO  at symbol index :
+
+                                                                                                                                 = 0 -                            (2)
+
+3 Signal Model: CFO-Induced Phase                                                                                     When   <  , each transmitted symbol finishes slightly
+                                                                                                                   earlier than the receiver expects, producing the cumulative
+    Distortion                                                                                                     timing drift - ; when   >  , the drift reverses direction.
+
+Carrier frequency offset (CFO) is traditionally treated as a                                                          (c) Accumulated offset compounds both effects (Fig-
+nuisance that distorts frequency measurements and degrades                                                         ure 3(c)). By the -th symbol, the time offset  has shifted
+detection. CFO-induced phase evolution is a known property                                                         the chirp boundary within the receiver's window. This shifts
+of CSS signals [1, 60]. Here, we express the frequency and                                                         the dechirped frequency:
+phase of each FFT peak as closed-form functions of the CFO
+  and the initial timing offset (TO) 0, enabling DeRa to                                                                        ( )  =  dc ( )  +                 (3)
+compensate for this evolution and coherently accumulate
+signals at low SNR. The resulting model supports the efficient                                                                                      
+detection and decoding algorithm in Section 4.
+                                                                                                                   causing the FFT peak to drift progressively across bins. It
+                                                                                                                   also means the chirp has already evolved for duration | |
+DeRa: Deep-Range Low-Power Wide Area IoT via Ultra-sensitive Signal Detection                                            MobiCom '26, October 26­30, 2026, Austin, TX, USA
+
+                                                                                                                                                                             
+
+                                                                                                                                               ( - )
+
+                                                                                                                                +   + 
+                                                                         
+         +                                    +                                                                                     ( + )
+
+                                                                                                                                                                                  
+                                                                                                                                                              +                
+                                                
+                                              -                                                                            -    +   +                                                       
+         -                                                                                                                                                                            -   
+                                                                                                                                                                           
+                                                                                                                                                                        -                      
+                                                
+                                             +                      ()
+                 ( - )
+                                                                                                                                                                                   
+
+     +   +                                                                                                                                                                       
+                                             -                                                                                                                            
+         ( + )                                                                                                                             
+
+                                                                                                                                                                               
+                                                                                                                                                                               
+                                                                                                                                                                        
+     +                                                                                                                                  
+                                                                                                   
+-        + 
+   
+
+                                                                                                                                                                                     
+                                                                                                                                                 -   
+                                                                    ()                                                                                        ()
+
+Figure 3: Impact of CFO on the dechirp­FFT pipeline. (a) Ideal case: dechirping yields a pure DC tone and zero
+phase. (b) CFO introduces residual frequency drift and phase curvature; duration scaling causes cumulative time
+offset. (c) Accumulated time offset shifts the dechirped frequency and adds a growing initial phase to each symbol.
+
+before the receiver's window begins, accumulating an initial                                                      center frequency reduces to approximately   +  ,
+phase:                                                                                                            encoding both CFO and time offset.
+                                                                                                                · Constant term ( ): The accumulated frame phase at
+                  (0)  =  2    (     -                  )  |  |  +   -   | |2       (4)                           symbol . Under the phase-continuity constraint that
+                                          2                           2                                           threads a single unbroken phase trajectory across the
+                                                                                                                  entire frame (see Appendix A), the phase increment
+                                                                                                                  per symbol is uniform:
+
+   The dechirped residual phase. Using local time  =                                                                      = 2    (mod 2 )                                              (6)
+ -  within the -th receiver window, let  = 2 denote
+the number of FFT bins per symbol and   {0, . . . ,  -1} the                                                      regardless of symbol type or code value, because all
+integer cyclic shift ( = 0 for preamble). The full dechirped                                                      terms involving   ·   = 2 contribute integer
+residual phase for chirp direction  (+1 for upchirps and -1
+for downchirps) is:                                                                                               multiples of 2 (Appendix A). Letting 0 denote the
+                                                                                                                  starting phase of the packet, the frame phase is:
+   res ( ) =            ( -)             2
+
+                                        
+
+                  chirp-rate mismatch                                                                                       = 0 + 2   ·  ·                                             (7)
+
++ 2         +                  -     +                     +      ·       +                                       This is the key quantity for coherent combina-
+                                  2                                 2                                             tion.
+                                         
+
+                       dechirped center frequency                             frame phase
+
+                                                                                         (5)                   Since the quadratic phase is small, the dechirped signal
+
+   In practice, stochastic phase noise and within-packet CFO                                       is well approximated as a single tone. For  samples per
+variation appear as an additional residual phase term  ( )                                         symbol, the FFT output  [] at peak bin  therefore carries
+on top of res ( ). DeRa assumes that this residual remains
+sufficiently small over the preamble accumulation interval                                         two pieces of information:
+and has minimal effect on the coherent-power peak.
+                                                                                                                          []   ·   ,                                                   (8)
+   The three terms have distinct physical roles:                                                                                                          = -1
+
+    · Quadratic term ( (-) · 2): Arises from the chirp-                                                         · Bin position : encodes   + for upchirps,   -
+       rate mismatch between the received and reference
+       chirps. Its magnitude is bounded by 2 ·2  0.44 rad                                                          for downchirps--the TO contribution reverses sign.
+       even in the worst case (SF12 at 40 kHz CFO; see Appen-                                                   · Complex angle  []: encodes  , the accumulated
+       dix A.5). In the frequency domain, this causes slight
+       peak broadening that is negligible--nearly all energy                                                      frame phase.
+       stays in a single FFT bin. In the phase domain, its con-
+       tribution is absorbed as a deterministic constant by                                        The total phase at the FFT peak combines the frame phase
+       the FFT (discussed in Appendix A.5).                                                        with a small contribution from the pre-window evolution
+                                                                                                   and fractional-bin scalloping:
+    · Linear term: Determines which FFT bin the energy
+       falls into. For preamble upchirps ( = 0,  = +1), the                                                         []     0  +     2        ·    ·      +    (0)         +    ( )     (9)
+
+                                                                                                                                                            
+
+                                                                                                                                                              
+
+                                                                                                   where  ( ) is a deterministic function of the fractional-bin
+
+                                                                                                   offset (derived in Appendix A.5). The dominant contribution
+                                                                                                   is the linearly increasing frame phase 2   ·  ·  .
+MobiCom '26, October 26­30, 2026, Austin, TX, USA                                      Du et al.
+
+3.3 Two-Section Windowing Model                                                        2 ·  · mid that is small in frequency (sub-bin) but can be
+                                                                                       significant in phase (several radians over many symbols).
+A subtlety arises because the receiver segments the signal                             This sub-bin phase correction must be accounted for when
+into windows of nominal duration  , while the actual symbol                            coherently combining symbols; the algorithm of Section 4
+duration is    . As a result, each receiver window does not                            includes it explicitly.
+align with a single transmitted symbol but instead captures
+two sections of the transmitted signal (Figure 3(c)):                                  3.4 Codewords and SFD
+
+    · Section 1 (Sub-1): The tail of the current chirp symbol,                         The two-section model applies uniformly to all symbol types,
+       spanning from  to  within the window.                                           differing only in the codeword  and the chirp direction :
+
+    · Section 2 (Sub-2): The head of the next chirp symbol,                                · Preamble upchirps ( = 0,  = +1): The code-dependent
+       spanning from 0 to +1 within the window.                                               term mod = 0, so 1 encodes   +  and the phase
+                                                                                              follows Eq. 7. All preamble windows produce identical
+   The relative lengths of Sub-1 and Sub-2 are determined                                     frequency patterns (modulo the progressive drift  ),
+by the timing offset. Because the initial signal arrival time is                              making preamble detection a pattern-matching prob-
+effectively random relative to the receiver window, the two                                   lem.
+sections have equal expected duration and are therefore each
+expected to contain half of the signal energy under a uniform                              · Sync-word upchirps ( = 1, 2 ;  = +1): The known
+timing-offset assumption. Consequently, DeRa includes both                                    sync-word codes shift 1 by mod = (/ ) · . Since
+contributions when forming the coherent detection score.                                       is known a priori, these symbols provide additional
+                                                                                              verification constraints.
+   Each section produces an independent complex contri-
+bution at a distinct frequency in the dechirped FFT. We pa-                                · SFD downchirps ( = 0,  = -1): The chirp sweeps
+rameterize each section by its center frequency  and phase                                    in the opposite direction, so the TO contribution to 1
+ :                                                                                            reverses sign: 1 encodes   -  instead of   +
+                                                                                               . The quadratic coefficient also flips sign. This sign
+    · (1, 1): the frequency and phase of Section 1.                                           reversal provides a complementary frequency-domain
+    · (2, 2): the frequency and phase of Section 2.                                           measurement.
+
+Both pairs are fully determined by ( , 0, , ). The exact                                   · Payload upchirps ( =  , unknown;  = +1): The
+expressions, derived from evaluating Eq. 5 over each section's                                code  is the data to be decoded. The same (1, 1, 2, 2)
+time interval (see Appendix A.4), are:                                                        model applies, but now  is unknown and must be es-
+                                                                                              timated.
+   Section 1 (current symbol, spanning [, ] in the receiver
+window):                                                                               3.5 Summary: What ( , 0) Determines
+
+       =  2 (         -  ) ·   mid,1      +     1             =       +        (10)    The signal model establishes that the pair ( , 0) jointly
+                           2                       ,                  2                and deterministically controls:
+   1                                                  mid,1
+                                                                                          (1) Signed frequency measurements. From the upchirp
+   1   =  2              ·    +             2                                                 and downchirp dechirping results  and  ,   =
+                                                                                              ( + )/2 and 0 = ( - )/(2). These spectral
+                                                                                              values are initially sampled on the FFT grid and there-
+                                                                                              fore have finite granularity. With a zero-padding factor
+                                                                                              , the grid spacing is  /( ), while the dechirped
+                                                                                              tone has a sinc-shaped peak with null-to-null width
+            frame phase                                                                       2 / . Consequently, at least one FFT sample falls
+                                                                                              close to the peak. The worst-case half-grid offset incurs
+          + 2                  -            -   mod   -       (    -   )  ·   2               a scalloping loss of 20 log10 [sinc(1/(2))], allowing
+                           2                                                                  the coarse FFT to retain most of the signal energy. The
+                                                                             mid,1            subsequent inter-chirp phase estimate refines the CFO
+                                                                                              to a continuous value rather than restricting it to this
+where mod = (/ )·  is the codeword-induced frequency                                          FFT grid.
+                                                                 )
+shift  and  1   =  2     (       -                +   mod  -          is  the  linear     (2) The two-section decomposition (1, 1, 2, 2) for
+                                           2                                                  every symbol window (Eqs. 10­11).
+coefficient.
+                                                                                          (3) The inter-symbol phase progression. The frame
+   Section 2 (next symbol, spanning [0, +1], if +1 > 0):                                      phase  = 0 + 2   ·  ·   increases linearly across
+
+   =   2 (    -   ) ·       mid,2      +  2                =  +1               (11)
+                    2                        ,                 2
+2                                                 mid,2
+
+2  =   2           ·     +             (  -       )2
+
+                              
+
+       - 2 (    -  )        -             +       + mod       -  ( - ) · m2 id,2
+                                  2
+
+where 2      =   2 (           -                 + mod -  (           -  ))    is the
+                                         2
+corresponding linear coefficient.
+
+   Fractional-bin phase correction. In the FFT, 1 (or 2)
+
+will generally not land exactly on an integer bin. The fractional-
+
+bin offset  =  - bin, where bin is the nearest FFT-bin
+
+frequency, produces a deterministic scalloping phase shift
+DeRa: Deep-Range Low-Power Wide Area IoT via Ultra-sensitive Signal Detection                MobiCom '26, October 26­30, 2026, Austin, TX, USA
+
+       preamble symbols with a slope determined by             The peak  encodes the inter-symbol phase rotation rate,
+       (Eq. 7).                                                yielding   modulo  / :
+
+   The coherent detection score is obtained by summing all                     ^ = eff ,                                          /2        (14)
+sections across all symbol windows with their predicted                            ·                 eff =  -                    > /2
+phases reverted:
+                                                                               The column-wise FFT provides   mod  / :
+
+         (   , 0) =   ·  -                              (12)                          () = ^                           |  () |        ,max  (15)
+                                                                                                  +  · ,
+                                                                                                                           
+                                                                                                               
+
+                       all sections                                            To recover the exact CFO value, we compute padded (-
+
+where  is the FFT value at the predicted bin and  is its       fold zero-padding) per-symbol FFTs and extract DC-centered
+
+predicted section phase (1 or 2). This score is maximized      signed frequency measurements (see Appendix B):
+when ( , 0) matches the true values, achieving construc-
+tive coherent combination. The question is how to search                                =   + 0  [- /2,  /2)                                (16)
+
+efficiently--the subject of Section 4.                                                  =   - 0  [- /2,  /2)                                (17)
+
+                                                               The             coarse  CFO   estimate     ^coarse  =   (   +    )/2  is  accurate  to
+
+                                                                                                             
+
+4 Phase-Coherent Detection and Decoding                         /( ) but unaliased. We fuse it with the fine estimate
+                                                               to obtain the optimal ^  candidate:
+    Algorithm
+                                                                                     ^       ^                   ^coarse - ^         
+Section 3 showed that the pair ( , 0) determines the fre-                                                                           ·
+quency and phase of every dechirped symbol through the                                    =       +  round                                  (18)
+two-section model (1, 1, 2, 2). The coherent score  =                                                               /                 
+|  · - | (Eq. 12) is maximized at the true ( , 0). DeRa
+first dechirps each preamble chirp and computes its FFT, and   The             time  offset  is  then:^0  =     - ^  
+then applies a column-wise FFT across the chirps to obtain                                                         
+coherent-power peaks and a continuous fractional-CFO esti-
+mate. It then resolves the bounded CFO aliases and timing      4.2 Coherent CFO/TO Refinement
+offset, coherently verifies the result, and performs phase-
+compensated payload decoding with a bounded CRC-guided            We retain the 20 best FFT-derived (^ , ^0) candidates
+fallback. The per-symbol FFT, column-wise FFT, and refine-     and compute coherent scores for them. We first evaluate
+ment form a coarse-to-fine search for the maximum coher-       (1, 1, 2, 2) expressions (Eqs. 10­11), and use them to gather
+ently accumulated power, which occurs when the correct         FFT values from the precomputed spectra (one high-resolution
+CFO aligns the inter-chirp phases; thus, the resulting peak    FFT per symbol window, computed once). The coherent sum
+robustly identifies the true CFO.                              is accumulated in complex double precision:
+
+                                                                                [, ] =  , ·  -  (,+2 , ·mid )                               (19)
+
+                                                                                                 all sections
+
+4.1 Two-Stage FFT for Coherent Detection                       The detection score is | [, ] |/ .
+                                                                  We refine each of the 20 candidates over a local neigh-
+Key observation: For the  preamble symbols used for
+detection ( = 0), the frame phase  = 0 + 2   ·  ·   in-        borhood of five CFO and five timing offsets, interpolate its
+creases linearly in the symbol index  (Eq. 7). This means the  power maximum, and rerank by refined power.
+sequence of FFT peak values { []}=-01 forms a complex
+sinusoid in  with frequency   ·  . A second FFT along             Computational complexity. The precomputation step
+this axis directly resolves this rotation rate.                computes ( + 5) FFTs (one per symbol window) of length
+                                                               fft, costing  ( · fft log fft). The column-wise FFT costs
+   We first build a  ×  spectral matrix Y by computing the      (  log ), where    . The refinement phase per-
+ -point FFT of each dechirped preamble symbol. Identify        forms a gather-and-sum operation that phase-aligns  val-
+the peak column , which is the bin with maximum total          ues from the precomputed FFT results. Evaluating 20 can-
+power across all rows. We then compute a zero-padded FFT       didates over five CFO and five timing offsets requires 20 ×
+of length  along this column:                                  5 × 5 = 500 such operations. Its fixed search size does not
+                                                               change the overall  ( log  ) complexity, or  ( log  )
+         -1                                                    per symbol. These hyperparameters can be tuned to achieve
+                                                               a tradeoff between computational cost and noise robustness.
+ []  =        [  ]  ·   - 2/ ,        = 0, . . . ,  -1  (13)   Overall, the reusable FFT precomputation, column-wise FFT,
+                                                               and bounded refinement have complexity  ( log  ), or
+         =0
+MobiCom '26, October 26­30, 2026, Austin, TX, USA             Du et al.
+
+ ( log  ) per symbol. Thus, DeRa has the same asymp-          using Eq. 7. We re-decode via real-part projection: ^ =
+totic complexity as standard FFT-based detection, although    arg max Re  [] ·  -^ .
+it incurs higher constant-factor computation. A complete
+pseudocode summary is provided in Appendix C.                    Stage 3: Alternative CFO candidates (if CRC still
+                                                              fails). If the phase-coherent decode also fails, the most likely
+4.3 Phase-Coherent Payload Decoding                           cause is an incorrect CFO estimate. We fall back to the
+                                                              next-ranked candidate from the detection stage and repeat
+With the estimated (^ , ^0) from detection, we decode the     Stages 1­2 with the updated (^ , ^0). We try at most five
+payload in multiple stages of increasing sophistication.      candidates.
+
+   Stage 1: Phase-compensated magnitude decode. We            4.4 Unified Detection­Decoding Pipeline
+dechirp each payload symbol with standard downchirps and
+compute the FFT. Because a payload symbol carries code ,      The complete pipeline embodies a key insight: detection and
+the chirp wraps around at fraction 1-/ within the symbol,     decoding are two aspects of a single, CFO-driven process. The
+creating a phase discontinuity that splits the energy across  CFO estimated during detection is the same physical quantity
+two FFT bins. We compute this phase jump analytically from    that determines payload phase distortions; the CRC outcome
+the preamble-derived (^ , ^0). It contains two parts:         during decoding feeds back to validate or reject that estimate.
+
+   (1) CFO-induced phase accumulation. The first chirp           (1) Detect: Column-wise FFT + coarse­fine fusion 
+       segment spans a duration   (1 - / ). Over this seg-           ranked ( , 0) candidates.
+       ment, the CFO accumulates a phase offset:
+                                                                 (2) Decode: For each candidate in rank order:
+cfo [] = 2   ·   · (1 - / )                          (20)          (a) Magnitude decode (Eq. 23)  CRC check.
+                                                                   (b) If fail: phase-coherent decode  CRC check.
+(2) Time-offset-induced frequency shift. The accumu-               (c) If fail: next candidate.
+    lated time offset shifts the wrap boundary by  (0 -
+     ) in frequency. This produces a phase that depends          (3) Accept the first CRC-passing result, or report detec-
+    on both the code position and the symbol index within            tion failure after exhausting all candidates.
+    the payload:
+                                                                 By treating the entire packet as one coherent entity con-
+ TO [] = 2 · ·( - )· 1 -  + pre + 4.25 +  (21)                nected by CFO, we simultaneously achieve more sensitive
+                                                              detection and more accurate decoding than any pipeline that
+                                                              treats them in isolation.
+       where  is the index of the payload symbol (zero-
+       based).                                                5 Evaluation
+Both terms are determined by the known parameters (^ , ^0, )
+and the to-be-searched parameter .                            5.1 Experimental Setup
+   Coherent recombination. Denoting the two FFT con-
+tributions as 1 (first segment) and 2 (second segment), we    Hardware. We use two COTS LoRa transmitters--Semtech
+compensate for the phase jump:                                SX1276 [42] and SX1280 [43]--and receive with a USRP
+                                                              N210 [16] SDR equipped with SBX 400­4400 MHz RF daugh-
+ coh []  =  1 []  +  2 []  ·   -  (cfo [ ]+TO [ ] )  (22)     terboards [15], controlled via UHD and GNU Radio at a sam-
+                                                              pling rate  of 1 MHz, a representative sampling frequency
+                                                              for COTS gateways [44, 45]. We evaluate two configurations:
+                                                              (i) 903.9 MHz carrier with 125 kHz bandwidth (SX1276) and
+This coherently adds the two segments at full energy, in      (ii) 2.4 GHz carrier with 203.125 kHz bandwidth (SX1280),
+contrast to LoRaTrimmer's incoherent |1|2 + |2|2 which        both with SF  {7, 8, 9, 10, 11, 12}, 8-symbol preambles, code
+loses up to 3 dB. The decoded symbol is the magnitude peak    rate CR = 4/8, and approximately 16-byte payloads transmit-
+                                                              ted periodically. All DeRa processing runs on a Raspberry
+of the coherently combined spectrum:                          Pi 4 equipped with four 1.5-GHz Cortex-A72 cores.
+
+            ^  = arg max      | coh [] |             (23)        Deployment. Experiments are conducted across indoor
+                                                              and outdoor environments, as shown in Figure 4. The indoor
+                                                              setting is an office with furniture, computers, and regular
+                                                              human activity that induces dynamic channel variations.
+                                                              We use two outdoor environments: (i) a university campus
+                                                              with buildings, pedestrians, and vehicular traffic, and (ii) a
+Decode the result and verify it via LoRa's built-in CRC. If   farm with fewer obstructions but scattered trees. We add
+CRC passes, accept the decode.
+
+   Stage 2: Phase-coherent decode (if CRC fails). The
+magnitude-based method discards phase information. When
+the initial decode fails, we exploit the phase model for im-
+proved decoding. We estimate the most probable initial phase
+^0 of the payload from the complex sum of all selected and
+phase-compensated FFT peaks: ^0 = (   [^ ]), and pre-
+dict the per-symbol phase: ^ = ^0+2 ^  ( +4.25+) · 
+DeRa: Deep-Range Low-Power Wide Area IoT via Ultra-sensitive Signal Detection                                 MobiCom '26, October 26­30, 2026, Austin, TX, USA
+
+              1.41 mile                                                                          0.26 mile    5.3 Decoding Performance
+                          3                                                                            23
+                                                                                                          1   The same coherent-processing advantage extends to decod-
+             2                                                                                                ing. Because DeRa performs phase-coherent demodulation--
+                                                                                                              constructively combining signal energy across chirp symbols--
+1.16 mile                                                                                                     it achieves lower SER and higher PRR than the partially
+                                                                                      0.29 mile               coherent model of LoRaTrimmer and the non-coherent de-
+                                                                                                              modulation of CloudLoRa. As shown in Figure 5(c,d) and
+                             1                                                                                Figure 6(a,b), DeRa improves the 10% SER threshold by 3.3­
+                                                                                                              3.9 dB over LoRaTrimmer and 4.4­5.2 dB over CloudLoRa,
+   Gateway                   915MHz Node                                                         2.4GHz Node  and lowers the 90% PRR threshold by 2.9­3.7 dB and 4.8­
+(USRP N210)                    SX1262                                                             SX1280      5.7 dB, respectively, with consistent gains across every SF.
+                                                                                                              To isolate the decoder contribution from detection, we fur-
+Figure 4: Deployments in farm and campus.                                                                     ther evaluate all three decoders under perfect CFO and TO
+                                                                                                              knowledge (Figure 6(c,d)). Even with identical synchroniza-
+calibrated synthetic noise to captured signals to evaluate                                                    tion inputs, DeRa lowers the 10% SER threshold by 1.9­2.0 dB
+performance across specific SNR levels.                                                                       over LoRaTrimmer and 4.6­4.7 dB over CloudLoRa, and low-
+                                                                                                              ers the 90% PRR threshold by 1.7­1.9 dB and 3.1 dB, respec-
+   Baselines. We compare against two state-of-the-art end-                                                    tively, confirming that a substantial portion of the end-to-end
+to-end detection-and-decoding systems: CloudLoRa [46], a                                                      gain originates from the accurate estimation of CFO and TO
+non-coherent energy-based detector (abbreviated CL in fig-                                                    and the phase-coherent decoder.
+ures) and LoRaTrimmer [12], who partially mitigate phase
+misalignment with a probabilistic model (abbreviated LT                                                       5.4 CFO Robustness
+in figures). We re-implement both baselines and run all
+three methods on the identical captured signals to ensure a                                                   We evaluate detection performance across five CFO levels: 0,
+fair comparison. DeRa is opensourced at https://github.com/                                                   500, 1,000, 10,000, and 40,000 Hz. The two endpoints are from
+daibiaoxuwu/DeRa.                                                                                             real hardware--the SX1276's TCXO yields near-zero CFO,
+                                                                                                              while the SX1280's 20 ppm oscillator produces up to 40 kHz at
+   Metrics. We report three metrics: Packet Detection Rate                                                    2.4 GHz--and the three intermediate values are synthetically
+(PDR), Symbol Error Rate (SER), and Packet Reception Rate                                                     injected to fill the gap. We test at two near-threshold settings:
+(PRR). PDR counts a detection as correct only when the                                                        SF7/-17 dB and SF10/-24 dB (Figure 7(a,b)).
+CFO estimation error is within  /2SF and timing offset
+error within 1/ (which are the tolerances required for                                                           DeRa maintains the highest and most stable PDR and PRR
+successful decoding). SER is the raw demodulation error rate                                                  across the entire CFO range because it jointly estimates and
+before Hamming correction. PRR is the end-to-end success                                                      compensates CFO-induced distortions before accumulation.
+rate after Hamming correction and CRC verification. We use                                                    CloudLoRa performs well near zero CFO because its detec-
+the 90% threshold SNR (minimum SNR for 90% PDR or PRR)                                                        tion algorithm implicitly assumes no frequency offset; how-
+and 10% threshold SNR (minimum SNR for SER < 10%) to                                                          ever, this same assumption causes it to collapse rapidly as
+quantify SNR gains between methods.                                                                           CFO increases, since its non-coherent accumulation cannot
+                                                                                                              compensate for the resulting frequency misalignment and
+5.2 Detection Performance                                                                                     phase shifts. LoRaTrimmer's probabilistic model partially
+                                                                                                              mitigates phase shifts, keeping its PDR relatively stable at
+Figure 5(a) shows that DeRa outperforms LoRaTrimmer and                                                       SF7 (see Figure 7(a)). However, at SF10 its PRR drops sharply
+CloudLoRa in all metrics at all SNRs. Furthermore, as SNR                                                     at large CFO (see Figure 7(b)): the denser frequency bins
+decreases, the PDR of DeRa degrades more gradually than                                                       ( /2SF) at higher SFs leave less tolerance for residual CFO
+LoRaTrimmer, which in turn drops more slowly than Cloud-                                                      estimation error, and the continuous frequency shift caused
+LoRa. This ordering directly reflects preamble accumulation                                                   by CFO accumulates across payload symbols until it exceeds
+coherence: DeRa adds symbol energies phase-coherently, so                                                     one bin width, causing massive decoding failures. In contrast,
+the accumulated power grows quadratically with the num-                                                       DeRa mitigates CFO-induced distortions, maintaining stable
+ber of symbols; LoRaTrimmer's probabilistic model achieves                                                    PDR and PRR at all CFO levels.
+only partially coherent gain; CloudLoRa's magnitude-only
+addition yields the weakest accumulation. Figure 5(b) quan-                                                      Figure 7(c) sweeps CFO across one FFT-bin interval at
+tifies this gap: DeRa lowers the 90% PDR threshold SNR by                                                     SF7/-18 dB. The periodic ripple reflects the combined res-
+4.3­4.8 dB over LoRaTrimmer and 5.3­6.5 dB over Cloud-                                                        olution of the two-stage FFT; PDR and PRR deviate from
+LoRa across all SFs.
+MobiCom '26, October 26­30, 2026, Austin, TX, USA                               Du et al.
+
+(a) PDR vs. SNR         (b) 90% PDR threshold                  (c) SER vs. SNR  (d) 10% SER threshold
+
+Figure 5: Detection and decoding performance: PDR and SER. Curves show SF  {7, 10, 12}; bars show threshold
+SNR across all SFs (lower is better).
+
+(a) PRR vs. SNR         (b) 90% PRR threshold                  (c) Decoder SER  (d) Decoder PRR
+
+Figure 6: Detection and decoding performance: PRR and decoder evaluation. (a,b) End-to-end PRR; (c,d) decoder
+performance under perfect CFO and TO knowledge.
+
+(a) CFO at SF7, -17 dB  (b) CFO at SF10, -24 dB                (c) Off-bin CFO  (d) CFO error CDF
+
+Figure 7: CFO robustness and estimation. (a,b) PDR and PRR at different CFO magnitudes. (c) PDR and PRR at
+fractional CFO positions. (d) Absolute CFO estimation errors for DeRa and LoRaTrimmer.
+
+the center by at most 5.35% and 5.30%, respectively, con-      a further reduction. These results show that both phase-
+firming that off-bin CFO has little effect on synchroniza-     coherent accumulation and CFO-distortion modeling con-
+tion. Figure 7(d) compares the absolute CFO-error CDFs of      tribute to detection sensitivity. The "Sub-1 only" variant
+DeRa and LoRaTrimmer at SF7/-16 dB, SF10/-24 dB, and           retains only the first section of each split receiver window.
+SF12/-28 dB. DeRa's 90th-percentile error is 16.99, 0.70, and  Its PDR and PRR remain below 82% and 83%, respectively,
+0.42 Hz, respectively, remaining below the corresponding       confirming that the discarded section contains signal energy
+FFT-bin spacing (488.28, 61.04, and 30.52 Hz) and outper-      needed for coherent accumulation.
+forming the LoRaTrimmer baseline.
+                                                                  For decoding, Figure 8(b) shows that disabling CFO fine-
+5.5 Ablation Study                                             tuning based on preamble-phase regression ("noFinetune")
+                                                               lowers PRR. Replacing the remaining decoder with LoRaTrim-
+We first isolate the detection components in Figure 8(a). Re-  mer's demodulator widens the gap, demonstrating the addi-
+placing phase-coherent accumulation with magnitude-only        tional contribution of DeRa's phase-coherent decoder.
+addition ("Abs-add") reduces PDR, and additionally remov-
+ing CFO-induced scaling-effect mitigation ("noCFO") causes
+DeRa: Deep-Range Low-Power Wide Area IoT via Ultra-sensitive Signal Detection  MobiCom '26, October 26­30, 2026, Austin, TX, USA
+
+(a) Ablation PDR  (b) Ablation PRR                                             (c) Field PDR  (d) Field PRR
+
+Figure 8: Component ablations, alternative receivers, and field performance. (a) PDR performance. (b) PRR
+performance. (c,d) Field PDR and PRR at the indoor, farm, and campus sites.
+
+   We also compare alternative receiver pipelines. In Fig-        lengths, including LoRa's six-symbol minimum [42]. Across
+ure 8(a), CALoRa+FFT uses CALoRa's self-attention detec-          SF7­SF12 and preamble lengths of 6­16 symbols, the per-
+tor [26], whereas NELoRa+FFT applies NELoRa's MaskCNN             window runtime utilization ranges from 45.8% to 60.9% on
+denoiser [28] before FFT-based detection. Both learned pipelines  a single Raspberry Pi CPU core, demonstrating that DeRa
+outperform the standard FFT receiver, but require substan-        operates in real time across the evaluated preamble lengths.
+tially higher SNR than DeRa. Large CFO and unknown win-
+dow alignment make it difficult for neural models to learn ro-    5.8 Robustness to Time-Varying CFO, Phase
+bust discriminative features. The Schmidl­Cox method [41]
+estimates synchronization using the correlation between                 Noise, and Interference
+repeated signal segments, while Xhonneux et al. [60] esti-
+mate CFO and timing offsets from consecutive LoRa pre-            Figure 9(b) compares the PRR robustness of DeRa and Lo-
+amble chirps. Both degrade at low SNR because these syn-          RaTrimmer under within-packet frequency variation. We
+chronization features are sensitive to noise. In Figure 8(b),     simulate oscillator-frequency drift as a random walk whose
+DeRa+NELoRa connects the detector of DeRa to NELoRa's             per-sample frequency increments have standard deviation
+decoder. Its improvement over the NELoRa+FFT baseline              /  . We additionally apply Wiener phase noise with
+shows the value of DeRa's detection stage, while its lower        per-sample increment standard deviation , fixed such that
+PRR than the full DeRa pipeline isolates the benefit of DeRa's      = 1 rad/ s. We evaluate SF7 at -16 dB, SF10 at -24 dB,
+phase-coherent decoder.                                           and SF12 at -28 dB. Higher spreading factors produce longer
+                                                                  packets, allowing more frequency drift to accumulate and
+5.6 Real-World Field Experiments                                  thereby degrading performance. From  = 0 to 8 Hz/ s, the
+                                                                  PRR of DeRa decreases by 0.1, 0.5, and 14.8 percentage points
+We deploy both COTS transmitters--SX1276 at 903.9 MHz             at SF7, SF10, and SF12, and is substantially more robust than
+(TCXO, near-zero CFO) and SX1280 at 2.4 GHz (20 ppm os-           LoRaTrimmer. We further evaluate robustness under Doppler
+cillator, up to 40 kHz CFO)--at varying indoor and outdoor        effects and mobility by mounting the device on a car and
+distances using SF 10. As shown in Figure 8(c), DeRa sustains     driving near the fixed campus and farm positions. Mobility
+95.5%­100% PDR across all locations regardless of CFO mag-        reduces PDR/PRR by 4.4%/5.2% at SF7 and 6.8%/7.9% at SF10,
+nitude. CloudLoRa drops to near zero at outdoor sites where       indicating that DeRa remains robust to practical frequency
+the SX1280's large CFO overwhelms its no-CFO assumption,          variation and phase noise.
+and LoRaTrimmer falls below 11% at the farthest locations
+where low SNR compounds residual CFO errors. The same                Figure 9(c,d) reports the corresponding sweeps with asyn-
+pattern appears in PRR (Figure 8(d)): DeRa delivers the high-     chronous four-node traffic at SIRs of -3, -6, and -9 dB. PRR
+est end-to-end reception at every site, confirming that its       decreases as SIR falls because interfering symbols affect pay-
+gains translate from controlled experiments to real-world         load decoding, whereas PDR remains comparatively stable,
+deployments.                                                      demonstrating DeRa's detection robustness under interfer-
+                                                                  ence.
+
+5.7 Effects of Preamble Lengths                                   5.9 Computation­Performance Tradeoff
+
+Figure 9(a) shows that increasing the preamble length low-        Figure 10(a,b) compares the full PDR and PRR curves for
+ers the SNR required to reach 90% PDR, with diminishing           SF7, SF10, and SF12 under three computation budgets, imple-
+returns because each doubling provides at most 3 dB of ad-        mented by scaling the sizes of the two-stage FFT to 0.25×,
+ditional coherent energy. DeRa supports variable preamble         1×, and 4× their default values. The 4× setting improves the
+MobiCom '26, October 26­30, 2026, Austin, TX, USA                                  Du et al.
+
+(a) Preamble length   (b) Frequency-drift PRR (c) PDR under Interference (d) PRR under Interference
+
+Figure 9: Adaptiveness to different preamble length, and robustness against frequency drift and interference.
+(a) SF7­SF12 90%-PDR thresholds versus preamble length. (b) DeRa and LoRaTrimmer PRR under within-packet
+frequency drift. (c,d) PDR and PRR with asynchronous four-node traffic at SIRs of -3, -6, and -9 dB.
+
+(a) PDR vs. FFT size  (b) PRR vs. FFT size                   (c) Detection scores  (d) Phase compensation
+
+Figure 10: Tradeoff between computation and performance, and phase-coherent detection case studies. (a,b) PDR
+and PRR at 0.25×, 1×, and 4× computation budgets. (c) Magnitude-only and phase-coherent detection scores in a
+field deployment. (d) Per-symbol phase before and after CFO compensation.
+
+average 90%-PDR and 90%-PRR thresholds by only 0.62 dB       Table 1 reports detector runtime per window for DeRa and
+and 0.75 dB, respectively, while increasing runtime by 269%  the baselines on a Raspberry Pi 4B using one CPU core. Real-
+on average. The 0.25× setting reduces runtime by 24% but     time operation requires the computation time to remain be-
+substantially degrades both PDR and PRR. Thus, the default   low the symbol duration it processes. DeRa uses 46.5­55.7%
+1× setting provides the best tradeoff between computation    of this time budget across SF7­SF12, slower than the stan-
+and reception performance.                                   dard FFT method but faster than LoRaTrimmer and Cloud-
+                                                             LoRa. The Dechirp/FFT, column-wise FFT, and coherent can-
+5.10 Case Study on Phase-Coherent                            didate scoring account for 9.6%, 37.2%, and 53.2% of run-
+        Detection                                            time on average, respectively. When simultaneously receiv-
+                                                             ing multiple channels, two/four/six/eight channels consume
+We illustrate the benefits of phase-coherent detection with  23.57/48.86/74.15/98.66% of the four-core runtime budget; all
+an SX1280 node transmitting periodically at 2.4 GHz, SF12,   evaluated channel counts operate in real time. Under con-
+at 0.25 miles on campus under heavy occlusion. Figure 10(c)  trolled CPU, system-call, and synchronous-I/O contention,
+compares the normalized scores of non-coherent magnitude-    DeRa has a 99th-percentile latency of 91.5% of the symbol
+only detection ("Magnitude") and phase-coherent detection    duration across the tested load profiles.
+("Phase"). Phase-coherent accumulation produces higher,
+more distinct peaks by concentrating signal energy instead   6 Related Work
+of spreading it across the noise floor. Figure 10(d) shows
+the unwrapped per-symbol phase of one detected packet.       Weak Signal Detection. Detecting LoRa packets below the
+CFO causes a linear phase increase before compensation;      noise floor is the primary bottleneck for extending commu-
+afterward, the phase remains approximately constant across   nication range [1, 17, 22, 35, 54, 56, 60, 68]. Recent works
+the preamble and payload, enabling coherent detection and    improve weak signal reception via chirp trimming [12], par-
+decoding.                                                    abolic phase modeling [28], spectrogram features [40], or
+                                                             extending preamble structures [29, 70]. Neural networks
+5.11 Runtime and Computational Cost
+DeRa: Deep-Range Low-Power Wide Area IoT via Ultra-sensitive Signal Detection  MobiCom '26, October 26­30, 2026, Austin, TX, USA
+
+Table 1: Mean per-symbol detector service time on a                          62, 64, 65, 69, 73]. These systems assume reliable bound-
+Raspberry Pi 4B using one CPU core (ms). The three                           ary detection and could potentially benefit from DeRa's
+indented rows apportion DeRa's fused runtime using                           enhanced front-end. Other efforts focus on robust packet
+separately measured component shares.                                        detection under diverse challenges, including interference
+                                                                             and spectrum dynamics [5, 25, 50, 55, 66, 67], hardware con-
+Method                  SF7      SF8       SF9      SF10      SF11     SF12  straints [63], scalable gateway architectures [24, 71, 72], jam-
+                                                                             ming [21], and backscatter scenarios [19, 23, 38]. While these
+Symbol duration       1.024    2.048     4.096     8.192    16.384   32.768  address specific environmental or scale constraints, DeRa
+DeRa                  0.476    0.960     1.972     4.525     9.034   18.260  targets the fundamental, physical-layer sensitivity limit of
+                      0.079    0.115     0.168     0.312     0.508    1.449  ultra-weak packet detection.
+   Dechirp/FFT        0.109    0.263     0.640     1.836     4.568    8.964
+   Column-wise FFT    0.288    0.582     1.164     2.377     3.958    7.847  7 Discussion
+   Coherent scoring   0.096    0.133     0.213     0.385     0.812    2.274
+Standard FFT          6.859   12.172    23.727    54.346  120.624   269.377  DeRa Integration in Practice: DeRa indeed trades a higher
+LoRaTrimmer          49.955  703.709  2,435.02  8,662.50  30,309.8  150,840  computational cost than a standard FFT-based receiver for
+CloudLoRa                                                                    improved detection and decoding at low SNR. This additional
+                                                                             cost arises primarily from the column-wise FFT and phase-
+have also been applied to LoRa signal detection [48]. Tes-                   alignment operations. Our experimental results show that
+fay et al. [50] combine autoencoder-based denoising with                     the resulting receiver can still operate in real time on a Rasp-
+CNN-based symbol detection in multiuser LoRa-like uplinks.                   berry Pi or comparable hardware, suggesting that DeRa can
+More recently, CALoRa [26] uses a self-attention-based chirp                 be deployed on low-cost platforms akin to commercial LoRa
+restorer to reconstruct noisy I/Q spectrograms, followed by                  gateways with sophisticated software-hardware co-design to
+a convolutional detector that localizes the preamble.                        further optimize computation efficiency and simultaneously
+Coherent Reception and Synchronization. Afisiadis et                         support multiple data streams from different channels.
+al. [1] analyze coherent LoRa symbol detection when phase
+information is available. Xhonneux et al. [60] estimate frac-                   When more demanding workloads, such as simultaneously
+tional CFO and STO from consecutive preamble upchirps.                       detecting more than eight channels, are required, similar to
+They target coherent demodulation and synchronization                        CloudLoRa [46], the main computation tasks of DeRa can be
+rather than weak-packet acquisition. The Schmidl­Cox OFDM                    offloaded to an edge or cloud server. Specifically, local LoRa
+method [41] jointly detects a specially designed repeated                    gateways use the standard FFT-based receiver to handle de-
+training sequence and estimates timing and CFO. In contrast,                 tectable signals and offload signals that failed detection or
+DeRa jointly detects the packet and estimates CFO through                    decoding to a DeRa server. Although this approach allevi-
+coherent accumulation at deep-negative SNR.                                  ates the local computation burden, it consumes considerable
+CFO and RF Impairments. CFO is traditionally treated                         network bandwidth on the backhaul between the gateways
+as a hardware impairment to be exploited for device finger-                  and the DeRa server, posing a challenge for designing the
+printing and collision resolution [14, 58] or corrected after                offloading strategy.
+packet detection to prevent symbol errors [49, 68]. Instead
+of merely tracking CFO as a fingerprint or nuisance, DeRa                    8 Conclusion
+transforms CFO into an asset: leveraging the determinis-
+tic phase evolution it imposes to achieve phase-coherent                     We present DeRa, a phase-coherent detection and decoding
+accumulation and boost detection sensitivity. LoRa radios                    framework that jointly estimates CFO and compensates CFO-
+also expose frequency-error indicators for Automatic Fre-                    induced phase distortions, enabling both sensitive packet
+quency Correction (AFC) after usable reception [42]. AFC                     detection and phase-aligned payload decoding. Experiments
+can estimate frequency error and retune subsequent frames,                   show that DeRa lowers the detection threshold by 4.3­4.8 dB
+whereas DeRa focuses on coherent detection of the current                    and the decoding threshold by 3.3­3.9 dB over state-of-the-
+weak packet; the two mechanisms are complementary.                           art baselines, while remaining robust under CFOs up to
+Sensitivity via Spatial and Resource Diversity. Several                      40 kHz. These results demonstrate that phase-coherent pro-
+designs increase detection sensitivity by combining multi-                   cessing can substantially improve LoRa sensitivity and ro-
+ple observations across distributed gateways [2, 10, 13, 31,                 bustness without requiring more expensive hardware.
+34, 46], collocated gateway antennas [22], or retransmitted
+packets [61]. In contrast, DeRa unlocks the coherent process-                9 Acknowledgments
+ing gain already latent in every LoRa preamble, achieving
+4.3­4.8 dB gains in detection sensitivity.                                   We thank the reviewers and our shepherd for their guidance.
+Collision, Concurrency, and Robustness. Beyond push-                         This work was supported in part by the National Science
+ing sensitivity, packet detection is also addressed in collision             Foundation under Grant Nos. 2338976 and 2312674.
+recovery and massive concurrency [6, 7, 14, 47, 51, 52, 57, 59,
+MobiCom '26, October 26­30, 2026, Austin, TX, USA                                                                                                             Du et al.
+
+References                                                                          and urban scenarios. Sensors 23, 3 (2023), 1695.
+                                                                              [19] Xiuzhen Guo, Longfei Shangguan, Yuan He, Nan Jing, Jiacheng Zhang,
+ [1] Orion Afisiadis, Sitian Li, Joachim Tapparel, Andreas Burg, and Alexios
+      Balatsoukas-Stimming. 2021. On the advantage of coherent LoRa                 Haotian Jiang, and Yunhao Liu. 2022. Saiyan: Design and implemen-
+      detection in the presence of interference. IEEE Internet of Things            tation of a low-power demodulator for LoRa backscatter systems. In
+      Journal 8, 14 (2021), 11581­11593.                                            Proceedings of USENIX NSDI.
+                                                                              [20] Jetmir Haxhibeqiri, Eli De Poorter, Ingrid Moerman, and Jeroen Hoe-
+ [2] Artur Balanuta, Nuno Pereira, Swarun Kumar, and Anthony Rowe.                  beke. 2018. A survey of LoRaWAN for IoT: From technology to appli-
+      2020. A cloud-optimized link layer for low-power wide-area networks.          cation. Sensors 18, 11 (2018), 3995.
+      In Proceedings of ACM MobiSys.                                          [21] Ningning Hou, Xianjin Xia, and Yuanqing Zheng. 2021. Jamming of
+                                                                                    LoRa PHY and countermeasure. In Proceedings of IEEE INFOCOM.
+ [3] Marco Centenaro, Lorenzo Vangelista, Andrea Zanella, and Michele         [22] Ningning Hou, Xianjin Xia, and Yuanqing Zheng. 2022. Don't miss
+      Zorzi. 2016. Long-range communications in unlicensed bands: The               weak packets: Boosting LoRa reception with antenna diversities. In
+      rising stars in the IoT and smart city scenarios. IEEE Wireless Commu-        Proceedings of IEEE INFOCOM.
+      nications 23, 5 (2016), 60­67.                                          [23] Haotian Jiang, Yuan He, Xiuzhen Guo, and Jia Li. 2021. P2LoRa: Scalable
+                                                                                    and energy-efficient long-range backscatter networking. In Proceedings
+ [4] Tusher Chakraborty, Heping Shi, Zerina Kapetanovic, Bodhi Priyantha,           of ACM MobiCom.
+      Deepak Vasisht, Binh Vu, Parag Pandit, Prasad Pillai, Yaswant Chabria,  [24] Jiamin Jiang, Shiming Yu, Hao Wang, and Lu Wang. 2025. SlideLoRa:
+      Andrew Nelson, et al. 2022. Whisper: IoT in the TV White Space                Reliable channel activity monitoring across massive logical channels
+      Spectrum. In Proceedings of USENIX NSDI.                                      in LoRa networks. In Proceedings of IEEE ICNP.
+                                                                              [25] Arzad Kherani and Poonam Maurya. 2019. Improved packet detection
+ [5] Gonglong Chen, Wei Dong, and Jiamei Lv. 2021. LoFi: Enabling 2.4GHz            in LoRa-like chirp spread spectrum systems. In Proceedings of IEEE
+      LoRa and WiFi coexistence by detecting extremely weak signals. In             ANTS.
+      Proceedings of IEEE INFOCOM.                                            [26] Yun-Seob Kim, Seunggyu Byeon, Dong-Hyun Kim, Mikio Hasegawa,
+                                                                                    and Jong-Deok Kim. 2026. Chirp-Aware Self-Attention for Robust LoRa
+ [6] Qian Chen and Jiliang Wang. 2023. AlignTrack: Push the SNR limit               Preamble Detection under Ultra-Low SNR. IEEE Internet of Things
+      of LoRa collision decoding. IEEE/ACM Transactions on Networking               Journal (2026).
+      (2023).                                                                 [27] Chenning Li and Zhichao Cao. 2022. LoRa Networking Techniques
+                                                                                    for Large-scale and Long-term IoT: A Down-to-top Survey. ACM
+ [7] Weiwei Chen, Runze Zhang, Xianjin Xia, Shuai Wang, Shuai Wang,                 Computing Surveys (CSUR) 55, 3 (2022), 1­36.
+      and Tian He. 2024. DeepDetangle: Deep learning-based fusion of          [28] Chenning Li, Hanqing Guo, Shuai Tong, Xiao Zeng, Zhichao Cao,
+      chirp-level and packet-level features for LoRa parallel decoding. In          Mi Zhang, Qiben Yan, Li Xiao, Jiliang Wang, and Yunhao Liu. 2021.
+      Proceedings of IEEE ICNP.                                                     NELoRa: Towards ultra-low SNR LoRa communication with neural-
+                                                                                    enhanced demodulation. In Proceedings of ACM SenSys.
+ [8] Francesca Cuomo, Manuel Campo, Alberto Caponi, Giuseppe Bianchi,         [29] Chenning Li, Yidong Ren, Shuai Tong, Shakhrul Iman Siam, Mi Zhang,
+      Giampaolo Rossini, and Patrizio Pisani. 2017. EXPLoRa: Extending the          Jiliang Wang, Yunhao Liu, and Zhichao Cao. 2024. ChirpTransformer:
+      performance of LoRa by suitable spreading factor allocations. In IEEE         Versatile LoRa encoding for low-power wide-area IoT. In Proceedings
+      WiMob.                                                                        of ACM MobiSys.
+                                                                              [30] Jansen C Liando, Amalinda Gamage, Agustinus W Tengourtius, and
+ [9] Younsuk Dong, Benjamin Werling, Zhichao Cao, and Gen Li. 2024.                 Mo Li. 2019. Known and unknown facts of LoRa: Experiences from a
+      Implementation of an in-field IoT system for precision irrigation man-        large-scale measurement study. ACM Transactions on Sensor Networks
+      agement. Frontiers in Water 6 (2024), 1353597.                                15, 2 (2019), 1­35.
+                                                                              [31] Jun Liu, Weitao Xu, Sanjay Jha, and Wen Hu. 2020. Nephalai: towards
+[10] Adwait Dongare, Revathy Narayanan, Akshay Gadre, Anh Luong,                    LPWAN C-RAN with physical layer compression. In Proceedings of
+      Artur Balanuta, Swarun Kumar, Bob Iannucci, and Anthony Rowe. 2018.           ACM MobiCom.
+      Charm: Exploiting geographical diversity through coherent combining     [32] Li Liu, Yuguang Yao, Zhichao Cao, and Mi Zhang. 2021. DeepLoRa:
+      in low-power wide-area networks. In Proceedings of ACM/IEEE IPSN.             Learning Accurate Path Loss Model for Long Distance Links in LPWAN.
+                                                                                    In Proceedings of IEEE INFOCOM.
+[11] Jialuo Du, Chenning Li, Li Liu, Yidong Ren, Yunhao Liu, and Zhichao      [33] LoRa Alliance. 2017. LoRaWAN 1.1 Specification. Standard. LoRa
+      Cao. 2025. LoRaSeek: Boosting denoising ability in neural-enhanced            Alliance. https://resources.lora-alliance.org/technical-specifications/
+      LoRa decoder via hierarchical feature extraction. In Proceedings of           lorawan-specification-v1-1
+      ACM MobiCom.                                                            [34] Wenliang Mao, Zhiwei Zhao, Kaiwen Zheng, and Geyong Min. 2023.
+                                                                                    Recovering packet collisions below the noise floor in multi-gateway
+[12] Jialuo Du, Yunhao Liu, Yidong Ren, Li Liu, and Zhichao Cao. 2024.              LoRa networks. In Proceedings of IEEE INFOCOM.
+      LoRaTrimmer: Optimal energy condensation with chirp trimming for        [35] Manan Mishra, Daniel Koch, Muhammad Osama Shahid, Bhuvana Kr-
+      LoRa weak signal decoding. In Proceedings of ACM MobiCom. 1104­               ishnaswamy, Krishna Chintalapudi, and Suman Banerjee. 2023. Open-
+      1118.                                                                         LoRa: Validating LoRa implementations through an extensible and
+                                                                                    open-sourced framework. In Proceedings of USENIX NSDI.
+[13] Jialuo Du, Yidong Ren, Zhui Zhu, Chenning Li, Zhichao Cao, Qiang Ma,     [36] Di Mu, Yitian Chen, Junyang Shi, and Mo Sha. 2020. Runtime control
+      and Yunhao Liu. 2023. SRLoRa: Neural-enhanced LoRa weak signal                of LoRa spreading factor for campus shuttle monitoring. In Proceedings
+      decoding with multi-gateway super resolution. In Proceedings of ACM           of IEEE ICNP.
+      MobiHoc.
+
+[14] Rashad Eletreby, Diana Zhang, Swarun Kumar, and Osman Yain.
+      2017. Empowering low-power wide area networks in urban settings.
+      In Proceedings of ACM SIGCOMM.
+
+[15] Ettus Research. 2025. SBX 400­4400 MHz Rx/Tx Daughterboard. https:
+      //kb.ettus.com/SBX. Accessed 10-Mar-2026.
+
+[16] Ettus Research. 2025. USRP N210. https://www.ettus.com/all-products/
+      un210-kit. Accessed 10-Mar-2026.
+
+[17] Reza Ghanaatian, Orion Afisiadis, and Andreas Burg. 2019. LoRa digital
+      receiver analysis and implementation. In Proceedings of IEEE ICASSP.
+
+[18] Aikaterini I Griva, Achilles D Boursianis, Shaohua Wan, Panagio-
+      tis Sarigiannidis, Konstantinos E Psannis, George Karagiannidis, and
+      Sotirios K Goudos. 2023. LoRa-based IoT network assessment in rural
+DeRa: Deep-Range Low-Power Wide Area IoT via Ultra-sensitive Signal Detection    MobiCom '26, October 26­30, 2026, Austin, TX, USA
+
+[37] Yidong Ren, Amalinda Gamage, Li Liu, Mo Li, Shigang Chen, Younsuk                 Communications Society (2024).
+      Dong, and Zhichao Cao. 2024. Sateriot: High-performance ground-            [56] Lorenzo Vangelista and Alessandro Cattapan. 2022. Start of packet
+      space networking for rural iot. In ACM MobiCom.
+                                                                                       detection and synchronization for LoRaWAN modulated signals. IEEE
+[38] Yidong Ren, Chenning Li, Zhichao Cao, and Yunhao Liu. 2023. Prism:                Transactions on Wireless Communications 21, 6 (2022), 4413­4424.
+      High-throughput LoRa backscatter with non-linear chirps. In Proceed-       [57] Jiliang Wang, Shuai Tong, Zhenqiang Xu, and Pengjin Xie. 2024. Real-
+      ings of IEEE INFOCOM.                                                            time concurrent LoRa transmissions based on peak tracking. IEEE
+                                                                                       Transactions on Mobile Computing (2024).
+[39] Yidong Ren, Li Liu, Chenning Li, Zhichao Cao, and Shigang Chen. 2022.       [58] Xiong Wang, Linghe Kong, Zucheng Wu, Long Cheng, Chenren Xu,
+      Is LoRaWAN Really Wide? Fine-grained LoRa Link-level Measurement                 and Guihai Chen. 2020. SLoRa: Towards secure LoRa communica-
+      in An Urban Environment. In Proceedings of IEEE ICNP. 1­12. doi:10.              tions with fine-grained physical layer features. In Proceedings of ACM
+      1109/ICNP55882.2022.9940375                                                      SenSys.
+                                                                                 [59] Yifan Wang, Xianjin Xia, and Yuanqing Zheng. 2019. mLoRa: A multi-
+[40] Kanav Sabharwal, Soundarya Ramesh, Jingxian Wang, Dinil Mon Di-                   packet reception protocol in LoRa networks. In Proceedings of IEEE
+      vakaran, and Mun Choon Chan. 2024. Enhancing LoRa reception with                 ICNP.
+      generative models: Channel-aware denoising of LoRaPHY signals. In          [60] Mathieu Xhonneux, Orion Afisiadis, David Bol, and Jérôme Louveaux.
+      Proceedings of ACM SenSys.                                                       2020. A low-complexity LoRa synchronization algorithm robust to
+                                                                                       sampling time offsets. IEEE Internet of Things Journal (2020).
+[41] Timothy M Schmidl and Donald C Cox. 1997. Robust frequency and              [61] Xianjin Xia, Qianwu Chen, Ningning Hou, Yuanqing Zheng, and Mo
+      timing synchronization for OFDM. IEEE Transactions on Communica-                 Li. 2023. XCopy: Boosting weak links for reliable LoRa communication.
+      tions 45, 12 (1997), 1613­1621.                                                  In Proceedings of ACM MobiCom.
+                                                                                 [62] Xianjin Xia, Yuanqing Zheng, and Tao Gu. 2020. FTrack: Parallel de-
+[42] Semtech. 2025. Semtech SX1276. https://www.semtech.com/products/                  coding for LoRa transmissions. IEEE/ACM Transactions on Networking
+      wireless-rf/lora-connect/sx1276. Accessed 10-Mar-2026.                           28, 6 (2020), 2573­2586.
+                                                                                 [63] Xianjin Xia, Yuanqing Zheng, and Tao Gu. 2020. LiteNap: Downclock-
+[43] Semtech. 2025. Semtech SX1280. https://www.semtech.com/products/                  ing LoRa reception. In Proceedings of IEEE INFOCOM.
+      wireless-rf/lora-connect/sx1280. Accessed 10-Mar-2026.                     [64] Xianjin Xia, Yuanqing Zheng, and Tao Gu. 2021. PCube: Scaling LoRa
+                                                                                       concurrent transmissions with reception diversities. In Proceedings of
+[44] Semtech Corporation 2018. SX1255 LoRa Gateway RF Front End Data                   ACM MobiCom.
+      Sheet (rev. 3.1 ed.). Semtech Corporation. Table 4-3; available at https:  [65] Pengjin Xie, Zhenqiang Xu, and Jiliang Wang. 2023. Push the limit
+      //www.semtech.com/products/wireless-rf/lora-core/sx1255; accessed                of LPWANs with concurrent transmissions. In Proceedings of IEEE
+      10-Aug-2026.                                                                     INFOCOM.
+                                                                                 [66] Qiling Xu et al. 2023. SLoRa: A systematic framework for synergic
+[45] Semtech Corporation 2020. SX1302 LoRa Gateway Baseband Transceiver                interference resilience in LPWAN. In Proceedings of ACM SenSys.
+      Data Sheet (rev. 1.2 ed.). Semtech Corporation. Table 4-1; available       [67] Qiling Xu et al. 2025. SLoRa+: A systematic framework for enhanced
+      at https://www.semtech.com/products/wireless-rf/lora-core/sx1302;                interference resilience in LoRaWAN. ACM Transactions on Sensor
+      accessed 10-Aug-2026.                                                            Networks (2025).
+                                                                                 [68] Zhenqiang Xu, Pengjin Xie, Shuai Tong, and Jiliang Wang. 2023. From
+[46] Muhammad Osama Shahid, Daniel Koch, Jayaram Raghuram, Bhu-                        demodulation to decoding: Toward complete LoRa PHY understanding
+      vana Krishnaswamy, Krishna Chintalapudi, and Suman Banerjee. 2024.               and implementation. ACM Transactions on Sensor Networks (2023).
+      Cloud-LoRa: Enabling Cloud Radio Access LoRa Networks Using Re-            [69] Zhenqiang Xu, Pengjin Xie, and Jiliang Wang. 2021. Pyramid: Real-
+      inforcement Learning Based Bandwidth-Adaptive Compression. In                    time LoRa collision decoding with peak tracking. In Proceedings of
+      Proceedings of USENIX NSDI.                                                      IEEE INFOCOM.
+                                                                                 [70] Zhenqiang Xu, Pengjin Xie, Jiliang Wang, and Yunhao Liu. 2022. Osti-
+[47] Muhammad Osama Shahid, Millan Philipose, Krishna Chintalapudi,                    nato: Combating LoRa weak links in real deployments. In Proceedings
+      Suman Banerjee, and Bhuvana Krishnaswamy. 2021. Concurrent in-                   of IEEE ICNP.
+      terference cancellation: Decoding multi-packet collisions in LoRa. In      [71] Shiming Yu, Xianjin Xia, Ningning Hou, Yuanqing Zheng, and Tao Gu.
+      Proceedings of ACM SIGCOMM.                                                      2024. Revolutionizing LoRa gateway with XGate: Scalable concurrent
+                                                                                       transmission across massive logical channels. In Proceedings of ACM
+[48] Shakhrul Iman Siam, Hyunho Ahn, Li Liu, Samiul Alam, Hui Shen,                    MobiCom.
+      Zhichao Cao, Ness Shroff, Bhaskar Krishnamachari, Mani Srivastava,         [72] Shiming Yu, Xianjin Xia, Ziyue Zhang, Ningning Hou, and Yuanqing
+      and Mi Zhang. 2025. Artificial Intelligence of Things: A Survey. ACM             Zheng. 2024. FDLoRa: Tackling downlink-uplink asymmetry with
+      Transactions on Sensor Networks 21, 1, Article 9 (Jan. 2025), 75 pages.          full-duplex LoRa gateways. In Proceedings of ACM SenSys.
+      doi:10.1145/3690639                                                        [73] Shiming Yu, Ziyue Zhang, Xianjin Xia, Yuanqing Zheng, and Jiliang
+                                                                                       Wang. 2020. FlipLoRa: Resolving collisions with up-down quasi-
+[49] Daniel Szafranski and Andreas Reinhardt. 2025. CEC-LoRa: A code-                  orthogonality. In Proceedings of IEEE SECON.
+      less error correction method for corrupted LoRa packet decoding. In
+      Proceedings of IEEE LCN.
+
+[50] Angesom Ataklity Tesfay, Eric Pierre Simon, Sofiane Kharbech, and
+      Laurent Clavier. 2021. Deep learning-based signal detection for uplink
+      in LoRa-like networks. In Proceedings of IEEE PIMRC.
+
+[51] Shuai Tong, Jiliang Wang, and Yunhao Liu. 2020. Combating packet col-
+      lisions using non-stationary signal scaling in LPWANs. In Proceedings
+      of ACM MobiSys.
+
+[52] Shuai Tong, Jiliang Wang, and Yunhao Liu. 2021. CoLoRa: Enabling
+      multi-packet reception in LoRa networks. In Proceedings of USENIX
+      NSDI.
+
+[53] Shuai Tong, Jiliang Wang, Jing Yang, Yunhao Liu, and Jun Zhang. 2023.
+      Citywide lora network deployment and operation: Measurements,
+      analysis, and implications. In ACM SenSys.
+
+[54] Lorenzo Vangelista. 2017. Frequency shift chirp modulation: The LoRa
+      modulation. IEEE Signal Processing Letters 24, 12 (2017), 1818­1821.
+
+[55] Lorenzo Vangelista and Giancarlo Calvagno. 2024. On the channel
+      activity detection in LoRaWAN networks. IEEE Open Journal of the
+MobiCom '26, October 26­30, 2026, Austin, TX, USA                                                                                Du et al.
+
+A Signal Model: Detailed Derivations                            For the symbol starting at start =  :
+
+This appendix provides the complete mathematical deriva-                     (~ - 0.5) +   +  ( - start)   [start,  ]
+tions underlying the signal model of Section 3. We expand        ( ) =   (~ - 1.5) +   +  ( - start)   [ , start +  ]
+on the global phase-continuity framework, the accurate fre-
+quency characteristics for each symbol in the LoRa packet,                                                                          (25)
+the per-symbol phase increment proof, the derivation of the     The frequency is discontinuous at  (jumping by - ),
+dechirped residual phase, and the linear-phase approxima-
+tion that enables efficient FFT-based detection.                but the phase remains continuous because the integral in
+
+A.1 Global Phase-Continuity Framework                           Eq. 24 is unaffected by instantaneous frequency jumps. To
+                                                                verify this, note that the phase at  accumulated from both
+The transmitted LoRa signal is a piecewise sequence of 
+segments (full or partial symbols), where the -th segment       pieces of the piecewise function is:
+occupies the time interval [, +1] with instantaneous fre-
+quency  (). The instantaneous phase at absolute time                              
+within this segment is:
+                                                                       () = 2                (~ - 0.5) +  
+                        
+          ( ) = 2  ()  +  ,   [, +1] (24)                                           start
+
+                                                                                          +  ( - start)  + start
+
+Phase continuity across segment boundaries requires  +1 =                = 2   (~ - 0.5) (1 - ~)                                     (26)
+(+1). This constraint is central: it threads a single, unbro-
+ken phase trajectory through the entire LoRa frame, linking                      +         (1  -  ~ )    +     (1   -  ~ ) 2  2
+every symbol--preamble, sync word, SFD, and payload--into                                                   2
+one coherent signal model.                                                             
+
+   LoRa frame structure. Under the shared-clock model,                           + start
+each full symbol has exact receiver-time duration  =  /(1+
+). The implementation uses  (1-) as its first-order update.     and continuing from  with the second piece (frequency
+The complete frame comprises:                                   reduced by  ) yields the same total integral at start +  
+                                                                as would be obtained from a continuous (unwrapped) sweep,
+   (1) Preamble:  upchirps with  = 0. Total duration:           because ( ) ( ) = 2 contributes an integer multiple of
+        .
+                                                                2 .
+   (2) Sync word: 2 coded upchirps with  = 1, 2 . Total
+       duration: 2 .                                               Downchirps (SFD). For downchirp symbols, the frequency
+                                                                sweeps downward at rate :
+   (3) SFD: 2.25 downchirps. Total duration: 2.25 .
+   (4) Payload:  coded upchirps with  = 1, . . . ,  .                     ( )    =         +       -  (        - start)              (27)
+                                                                                      2
+       Total duration:  .
+                                                                The downchirp sweeps from + /2+   to - /2+  
+The phase-continuity constraint ensures that the phase at       over one symbol period . Unlike upchirps, downchirps with
+the boundary of any two adjacent segments is unbroken,
+regardless of whether the transition is between symbols of       = 0 do not require a frequency wrap within the symbol.
+the same type (e.g., consecutive preamble chirps), between
+different types (e.g., preamble to sync word), or across the    A.3 Per-Symbol Phase Increment: Full
+frequency wrap point within a single chirp.
+                                                                       Derivation
+A.2 Piecewise Frequency Definitions
+                                                                We prove that the phase increment per symbol is the same for
+We define the instantaneous frequency  () for each symbol
+type under CFO.                                                 all symbol types and all cyclic shifts.
+                                                                   Upchirp case. For an upchirp with normalized cyclic
+   Upchirps (preamble, sync word, and payload). A LoRa
+upchirp with integer cyclic shift   {0, . . . ,  - 1} has nor-  shift ~ = / , the total phase accumulated over one symbol
+malized shift ~ = /  [0, 1), with  = 0 for preamble             duration   is:
+base chirps. It sweeps upward at rate  and folds (wraps by
+- ) at  = start + (1 - ~)  to stay within the bandwidth.                  (1-~ )               (~ -0.5)                   
+
+                                                                up = 2                                      +        +        
+
+                                                                         0                                                           (28)
+
+                                                                            
+
+                                                                       + 2                     (~ -1.5)     +        +           
+
+                                                                                                                         
+
+                                                                                 (1-~ ) 
+
+                                                                Evaluating the first integral:
+
+                                                                1 = 2     (~  -  0.5) (1   -  ~)   +      (1   - ~)      +       (1  -  ~)2 2
+                                                                                                                              2
+
+                                                                                                                                     (29)
+DeRa: Deep-Range Low-Power Wide Area IoT via Ultra-sensitive Signal Detection       MobiCom '26, October 26­30, 2026, Austin, TX, USA
+
+Evaluating the second integral:                                             A.4 Dechirped Residual Phase: Derivation
+
+    2 = 2   (~ - 1.5) · ~  +   · ~                                          We now derive the dechirped residual phase expression
+                                                                            (Eq. 5) from the frequency definitions and phase-continuity
+                                                                      (30)  framework established above.
+                +
+                             2 - (1 - ~)2 2                                    Derivation procedure. Using local time  =  - within
+                   2                                                        the -th receiver window, the dechirped signal is obtained
+                                                                            by multiplying the received chirp (at CFO-scaled parameters
+Summing 1 + 2 and collecting terms:                                         ,  ) by the receiver's nominal-parameter conjugate ref-
+                                                                            erence chirp (,  ). The residual phase is the integral of
+up = 2                ~ (~ - 0.5) - ~ (1 - ~) + (~ - 0.5) (1 - ~)           the instantaneous frequency difference.
+
+                                                                               For an upchirp with integer cyclic shift  and direction 
+                                                                            (+1 for upchirp, -1 for downchirp), the transmitted chirp
+           - ~ · 0.5  +            +   2                                    sweeps at rate  while the reference sweeps at rate .
+                                        2                                   Their difference produces:
+                           
+                                                                                · A chirp-rate mismatch term ( - ), which inte-
+                                                                      (31)         grates to  ( - ) ·  2.
+
+   Using the identity  ·  = 2 (an integer) and  2/2 =                           · A dechirped center frequency from the sum of all
+  /2 = 2 /2, we can simplify. The key observation is                               constant-frequency offsets:   (carrier offset),   (/ -
+that all terms involving    evaluate to integer multiples:                         /2) (code-dependent start frequency under CFO), 
+                                                                                   (progressive time-offset drift from Eq. 2), and  · /2
+BW  terms  =          [ (~  -  0.5) (1   - ~)  +   ~ (~  -  1.5)]  +   2           (receiver reference offset). Together these give the lin-
+                                                                        2          ear coefficient.
+                
+                                                                                · The frame phase  = 0 + 2   ·  ·  (Section A.3),
+           = 2  ~ - ~2 - 0.5 + 0.5~ + ~2 - 1.5~                2                   which enters as the constant term representing the
+                                                             +                     accumulated phase at the start of the -th symbol.
+
+                                                                 2             Combining these three contributions yields the complete
+                                                                            residual phase of Eq. 5:
+           = 2  [-0.5] +       2      =0
+                                2
+                                                                      (32)
+
+Therefore all  -dependent terms contribute integer mul-
+tiples of 2 and vanish modulo 2:
+
+              up = 2    (mod 2 )                                      (33)     res ( ) =  ( -)  2
+
+   Downchirp case. For a downchirp, the total phase over                            chirp-rate mismatch
+  is:
+
+                                                                               + 2     +      -     +           +        ·    +  
+                                     2                                                           2                    2
+    down = 2                                                                                              
+
+                            0            +         -         
+
+                                                          
+
+                                                                                    dechirped center frequency                   frame phase
+
+                = 2                   +            -   2                                                                                  (36)
+                           2                            
+                                                                      (34)
+                                                      2
+
+                = 2      2     +     -         2                               Specialization to downchirps. For SFD downchirps ( =
+                          2                     2                           -1), the chirp-rate mismatch reverses sign to - ( - ),
+                                                                            while the dechirped center frequency becomes   + /2+
+                = 2                                                          -  /2. The magnitude of the chirp-rate mismatch
+
+   Both upchirps and downchirps accumulate the identical                    remains the same as for upchirps.
+phase increment 2    per symbol, regardless of cyclic
+shift  or chirp direction.                                                     Sync-word upchirps. The sync-word symbols are ordi-
+                                                                            nary coded upchirps with specific cyclic shifts 1, 2 deter-
+   Frame phase consequence. Since every symbol accu-                        mined by the LoRa network identifier. Their residual phase
+mulates the same phase increment, and phase is continuous                   follows the same expression with  = 1 or 2 , modifying only
+across symbol boundaries, the phase at the start of the -th                 the dechirped center frequency (through the   (/ -1/2)
+symbol in the frame is:
+                                                                            term) while the chirp-rate mismatch and frame phase remain
+                  = 0 + 2   ·  ·                                      (35)
+                                                                            unchanged.
+For example, the initial phase of the first payload symbol
+( =  + 2 + 2.25) is payload = 0 + 2    ( + 4.25) .                             Key universal property. Across all symbol types, the
+                                                                            frame phase  = 0 + 2   ·  ·   is a universal signature
+                                                                            of CFO, independent of symbol content or type. The chirp-
+
+                                                                            rate mismatch and the dechirped center frequency vary by
+MobiCom '26, October 26­30, 2026, Austin, TX, USA                                                                Du et al.
+
+symbol type and cyclic shift, but within each symbol type the    sample), the DFT at  is a Dirichlet kernel:
+mismatch is constant; its effect on the FFT peak is therefore a
+fixed complex multiplier that does not alter the inter-symbol    0 ( )  =   -1     =  sin( /2)    ·   ( -1)/2    (40)
+phase progression determined by the frame phase.                                       sin( /2)
+                                                                           
+                                                                                 
+
+                                                                            =0
+
+A.5 Single-Bin Energy Concentration                              The magnitude exhibits the familiar sinc-like scalloping loss,
+                                                                 and the phase is:
+The dechirped residual phase (Eq. 5) is quadratic in . In
+principle, the FFT of a signal with quadratic phase involves            0 ( )  =  ( -    1)         =         ~  (41)
+the Fresnel integral, which has no closed-form solution. We                           2        2
+show that the chirp-rate mismatch coefficient is small enough
+that signal energy remains concentrated in the peak FFT          where ~ =  /(2) is the fractional-bin offset in bins.
+bin, and that the quadratic term contributes a determinis-       Thus the phase at the peak bin is:
+tic, symbol-type-constant phase factor that the detection
+algorithm absorbs.                                                          []   + ~ + quad                      (42)
+
+   Quadratic phase bound. The chirp-rate mismatch co-            where quad is the additional (small, constant) contribution
+efficient is  ( - ). Using the exact shared-clock relation       from the quadratic term.
+ =  (1 + )2:
+                                                                    Linearity of the scalloping phase across symbols. For
+          ( - ) =   2 + 2  2 .                        (37)
+                                                                 preamble symbols ( = 0), the dechirped center frequency
+The total quadratic phase accumulated over one symbol du-
+ration  is:                                                      drifts linearly due to the progressive time offset  = 0 -  .
+                                                                 The bin position  typically does not change (total drift < 1
+                                                                 bin over  symbols), so ~ inherits the same linear drift:
+
+                                                                           ~  ~0 +  ·  · 2 ·                     (43)
+                                                                                                  
+ (-)· 2     2 · 2          · 2     2· ·               2  ·2 
+         =         =  2         =                  =
+
+                                                                 The scalloping phase ~ therefore adds a linear contribution
+                                                                 to the inter-symbol phase progression, yielding:
+                                                      (38)
+
+For a carrier at  with CFO   ,  =   / . Typically,                []  (0 + 0) + (2    + 1)                       (44)
+ ( - ) 2 < 0.5 rad (e.g. in worst-case 2.4 GHz, CFO can
+
+reach 40 kHz, giving 0.43 rad at SF12), well below 2. The
+
+quadratic modulation therefore causes only minor energy          where 0 = ~0 + quad is a constant offset and 1 =
+                                                                  · 2 · / is a small slope correction. Both are determin-
+spreading across FFT bins; nearly all signal power remains       istic functions of  and 0. The column-wise FFT (Section 4)
+concentrated in the peak bin .                                   captures the total slope 2    + 1; since 1  2   ,
+                                                                 the measured phase rotation rate remains an accurate proxy
+The same bound applies to downchirps, since the magni-           for    .
+
+tude of the chirp-rate mismatch is identical (only the sign         For SFD downchirps, the sign-flipped chirp-rate mismatch
+                                                                 produces a different constant factor, and the reversed dechirped
+flips).                                                          center frequency yields a different scalloping offset. The re-
+                                                                 sulting phase difference between upchirp and downchirp
+Consequence: deterministic phase factor and scallop-             peaks is deterministic and absorbed by the algorithm, which
+                                                                 processes these symbol types separately.
+ing phase. For sampling rate  and  samples per symbol,
+the FFT output at the peak bin can be written in terms of           Inter-symbol bin stability. For preamble symbols ( =
+                                                                 0), the peak bin shifts from symbol to symbol due to the
+sample index  as:                                                progressive time drift  . The bin shift over  symbols is:
+
+                                -1                    (39)
+
+          [] =      ( ( - )2/2 +)
+
+                                =0
+
+where  is the fractional-bin offset (the angular frequency        =         ·                                    (45)
+mismatch between the true tone and the nearest bin). The                           =  · 2 ·   · 2
+sum  ( ) =    ( (- )2/2 +) is a discrete Fresnel-like                       /                  
+factor whose magnitude and phase are determined by the
+chirp-rate mismatch and  .                                       At  = 8,  = 1.7 × 10-5, and  = 12, this gives   0.56
+                                                                 bins. Thus the signal remains concentrated in a single column
+   Scalloping phase from fractional-bin offset. Even             of the  ×  spectral matrix, ensuring that the column-wise
+when the chirp-rate mismatch is zero, evaluating the DFT         FFT in the detection algorithm (Section 4) captures the full
+at  instead of the true frequency introduces a scalloping        inter-symbol phase evolution.
+phase. For a pure tone at fractional offset  (in radians per
+DeRa: Deep-Range Low-Power Wide Area IoT via Ultra-sensitive Signal Detection  MobiCom '26, October 26­30, 2026, Austin, TX, USA
+
+A.6 Phase-Coherent Accumulation: SNR                                   and identify  = arg max ¯ []. The signed upchirp dechirped
+                                                                       frequency is:
+       Analysis
+                                                                                =     -     ·    =    + 0  (50)
+With the linear-phase approximation established, we for-                                 2
+mally analyze the SNR gain of coherent versus non-coherent                                     
+accumulation.
+                                                                       Similarly, for the 2 SFD downchirps (dechirped with an up-
+   Signal model at the peak bin. At bin , the FFT output               chirp reference), the peak is at  =   - 0:
+for the -th preamble symbol is:
+
+                                                                                =     -     ·    =    - 0  (51)
+                                                                                         2
+                      [] =  ·   +                    (46)                                      
+
+where  =  is the signal amplitude (real, positive) and                 These signed frequency measurements feed directly into the
+  CN (0, 2) is complex Gaussian noise.                                 coarse­fine CFO fusion described in Section 4.
+
+   Coherent addition (with known phase). If the phases                 C Algorithm Pseudocode
+
+ are known and compensated:                                            Algorithm 1 summarizes the complete DeRa detection and
+                                                                       decoding pipeline described in Section 4.
+             -1                                 -1
+        coh =   [] ·  -  =  +   - 
+                                                     (47)
+
+                =0                             =0
+
+The signal amplitude is ; the noise power is E[|  - |2] =
+2 (since the rotated noise remains i.i.d.); the SNR is ()2/(2) =
+ · 2/2 =  · SNR1.
+
+B DC-Centered Signed Frequency
+
+     Extraction
+
+After dechirping a preamble symbol (code  = 0) with the
+nominal downchirp reference, the residual signal is approxi-
+mately a complex tone at frequency  =   + 0. When
+  < 0 and 0 is small,  can be negative. In a standard
+ -point DFT, negative frequencies map to high-index bins
+near  , far beyond the signal bandwidth region of the first
+ bins. Simply truncating the FFT output to the first  bins
+therefore misses negative-frequency peaks entirely.
+
+   To capture both positive and negative dechirped frequen-
+cies, we extract a  -wide window centered at DC from
+the full  -point FFT. The key idea is to concatenate the last
+ /2 bins (which represent negative frequencies [- /2, 0))
+with the first  /2 bins (positive frequencies [0,  /2)):
+
+~ [] =         -     +    = 0, 1, . . . ,       -1   (negative freqs)
+                  2                          2
+
+            -             =     ,  .  .  .,    -  1  (positive freqs)
+               2             2
+                                                     (48)
+
+This produces  bins spanning [- /2,  /2) with reso-
+
+lution  / . The signed frequency corresponding to bin 
+
+is  () = ( -  /2) ·  / .
+
+For the  preamble upchirps, the peak at  is consistent
+
+across all symbols (since preamble code is  = 0 and the inter-
+
+symbol bin drift is negligible--see Section A.5). We average
+
+the magnitude spectra:
+
+                           -1
+                     ¯ [] =  ~ []
+                                                     (49)
+
+                           =0
+MobiCom '26, October 26­30, 2026, Austin, TX, USA                           Du et al.
+
+Algorithm 1 DeRa: Phase-Coherent Detection and Decoding
+
+Require: Received signal  (); spreading factor  ; column-FFT length ; sync-word codes 1, 2 ; candidate-list length  = 20
+Ensure: Decoded payload symbols {^ } or detection failure
+
+     -- Precomputation: High-Resolution Dechirped FFTs --
+
+1: for each of the  +5 symbol windows (8 preamble, 2 sync, 3 SFD) do
+
+2: Dechirp with the appropriate reference chirp and compute fft-point FFT
+
+3: end for                                                                   Appendix B
+4: Extract DC-centered signed spectra ~ , ~ 
+
+5:   peak              |~  |  ;    peak                |~  |                 Eq. 16
+
+                                                          
+
+     -- Column-Wise FFT (Section 4) --
+
+6: Build  ×  spectral matrix Y from  -point preamble FFTs
+
+7:   arg max  | [] |2                                                                                Peak column
+                                                                               Zero-padded column-wise FFT
+8:  []  FFT { []}=-01
+9:   arg max | [] |                                                          Eq. 14; resolves   mod  /
+
+10:  ^fine    eff/(     ·  )                                                 Unaliased, resolution  /( )
+                                                                                                             Eq. 18
+        
+
+     -- Coarse­Fine Fusion (Section 4) --
+
+11:  ^coarse    (    +  )/2
+
+        
+
+12:  ^        ^fine  + round     ^coarse - ^fine  · 
+
+                                                     
+
+                                     /
+
+13: ^0  (  - ^   )/
+
+    -- Coherent Verification and Local Refinement (Section 4.2) --
+14: Retain the 20 best (^ , ^0) candidates
+
+15: for each retained candidate (, ) do
+
+16: Evaluate (1, 1, 2, 2) and gather 1, 2 from the precomputed spectra       Eqs. 10­11
+
+17:   [, ]  all sections , -  (,+2 ,mid )
+
+18: Detection score  | [, ] |/
+
+19: end for
+
+20: Refine each of the 20 candidates over five CFO and five timing offsets
+
+21: Interpolate each power maximum to refine (^ , ^0)
+                                                                  1 ,    
+22:  Verify   each  candidate    against  sync-word    symbols           2
+
+23: Rerank by refined score; retain the top five for decoding fallback
+DeRa: Deep-Range Low-Power Wide Area IoT via Ultra-sensitive Signal Detection  MobiCom '26, October 26­30, 2026, Austin, TX, USA
+
+Algorithm 1 DeRa: Phase-Coherent Detection and Decoding (continued)                              Stage 3: bounded iteration
+
+     -- Unified Detection­Decoding Loop (Section 4.4) --                                                                  Eq. 20
+                                                                                                                          Eq. 21
+24:  for  each  candidate  (  ^( ),  ^0(  )  )  in  ranked  order    do                                                   Eq. 22
+                                                                                                                          Eq. 23
+                                                                                             Successful magnitude decode
+                                                                                               ML estimate of initial phase
+     Stage 1: Phase-compensated magnitude decode                                                                           Eq. 7
+
+25:       Remove  CFO:  comp ( )     =     ()       ·    -  2 ^( )                     Successful phase-coherent decode
+                                                                                                All  candidates exhausted
+
+26: for each payload symbol  do
+
+27:       Dechirp with corrected timing   =  (1 - ^); compute FFT
+
+28:       cfo []  2 ^  ·   (1 - / )
+
+29:       TO []  2 ·  · (  - ) (1-/ +pre +4.25+)
+
+30:        coh []       1 []  + 2 []            ·    -  (cfo [ ]+TO [ ] )
+
+            
+
+31:       ^  arg max          | coh [] |
+
+                                
+
+32: end for
+
+33: if CRC({^ }) passes then
+
+34:       return {^ }
+
+35: end if
+
+     Stage 2: Phase-coherent decode (if CRC fails)
+
+36: ^0  (   [^ ])
+
+37: for each payload symbol  do
+
+38:       ^  ^0 + 2 ^  (pre + 4.25 + ) ·  
+
+39:       ^  arg max Re  [] ·  -^
+
+40: end for
+
+41: if CRC({^ }) passes then
+
+42:       return {^ }
+
+43: end if
+
+44: end for
+45: return detection failure
+

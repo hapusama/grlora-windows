@@ -1,0 +1,12 @@
+== A: native 28 帧 ==
+  f00 savt=0.000 savt2=0.000 best_c=+1.50
+  f01 savt=0.000 savt2=0.000 best_c=+1.50
+  f02 savt=0.000 savt2=0.000 best_c=+1.50
+  f03 savt=0.000 savt2=0.000 best_c=+1.50
+native 坏帧: savt=0 savt2=0（应均 0）
+
+== B: v4 残余失败单元（DERA×SAVT crc_fail=1 且 sync=1）==
+目标单元数: 29
+可评估 29 单元：CRC 救回 savt=0 savt2=5
+  savt   raw SER: mean=0.170 med=0.143 归零率=0.00
+  savt2  raw SER: mean=0.166 med=0.143 归零率=0.00

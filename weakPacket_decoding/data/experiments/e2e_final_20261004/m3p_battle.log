@@ -1,0 +1,110 @@
+待跑 8484 单元（总 8484）
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  56/8484 (0.8min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  112/8484 (1.4min)
+  168/8484 (2.0min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  224/8484 (2.6min)
+  280/8484 (3.4min)
+  336/8484 (4.2min)
+  392/8484 (5.0min)
+  448/8484 (5.9min)
+  504/8484 (6.7min)
+  560/8484 (7.2min)
+  616/8484 (7.7min)
+  672/8484 (8.4min)
+  728/8484 (9.2min)
+  784/8484 (9.9min)
+  840/8484 (10.8min)
+  896/8484 (11.5min)
+  952/8484 (12.1min)
+  1008/8484 (12.6min)
+  1064/8484 (13.3min)
+  1120/8484 (14.1min)
+  1176/8484 (14.9min)
+  1232/8484 (15.7min)
+  1288/8484 (16.5min)
+  1344/8484 (17.2min)
+  1400/8484 (17.7min)
+  1456/8484 (18.3min)
+  1512/8484 (19.0min)
+  1568/8484 (19.8min)
+  1624/8484 (20.5min)
+  1680/8484 (21.4min)
+  1736/8484 (22.2min)
+  1792/8484 (22.8min)
+  1848/8484 (23.2min)
+  1904/8484 (23.9min)
+  1960/8484 (24.6min)
+  2016/8484 (25.4min)
+  2072/8484 (26.2min)
+  2128/8484 (27.0min)
+  2184/8484 (27.8min)
+  2240/8484 (28.3min)
+  2296/8484 (28.9min)
+  2352/8484 (29.6min)
+  2408/8484 (30.4min)
+  2464/8484 (31.1min)
+  2520/8484 (31.9min)
+  2576/8484 (32.7min)
+  2632/8484 (33.2min)
+  2688/8484 (33.7min)
+  2744/8484 (34.4min)
+  2800/8484 (35.1min)
+  2856/8484 (35.9min)
+  2912/8484 (36.7min)
+  2968/8484 (37.5min)
+  3024/8484 (38.3min)
+  3080/8484 (38.7min)
+  3136/8484 (39.3min)
+  3192/8484 (40.1min)
+  3248/8484 (40.9min)
+  3304/8484 (41.6min)
+  3360/8484 (42.4min)
+  3416/8484 (43.2min)
+  3472/8484 (43.8min)
+  3528/8484 (44.3min)
+  3584/8484 (45.0min)
+  3640/8484 (45.7min)
+  3696/8484 (46.5min)
+  3752/8484 (47.3min)
+  3808/8484 (48.2min)
+  3864/8484 (48.8min)
+  3920/8484 (49.3min)
+  3976/8484 (49.9min)
+  4032/8484 (50.6min)
+  4088/8484 (51.4min)
+  4144/8484 (52.2min)
+  4200/8484 (53.0min)
+  4256/8484 (53.7min)
+  4312/8484 (54.3min)
+  4368/8484 (54.7min)
+  4424/8484 (55.5min)
+预算到，优雅退出
+本批完成 4424 单元，55.5min

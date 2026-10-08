@@ -1,0 +1,122 @@
+{
+ "P=8": {
+  "cert": {
+   "parts": {
+    "row_dtft": 53248,
+    "sigma2": 12582912,
+    "fft": 3328
+   },
+   "total": 12639488
+  },
+  "depold": {
+   "parts": {
+    "row_fft": 692224,
+    "coarse_bank": 212992,
+    "sigma2": 6291456,
+    "dtft_grid": 2183168,
+    "fft": 136448
+   },
+   "total": 9516288
+  },
+  "dep2": {
+   "parts": {
+    "acq_row_fft": 319488,
+    "acq_search": 6291456,
+    "acq_refine": 540672,
+    "conf_dtft": 25804800,
+    "conf_fft": 3085824,
+    "sigma2": 10485760
+   },
+   "total": 46528000
+  },
+  "dera": {
+   "parts": {
+    "row_fft": 425984,
+    "sigma2": 8388608,
+    "dtft": 98304,
+    "fft": 6144
+   },
+   "total": 8919040
+  }
+ },
+ "P=16": {
+  "cert": {
+   "parts": {
+    "row_dtft": 86016,
+    "sigma2": 12582912,
+    "fft": 5376
+   },
+   "total": 12674304
+  },
+  "depold": {
+   "parts": {
+    "row_fft": 1118208,
+    "coarse_bank": 425984,
+    "sigma2": 6291456,
+    "dtft_grid": 3526656,
+    "fft": 220416
+   },
+   "total": 11582720
+  },
+  "dep2": {
+   "parts": {
+    "acq_row_fft": 319488,
+    "acq_search": 6291456,
+    "acq_refine": 540672,
+    "conf_dtft": 34062336,
+    "conf_fft": 6612480,
+    "sigma2": 18874368
+   },
+   "total": 66700800
+  },
+  "dera": {
+   "parts": {
+    "row_fft": 851968,
+    "sigma2": 16777216,
+    "dtft": 196608,
+    "fft": 12288
+   },
+   "total": 17838080
+  }
+ },
+ "P=32": {
+  "cert": {
+   "parts": {
+    "row_dtft": 151552,
+    "sigma2": 12582912,
+    "fft": 9472
+   },
+   "total": 12743936
+  },
+  "depold": {
+   "parts": {
+    "row_fft": 1970176,
+    "coarse_bank": 851968,
+    "sigma2": 6291456,
+    "dtft_grid": 6213632,
+    "fft": 388352
+   },
+   "total": 15715584
+  },
+  "dep2": {
+   "parts": {
+    "acq_row_fft": 319488,
+    "acq_search": 6291456,
+    "acq_refine": 540672,
+    "conf_dtft": 50577408,
+    "conf_fft": 13665792,
+    "sigma2": 35651584
+   },
+   "total": 107046400
+  },
+  "dera": {
+   "parts": {
+    "row_fft": 1703936,
+    "sigma2": 33554432,
+    "dtft": 393216,
+    "fft": 24576
+   },
+   "total": 35676160
+  }
+ }
+}

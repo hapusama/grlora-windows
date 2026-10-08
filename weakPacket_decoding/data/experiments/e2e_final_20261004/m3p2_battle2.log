@@ -1,0 +1,80 @@
+断点恢复：1904 单元
+待跑 3752 单元（总 5656）
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  56/3752 (2.1min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  112/3752 (4.8min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  168/3752 (5.6min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  224/3752 (6.8min)
+  280/3752 (8.2min)
+  336/3752 (9.4min)
+  392/3752 (11.3min)
+  448/3752 (11.8min)
+  504/3752 (12.9min)
+  560/3752 (14.2min)
+  616/3752 (15.4min)
+  672/3752 (17.1min)
+  728/3752 (17.7min)
+  784/3752 (18.6min)
+  840/3752 (19.7min)
+  896/3752 (20.8min)
+  952/3752 (22.6min)
+  1008/3752 (23.1min)
+  1064/3752 (24.1min)
+  1120/3752 (25.4min)
+  1176/3752 (26.5min)
+  1232/3752 (28.2min)
+  1288/3752 (28.7min)
+  1344/3752 (29.6min)
+  1400/3752 (30.7min)
+  1456/3752 (31.8min)
+  1512/3752 (33.5min)
+  1568/3752 (33.9min)
+  1624/3752 (34.8min)
+  1680/3752 (36.0min)
+  1736/3752 (37.0min)
+  1792/3752 (38.8min)
+  1848/3752 (39.3min)
+  1904/3752 (40.3min)
+  1960/3752 (41.4min)
+  2016/3752 (42.4min)
+  2072/3752 (44.1min)
+  2128/3752 (44.6min)
+  2184/3752 (45.4min)
+  2240/3752 (46.6min)
+  2296/3752 (47.7min)
+  2352/3752 (49.3min)
+  2408/3752 (49.8min)
+  2464/3752 (50.7min)
+  2520/3752 (51.9min)
+  2576/3752 (53.0min)
+  2632/3752 (54.6min)
+  2688/3752 (55.1min)
+预算到，优雅退出
+本批完成 2688 单元，55.1min

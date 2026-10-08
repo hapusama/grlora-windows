@@ -1,0 +1,126 @@
+M2b battle：δ [0.0, 0.005, 0.01, 0.02, 0.04, 0.082]｜levels [-26, -28, -30, -32, -34, -36, -38]｜seeds 20｜dep3a+dep3b
+待跑 H1 840 / H0 360
+h1 20/840 (26s)
+h1 40/840 (47s)
+h1 60/840 (66s)
+h1 80/840 (88s)
+h1 100/840 (110s)
+h1 120/840 (133s)
+h1 140/840 (156s)
+h1 160/840 (189s)
+h1 180/840 (208s)
+h1 200/840 (231s)
+h1 220/840 (252s)
+h1 240/840 (273s)
+h1 260/840 (294s)
+h1 280/840 (321s)
+h1 300/840 (353s)
+h1 320/840 (371s)
+h1 340/840 (393s)
+h1 360/840 (416s)
+h1 380/840 (436s)
+h1 400/840 (455s)
+h1 420/840 (475s)
+h1 440/840 (511s)
+h1 460/840 (529s)
+h1 480/840 (548s)
+h1 500/840 (565s)
+h1 520/840 (609s)
+h1 540/840 (626s)
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\spawn.py", line 107, in spawn_main
+    new_handle = reduction.duplicate(pipe_handle,
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\reduction.py", line 79, in duplicate
+    return _winapi.DuplicateHandle(
+PermissionError: [WinError 5] 拒绝访问。
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\spawn.py", line 107, in spawn_main
+    new_handle = reduction.duplicate(pipe_handle,
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\reduction.py", line 79, in duplicate
+    return _winapi.DuplicateHandle(
+PermissionError: [WinError 5] 拒绝访问。
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\spawn.py", line 107, in spawn_main
+    new_handle = reduction.duplicate(pipe_handle,
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\reduction.py", line 79, in duplicate
+    return _winapi.DuplicateHandle(
+PermissionError: [WinError 5] 拒绝访问。
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\spawn.py", line 107, in spawn_main
+    new_handle = reduction.duplicate(pipe_handle,
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\reduction.py", line 79, in duplicate
+    return _winapi.DuplicateHandle(
+PermissionError: [WinError 5] 拒绝访问。
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\spawn.py", line 126, in _main
+    self = reduction.pickle.load(from_parent)
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\connection.py", line 962, in rebuild_pipe_connection
+    handle = dh.detach()
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\reduction.py", line 131, in detach
+    return _winapi.DuplicateHandle(
+PermissionError: [WinError 5] 拒绝访问。
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\spawn.py", line 126, in _main
+    self = reduction.pickle.load(from_parent)
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\connection.py", line 962, in rebuild_pipe_connection
+    handle = dh.detach()
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\reduction.py", line 131, in detach
+    return _winapi.DuplicateHandle(
+PermissionError: [WinError 5] 拒绝访问。
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\spawn.py", line 126, in _main
+    self = reduction.pickle.load(from_parent)
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\connection.py", line 962, in rebuild_pipe_connection
+    handle = dh.detach()
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\reduction.py", line 131, in detach
+    return _winapi.DuplicateHandle(
+PermissionError: [WinError 5] 拒绝访问。
+M2b battle：δ [0.0, 0.005, 0.01, 0.02, 0.04, 0.082]｜levels [-26, -28, -30, -32, -34, -36, -38]｜seeds 20｜dep3a+dep3b
+断点恢复：547 完成作业
+待跑 H1 293 / H0 360
+h1 20/293 (60s)
+h1 40/293 (85s)
+h1 60/293 (108s)
+h1 80/293 (133s)
+h1 100/293 (157s)
+h1 120/293 (181s)
+h1 140/293 (205s)
+h1 160/293 (242s)
+h1 180/293 (265s)
+h1 200/293 (291s)
+h1 220/293 (317s)
+h1 240/293 (343s)
+h1 260/293 (372s)
+h1 280/293 (395s)
+h0 7/360 (459s)
+h0 27/360 (584s)
+h0 47/360 (682s)
+h0 67/360 (806s)
+h0 87/360 (907s)
+h0 107/360 (1034s)
+h0 127/360 (1135s)
+h0 147/360 (1225s)
+h0 167/360 (1309s)
+h0 187/360 (1412s)
+h0 207/360 (1501s)
+h0 227/360 (1589s)
+h0 247/360 (1687s)
+h0 267/360 (1781s)
+h0 287/360 (1862s)
+h0 307/360 (1971s)
+h0 327/360 (2050s)
+h0 347/360 (2147s)
+完成 2191s

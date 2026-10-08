@@ -1,0 +1,31 @@
+断点恢复：3281 单元
+待跑 667 单元
+  140/667 (286s)
+  280/667 (506s)
+  420/667 (754s)
+  560/667 (999s)
+
+==== 战表（SER/PER）====
+[ native] TREL-5 0.0000/0.0000 | DERA 0.0020/0.0000 | OURS-Dir 0.0316/0.1429 | DERA-DT 0.0000/0.0000 (n=28)
+[    -20] TREL-5 0.0147/0.0357 | DERA 0.0092/0.0196 | OURS-Dir 0.0552/0.2964 | DERA-DT 0.0129/0.0304 (n=560)
+[    -21] TREL-5 0.0276/0.0714 | DERA 0.0156/0.0357 | OURS-Dir 0.0812/0.3643 | DERA-DT 0.0239/0.0661 (n=560)
+[    -22] TREL-5 0.0569/0.1750 | DERA 0.0219/0.0929 | OURS-Dir 0.1306/0.6339 | DERA-DT 0.0416/0.1143 (n=560)
+[    -23] TREL-5 0.1072/0.4857 | DERA 0.0426/0.1714 | OURS-Dir 0.2024/0.9214 | DERA-DT 0.0681/0.2375 (n=560)
+[    -24] TREL-5 0.2147/0.9446 | DERA 0.0951/0.4839 | OURS-Dir 0.3201/0.9982 | DERA-DT 0.1360/0.6357 (n=560)
+[    -25] TREL-5 0.3647/0.9970 | DERA 0.1975/0.8816 | OURS-Dir 0.4502/1.0000 | DERA-DT 0.2529/0.9610 (n=667)
+[    -26] TREL-5 0.5254/1.0000 | DERA 0.3319/0.9946 | OURS-Dir 0.5853/1.0000 | DERA-DT 0.4102/1.0000 (n=1119)
+
+10%% SER 门限： {'TREL-5': None, 'DERA': None, 'OURS-Dir': None, 'DERA-DT': None}
+
+κ 分桶 SER：
+  k<0.2   {'TREL-5': 0.1964, 'DERA': 0.083, 'OURS-Dir': 0.2473, 'DERA-DT': 0.1317}
+  0.2-0.3 {'TREL-5': 0.2079, 'DERA': 0.1126, 'OURS-Dir': 0.2897, 'DERA-DT': 0.1473}
+  0.3-0.5 {'TREL-5': 0.2899, 'DERA': 0.2002, 'OURS-Dir': 0.3783, 'DERA-DT': 0.2319}
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dirichlet_demod_20261004\m1_battle.py", line 223, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dirichlet_demod_20261004\m1_battle.py", line 215, in main
+    "table": {"%s|%s" % k: v for k, v in agg.items()}}
+              ~~~~~~~~^~~
+TypeError: not all arguments converted during string formatting
+ng formatting

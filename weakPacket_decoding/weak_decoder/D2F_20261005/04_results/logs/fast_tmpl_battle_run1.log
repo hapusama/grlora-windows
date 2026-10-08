@@ -1,0 +1,119 @@
+待跑 4536 单元（总 4536；仅 m3p2 失败单元现算）
+  56/4536 (0.1min)
+  112/4536 (0.1min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  168/4536 (3.2min)
+  224/4536 (3.5min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  280/4536 (7.2min)
+  336/4536 (7.3min)
+  392/4536 (10.0min)
+  448/4536 (10.2min)
+  504/4536 (13.7min)
+  560/4536 (13.8min)
+  616/4536 (16.2min)
+  672/4536 (17.0min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  728/4536 (19.9min)
+  784/4536 (20.0min)
+  840/4536 (23.3min)
+  896/4536 (23.8min)
+  952/4536 (27.5min)
+  1008/4536 (27.7min)
+  1064/4536 (29.7min)
+  1120/4536 (30.2min)
+  1176/4536 (33.4min)
+  1232/4536 (33.7min)
+  1288/4536 (35.8min)
+  1344/4536 (36.2min)
+  1400/4536 (38.9min)
+  1456/4536 (38.9min)
+  1512/4536 (41.2min)
+  1568/4536 (41.4min)
+  1624/4536 (44.1min)
+  1680/4536 (44.1min)
+  1736/4536 (46.0min)
+  1792/4536 (46.3min)
+  1848/4536 (48.9min)
+  1904/4536 (49.2min)
+  1960/4536 (51.8min)
+  2016/4536 (52.1min)
+  2072/4536 (54.8min)
+  2128/4536 (54.8min)
+  2184/4536 (56.1min)
+  2240/4536 (56.2min)
+  2296/4536 (57.7min)
+  2352/4536 (58.0min)
+  2408/4536 (60.2min)
+  2464/4536 (60.5min)
+  2520/4536 (63.2min)
+  2576/4536 (63.5min)
+  2632/4536 (64.7min)
+  2688/4536 (64.8min)
+  2744/4536 (67.0min)
+  2800/4536 (67.2min)
+  2856/4536 (69.0min)
+  2912/4536 (69.4min)
+  2968/4536 (71.5min)
+  3024/4536 (71.6min)
+  3080/4536 (73.7min)
+  3136/4536 (73.7min)
+  3192/4536 (75.2min)
+  3248/4536 (75.3min)
+  3304/4536 (76.0min)
+  3360/4536 (76.1min)
+  3416/4536 (77.6min)
+  3472/4536 (77.6min)
+  3528/4536 (78.4min)
+  3584/4536 (78.5min)
+  3640/4536 (80.2min)
+  3696/4536 (80.3min)
+  3752/4536 (81.4min)
+  3808/4536 (81.7min)
+  3864/4536 (83.2min)
+  3920/4536 (83.2min)
+  3976/4536 (84.5min)
+  4032/4536 (84.5min)
+  4088/4536 (86.2min)
+  4144/4536 (86.3min)
+  4200/4536 (87.3min)
+  4256/4536 (87.4min)
+  4312/4536 (88.7min)
+  4368/4536 (88.7min)
+  4424/4536 (89.4min)
+  4480/4536 (89.7min)
+  4536/4536 (91.2min)
+本批完成 4536 单元，91.2min
+
+=== 链战 PER（20 种子 × 28 帧/档；uf = m3p2 ∪ fast 救援）===
+δ     | SNR   | n   | m3p2(u) | D2F-fast(uf) | DeRa(join)
+0.000 | None  |  28 | 0.000   | 0.000        | 0.000
+0.000 | -24   | 560 | 0.475   | 0.216        | 0.679
+0.000 | -22   | 560 | 0.071   | 0.043        | 0.079
+0.000 | -20   | 560 | 0.032   | 0.018        | 0.005
+0.000 | -18   | 560 | 0.013   | 0.004        | 0.002
+0.020 | None  |  28 | 0.000   | 0.000        | 0.143
+0.020 | -24   | 560 | 0.863   | 0.241        | 0.673
+0.020 | -22   | 560 | 0.173   | 0.057        | 0.246
+0.020 | -20   | 560 | 0.055   | 0.014        | 0.189
+0.020 | -18   | 560 | 0.011   | 0.004        | 0.164
+
+fast 救回数（u败→fast过）：{(0, -24): 145, (0, -22): 16, (1, -22): 65, (1, -24): 348, (0, -20): 8, (1, -20): 23, (1, -18): 4, (0, -18): 5}
+救回单元 δ_c 分布：{(0, -24, 0.0): 24, (0, -24, -0.01): 96, (0, -22, 0.01): 10, (0, -24, 0.01): 24, (1, -22, 0.01): 65, (1, -24, 0.01): 330, (0, -22, 0.0): 2, (0, -20, 0.01): 6, (1, -20, 0.01): 23, (1, -24, 0.02): 17, (1, -18, 0.01): 4, (0, -22, -0.01): 4, (0, -20, -0.01): 2, (0, -18, 0.01): 4, (1, -24, -0.01): 1, (0, -24, 0.02): 1, (0, -18, -0.01): 1}

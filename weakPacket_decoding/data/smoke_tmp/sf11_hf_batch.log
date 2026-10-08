@@ -1,0 +1,447 @@
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_0_10_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_0_11_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_0_12_11_2_16_sync_chain.csv'
+selected_candidates=9
+frame_filter=framesync-valid
+header_valid=9/9
+symbol_rows=432
+payload_rows=360
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_13_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_13_11_2_16_header_first_frames.csv
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_0_14_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_0_15_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_0_16_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_0_8_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_0_9_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_0_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_1_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_2_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_3_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_4_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_5_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_6_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_7_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_0_10_11_2_16_sync_chain.csv'
+selected_candidates=9
+frame_filter=framesync-valid
+header_valid=9/9
+symbol_rows=432
+payload_rows=360
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_11_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_11_11_2_16_header_first_frames.csv
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_0_12_11_2_16_sync_chain.csv'
+selected_candidates=9
+frame_filter=framesync-valid
+header_valid=9/9
+symbol_rows=432
+payload_rows=360
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_13_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_13_11_2_16_header_first_frames.csv
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_0_14_11_2_16_sync_chain.csv'
+selected_candidates=7
+frame_filter=framesync-valid
+header_valid=7/7
+symbol_rows=336
+payload_rows=280
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_15_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_15_11_2_16_header_first_frames.csv
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_0_16_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_0_8_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_0_9_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_0_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_1_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_2_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_3_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_4_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_5_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_6_11_2_16_sync_chain.csv'
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 586, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 340, in main
+    sync_rows = load_sync_rows(args.sync_csv, args.max_frames, os_factor=os_factor, frame_filter=args.frame_filter)
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\scripts\run_header_first_demod.py", line 137, in load_sync_rows
+    with path.open("r", encoding="utf-8", newline="") as handle:
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\pathlib.py", line 1119, in open
+    return self._accessor.open(self, mode, buffering, encoding, errors,
+FileNotFoundError: [Errno 2] No such file or directory: 'weakPacket_decoding\\data\\weak_sync_chain\\sync_chain\\1_1_7_11_2_16_sync_chain.csv'
+selected_candidates=9
+frame_filter=framesync-valid
+header_valid=9/9
+symbol_rows=432
+payload_rows=360
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_10_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_10_11_2_16_header_first_frames.csv
+selected_candidates=9
+frame_filter=framesync-valid
+header_valid=9/9
+symbol_rows=432
+payload_rows=360
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_11_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_11_11_2_16_header_first_frames.csv
+selected_candidates=10
+frame_filter=framesync-valid
+header_valid=10/10
+symbol_rows=480
+payload_rows=400
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_12_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_12_11_2_16_header_first_frames.csv
+selected_candidates=9
+frame_filter=framesync-valid
+header_valid=9/9
+symbol_rows=432
+payload_rows=360
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_13_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_13_11_2_16_header_first_frames.csv
+selected_candidates=0
+frame_filter=framesync-valid
+header_valid=0/0
+symbol_rows=0
+payload_rows=0
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_14_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_14_11_2_16_header_first_frames.csv
+selected_candidates=7
+frame_filter=framesync-valid
+header_valid=7/7
+symbol_rows=336
+payload_rows=280
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_15_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_15_11_2_16_header_first_frames.csv
+selected_candidates=5
+frame_filter=framesync-valid
+header_valid=4/5
+symbol_rows=192
+payload_rows=160
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_16_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_16_11_2_16_header_first_frames.csv
+selected_candidates=7
+frame_filter=framesync-valid
+header_valid=7/7
+symbol_rows=336
+payload_rows=280
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_8_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_8_11_2_16_header_first_frames.csv
+selected_candidates=9
+frame_filter=framesync-valid
+header_valid=9/9
+symbol_rows=432
+payload_rows=360
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_9_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_0_9_11_2_16_header_first_frames.csv
+selected_candidates=10
+frame_filter=framesync-valid
+header_valid=10/10
+symbol_rows=480
+payload_rows=400
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_0_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_0_11_2_16_header_first_frames.csv
+selected_candidates=2
+frame_filter=framesync-valid
+header_valid=1/2
+symbol_rows=48
+payload_rows=40
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_1_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_1_11_2_16_header_first_frames.csv
+selected_candidates=9
+frame_filter=framesync-valid
+header_valid=9/9
+symbol_rows=432
+payload_rows=360
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_2_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_2_11_2_16_header_first_frames.csv
+selected_candidates=7
+frame_filter=framesync-valid
+header_valid=7/7
+symbol_rows=336
+payload_rows=280
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_3_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_3_11_2_16_header_first_frames.csv
+selected_candidates=10
+frame_filter=framesync-valid
+header_valid=9/10
+symbol_rows=432
+payload_rows=360
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_4_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_4_11_2_16_header_first_frames.csv
+selected_candidates=8
+frame_filter=framesync-valid
+header_valid=8/8
+symbol_rows=384
+payload_rows=320
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_5_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_5_11_2_16_header_first_frames.csv
+selected_candidates=9
+frame_filter=framesync-valid
+header_valid=9/9
+symbol_rows=432
+payload_rows=360
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_6_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_6_11_2_16_header_first_frames.csv
+selected_candidates=9
+frame_filter=framesync-valid
+header_valid=9/9
+symbol_rows=432
+payload_rows=360
+wrote=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_7_11_2_16_header_first_symbols.csv
+wrote_frames=weakPacket_decoding\data\weak_sync_chain\header_first\1_1_7_11_2_16_header_first_frames.csv

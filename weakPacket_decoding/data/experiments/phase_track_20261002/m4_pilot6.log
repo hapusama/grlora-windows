@@ -1,0 +1,28 @@
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\e2_arm.py:94: RuntimeWarning: divide by zero encountered in log
+  logWK=np.log(WK), logWKG=np.log(WKG),
+断点恢复：已完成 336 单元
+待跑 336 / 672 单元
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\e2_arm.py:94: RuntimeWarning: divide by zero encountered in log
+  logWK=np.log(WK), logWKG=np.log(WKG),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\e2_arm.py:94: RuntimeWarning: divide by zero encountered in log
+  logWK=np.log(WK), logWKG=np.log(WKG),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\e2_arm.py:94: RuntimeWarning: divide by zero encountered in log
+  logWK=np.log(WK), logWKG=np.log(WKG),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\e2_arm.py:267: RuntimeWarning: divide by zero encountered in log
+  rows[k] = lse(np.log(g)[:, None] + li, 0)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\e2_arm.py:267: RuntimeWarning: divide by zero encountered in log
+  rows[k] = lse(np.log(g)[:, None] + li, 0)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\e2_arm.py:267: RuntimeWarning: divide by zero encountered in log
+  rows[k] = lse(np.log(g)[:, None] + li, 0)
+60/336 (68s)
+120/336 (138s)
+180/336 (185s)
+240/336 (250s)
+300/336 (305s)
+== 汇总（n=6 种子）==
+snr      n   |  PER:  A   DERA   D|A   D|D  CHAIN | DERA失败帧上D|D回收
+native   168 |      0.357    0.000     0.321    0.000   0.000  |  0/0
+-26      168 |      1.000    0.994     1.000    0.994   0.994  |  0/167
+-24      168 |      0.798    0.506     0.661    0.452   0.452  |  9/85
+-22      168 |      0.458    0.048     0.363    0.048   0.048  |  0/8
+用时 343s → D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\m4_units.jsonl

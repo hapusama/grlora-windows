@@ -1,0 +1,4 @@
+P=8 done (539s mc): dev@1e-2=+0.590dB dev@1e-3=+0.741dB c_emp=0.0 c_tot=119.5
+P=16 done (688s mc): dev@1e-2=+0.663dB dev@1e-3=+0.590dB c_emp=0.0 c_tot=193.2
+P=32 done (343s mc): dev@1e-2=+0.642dB dev@1e-3=+0.884dB c_emp=0.0 c_tot=556.5
+→ m2_thr.json (1570s)

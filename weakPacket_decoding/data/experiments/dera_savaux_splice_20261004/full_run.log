@@ -1,0 +1,24 @@
+待跑 532 单元
+  28/532 (159s, 5.7s/u, ETA 48min)
+  56/532 (330s, 5.9s/u, ETA 47min)
+  84/532 (509s, 6.1s/u, ETA 45min)
+  112/532 (683s, 6.1s/u, ETA 43min)
+  140/532 (881s, 6.3s/u, ETA 41min)
+  168/532 (1074s, 6.4s/u, ETA 39min)
+  196/532 (1268s, 6.5s/u, ETA 36min)
+  224/532 (1474s, 6.6s/u, ETA 34min)
+  252/532 (1668s, 6.6s/u, ETA 31min)
+  280/532 (1862s, 6.7s/u, ETA 28min)
+  308/532 (2084s, 6.8s/u, ETA 25min)
+  336/532 (2333s, 6.9s/u, ETA 23min)
+  364/532 (2582s, 7.1s/u, ETA 20min)
+  392/532 (2859s, 7.3s/u, ETA 17min)
+  420/532 (3140s, 7.5s/u, ETA 14min)
+  448/532 (3434s, 7.7s/u, ETA 11min)
+  476/532 (3614s, 7.6s/u, ETA 7min)
+  504/532 (3820s, 7.6s/u, ETA 4min)
+  532/532 (4087s, 7.7s/u, ETA 0min)
+
+拼接战表（SER=前端同步成功单元内 / PER=含同步失败；PRIOR×SAVAUX=oracle 诊断天花板）
+[ native] sync OURS=1.00 DERA=1.00 | DERA×SAVAUX 0.123/0.321 | DERAfd×SAVAUX 0.000/0.000 | DERA×TRIMMER 0.056/0.214 | DERA×TREL-5 0.000/0.000 | DERA×DERA 0.000/0.000 | OURS×SAVAUX 0.039/0.107 | PRIOR×SAVAUX 0.039/0.107 (n=28)  [DERA |f_err|med=0.0031 bin, |hs_err|med=0 samp, fd d*med=+1.62]
+4087s elapsed

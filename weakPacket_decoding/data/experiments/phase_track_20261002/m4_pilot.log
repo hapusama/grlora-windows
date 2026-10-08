@@ -1,0 +1,28 @@
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\e2_arm.py:94: RuntimeWarning: divide by zero encountered in log
+  logWK=np.log(WK), logWKG=np.log(WKG),
+断点恢复：已完成 9 单元
+待跑 327 / 336 单元
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\e2_arm.py:94: RuntimeWarning: divide by zero encountered in log
+  logWK=np.log(WK), logWKG=np.log(WKG),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\e2_arm.py:94: RuntimeWarning: divide by zero encountered in log
+  logWK=np.log(WK), logWKG=np.log(WKG),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\e2_arm.py:94: RuntimeWarning: divide by zero encountered in log
+  logWK=np.log(WK), logWKG=np.log(WKG),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\e2_arm.py:267: RuntimeWarning: divide by zero encountered in log
+  rows[k] = lse(np.log(g)[:, None] + li, 0)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\e2_arm.py:267: RuntimeWarning: divide by zero encountered in log
+  rows[k] = lse(np.log(g)[:, None] + li, 0)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\e2_arm.py:267: RuntimeWarning: divide by zero encountered in log
+  rows[k] = lse(np.log(g)[:, None] + li, 0)
+60/327 (68s)
+120/327 (134s)
+180/327 (180s)
+240/327 (240s)
+300/327 (297s)
+== 汇总（n=3 种子）==
+Traceback (most recent call last):
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\m4_run.py", line 205, in <module>
+    main()
+  File "D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\phase_track_20261002\m4_run.py", line 193, in main
+    print("%-7s %4s | PER: A %.3f DERA %.3f D|A %.3f D|D %.3f CHAIN %.3f"
+TypeError: not enough arguments for format string

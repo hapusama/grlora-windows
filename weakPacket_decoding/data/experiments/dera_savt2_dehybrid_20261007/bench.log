@@ -1,0 +1,11 @@
+== B1: 复杂度基准（native，3 帧 × {pre8,16,32}，wall-time 秒）==
+f00 psym=35 | dera_sync(检测) 1.053s | DERA解码 0.082s | SAVAUX裸解调 0.015s | SAVT整包网格(17) 0.851s | SAVT2双层网格(35) 1.727s
+f09 psym=35 | dera_sync(检测) 1.038s | DERA解码 0.076s | SAVAUX裸解调 0.014s | SAVT整包网格(17) 0.744s | SAVT2双层网格(35) 1.626s
+f20 psym=35 | dera_sync(检测) 1.792s | DERA解码 0.072s | SAVAUX裸解调 0.013s | SAVT整包网格(17) 0.838s | SAVT2双层网格(35) 1.802s
+
+== B2: 步罚敏感性（−24 档 seed0，28 帧，DERA×SAVT2）==
+PEN=0.1  PER=0.286  SER=0.0789
+PEN=0.2  PER=0.286  SER=0.0823
+PEN=0.4  PER=0.286  SER=0.0823
+PEN=0.8  PER=0.286  SER=0.0823
+(v4-b 战役用 PEN=0.2)

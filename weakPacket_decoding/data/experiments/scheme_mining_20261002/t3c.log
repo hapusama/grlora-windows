@@ -1,0 +1,17 @@
+    [T3c] gamma=-19.00 dB  thr=4325  Pd=0.677
+    [T3c] gamma=-17.50 dB  thr=4364  Pd=0.985
+    [T3c] gamma=-18.25 dB  thr=4353  Pd=0.897
+    [T3c] gamma=-17.88 dB  thr=4358  Pd=0.950
+    [T3c] gamma=-18.06 dB  thr=4343  Pd=0.958
+    [T3c] gamma=-18.16 dB  thr=4341  Pd=0.920
+    [T3c] gamma=-18.20 dB  thr=4349  Pd=0.922
+ FAR=1e-02  T3c frontier=-18.23 dB
+    [T3c] gamma=-19.00 dB  thr=4426  Pd=0.542
+    [T3c] gamma=-17.50 dB  thr=4495  Pd=0.973
+    [T3c] gamma=-18.25 dB  thr=4452  Pd=0.815
+    [T3c] gamma=-17.88 dB  thr=4560  Pd=0.828
+    [T3c] gamma=-17.69 dB  thr=4469  Pd=0.963
+    [T3c] gamma=-17.78 dB  thr=4433  Pd=0.938
+    [T3c] gamma=-17.83 dB  thr=4480  Pd=0.925
+ FAR=1e-03  T3c frontier=-17.85 dB
+saved t3c_probe_results.json (401.0 s)

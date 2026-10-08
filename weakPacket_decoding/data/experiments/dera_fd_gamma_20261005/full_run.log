@@ -1,0 +1,26 @@
+待跑 448 单元
+  28/448 (65s, 2.3s/u, ETA 16min)
+  56/448 (147s, 2.6s/u, ETA 17min)
+  84/448 (228s, 2.7s/u, ETA 16min)
+  112/448 (325s, 2.9s/u, ETA 16min)
+  140/448 (401s, 2.9s/u, ETA 15min)
+  168/448 (494s, 2.9s/u, ETA 14min)
+  196/448 (578s, 2.9s/u, ETA 12min)
+  224/448 (659s, 2.9s/u, ETA 11min)
+  252/448 (740s, 2.9s/u, ETA 10min)
+  280/448 (819s, 2.9s/u, ETA 8min)
+  308/448 (940s, 3.1s/u, ETA 7min)
+  336/448 (1071s, 3.2s/u, ETA 6min)
+  364/448 (1185s, 3.3s/u, ETA 5min)
+  392/448 (1333s, 3.4s/u, ETA 3min)
+  420/448 (1466s, 3.5s/u, ETA 2min)
+  448/448 (1620s, 3.6s/u, ETA 0min)
+
+v2 战表（SER=同步成功单元内 / PER=含同步失败；PRIOR=oracle 分报）
+[ native] sync DERA=1.00 | DERA×GAMMA 0.000/0.000 | DERAfd×GAMMA 0.000/0.000 | DERAfd×SAVAUX 0.000/0.000 | DERA×DERA 0.000/0.000 | PRIOR×GAMMA 0.002/0.000 (n=28)  [fd d*med=+1.62]
+[    -17] sync DERA=1.00 | DERA×GAMMA 0.003/0.000 | DERAfd×GAMMA 0.000/0.000 | DERAfd×SAVAUX 0.012/0.012 | DERA×DERA 0.003/0.000 | PRIOR×GAMMA 0.004/0.000 (n=84)  [fd d*med=-1.25]
+[    -20] sync DERA=1.00 | DERA×GAMMA 0.019/0.024 | DERAfd×GAMMA 0.004/0.000 | DERAfd×SAVAUX 0.027/0.024 | DERA×DERA 0.014/0.024 | PRIOR×GAMMA 0.010/0.012 (n=84)  [fd d*med=-1.25]
+[    -22] sync DERA=0.99 | DERA×GAMMA 0.034/0.107 | DERAfd×GAMMA 0.025/0.060 | DERAfd×SAVAUX 0.075/0.107 | DERA×DERA 0.033/0.107 | PRIOR×GAMMA 0.044/0.048 (n=84)  [fd d*med=-0.50]
+[    -24] sync DERA=0.82 | DERA×GAMMA 0.116/0.607 | DERAfd×GAMMA 0.343/0.524 | DERAfd×SAVAUX 0.404/0.583 | DERA×DERA 0.150/0.619 | PRIOR×GAMMA 0.141/0.357 (n=84)  [fd d*med=-0.75]
+[    -26] sync DERA=0.19 | DERA×GAMMA 0.525/1.000 | DERAfd×GAMMA 0.654/1.000 | DERAfd×SAVAUX 0.655/1.000 | DERA×DERA 0.521/1.000 | PRIOR×GAMMA 0.417/0.988 (n=84)  [fd d*med=+1.00]
+1620s elapsed

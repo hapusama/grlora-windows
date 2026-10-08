@@ -1,0 +1,126 @@
+待跑 4536 单元（总 4536；u败单元现算三臂）
+  56/4536 (0.0min)
+  112/4536 (0.0min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  168/4536 (2.0min)
+  224/4536 (2.1min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  280/4536 (4.8min)
+  336/4536 (4.9min)
+  392/4536 (6.7min)
+  448/4536 (6.9min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  504/4536 (9.8min)
+  560/4536 (9.8min)
+  616/4536 (11.3min)
+  672/4536 (12.1min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  728/4536 (14.3min)
+  784/4536 (14.4min)
+  840/4536 (16.6min)
+  896/4536 (16.9min)
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\e2e_final_20261004\m3_core.py:201: RuntimeWarning: invalid value encountered in divide
+  return dict(nu0h=nu0h, khat=khat, acq_score=best / (ka * sig2),
+D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dep_anchor_20261004\m2_core.py:224: RuntimeWarning: invalid value encountered in divide
+  score = np.abs(bestT) ** 2 / (sig2 * L["K_c"])
+  952/4536 (19.5min)
+  1008/4536 (19.9min)
+  1064/4536 (21.3min)
+  1120/4536 (21.6min)
+  1176/4536 (23.8min)
+  1232/4536 (24.4min)
+  1288/4536 (25.9min)
+  1344/4536 (26.4min)
+  1400/4536 (29.0min)
+  1456/4536 (29.0min)
+  1512/4536 (30.6min)
+  1568/4536 (31.1min)
+  1624/4536 (33.5min)
+  1680/4536 (33.5min)
+  1736/4536 (35.2min)
+  1792/4536 (35.8min)
+  1848/4536 (38.3min)
+  1904/4536 (38.6min)
+  1960/4536 (40.7min)
+  2016/4536 (41.2min)
+  2072/4536 (43.5min)
+  2128/4536 (43.7min)
+  2184/4536 (44.7min)
+  2240/4536 (45.1min)
+  2296/4536 (47.7min)
+  2352/4536 (48.0min)
+  2408/4536 (49.9min)
+  2464/4536 (50.4min)
+  2520/4536 (53.1min)
+  2576/4536 (53.7min)
+  2632/4536 (55.1min)
+  2688/4536 (55.4min)
+  2744/4536 (57.5min)
+  2800/4536 (57.5min)
+  2856/4536 (59.3min)
+  2912/4536 (59.7min)
+  2968/4536 (62.4min)
+  3024/4536 (62.7min)
+  3080/4536 (64.5min)
+  3136/4536 (64.5min)
+  3192/4536 (67.0min)
+  3248/4536 (67.2min)
+  3304/4536 (68.1min)
+  3360/4536 (68.4min)
+  3416/4536 (71.0min)
+  3472/4536 (71.0min)
+  3528/4536 (72.2min)
+  3584/4536 (72.3min)
+  3640/4536 (74.6min)
+  3696/4536 (75.1min)
+  3752/4536 (76.5min)
+  3808/4536 (77.1min)
+  3864/4536 (79.5min)
+  3920/4536 (79.6min)
+  3976/4536 (81.2min)
+  4032/4536 (81.3min)
+  4088/4536 (84.0min)
+  4144/4536 (84.0min)
+  4200/4536 (85.5min)
+  4256/4536 (85.9min)
+  4312/4536 (87.6min)
+  4368/4536 (87.6min)
+  4424/4536 (88.7min)
+  4480/4536 (89.1min)
+  4536/4536 (91.8min)
+本批完成 4536 单元，91.8min
+
+=== 系统阶梯（模块逐级添加，同噪声同判据，PER）===
+δ     | SNR   | L0 oa(A,无梯) | L1 u(+B,无梯) | L2 u(+梯) | L3 uf(+fast) | L4 ufp(+P) | ab ufa(A-only) | ab ufn(N-only) | DeRa
+0.000 | None  | 0.000(n28) | 0.000(n28) | 0.000(n28) | 0.000(n28) | 0.000(n28) | 0.000(n28) | 0.000(n28) | 0.000(n28)
+0.000 | -24   | 0.493(n536) | 0.466(n536) | 0.451(n536) | 0.216(n560) | 0.174(n536) | 0.187(n536) | 0.364(n536) | 0.672(n536)
+0.000 | -22   | 0.081(n557) | 0.066(n557) | 0.066(n557) | 0.043(n560) | 0.038(n557) | 0.038(n557) | 0.045(n557) | 0.077(n557)
+0.000 | -20   | 0.047(n558) | 0.030(n558) | 0.029(n558) | 0.018(n560) | 0.011(n558) | 0.014(n558) | 0.018(n558) | 0.005(n558)
+0.000 | -18   | 0.016(n558) | 0.009(n558) | 0.009(n558) | 0.004(n560) | 0.000(n558) | 0.000(n558) | 0.002(n558) | 0.002(n558)
+0.020 | None  | 0.929(n28) | 0.179(n28) | 0.000(n28) | 0.000(n28) | 0.000(n28) | 0.000(n28) | 0.000(n28) | 0.143(n28)
+0.020 | -24   | 0.959(n534) | 0.940(n534) | 0.856(n534) | 0.241(n560) | 0.197(n534) | 0.206(n534) | 0.607(n534) | 0.663(n534)
+0.020 | -22   | 0.915(n555) | 0.813(n555) | 0.166(n555) | 0.057(n560) | 0.049(n555) | 0.049(n555) | 0.058(n555) | 0.249(n555)
+0.020 | -20   | 0.899(n556) | 0.718(n556) | 0.049(n556) | 0.014(n560) | 0.007(n556) | 0.007(n556) | 0.014(n556) | 0.191(n556)
+0.020 | -18   | 0.909(n559) | 0.606(n559) | 0.009(n559) | 0.004(n560) | 0.002(n559) | 0.002(n559) | 0.002(n559) | 0.163(n559)
+
+（L0=m3p oa 单A列无梯；L1=m3p u(+B)；L2=m3p2 u(+梯)；L3=+fast(A→B)；L4=+P；现算臂只在 u败 单元，其余继承 join u=0；L3 全档数字与 RESULTS_FAST_TMPL §4 uf 列一致

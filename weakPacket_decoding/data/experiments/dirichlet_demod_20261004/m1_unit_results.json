@@ -1,0 +1,197 @@
+{
+ "sf": 10,
+ "os": 4,
+ "half_taps": 48,
+ "cases": [
+  {
+   "kappa": 0.0,
+   "c": 100,
+   "ours_rec_db": -0.034863159077337155,
+   "ours_argmax": 100,
+   "dera_loss_db": 0.0,
+   "dera_fb_powdb": -0.8419871926307678,
+   "dt4_rec_db": 0.0,
+   "dt4_argmax": 100
+  },
+  {
+   "kappa": 0.0,
+   "c": 512,
+   "ours_rec_db": -0.03647509125434186,
+   "ours_argmax": 512,
+   "dera_loss_db": 1.0354386859035003e-06,
+   "dera_fb_powdb": -3.0102994441986084,
+   "dt4_rec_db": 1.0354386859035003e-06,
+   "dt4_argmax": 512
+  },
+  {
+   "kappa": 0.0,
+   "c": 900,
+   "ours_rec_db": -0.035334186386868506,
+   "ours_argmax": 900,
+   "dera_loss_db": 0.0,
+   "dera_fb_powdb": -1.0394808053970337,
+   "dt4_rec_db": 0.0,
+   "dt4_argmax": 900
+  },
+  {
+   "kappa": 0.2,
+   "c": 100,
+   "ours_rec_db": -0.03522344779664081,
+   "ours_argmax": 100,
+   "dera_loss_db": -0.4239061176776886,
+   "dera_fb_powdb": -1.3067363500595093,
+   "dt4_rec_db": 0.0,
+   "dt4_argmax": 100
+  },
+  {
+   "kappa": 0.2,
+   "c": 512,
+   "ours_rec_db": -0.03640346316828348,
+   "ours_argmax": 512,
+   "dera_loss_db": -0.14334888756275177,
+   "dera_fb_powdb": -3.153648614883423,
+   "dt4_rec_db": 1.0354386859035003e-06,
+   "dt4_argmax": 512
+  },
+  {
+   "kappa": 0.2,
+   "c": 900,
+   "ours_rec_db": -0.03555099652221671,
+   "ours_argmax": 900,
+   "dera_loss_db": -0.391865998506546,
+   "dera_fb_powdb": -1.4769643545150757,
+   "dt4_rec_db": 0.0,
+   "dt4_argmax": 900
+  },
+  {
+   "kappa": 0.3,
+   "c": 100,
+   "ours_rec_db": -0.035570564473502965,
+   "ours_argmax": 100,
+   "dera_loss_db": -0.9639369249343872,
+   "dera_fb_powdb": -1.9015668630599976,
+   "dt4_rec_db": 0.0,
+   "dt4_argmax": 100
+  },
+  {
+   "kappa": 0.3,
+   "c": 512,
+   "ours_rec_db": -0.036320539687615214,
+   "ours_argmax": 512,
+   "dera_loss_db": -0.3238869905471802,
+   "dera_fb_powdb": -3.3341870307922363,
+   "dt4_rec_db": 1.0354386859035003e-06,
+   "dt4_argmax": 512
+  },
+  {
+   "kappa": 0.3,
+   "c": 900,
+   "ours_rec_db": -0.03576247715224564,
+   "ours_argmax": 900,
+   "dera_loss_db": -0.889923095703125,
+   "dera_fb_powdb": -2.0357096195220947,
+   "dt4_rec_db": 0.0,
+   "dt4_argmax": 900
+  },
+  {
+   "kappa": 0.4,
+   "c": 100,
+   "ours_rec_db": -0.03589583235940397,
+   "ours_argmax": 100,
+   "dera_loss_db": -1.7402141094207764,
+   "dera_fb_powdb": -2.762341260910034,
+   "dt4_rec_db": 0.0,
+   "dt4_argmax": 100
+  },
+  {
+   "kappa": 0.4,
+   "c": 512,
+   "ours_rec_db": -0.0362161454548775,
+   "ours_argmax": 512,
+   "dera_loss_db": -0.5792235732078552,
+   "dera_fb_powdb": -3.5895230770111084,
+   "dt4_rec_db": 1.0354386859035003e-06,
+   "dt4_argmax": 512
+  },
+  {
+   "kappa": 0.4,
+   "c": 900,
+   "ours_rec_db": -0.03596522488377509,
+   "ours_argmax": 900,
+   "dera_loss_db": -1.6034616231918335,
+   "dera_fb_powdb": -2.841677665710449,
+   "dt4_rec_db": 0.0,
+   "dt4_argmax": 900
+  },
+  {
+   "kappa": 0.5,
+   "c": 100,
+   "ours_rec_db": -0.03610059943102183,
+   "ours_argmax": 100,
+   "dera_loss_db": -2.7762677669525146,
+   "dera_fb_powdb": -3.9223976135253906,
+   "dt4_rec_db": 0.0,
+   "dt4_argmax": 100
+  },
+  {
+   "kappa": 0.5,
+   "c": 512,
+   "ours_rec_db": -0.036100595351924024,
+   "ours_argmax": 512,
+   "dera_loss_db": -0.9120965600013733,
+   "dera_fb_powdb": -3.922396659851074,
+   "dt4_rec_db": 1.0354386859035003e-06,
+   "dt4_argmax": 512
+  },
+  {
+   "kappa": 0.5,
+   "c": 900,
+   "ours_rec_db": -0.03610059806623134,
+   "ours_argmax": 900,
+   "dera_loss_db": -2.5510172843933105,
+   "dera_fb_powdb": -3.9223971366882324,
+   "dt4_rec_db": 0.0,
+   "dt4_argmax": 900
+  }
+ ],
+ "gate_a_pass": true,
+ "gate_b_pass": true,
+ "kappa_sens": [
+  {
+   "kerr": -0.1,
+   "rec_db": -0.17932329743769893,
+   "argmax": 512
+  },
+  {
+   "kerr": -0.05,
+   "rec_db": -0.07191817251894947,
+   "argmax": 512
+  },
+  {
+   "kerr": -0.02,
+   "rec_db": -0.041931227510906596,
+   "argmax": 512
+  },
+  {
+   "kerr": 0.0,
+   "rec_db": -0.0362161454548775,
+   "argmax": 512
+  },
+  {
+   "kerr": 0.02,
+   "rec_db": -0.041908863244410885,
+   "argmax": 512
+  },
+  {
+   "kerr": 0.05,
+   "rec_db": -0.07186226112729815,
+   "argmax": 512
+  },
+  {
+   "kerr": 0.1,
+   "rec_db": -0.17921146946538627,
+   "argmax": 512
+  }
+ ],
+ "elapsed_s": 9.247593879699707
+}

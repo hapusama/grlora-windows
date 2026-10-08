@@ -43,9 +43,10 @@ MASK = np.abs(np.fft.fftfreq(NF)) <= 0.125 + 40.0 / NF
 REF_OS = np.conj(build_upchirp(SF, symbol_id=0, os_factor=OS))
 DERA = DeRaDemodulator(SF, OS)
 
-# DERA port 挂起（分段机制需论文公式精读/上游码，native SER 0.14 不可入表）
-CHAINS = ["PLAIN", "OLD-A", "TRIMMER", "SAVAUX", "NEW-0", "TREL-5", "BCJR-5"]
-EV_CHAINS = ["OLD-A", "TRIMMER", "SAVAUX", "NEW-0", "TREL-5", "BCJR-5"]
+# DERA port v2 入列（2026-09-29 修复：逐候选越界切分 + 相干合并 + ML 公共相位；
+# native 2/980 = SER .002，验证脚本 dera_native_check.py；v1 固定中点切分已弃）
+CHAINS = ["PLAIN", "OLD-A", "TRIMMER", "DERA", "SAVAUX", "NEW-0", "TREL-5", "BCJR-5"]
+EV_CHAINS = ["OLD-A", "TRIMMER", "DERA", "SAVAUX", "NEW-0", "TREL-5", "BCJR-5"]
 
 EXP_DIR = r"D:\Desktop\proj\gr-lora_sdr\weakPacket_decoding\data\experiments\dera_battle_20260929"
 CKPT = os.path.join(EXP_DIR, "checkpoint.jsonl")
@@ -205,6 +206,8 @@ def chain_rows(seg, psym):
                                   cfo_int=0).combined_spectrum) ** 2
     rows["TRIMMER"] = tri
     rows["SAVAUX"] = sav
+    _s1d, _cohd = DERA.demod_payload(seg, 16, psym)
+    rows["DERA"] = _cohd
     ms = [wm(seg, 16 + k) for k in range(psym)]
     rows["NEW-0"] = np.stack([m[:, 2] for m in ms])
     lam = np.array([np.log(np.maximum(m.max(axis=0) - np.median(m, axis=0), 1e-30))

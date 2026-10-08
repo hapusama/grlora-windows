@@ -1,0 +1,60 @@
+resume: done=0 todo=252
+  12/252 (39s, 3.3s/u, ETA 13.1min) last=(-20, 0, 10, 0)
+  24/252 (92s, 3.8s/u, ETA 14.6min) last=(-20, 0, 23, 0)
+  36/252 (118s, 3.3s/u, ETA 11.8min) last=(-20, 1, 7, 0)
+  48/252 (166s, 3.5s/u, ETA 11.8min) last=(-20, 1, 18, 0)
+  60/252 (213s, 3.5s/u, ETA 11.4min) last=(-20, 2, 3, 0)
+  72/252 (252s, 3.5s/u, ETA 10.5min) last=(-20, 2, 15, 0)
+  84/252 (300s, 3.6s/u, ETA 10.0min) last=(-20, 2, 27, 0)
+  96/252 (327s, 3.4s/u, ETA 8.9min) last=(-22, 0, 10, 0)
+  108/252 (388s, 3.6s/u, ETA 8.6min) last=(-22, 0, 24, 0)
+  120/252 (424s, 3.5s/u, ETA 7.8min) last=(-22, 1, 8, 0)
+  132/252 (468s, 3.5s/u, ETA 7.1min) last=(-22, 1, 19, 0)
+  144/252 (510s, 3.5s/u, ETA 6.4min) last=(-22, 2, 5, 0)
+  156/252 (546s, 3.5s/u, ETA 5.6min) last=(-22, 2, 15, 0)
+  168/252 (594s, 3.5s/u, ETA 4.9min) last=(-24, 0, 1, 0)
+  180/252 (630s, 3.5s/u, ETA 4.2min) last=(-24, 0, 12, 0)
+  192/252 (693s, 3.6s/u, ETA 3.6min) last=(-24, 0, 23, 3)
+  204/252 (739s, 3.6s/u, ETA 2.9min) last=(-24, 1, 4, 1)
+  216/252 (813s, 3.8s/u, ETA 2.3min) last=(-24, 1, 20, 1)
+  228/252 (885s, 3.9s/u, ETA 1.6min) last=(-24, 2, 6, 0)
+  240/252 (953s, 4.0s/u, ETA 0.8min) last=(-24, 2, 16, 2)
+  252/252 (1063s, 4.2s/u, ETA 0.0min) last=(-24, 2, 26, 1)
+ALL DONE 1063s
+== taxonomy units=252 ==
+crosscheck vs orig DERAfd crc_fail: mismatches=0 / 252
+
+== per-level taxonomy ==
+[-20] n=84 success=82 cls1(sync)=0 cls2(demod)=0 cls3(fec-edge)=2 other=0 | orig_fail=2 OK
+[-22] n=84 success=75 cls1(sync)=1 cls2(demod)=3 cls3(fec-edge)=5 other=0 | orig_fail=9 OK
+[-24] n=84 success=35 cls1(sync)=15 cls2(demod)=11 cls3(fec-edge)=23 other=0 | orig_fail=49 OK
+
+== cls2: |d* - d_opt| (top-1 cand) ==
+n=14 med=1.625 max=2.500
+dist: {'0.875': 1, '1.000': 1, '1.250': 2, '1.375': 2, '1.625': 2, '2.000': 1, '2.250': 2, '2.375': 1, '2.500': 2}
+ser_opt med=0.000 max=0.457 | ser@d* med=0.400 max=0.657
+
+== cls3: best-cand raw SER histogram ==
+  [0.00,0.05): 4 ####
+  [0.05,0.10): 10 ##########
+  [0.10,0.15): 8 ########
+  [0.15,0.20): 4 ####
+  [0.20,0.25): 2 ##
+  [0.25,0.30): 2 ##
+  med=0.114
+
+== -24: per-frame failures (seed list) ==
+failing units=49 / 84 across 26 frames
+  frame 11: n=3 [(0, 'cls1', 'no_cands'), (1, 'cls1', 'no_cands'), (2, 'cls2', '')]
+  frame 13: n=3 [(0, 'cls3', ''), (1, 'cls3', ''), (2, 'cls1', 'no_cands')]
+  frame 15: n=3 [(0, 'cls3', ''), (1, 'cls3', ''), (2, 'cls1', 'no_cands')]
+  frame 16: n=3 [(0, 'cls3', ''), (1, 'cls3', ''), (2, 'cls2', '')]
+  frame 17: n=3 [(0, 'cls3', ''), (1, 'cls3', ''), (2, 'cls1', 'no_cands')]
+  frame 21: n=3 [(0, 'cls2', ''), (1, 'cls1', 'no_cands'), (2, 'cls1', 'no_cands')]
+  frame 00: n=2 [(1, 'cls3', ''), (2, 'cls2', '')]
+  frame 04: n=2 [(1, 'cls1', 'no_cands'), (2, 'cls3', '')]
+  frame 07: n=2 [(0, 'cls2', ''), (2, 'cls3', '')]
+  frame 09: n=2 [(0, 'cls3', ''), (2, 'cls1', 'no_cands')]
+
+== cls1 reasons ==
+{'no_cands': 16}

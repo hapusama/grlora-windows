@@ -1,0 +1,52 @@
+M2 battle：δ [0.0, 0.005, 0.01, 0.02, 0.04, 0.082]｜levels [-26, -28, -30, -32, -34, -36, -38]｜seeds 20｜dep2(K_a=6)
+断点恢复：568 完成作业
+待跑 H1 272 / H0 360
+h1 40/272 (335s)
+h1 80/272 (599s)
+h1 120/272 (898s)
+h1 160/272 (1207s)
+h1 200/272 (1619s)
+h1 240/272 (1998s)
+h0 8/360 (2402s)
+h0 48/360 (2843s)
+h0 88/360 (3330s)
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\spawn.py", line 107, in spawn_main
+    h0 40/252 (750s)
+h0 80/252 (1467s)
+h0 120/252 (2194s)
+h0 160/252 (3067s)
+envs\gr-lora\lib\multiprocessing\reduction.py", line 79, in duplicate
+    return _winapi.DuplicateHandle(
+PermissionError: [WinError 5] 拒绝访问。
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\spawn.py", line 126, in _main
+    self = reduction.pickle.load(from_parent)
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\connection.py", line 962, in rebuild_pipe_connection
+    handle = dh.detach()
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\reduction.py", line 131, in detach
+    return _winapi.DuplicateHandle(
+PermissionError: [WinError 5] 拒绝访问。
+M2 battle：δ [0.0, 0.005, 0.01, 0.02, 0.04, 0.082]｜levels [-26, -28, -30, -32, -34, -36, -38]｜seeds 20｜dep2(K_a=6)
+断点恢复：953 完成作业
+待跑 H1 0 / H0 247
+h0 40/247 (759s)
+h0 80/247 (1485s)
+h0 120/247 (2217s)
+h0 160/247 (3022s)
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\spawn.py", line 107, in spawn_main
+    new_handle = reduction.duplicate(pipe_handle,
+  File "D:\mysoft2\miniconda3\envs\gr-lora\lib\multiprocessing\reduction.py", line 79, in duplicate
+    return _winapi.DuplicateHandle(
+PermissionError: [WinError 5] 拒绝访问。
+M2 battle：δ [0.0, 0.005, 0.01, 0.02, 0.04, 0.082]｜levels [-26, -28, -30, -32, -34, -36, -38]｜seeds 20｜dep2(K_a=6)
+断点恢复：1142 完成作业
+待跑 H1 0 / H0 58
+h0 40/58 (653s)
+完成 909s

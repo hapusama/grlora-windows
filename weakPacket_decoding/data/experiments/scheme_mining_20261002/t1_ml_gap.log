@@ -1,0 +1,15 @@
+SF7 N=128, M=8 uncoded syms, step 0.05
+==== grid = [-0.50, 0.50], 21 pts ====
+threshold = per-sample SNR (dB) @ SER=10%; 'floor'=50% info wall
+ kappa |    plain   plugin     marg    margF      jml |  marg-jml margF-jml  E|khat|
+ +0.00 |   -20.17   -20.17   -20.13   -20.17   -20.17 |      0.04      0.00    0.019
+ +0.20 |   -19.90   -20.00   -19.94   -20.00   -20.00 |      0.06      0.00    0.011
+ +0.30 |   -19.06   -20.53   -19.30   -20.59   -20.60 |      1.30      0.01    0.007
+ +0.40 |   -17.00   -20.25   -17.79   -20.29   -20.29 |      2.50      0.00    0.008
+ -0.50 |    floor    floor    floor    floor   -10.93 |        --        --    0.147
+==== grid = [-0.20, 0.20], 9 pts ====
+threshold = per-sample SNR (dB) @ SER=10%; 'floor'=50% info wall
+ kappa |    plain   plugin     marg    margF      jml |  marg-jml margF-jml  E|khat|
+ +0.00 |   -20.25   -20.25   -20.26   -20.25   -20.25 |     -0.01      0.00    0.021
+ +0.20 |   -19.42   -20.34   -19.46   -20.36   -20.36 |      0.90      0.00    0.010
+elapsed 627.9 s

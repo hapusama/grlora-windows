@@ -1,0 +1,24 @@
+== 0) 干净基线：冻结 δ_clean 与 clean 错误 ==
+δ_clean 分布: {0: 6, 1023: 22}
+clean 总错误(冻结δ): 960 / 980 = 0.9796
+
+== 1) S/N0 标定窗比（拼接窗 vs battle 窗）==
+SNR窗差 dB: med=-0.002  mean=+0.010  min=-0.098 max=+0.487
+
+== 2) 四变体 SER @ −25/−26（3 种子）==
+n_sym/变体/档 = 2940
+[-25] A_我的段+CRC仲裁 0.3901 | B_我的段+冻结δ 0.9833 | C_battle段+冻结δ 0.9844 | D_battle段+种子20260929+冻结δ 0.9806
+[-26] A_我的段+CRC仲裁 0.5112 | B_我的段+冻结δ 0.9840 | C_battle段+冻结δ 0.9864 | D_battle段+种子20260929+冻结δ 0.9837
+
+== 3) 逐帧错误贡献 @−26（A=CRC仲裁 vs B=冻结δ，各 3 种子合计）==
+f07 δ_clean=0 δ_仲裁(mode)=0  errA= 95 errB= 95  差=+0
+f08 δ_clean=0 δ_仲裁(mode)=0  errA= 80 errB= 80  差=+0
+f09 δ_clean=0 δ_仲裁(mode)=0  errA=104 errB=104  差=+0
+f18 δ_clean=0 δ_仲裁(mode)=0  errA=103 errB=103  差=+0
+f19 δ_clean=0 δ_仲裁(mode)=0  errA=104 errB=104  差=+0
+f21 δ_clean=0 δ_仲裁(mode)=0  errA=105 errB=105  差=+0
+f27 δ_clean=1023 δ_仲裁(mode)=0  errA= 81 errB=104  差=-23
+f17 δ_clean=1023 δ_仲裁(mode)=0  errA= 70 errB=104  差=-34
+f05 δ_clean=1023 δ_仲裁(mode)=0  errA= 68 errB=105  差=-37
+f04 δ_clean=1023 δ_仲裁(mode)=0  errA= 54 errB=103  差=-49
+A−B 总差 @−26: -1390 / 2940 符号

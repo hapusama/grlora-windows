@@ -1,0 +1,20 @@
+== A: native 28 帧 ==
+  f00 bare=0.400 fdc=0.000 trellis=0.000 traj_span=0.00
+  f01 bare=0.286 fdc=0.000 trellis=0.000 traj_span=0.00
+  f02 bare=0.000 fdc=0.000 trellis=0.000 traj_span=0.00
+  f03 bare=0.000 fdc=0.000 trellis=0.000 traj_span=0.00
+  f07 bare=0.400 fdc=0.000 trellis=0.000 traj_span=0.00
+  f13 bare=0.400 fdc=0.000 trellis=0.000 traj_span=0.00
+  f16 bare=0.400 fdc=0.000 trellis=0.000 traj_span=0.00
+  f18 bare=0.286 fdc=0.000 trellis=0.000 traj_span=0.00
+  f19 bare=0.486 fdc=0.000 trellis=0.000 traj_span=0.00
+  f20 bare=0.343 fdc=0.000 trellis=0.000 traj_span=0.00
+  f22 bare=0.257 fdc=0.000 trellis=0.000 traj_span=0.00
+  f24 bare=0.200 fdc=0.000 trellis=0.000 traj_span=0.00
+native 坏帧: bare=10 fdc=0 trellis=0（fdc 应 0，trellis 应 ≤fdc）
+
+== B: v3 残余失败单元（DERAfdc×SAVAUX crc_fail=1 且 sync=1）==
+目标单元数: 48
+可评估 48 单元：CRC 救回 fdc=0 trellis=20
+  fdc      raw SER: mean=0.182 med=0.143 归零率=0.00
+  trellis  raw SER: mean=0.113 med=0.057 归零率=0.08

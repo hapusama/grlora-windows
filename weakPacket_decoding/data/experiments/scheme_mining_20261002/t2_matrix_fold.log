@@ -1,0 +1,20 @@
+Hamming(8,4) dmin=4; |d0|^2/N=146.6 |d1|^2/N=65.2 |beta|^2/N=407.3  (PCM 相干合并)
+== Part A: 2x2 matrix, SF8, kappa=0.4, Hamming(8,4)/Gray, M=8 ==
+  reb=0 soft=0 : CER10% threshold = -20.87 dB
+  reb=0 soft=1 : CER10% threshold = -23.00 dB
+  reb=1 soft=0 : CER10% threshold = -22.00 dB
+  reb=1 soft=1 : CER10% threshold = -23.08 dB
+  Δrebin(hard)=1.13 dB  Δsoft(plain)=2.13 dB  total=2.20 dB  协同=-1.05 dB
+  -- LLR 标定敏感性 (PCM,soft) @ SNR=-22.08 dB --
+    sfac=0.70 : CER=0.0881
+    sfac=0.85 : CER=0.0894
+    sfac=1.00 : CER=0.0721
+    sfac=1.15 : CER=0.0838
+    sfac=1.30 : CER=0.0783
+== Part B: preamble fold 8 -> 12.25, T=sum|r|^2 ==
+   coherent ref = 10log10(12.25/8) = 1.850 dB
+  Pfa=1e-03: SNR@Pd90: L=8 +4.02 dB, L=12.25 +2.73 dB -> 增益 1.30 dB (兑现率 70%)
+    deflection 高斯近似: L=8 -3.34, L=12.25 -4.05 -> 增益 0.71 dB (精确 1.30 dB)
+  Pfa=1e-02: SNR@Pd90: L=8 +2.93 dB, L=12.25 +1.68 dB -> 增益 1.25 dB (兑现率 68%)
+    deflection 高斯近似: L=8 -5.80, L=12.25 -6.50 -> 增益 0.69 dB (精确 1.25 dB)
+elapsed 69.1 s

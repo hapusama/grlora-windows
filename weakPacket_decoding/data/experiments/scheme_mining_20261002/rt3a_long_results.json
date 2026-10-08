@@ -1,0 +1,67 @@
+{
+ "validated": true,
+ "seed": 4711,
+ "cfg": {
+  "cr": 4,
+  "BLK": 8,
+  "NB": 16,
+  "N": 128,
+  "plen": 62
+ },
+ "gate_depth": {
+  "gammas": [
+   -23.0,
+   -22.0,
+   -21.0,
+   -20.0,
+   -19.0
+  ],
+  "curves": {
+   "B": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Blist": [
+    0.00125,
+    0.00125,
+    0.0,
+    0.0025,
+    0.00125
+   ]
+  },
+  "pd09": {
+   "B": {
+    "0.9": null,
+    "0.5": null
+   },
+   "Blist": {
+    "0.9": null,
+    "0.5": null
+   }
+  }
+ },
+ "q_h0": {
+  "assume_gamma_db": -21.0,
+  "n": 3000,
+  "q": {
+   "B": 0.0003333333333333333,
+   "Blist": 0.001
+  }
+ },
+ "frontier_recheck": {
+  "q_used": 0.001,
+  "f_cell": 1e-06,
+  "frontier": -19.54296875
+ },
+ "verdict": {
+  "gate_Bplus": null,
+  "frontier_list": -19.54296875,
+  "base_1e9": -18.21,
+  "system_frontier": null,
+  "net_db": null
+ },
+ "elapsed_s": 642.1658959388733
+}

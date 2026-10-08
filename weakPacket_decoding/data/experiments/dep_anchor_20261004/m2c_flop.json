@@ -1,0 +1,151 @@
+{
+ "P8": {
+  "dep4k8": {
+   "nominat": 0.49,
+   "sigma2": 7.37,
+   "verify_per_nom": 5.93,
+   "total_M": 55.3,
+   "K": 8
+  },
+  "dep4k16": {
+   "nominat": 0.49,
+   "sigma2": 7.37,
+   "verify_per_nom": 5.93,
+   "total_M": 102.8,
+   "K": 16
+  }
+ },
+ "P16": {
+  "dep4k8": {
+   "nominat": 0.98,
+   "sigma2": 12.29,
+   "verify_per_nom": 8.03,
+   "total_M": 77.5,
+   "K": 8
+  },
+  "dep4k16": {
+   "nominat": 0.98,
+   "sigma2": 12.29,
+   "verify_per_nom": 8.03,
+   "total_M": 141.7,
+   "K": 16
+  }
+ },
+ "P32": {
+  "dep4k8": {
+   "nominat": 1.97,
+   "sigma2": 22.12,
+   "verify_per_nom": 12.22,
+   "total_M": 121.9,
+   "K": 8
+  },
+  "dep4k16": {
+   "nominat": 1.97,
+   "sigma2": 22.12,
+   "verify_per_nom": 12.22,
+   "total_M": 219.7,
+   "K": 16
+  }
+ },
+ "reference_m2b": {
+  "P=8": {
+   "acq": {
+    "parts": {
+     "row_fft": 319488,
+     "acq_search": 22020096,
+     "acq_refine": 540672,
+     "sigma2": 6291456
+    },
+    "total": 29171712
+   },
+   "dep3a": {
+    "parts": {
+     "conf_dtft_pre": 2064384,
+     "conf_dtft_sfd": 21676032,
+     "conf_fft_pre": 125952,
+     "conf_fft_sfd": 1322496,
+     "sigma2": 7340032,
+     "acq_total": 29171712
+    },
+    "total": 32528896
+   },
+   "dep3b": {
+    "parts": {
+     "conf_dtft_pre": 2064384,
+     "conf_dtft_sfd": 10838016,
+     "conf_fft_pre": 125952,
+     "conf_fft_sfd": 661248,
+     "sigma2": 7340032,
+     "acq_total": 29171712
+    },
+    "total": 21029632
+   }
+  },
+  "P=16": {
+   "acq": {
+    "parts": {
+     "row_fft": 638976,
+     "acq_search": 44040192,
+     "acq_refine": 1081344,
+     "sigma2": 12582912
+    },
+    "total": 58343424
+   },
+   "dep3a": {
+    "parts": {
+     "conf_dtft_pre": 3096576,
+     "conf_dtft_sfd": 21676032,
+     "conf_fft_pre": 188928,
+     "conf_fft_sfd": 1322496,
+     "sigma2": 9437184,
+     "acq_total": 58343424
+    },
+    "total": 35721216
+   },
+   "dep3b": {
+    "parts": {
+     "conf_dtft_pre": 3096576,
+     "conf_dtft_sfd": 10838016,
+     "conf_fft_pre": 188928,
+     "conf_fft_sfd": 661248,
+     "sigma2": 9437184,
+     "acq_total": 58343424
+    },
+    "total": 24221952
+   }
+  },
+  "P=32": {
+   "acq": {
+    "parts": {
+     "row_fft": 638976,
+     "acq_search": 44040192,
+     "acq_refine": 1081344,
+     "sigma2": 12582912
+    },
+    "total": 58343424
+   },
+   "dep3a": {
+    "parts": {
+     "conf_dtft_pre": 11354112,
+     "conf_dtft_sfd": 21676032,
+     "conf_fft_pre": 692736,
+     "conf_fft_sfd": 1322496,
+     "sigma2": 26214400,
+     "acq_total": 58343424
+    },
+    "total": 61259776
+   },
+   "dep3b": {
+    "parts": {
+     "conf_dtft_pre": 11354112,
+     "conf_dtft_sfd": 10838016,
+     "conf_fft_pre": 692736,
+     "conf_fft_sfd": 661248,
+     "sigma2": 26214400,
+     "acq_total": 58343424
+    },
+    "total": 49760512
+   }
+  }
+ }
+}

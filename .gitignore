@@ -33,3 +33,17 @@ weakPacket_decoding/data/phase_line_error_diagnostics_*/
 # Local security-scanner state (Mimosa hook), never commit.
 .mimosa/
 **/.mimosa/
+
+# 外部参考项目（LoRadar 309MB，本地保留不入库）
+weakPacket_decoding/data/external/
+
+# 瘦身 2026-10-08：死线中间 checkpoint 与外部 PDF 不入库（结论已归档 doc/ 与 RESULTS；本地保留）
+weakPacket_decoding/data/experiments/dep_anchor_20261004/m2_battle_checkpoint.jsonl
+weakPacket_decoding/data/experiments/dep_anchor_20261004/m2b_battle_checkpoint.jsonl
+weakPacket_decoding/data/experiments/dep_anchor_20261004/m2_battleC_checkpoint.jsonl
+weakPacket_decoding/data/experiments/keystone_battle_20261003/*checkpoint*.jsonl
+weakPacket_decoding/data/experiments/phase_track_20261002/*.jsonl
+weakPacket_decoding/data/experiments/g1_rescue_map_20261004/*.jsonl
+weakPacket_decoding/data/experiments/fullfield_cert_detect_20261003/checkpoint*.jsonl
+weakPacket_decoding/paper/
+*.jsonl.bak
